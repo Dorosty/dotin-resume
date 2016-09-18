@@ -41,16 +41,17 @@ exports.instance = (thisComponent) ->
   exports = {}
 
   exports.E = do ->
-    e = (tagName, style, children) ->
+    e = (parent, tagName, style, children) ->
       element = document.createElement tagName
       component =
         name: tagName
         element: element
+        parent: parent
         off: ->
       exports.setStyle component, style
       do appendChildren = (children) ->
         children.forEach (x) ->
-          if (typeof x) in ['string', 'number']
+          if typeof(x) in ['string', 'number']
             exports.setStyle component, text: x
           else if Array.isArray x
             appendChildren x
@@ -58,8 +59,8 @@ exports.instance = (thisComponent) ->
             exports.append component, x
       component
 
-    ->
-      firstArg = arguments[0]
+    (args...) ->
+      firstArg = args[0]
       if typeof firstArg is 'function'
         l = log.E0 thisComponent
         l()
@@ -69,20 +70,19 @@ exports.instance = (thisComponent) ->
       else
         if typeof firstArg is 'string'
           tagName = firstArg
-          style = arguments[1] or {}
-          children = arguments[2] or []
+          style = args[1] or {}
+          children = args[2..]
         else if typeof firstArg is 'object' and not Array.isArray firstArg
           tagName = 'div'
-          style = firstArg
-          children = arguments[1] or []
+          style = firstArg or {}
+          children = args[1..]
         else
           tagName = 'div'
           style = {}
-          children = firstArg or []
+          children = args[1..]
         l = log.E1 thisComponent, tagName, style, children, parent
         l()
-        component = e tagName, style, children
-        component.parent = thisComponent
+        component = e thisComponent, tagName, style, children
         l()
 
       prevOff = thisComponent.off

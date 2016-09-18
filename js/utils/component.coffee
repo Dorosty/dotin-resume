@@ -11,13 +11,14 @@ module.exports = (componentName, create) -> ->
   
   log.create 0, component
 
-  {element} = create
+  c = create
     dom: dom.instance component
     events: events.instance component
     state: state.instance component
     service: service.instance component
 
-  component.element = element
+  if c?.element
+    component.element = c.element
 
   log.create 1, component
 

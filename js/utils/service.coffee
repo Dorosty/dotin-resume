@@ -1,10 +1,16 @@
+mock = require './mockService'
 log = require('./log').service
 Q = require '../q'
 state = require './state'
 {eraseCookie} = require './cookies'
 
 handle = (isGet) -> (url, params = {}) ->
+
+  if mock[url]
+    return mock[url] params
+
   url = "/#{url}?rand=#{Math.random()}&"
+
   if isGet
     url += Object.keys(params).map((param) -> "#{param}=#{params[param]}").join '&'
   Q.promise (resolve, reject) ->

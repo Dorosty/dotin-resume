@@ -2299,19 +2299,21 @@ log = require('./log').component;
 
 module.exports = function(componentName, create) {
   return function() {
-    var component, element;
+    var c, component;
     component = {
       name: componentName,
       off: function() {}
     };
     log.create(0, component);
-    element = create({
+    c = create({
       dom: dom.instance(component),
       events: events.instance(component),
       state: state.instance(component),
       service: service.instance(component)
-    }).element;
-    component.element = element;
+    });
+    if (c != null ? c.element : void 0) {
+      component.element = c.element;
+    }
     log.create(1, component);
     return component;
   };
@@ -2352,7 +2354,8 @@ exports.eraseCookie = function(name) {
 
 
 },{}],7:[function(require,module,exports){
-var extend, log, ref, toPersian, uppercaseFirst;
+var extend, log, ref, toPersian, uppercaseFirst,
+  slice = [].slice;
 
 log = require('./log').dom;
 
@@ -2419,12 +2422,13 @@ exports.instance = function(thisComponent) {
   exports = {};
   exports.E = (function() {
     var e;
-    e = function(tagName, style, children) {
+    e = function(parent, tagName, style, children) {
       var appendChildren, component, element;
       element = document.createElement(tagName);
       component = {
         name: tagName,
         element: element,
+        parent: parent,
         off: function() {}
       };
       exports.setStyle(component, style);
@@ -2445,8 +2449,9 @@ exports.instance = function(thisComponent) {
       return component;
     };
     return function() {
-      var children, component, firstArg, l, prevOff, style, tagName;
-      firstArg = arguments[0];
+      var args, children, component, firstArg, l, prevOff, style, tagName;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      firstArg = args[0];
       if (typeof firstArg === 'function') {
         l = log.E0(thisComponent);
         l();
@@ -2456,21 +2461,20 @@ exports.instance = function(thisComponent) {
       } else {
         if (typeof firstArg === 'string') {
           tagName = firstArg;
-          style = arguments[1] || {};
-          children = arguments[2] || [];
+          style = args[1] || {};
+          children = args.slice(2);
         } else if (typeof firstArg === 'object' && !Array.isArray(firstArg)) {
           tagName = 'div';
-          style = firstArg;
-          children = arguments[1] || [];
+          style = firstArg || {};
+          children = args.slice(1);
         } else {
           tagName = 'div';
           style = {};
-          children = firstArg || [];
+          children = args.slice(1);
         }
         l = log.E1(thisComponent, tagName, style, children, parent);
         l();
-        component = e(tagName, style, children);
-        component.parent = thisComponent;
+        component = e(thisComponent, tagName, style, children);
         l();
       }
       prevOff = thisComponent.off;
@@ -3024,17 +3028,13 @@ log = function(x) {
 };
 
 getFullName = function(component) {
-  var name, results;
-  name = component.name;
-  if (!component.parent) {
-    return;
-  }
-  results = [];
+  var name;
+  name = '';
   while (component) {
+    name = component.name + ">" + name;
     component = component.parent;
-    results.push(name = component.name + ">" + name);
   }
-  return results;
+  return name.substr(0, name.length - 1);
 };
 
 exports.component = {
@@ -3053,12 +3053,15 @@ exports.dom = {
   },
   E1: function(thisComponent, tagName, style, children) {
     var logText, part;
-    logText = "dom.E:" + tagName;
+    logText = "dom.E:" + (getFullName({
+      name: tagName,
+      parent: thisComponent
+    }));
     if (Object.keys(style).length) {
       logText += ':' + JSON.stringify(style);
     }
     if (children.length) {
-      console.log += ':HasChildren';
+      logText += ':HasChildren';
     }
     logText += "|" + (getFullName(thisComponent));
     part = 0;
@@ -3066,26 +3069,29 @@ exports.dom = {
       return log((part++) + ":" + logText);
     };
   },
-  append: function(part, parent, component, thisComponent) {
+  append: function(thisComponent, parent, component) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.append:" + (getFullName(parent)) + "--->" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
-  destroy: function(part, component, thisComponent) {
+  destroy: function(thisComponent, component) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.destroy:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
-  empty: function(part, component, thisComponent) {
+  empty: function(thisComponent, component) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.empty:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
-  setStyle: function(part, component, style, thisComponent) {
-    var logText;
+  setStyle: function(thisComponent, component, style) {
+    var logText, part;
     logText = "dom.setStyle:" + (getFullName(component));
     if (Object.keys(style).length) {
       logText += ':' + JSON.stringify(style);
@@ -3096,25 +3102,29 @@ exports.dom = {
       return log((part++) + ":" + logText);
     };
   },
-  addClass: function(part, component, klass, thisComponent) {
+  addClass: function(thisComponent, component, klass) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.addClass:" + (getFullName(component)) + ":" + klass + "|" + (getFullName(thisComponent)));
     };
   },
-  removeClass: function(part, component, klass, thisComponent) {
+  removeClass: function(thisComponent, component, klass) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.removeClass:" + (getFullName(component)) + ":" + klass + "|" + (getFullName(thisComponent)));
     };
   },
-  show: function(part, component, thisComponent) {
+  show: function(thisComponent, component) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.show:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
-  hide: function(part, component, thisComponent) {
+  hide: function(thisComponent, component) {
+    var part;
     part = 0;
     return function() {
       return log((part++) + ":dom.hide:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
@@ -3144,60 +3154,60 @@ exports.events = {
   onLoad: function(thisComponent, callback) {
     var parts;
     parts = [0, 0, 0];
-    return function() {
-      return log((part++) + ":events.onLoad|" + (getFullName(thisComponent)));
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":events.onLoad|" + (getFullName(thisComponent)));
     };
   },
   onResize: function(thisComponent, callback) {
     var parts;
     parts = [0, 0, 0];
-    return function() {
-      return log((part++) + ":events.onResize|" + (getFullName(thisComponent)));
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":events.onResize|" + (getFullName(thisComponent)));
     };
   },
   onMouseover: function(thisComponent, component, callback) {
     var parts;
     parts = [0, 0, 0];
-    return function() {
-      return log((part++) + ":events.onMouseover:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":events.onMouseover:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
   onMouseout: function(thisComponent, component, callback) {
     var parts;
     parts = [0, 0, 0];
-    return function() {
-      return log((part++) + ":events.onMouseout:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":events.onMouseout:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
   onMouseup: function(thisComponent, callback) {
     var parts;
     parts = [0, 0, 0];
-    return function() {
-      return log((part++) + ":events.onMouseup|" + (getFullName(thisComponent)));
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":events.onMouseup|" + (getFullName(thisComponent)));
     };
   },
   onEnter: function(thisComponent, component, callback) {
     var parts;
     parts = [0, 0, 0];
-    return function() {
-      return log((part++) + ":events.onEnter:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":events.onEnter:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   }
 };
 
 exports.state = {
   pubsub: function(thisComponent, name, options, callback) {
-    var part;
-    part = 0;
-    return function() {
-      return log((part++) + ":state.pubsub:" + name + ":" + (JSON.stringify(options)) + "|" + (getFullName(thisComponent)));
+    var parts;
+    parts = [0, 0, 0, 0];
+    return function(partIndex) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":state.pubsub:" + name + ":" + (JSON.stringify(options)) + "|" + (getFullName(thisComponent)));
     };
   },
   all: function(thisComponent, options, keys, callback) {
-    var part;
-    part = 0;
-    return function() {
-      return log((part++) + ":state.all:" + (JSON.stringify(keys)) + ":" + (JSON.stringify(options)) + "|" + (getFullName(thisComponent)));
+    var parts;
+    parts = [0, 0, 0];
+    return function(partIndex, data) {
+      return log(partIndex + ":" + (parts[partIndex]++) + ":state.all:" + (JSON.stringify(keys)) + ":" + (JSON.stringify(options)) + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
     };
   }
 };
@@ -3220,43 +3230,32 @@ exports.service = {
 
 
 },{}],11:[function(require,module,exports){
-var Q, service,
-  slice = [].slice;
+var Q;
 
 Q = require('../q');
 
-service = require('./service');
-
-service.login = function(arg) {
+exports.login = function(arg) {
   var email, password;
   email = arg.email, password = arg.password;
-  switch (email) {
-    case 'ma.dorosty@gmail.com':
-      return {
-        name: 'Ali Dorosty'
-      };
-    default:
-      return {
-        invalid: true
-      };
-  }
+  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+    switch (email) {
+      case 'ma.dorosty@gmail.com':
+        return {
+          name: 'Ali Dorosty'
+        };
+      default:
+        return {
+          invalid: true
+        };
+    }
+  });
 };
 
-Object.keys(service).forEach(function(key) {
-  var prev;
-  prev = service[key];
-  return service[key] = function() {
-    var args;
-    args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-    return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
-      return prev.apply(null, args);
-    });
-  };
-});
 
+},{"../q":4}],12:[function(require,module,exports){
+var Q, eraseCookie, get, handle, log, mock, post, state;
 
-},{"../q":4,"./service":12}],12:[function(require,module,exports){
-var Q, eraseCookie, get, handle, log, post, state;
+mock = require('./mockService');
 
 log = require('./log').service;
 
@@ -3270,6 +3269,9 @@ handle = function(isGet) {
   return function(url, params) {
     if (params == null) {
       params = {};
+    }
+    if (mock[url]) {
+      return mock[url](params);
     }
     url = "/" + url + "?rand=" + (Math.random()) + "&";
     if (isGet) {
@@ -3335,7 +3337,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../q":4,"./cookies":6,"./log":10,"./state":13}],13:[function(require,module,exports){
+},{"../q":4,"./cookies":6,"./log":10,"./mockService":11,"./state":13}],13:[function(require,module,exports){
 var createPubSub, log;
 
 log = require('./log').state;
@@ -3457,9 +3459,9 @@ exports.instance = function(thisComponent) {
       return unsubscribe;
     };
     pubSub.set = function(data) {
-      l(4);
+      l(3);
       prevSet(data);
-      return l(4);
+      return l(3);
     };
     return exports[x] = pubSub;
   });
@@ -3513,8 +3515,6 @@ exports.instance = function(thisComponent) {
 },{"./log":10}],14:[function(require,module,exports){
 var addPageStyle, page;
 
-require('./utils/mockService');
-
 addPageStyle = require('./utils/dom').addPageStyle;
 
 page = require('./page');
@@ -3529,4 +3529,4 @@ addPageStyle("* { direction: rtl; font-family: 'yekan', tahoma; } .hidden { disp
 page();
 
 
-},{"./page":3,"./utils/dom":7,"./utils/mockService":11}]},{},[14]);
+},{"./page":3,"./utils/dom":7}]},{},[14]);

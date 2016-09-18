@@ -100,9 +100,9 @@ exports.instance = (thisComponent) ->
       unsubscribe
 
     pubSub.set = (data) ->
-      l 4 
+      l 3 
       prevSet data
-      l 4
+      l 3
 
     exports[x] = pubSub
 

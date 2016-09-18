@@ -1,4 +1,3 @@
-require './utils/mockService'
 {addPageStyle} = require './utils/dom'
 page = require './page'
 
