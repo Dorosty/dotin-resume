@@ -186,7 +186,7 @@ var component;
 component = require('../utils/component');
 
 module.exports = component('login', function(arg) {
-  var E, doSubmit, dom, email, events, hide, onEnter, onEvent, password, service, show, spinner, state, submit;
+  var E, doSubmit, dom, email, events, hide, invalid, onEnter, onEvent, password, service, show, spinner, state, submit;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent, onEnter = events.onEnter;
@@ -194,21 +194,27 @@ module.exports = component('login', function(arg) {
     placeholder: 'email'
   }), password = E('input', {
     placeholder: 'password'
-  }), submit = E('button', null, 'submit'), spinner = E(null, 'spinner'));
+  }), submit = E('button', null, 'submit'), spinner = E(null, 'spinner'), hide(invalid = E(null, 'invalid')));
   hide(spinner);
   doSubmit = function() {
+    hide(invalid);
     show(spinner);
     return service.login({
       email: email.element.value,
       password: password.element.value
     }).then(function(response) {
       if (response.invalid) {
-        return alert('invalid');
+        return show(invalid);
+      } else {
+        return state.user.set(response);
       }
     }).fin(function() {
       return hide(spinner);
     });
   };
+  onEvent([email, password], 'input', function() {
+    return hide(invalid);
+  });
   onEnter([email, password], doSubmit);
   onEvent(submit, 'click', doSubmit);
   return component;
@@ -225,10 +231,18 @@ login = require('./login');
 body = require('./utils/dom').body;
 
 module.exports = component('page', function(arg) {
-  var E, append, dom;
-  dom = arg.dom;
-  E = dom.E, append = dom.append;
-  return append(E(body), E(login));
+  var E, append, dom, setStyle, state, username;
+  dom = arg.dom, state = arg.state;
+  E = dom.E, append = dom.append, setStyle = dom.setStyle;
+  append(E(body), E('div', null, username = E('div'), E(login)));
+  return state.user.on({
+    allowNull: true
+  }, function(user) {
+    var ref;
+    return setStyle(username, {
+      text: (ref = user != null ? user.name : void 0) != null ? ref : ''
+    });
+  });
 });
 
 
@@ -2628,14 +2642,16 @@ exports.instance = function(thisComponent) {
     l = log.show(thisComponent, component);
     l();
     exports.removeClass(component, 'hidden');
-    return l();
+    l();
+    return component;
   };
   exports.hide = function(component) {
     var l;
     l = log.hide(thisComponent, component);
     l();
     exports.addClass(component, 'hidden');
-    return l();
+    l();
+    return component;
   };
   return exports;
 };
@@ -3039,6 +3055,7 @@ getFullName = function(component) {
 
 exports.component = {
   create: function(part, component) {
+    return;
     return log(part + ":create:" + (getFullName(component)));
   }
 };
@@ -3048,6 +3065,7 @@ exports.dom = {
     var part;
     part = 0;
     return function(component) {
+      return;
       return log((part++) + ":dom.E:" + (component ? getFullName(component) : 'UnknownComponent') + "|" + thisComponent.name);
     };
   },
@@ -3066,6 +3084,7 @@ exports.dom = {
     logText += "|" + (getFullName(thisComponent));
     part = 0;
     return function() {
+      return;
       return log((part++) + ":" + logText);
     };
   },
@@ -3073,6 +3092,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.append:" + (getFullName(parent)) + "--->" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3080,6 +3100,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.destroy:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3087,6 +3108,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.empty:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3099,6 +3121,7 @@ exports.dom = {
     logText += "|" + (getFullName(thisComponent));
     part = 0;
     return function() {
+      return;
       return log((part++) + ":" + logText);
     };
   },
@@ -3106,6 +3129,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.addClass:" + (getFullName(component)) + ":" + klass + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3113,6 +3137,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.removeClass:" + (getFullName(component)) + ":" + klass + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3120,6 +3145,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.show:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3127,6 +3153,7 @@ exports.dom = {
     var part;
     part = 0;
     return function() {
+      return;
       return log((part++) + ":dom.hide:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   }
@@ -3144,9 +3171,11 @@ exports.events = {
     logText += "|" + thisComponent.name;
     parts = [0, 0, 0];
     l = function(partIndex, e) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + (e ? ':' + JSON.stringify(e) : '') + ":" + logText);
     };
     l.ignore = function(ignoredComponent, e) {
+      return;
       return log("ignore " + (getFullName(ignoredComponent)) + (e ? ':' + JSON.stringify(e) : '') + ":" + logText);
     };
     return l;
@@ -3155,6 +3184,7 @@ exports.events = {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":events.onLoad|" + (getFullName(thisComponent)));
     };
   },
@@ -3162,6 +3192,7 @@ exports.events = {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":events.onResize|" + (getFullName(thisComponent)));
     };
   },
@@ -3169,6 +3200,7 @@ exports.events = {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":events.onMouseover:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3176,6 +3208,7 @@ exports.events = {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":events.onMouseout:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
@@ -3183,6 +3216,7 @@ exports.events = {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":events.onMouseup|" + (getFullName(thisComponent)));
     };
   },
@@ -3190,23 +3224,44 @@ exports.events = {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":events.onEnter:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   }
 };
 
 exports.state = {
-  pubsub: function(thisComponent, name, options, callback) {
-    var parts;
-    parts = [0, 0, 0, 0];
-    return function(partIndex) {
-      return log(partIndex + ":" + (parts[partIndex]++) + ":state.pubsub:" + name + ":" + (JSON.stringify(options)) + "|" + (getFullName(thisComponent)));
+  pubsub: function(thisComponent, name) {
+    return {
+      on: function(options, callback) {
+        var parts;
+        parts = [0, 0, 0];
+        return function(partIndex, data) {
+          var logText;
+          return;
+          logText = partIndex + ":" + (parts[partIndex]++) + ":state.pubsub.on:" + name + ":" + (JSON.stringify(options));
+          if (partIndex === 1) {
+            logText += ':' + JSON.stringify(data);
+          }
+          logText += "|" + (getFullName(thisComponent));
+          return log(logText);
+        };
+      },
+      set: function(data) {
+        var part;
+        part = 0;
+        return function() {
+          return;
+          return log((part++) + ":state.pubsub.set:" + name + ":" + (JSON.stringify(data)) + "|" + (getFullName(thisComponent)));
+        };
+      }
     };
   },
   all: function(thisComponent, options, keys, callback) {
     var parts;
     parts = [0, 0, 0];
     return function(partIndex, data) {
+      return;
       return log(partIndex + ":" + (parts[partIndex]++) + ":state.all:" + (JSON.stringify(keys)) + ":" + (JSON.stringify(options)) + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
     };
   }
@@ -3215,15 +3270,18 @@ exports.state = {
 exports.service = {
   get: function(thisComponent, url, params) {
     return function(data) {
+      return;
       return log("service.get:" + url + ":" + (JSON.stringify(params)) + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
     };
   },
   post: function(thisComponent, url, params) {
     return function(data) {
+      return;
       return log("service.post:" + url + ":" + (JSON.stringify(params)) + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
     };
   },
   logout: function(thisComponent) {
+    return;
     return log("service.logout|" + (getFullName(thisComponent)));
   }
 };
@@ -3318,8 +3376,9 @@ exports.instance = function(thisComponent) {
       var l;
       l = log.get(thisComponent, x, params);
       l();
-      return get(x).then(function(data) {
-        return l(data);
+      return get(x, params).then(function(data) {
+        l(data);
+        return data;
       });
     };
   });
@@ -3328,8 +3387,9 @@ exports.instance = function(thisComponent) {
       var l;
       l = log.get(thisComponent, x, params);
       l();
-      return post(x).then(function(data) {
-        return l(data);
+      return post(x, params).then(function(data) {
+        l(data);
+        return data;
       });
     };
   });
@@ -3338,32 +3398,24 @@ exports.instance = function(thisComponent) {
 
 
 },{"../q":4,"./cookies":6,"./log":10,"./mockService":11,"./state":13}],13:[function(require,module,exports){
-var createPubSub, log;
+var createPubSub, log, pubSubs;
 
 log = require('./log').state;
 
-createPubSub = function(name) {
-  var data, dataNotLoading, dataNotNull, dataNotNullNotLoading, set, subscribers;
-  data = dataNotNull = dataNotLoading = dataNotNullNotLoading = void 0;
+createPubSub = function() {
+  var data, dataNotNull, subscribers;
+  data = dataNotNull = void 0;
   subscribers = [];
   return {
     on: function(options, callback) {
-      var firstDataSent, wrappedCallback;
+      var firstDataSent, unsubscribe, wrappedCallback;
       firstDataSent = false;
       if (!options.omitFirst) {
-        if (!options.allowNull && !options.allowLoading) {
-          if (dataNotNullNotLoading !== void 0) {
-            callback(dataNotNullNotLoading);
-            firstDataSent = true;
-          }
-        } else if (!options.allowNull) {
+        if (!options.allowNull) {
           if (dataNotNull !== void 0) {
             callback(dataNotNull);
             firstDataSent = true;
           }
-        } else if (!options.allowLoading) {
-          callback(dataNotLoading);
-          firstDataSent = true;
         } else {
           callback(data);
           firstDataSent = true;
@@ -3372,29 +3424,24 @@ createPubSub = function(name) {
       if (options.once && !options.omitFirst && firstDataSent) {
         return function() {};
       }
-      return subscribers.push(wrappedCallback = function(data) {
-        var unsubscribe;
-        unsubscribe = function() {
-          var index;
-          index = subscribers.indexOf(wrappedCallback);
-          if (~index) {
-            return subscribers.splice(index, 1);
-          }
-        };
+      subscribers.push(wrappedCallback = function(data) {
         if (!options.allowNull && (data == null)) {
-          return;
-        }
-        if (!options.allowLoading && (data != null ? data.loading : void 0)) {
           return;
         }
         callback(data);
         if (options.once) {
-          unsubscribe();
+          return unsubscribe();
         }
-        return unsubscribe;
       });
+      return unsubscribe = function() {
+        var index;
+        index = subscribers.indexOf(wrappedCallback);
+        if (~index) {
+          return subscribers.splice(index, 1);
+        }
+      };
     },
-    set: set = function(_data) {
+    set: function(_data) {
       if (JSON.stringify(data) === JSON.stringify(_data)) {
         return;
       }
@@ -3402,54 +3449,50 @@ createPubSub = function(name) {
       if (data != null) {
         dataNotNull = data;
       }
-      if (!(data != null ? data.loading : void 0)) {
-        dataNotLoading = data;
-      }
-      if ((data != null) && !data.loading) {
-        dataNotNullNotLoading = data;
-      }
-      if ((data != null ? data.then : void 0) != null) {
-        set({
-          loading: true
-        });
-        return data.then(set);
-      } else {
-        return subscribers.forEach(function(callback) {
-          return callback(data);
-        });
-      }
+      return subscribers.forEach(function(callback) {
+        return callback(data);
+      });
     }
   };
 };
 
+pubSubs = ['user'].map(function(x) {
+  return {
+    x: x,
+    pubSub: createPubSub()
+  };
+});
+
 exports.instance = function(thisComponent) {
   var exports;
   exports = {};
-  [].forEach(function(x) {
-    var l, prevOn, prevSet, pubSub;
-    pubSub = createPubSub(x);
-    prevOn = pubSub.on;
-    prevSet = pubSub.set;
-    l = log.pubsub(thisComponent, x, options, callback);
-    pubSub.on = function() {
-      var callback, options, prevOff, unsubscribe;
+  pubSubs.forEach(function(arg) {
+    var instancePubSub, l, pubSub, x;
+    x = arg.x, pubSub = arg.pubSub;
+    l = log.pubsub(thisComponent, x);
+    instancePubSub = {};
+    instancePubSub.on = function() {
+      var callback, ll, options, prevOff, unsubscribe;
       if (arguments.length === 1) {
         callback = arguments[0];
         options = {};
       } else {
         options = arguments[0], callback = arguments[1];
       }
-      l(0);
-      unsubscribe = prevOn(options, function(data) {
-        l(1, data);
+      ll = l.on(options, callback);
+      ll(0);
+      unsubscribe = pubSub.on(options, function(data) {
+        ll(1, data);
         callback(data);
-        return l(1, data);
+        return ll(1, data);
       });
-      l(0);
+      ll(0);
       unsubscribe = (function(unsubscribe) {
-        l(2);
-        unsubscribe();
-        return l(2);
+        return function() {
+          ll(2);
+          unsubscribe();
+          return ll(2);
+        };
       })(unsubscribe);
       prevOff = thisComponent.off;
       thisComponent.off = function() {
@@ -3458,15 +3501,17 @@ exports.instance = function(thisComponent) {
       };
       return unsubscribe;
     };
-    pubSub.set = function(data) {
-      l(3);
-      prevSet(data);
-      return l(3);
+    instancePubSub.set = function(data) {
+      var ll;
+      ll = l.set(data);
+      ll();
+      pubSub.set(data);
+      return ll();
     };
-    return exports[x] = pubSub;
+    return exports[x] = instancePubSub;
   });
   exports.all = function() {
-    var callback, keys, l, options, resolved, unsubscribe, unsubscribes, values;
+    var callback, keys, l, options, prevOff, resolved, unsubscribe, unsubscribes, values;
     if (arguments.length === 2) {
       keys = arguments[0], callback = arguments[1];
       options = {};
@@ -3502,6 +3547,7 @@ exports.instance = function(thisComponent) {
       });
       return l(2);
     };
+    prevOff = thisComponent.off;
     thisComponent.off = function() {
       prevOff();
       return unsubscribe();

@@ -1,23 +1,16 @@
 log = require('./log').state
 
-createPubSub = (name) ->
-  data = dataNotNull = dataNotLoading = dataNotNullNotLoading = undefined
+createPubSub = ->
+  data = dataNotNull = undefined
   subscribers = []
   on: (options, callback) ->
 
     firstDataSent = false
     unless options.omitFirst
-      if not options.allowNull and not options.allowLoading
-        if dataNotNullNotLoading isnt undefined
-          callback dataNotNullNotLoading
-          firstDataSent = true
-      else unless options.allowNull
+      if not options.allowNull
         if dataNotNull isnt undefined
           callback dataNotNull
           firstDataSent = true
-      else unless options.allowLoading
-        callback dataNotLoading
-        firstDataSent = true
       else
         callback data
         firstDataSent = true
@@ -26,15 +19,7 @@ createPubSub = (name) ->
       return ->
 
     subscribers.push wrappedCallback = (data) ->
-      unsubscribe = ->
-        index = subscribers.indexOf wrappedCallback
-        if ~index
-          subscribers.splice index, 1
-
       if not options.allowNull and not data?
-        return
-
-      if not options.allowLoading and data?.loading
         return
 
       callback data
@@ -42,9 +27,12 @@ createPubSub = (name) ->
       if options.once
         unsubscribe()
         
-      unsubscribe
+    unsubscribe = ->
+      index = subscribers.indexOf wrappedCallback
+      if ~index
+        subscribers.splice index, 1
         
-  set: set = (_data) ->
+  set: (_data) ->
 
     if JSON.stringify(data) is JSON.stringify(_data)
       return
@@ -52,30 +40,26 @@ createPubSub = (name) ->
     data = _data
     if data?
       dataNotNull = data
-    unless data?.loading
-      dataNotLoading = data
-    if data? and not data.loading
-      dataNotNullNotLoading = data
 
-    if data?.then?
-      set loading: true
-      data.then set
-    else
-      subscribers.forEach (callback) -> callback data
+    subscribers.forEach (callback) -> callback data
+
+pubSubs = [
+  'user'
+].map (x) ->
+  x: x
+  pubSub: createPubSub()
 
 exports.instance = (thisComponent) ->
 
   exports = {}
 
-  [
-  ].forEach (x) ->
-    pubSub = createPubSub x
-    prevOn = pubSub.on
-    prevSet = pubSub.set
+  pubSubs.forEach ({x, pubSub}) ->
 
-    l = log.pubsub thisComponent, x, options, callback
+    l = log.pubsub thisComponent, x
+    
+    instancePubSub = {}
 
-    pubSub.on = ->
+    instancePubSub.on = ->
 
       if arguments.length is 1
         [callback] = arguments
@@ -83,28 +67,31 @@ exports.instance = (thisComponent) ->
       else
         [options, callback] = arguments
 
-      l 0
-      unsubscribe = prevOn options, (data) ->
-        l 1, data
+      ll = l.on options, callback
+
+      ll 0
+      unsubscribe = pubSub.on options, (data) ->
+        ll 1, data
         callback data
-        l 1, data
-      l 0
-      unsubscribe = do (unsubscribe) ->
-        l 2
+        ll 1, data
+      ll 0
+      unsubscribe = do (unsubscribe) -> ->
+        ll 2
         unsubscribe()
-        l 2
+        ll 2
       prevOff = thisComponent.off
       thisComponent.off = ->
         prevOff()
         unsubscribe()
       unsubscribe
 
-    pubSub.set = (data) ->
-      l 3 
-      prevSet data
-      l 3
+    instancePubSub.set = (data) ->
+      ll = l.set data
+      ll()
+      pubSub.set data
+      ll()
 
-    exports[x] = pubSub
+    exports[x] = instancePubSub
 
   exports.all = ->
 
@@ -135,6 +122,7 @@ exports.instance = (thisComponent) ->
       unsubscribes.forEach (unsubscribe) -> unsubscribe()
       l 2
 
+    prevOff = thisComponent.off
     thisComponent.off = ->
       prevOff()
       unsubscribe()

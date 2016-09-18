@@ -45,9 +45,10 @@ exports.instance = (thisComponent) ->
     exports[x] = (params) ->
       l = log.get thisComponent, x, params
       l()
-      get x
+      get x, params
       .then (data) ->
         l data
+        data
 
   [
     'login'
@@ -56,8 +57,9 @@ exports.instance = (thisComponent) ->
     exports[x] = (params) ->
       l = log.get thisComponent, x, params
       l()
-      post x
+      post x, params
       .then (data) ->
         l data
+        data
   
   exports

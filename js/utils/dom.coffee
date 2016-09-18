@@ -187,11 +187,13 @@ exports.instance = (thisComponent) ->
     l()
     exports.removeClass component, 'hidden'
     l()
+    component
 
   exports.hide = (component) ->
     l = log.hide thisComponent, component
     l()
     exports.addClass component, 'hidden'
     l()
+    component
 
   exports

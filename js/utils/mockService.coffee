@@ -5,6 +5,6 @@ exports.login = ({email, password}) ->
   .then ->
     switch email
       when 'ma.dorosty@gmail.com'
-        return name: 'Ali Dorosty'
+        name: 'Ali Dorosty'
       else
-        return invalid: true
+        invalid: true
