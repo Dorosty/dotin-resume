@@ -5,8 +5,8 @@ isIn = (component, {pageX, pageY}) ->
   rect = component.element.getBoundingClientRect()
   minX = rect.left
   maxX = rect.left + rect.width
-  minY = rect.top + window.scrollY
-  maxY = rect.top + window.scrollY + rect.height
+  minY = rect.top + window().element.scrollY
+  maxY = rect.top + window().element.scrollY + rect.height
   minX < pageX < maxX and minY < pageY < maxY
 
 exports.instance = (thisComponent) ->
@@ -36,13 +36,6 @@ exports.instance = (thisComponent) ->
 
     l = log.onEvent thisComponent, component, event, ignores, callback
 
-    l 0
-    if element.addEventListener
-      element.addEventListener event, callback
-    else if element.attachEvent
-      element.attachEvent "on#{uppercaseFirst event}", callback
-    l 0
-
     callback = do (callback) -> (e) ->
       e.target ?= e.srcElement
       if ignores
@@ -59,7 +52,15 @@ exports.instance = (thisComponent) ->
       callback e
       l 1, e
 
+    l 0
+    if element.addEventListener
+      element.addEventListener event, callback
+    else if element.attachEvent
+      element.attachEvent "on#{uppercaseFirst event}", callback
+    l 0
+
     unbind = ->
+      return
       l 2
       if element.removeEventListener
         element.removeEventListener event, callback
@@ -77,7 +78,7 @@ exports.instance = (thisComponent) ->
   exports.onLoad = (callback) ->
     l = log.onLoad thisComponent, callback
     l 0
-    unbind = exports.onEvent window, 'load', (e) ->
+    unbind = exports.onEvent window(), 'load', (e) ->
       l 1, e
       callback e
       l 1, e
@@ -90,7 +91,7 @@ exports.instance = (thisComponent) ->
   exports.onResize = (callback) ->
     l = log.onResize thisComponent, callback
     l 0
-    unbind = exports.onEvent window, 'resize', (e) ->
+    unbind = exports.onEvent window(), 'resize', (e) ->
       l 1, e
       callback e
       l 1, e
@@ -104,7 +105,7 @@ exports.instance = (thisComponent) ->
     l = log.onMouseover thisComponent, component, callback
     allreadyIn = false
     l 0
-    unbind = exports.onEvent body, 'mousemove', (e) ->
+    unbind = exports.onEvent body(), 'mousemove', (e) ->
       if isIn component, e
         l 1, e
         callback e unless allreadyIn
@@ -122,7 +123,7 @@ exports.instance = (thisComponent) ->
     l = log.onMouseout thisComponent, component, callback
     allreadyOut = false
     l 0.0
-    unbind0 = exports.onEvent body, 'mousemove', (e) ->
+    unbind0 = exports.onEvent body(), 'mousemove', (e) ->
       unless isIn component, e
         l 1.0, e
         callback e unless allreadyOut
@@ -132,7 +133,7 @@ exports.instance = (thisComponent) ->
         allreadyOut = false
     l 0.0
     l 0.1
-    unbind1 = exports.onEvent body, 'mouseout', (e) ->
+    unbind1 = exports.onEvent body(), 'mouseout', (e) ->
       from = e.relatedTarget || e.toElement
       if !from || from.nodeName == 'HTML'
         l 1.1, e
@@ -149,13 +150,13 @@ exports.instance = (thisComponent) ->
 
   exports.onMouseup = (callback) ->
     l 0.0
-    unbind0 = exports.onEvent body, 'mouseup', (e) ->
+    unbind0 = exports.onEvent body(), 'mouseup', (e) ->
       l 1.0, e
       callback e
       l 1.0, e
     l 0.0
     l 0.1
-    unbind1 = exports.onEvent body, 'mouseout', (e) ->
+    unbind1 = exports.onEvent body(), 'mouseout', (e) ->
       from = e.relatedTarget || e.toElement
       if !from || from.nodeName == 'HTML'
         l 1.1, e

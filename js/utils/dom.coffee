@@ -92,12 +92,23 @@ exports.instance = (thisComponent) ->
 
       component
 
+  exports.text = (text) ->
+    l = log.text thisComponent, text
+    l()
+    component =
+      name: "text[#{text}]"
+      element: document.createTextNode text
+      off: ->
+    l()
+    component
+
   exports.append = (parent, component) ->
     if Array.isArray component
       return component.forEach (component) -> exports.append parent, component
     l = log.append thisComponent, parent, component
     l()
     parent.element.appendChild component.element
+    component.domParent = parent
     l()
 
   exports.destroy = (component) ->
@@ -193,6 +204,26 @@ exports.instance = (thisComponent) ->
     l = log.hide thisComponent, component
     l()
     exports.addClass component, 'hidden'
+    l()
+    component
+
+  exports.enable = (component) ->
+    if Array.isArray component
+      return component.map (component) -> exports.enable component
+    {element} = component
+    l = log.enable thisComponent, component
+    l()
+    element.removeAttribute 'disabled'
+    l()
+    component
+
+  exports.disable = (component) ->
+    if Array.isArray component
+      return component.map (component) -> exports.disable component
+    {element} = component
+    l = log.disable thisComponent, component
+    l()
+    element.setAttribute 'disabled', 'disabled'
     l()
     component
 

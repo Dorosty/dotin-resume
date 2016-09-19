@@ -181,36 +181,54 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
-var component;
+var component, extend, style;
 
 component = require('../utils/component');
 
+style = require('./style');
+
+extend = require('../utils').extend;
+
 module.exports = component('login', function(arg) {
-  var E, doSubmit, dom, email, events, hide, invalid, onEnter, onEvent, password, service, show, spinner, state, submit;
+  var E, disable, doSubmit, dom, email, enable, events, hide, invalid, onEnter, onEvent, password, remember, service, setStyle, show, spinner, state, submit, text;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
-  E = dom.E, show = dom.show, hide = dom.hide;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, enable = dom.enable, disable = dom.disable;
   onEvent = events.onEvent, onEnter = events.onEnter;
-  component = E(null, email = E('input', {
-    placeholder: 'email'
-  }), password = E('input', {
-    placeholder: 'password'
-  }), submit = E('button', null, 'submit'), spinner = E(null, 'spinner'), hide(invalid = E(null, 'invalid')));
+  component = E(null, E('img', style.bg), E(style.form, E('img', style.logo), E(style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'), E(style.formInputs, email = E('input', extend({
+    placeholder: 'ایمیل'
+  }, style.input)), password = E('input', extend({
+    placeholder: 'رمز عبور'
+  }, style.input)), E(style.submitSection, submit = E('button', style.submit, 'ورود'), E('label', style.rememberLabel, remember = E('input', extend({
+    type: 'checkbox'
+  }, style.remember)), text('مرا به خاطر بسپار')), spinner = E(style.spinner, 'در حال بارگذاری...'), hide(invalid = E(style.invalid, 'نام کاربری و یا رمز عبور اشتباه است.'))))));
   hide(spinner);
+  [email, password].forEach(function(input) {
+    onEvent(input, 'focus', function() {
+      return setStyle(input, style.inputFocus);
+    });
+    return onEvent(input, 'blur', function() {
+      return setStyle(input, style.input);
+    });
+  });
   doSubmit = function() {
+    disable([email, password, submit, remember]);
     hide(invalid);
     show(spinner);
     return service.login({
       email: email.element.value,
-      password: password.element.value
+      password: password.element.value,
+      rememver: !!remember.element.checked
     }).then(function(response) {
+      enable([email, password, submit, remember]);
       if (response.invalid) {
         return show(invalid);
       } else {
-        return state.user.set(response);
+        state.user.set(response.user);
+        return state.applications.set(response.applications);
       }
     }).fin(function() {
       return hide(spinner);
-    });
+    }).done();
   };
   onEvent([email, password], 'input', function() {
     return hide(invalid);
@@ -221,32 +239,617 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../utils/component":5}],3:[function(require,module,exports){
-var body, component, login;
+},{"../utils":14,"../utils/component":10,"./style":3}],3:[function(require,module,exports){
+exports.bg = {
+  src: 'img/bg-1.jpg',
+  zIndex: -1,
+  minHeight: '100%',
+  minWidth: 1024,
+  width: '100%',
+  height: 'auto',
+  position: 'fixed',
+  top: 0,
+  left: 0
+};
+
+exports.form = {
+  margin: '100px auto 0',
+  width: 500,
+  backgroundColor: 'white',
+  textAlign: 'center',
+  paddingBottom: 100
+};
+
+exports.logo = {
+  width: 100,
+  marginTop: 100
+};
+
+exports.title = {
+  fontSize: 18,
+  color: '#1D7453'
+};
+
+exports.formInputs = {
+  marginTop: 50
+};
+
+exports.input = {
+  border: 0,
+  outline: 0,
+  width: 400,
+  padding: 4,
+  margin: '20px 0',
+  borderBottom: '1px solid #ddd',
+  transition: 'border-bottom .5s'
+};
+
+exports.inputFocus = {
+  borderBottom: '1px solid #6cc791'
+};
+
+exports.submit = {
+  backgroundColor: '#6cc791',
+  color: 'white',
+  padding: '7px 20px',
+  borderRadius: 5,
+  marginTop: 50,
+  marginLeft: 20,
+  border: 0,
+  cursor: 'pointer'
+};
+
+exports.submitSection = {
+  textAlign: 'right',
+  paddingRight: 50
+};
+
+exports.rememberLabel = {
+  fontSize: 11,
+  color: '#888',
+  cursor: 'pointer'
+};
+
+exports.remember = {
+  width: 'auto',
+  margin: '20px 5px',
+  position: 'relative',
+  top: 4
+};
+
+exports.spinner = {
+  color: '#999'
+};
+
+exports.invalid = {
+  color: 'red'
+};
+
+
+},{}],4:[function(require,module,exports){
+var collection, component, extend, ref, stateToPersian, style, toDate;
+
+component = require('../utils/component');
+
+style = require('./style');
+
+ref = require('../utils'), extend = ref.extend, toDate = ref.toDate, collection = ref.collection;
+
+stateToPersian = function(state) {
+  switch (state) {
+    case 0:
+      return 'ثبت شده';
+    case 1:
+      return 'تایید اولیه توسط مدیر';
+    case 2:
+      return 'مصاحبه تلفنی انجام شده';
+    case 3:
+      return 'اطلاعات تکمیل شده';
+    case 4:
+      return 'آزمون‌های شخصیت‌شناسی داده شده';
+    case 5:
+      return 'مصاحبه فنی برگزار شده';
+    case 6:
+      return 'کمیته جذب برگزار شده';
+    case 7:
+      return 'جذب شده';
+    case 8:
+      return 'بایگانی';
+  }
+};
+
+module.exports = component('mainView', function(arg) {
+  var E, addApplication, append, applications, changeApplication, destroy, dom, events, handleApplications, onEvent, removeApplication, searchFirstName, searchInputs, searchJobs, searchLastName, setStyle, state, tbody, updateTable, view;
+  dom = arg.dom, events = arg.events, state = arg.state;
+  E = dom.E, append = dom.append, destroy = dom.destroy, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  view = E(null, E(style.header, E('img', style.headerImg), E(style.headerWrapper, E(style.headerTitle, 'انتخاب شغل‌های مورد تقاضا'), E(style.breadcrumbs, E('a', extend({
+    href: 'Home'
+  }, style.breadcrumbsLink), 'خانه > '), E('a', extend({
+    href: '#'
+  }, style.breadcrumbsLinkActive), 'انتخاب شغل‌های مورد تقاضا')))), E(style.wrapper, E(style.title, 'انتخاب شغل‌های مورد تقاضا'), E('table', style.table, E('thead', null, E('th', extend({
+    minWidth: 65
+  }, style.th)), E('th', style.th, E(style.thSpan, 'نام'), searchFirstName = E('input', {
+    placeholder: 'جستجو...',
+    "class": 'form-control'
+  })), E('th', style.th, E(style.thSpan, 'نام خانوادگی'), searchLastName = E('input', {
+    placeholder: 'جستجو...',
+    "class": 'form-control'
+  })), E('th', style.th, 'تاریخ تولد'), E('th', style.th, E(style.thSpan, 'مشاغل درخواستی'), searchJobs = E('input', {
+    placeholder: 'جستجو...',
+    "class": 'form-control'
+  })), E('th', style.th, 'تاریخ ثبت'), E('th', style.th, 'تلفن همراه'), E('th', style.th, 'ایمیل'), E('th', style.th, 'رزومه'), E('th', style.th, 'اطباعات تکمیل شده'), E('th', style.th, 'نتیجه آزمونها'), E('th', extend({
+    minWidth: 100
+  }, style.th), 'وضعیت')), tbody = E('tbody'))));
+  addApplication = function(application) {
+    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume, row;
+    append(tbody, row = E('tr', style.tr, E('td', style.td, img = E('img', extend({
+      src: application.picture || 'img/picicon.png'
+    }, style.tdPicture))), firstName = E('td', style.td, application.firstName), lastName = E('td', style.td, application.lastName), birthday = E('td', style.td, application.birthday), jobs = E('td', style.td, application.jobs), createdAt = E('td', style.td, toDate(application.createdAt)), phoneNumber = E('td', style.td, application.phoneNumber), email = E('td', extend({
+      englishText: application.email
+    }, style.td)), E('td', style.td, resume = E('a', {
+      href: application.resumeUrl
+    }, E('i', extend({
+      "class": 'fa fa-paperclip'
+    }, style.tdPaperclip)))), E('td', style.td, E('a', {
+      href: ''
+    }, E('i', extend({
+      "class": 'fa fa-paperclip'
+    }, style.tdPaperclip)))), E('td', style.td, E('a', {
+      href: ''
+    }, E('i', extend({
+      "class": 'fa fa-paperclip'
+    }, style.tdPaperclip)))), state = E('td', style.td, stateToPersian(application.state))));
+    return {
+      row: row,
+      img: img,
+      firstName: firstName,
+      lastName: lastName,
+      birthday: birthday,
+      jobs: jobs,
+      createdAt: createdAt,
+      phoneNumber: phoneNumber,
+      email: email,
+      resume: resume,
+      state: state
+    };
+  };
+  removeApplication = function(arg1) {
+    var row;
+    row = arg1.row;
+    return destroy(row);
+  };
+  changeApplication = function(application, x) {
+    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume;
+    img = x.img, firstName = x.firstName, lastName = x.lastName, birthday = x.birthday, jobs = x.jobs, createdAt = x.createdAt, phoneNumber = x.phoneNumber, email = x.email, resume = x.resume, state = x.state;
+    setStyle(img, {
+      src: application.picture || 'img/picicon.png'
+    });
+    setStyle(firstName, {
+      text: application.firstName
+    });
+    setStyle(lastName, {
+      text: application.lastName
+    });
+    setStyle(birthday, {
+      text: application.birthday
+    });
+    setStyle(jobs, {
+      text: application.jobs
+    });
+    setStyle(createdAt, {
+      text: toDate(application.createdAt)
+    });
+    setStyle(phoneNumber, {
+      text: application.phoneNumber
+    });
+    setStyle(email, {
+      englishText: application.email
+    });
+    setStyle(resume, {
+      href: application.resumeUrl
+    });
+    setStyle(state, {
+      text: stateToPersian(application.state)
+    });
+    return x;
+  };
+  handleApplications = collection(addApplication, removeApplication, changeApplication);
+  searchInputs = {
+    'firstName': searchFirstName,
+    'lastName': searchLastName,
+    'jobs': searchJobs
+  };
+  updateTable = function() {
+    var filteredApplications;
+    filteredApplications = applications;
+    Object.keys(searchInputs).forEach(function(key) {
+      var value, words;
+      value = String(searchInputs[key].element.value);
+      if (value.trim() === '') {
+        return;
+      }
+      words = value.split(' ').map(function(word) {
+        return word.trim().toLowerCase();
+      }).filter(function(word) {
+        return word;
+      });
+      return filteredApplications = filteredApplications.filter(function(application) {
+        return words.some(function(word) {
+          return ~application[key].toLowerCase().indexOf(word);
+        });
+      });
+    });
+    return handleApplications(filteredApplications);
+  };
+  applications = void 0;
+  state.applications.on(function(_applications) {
+    applications = _applications;
+    return handleApplications(applications);
+  });
+  Object.keys(searchInputs).forEach(function(key) {
+    return onEvent(searchInputs[key], 'input', updateTable);
+  });
+  return view;
+});
+
+
+},{"../utils":14,"../utils/component":10,"./style":5}],5:[function(require,module,exports){
+exports.header = {
+  position: 'relative',
+  height: 208,
+  overflow: 'hidden'
+};
+
+exports.headerImg = {
+  src: 'img/bg-2.jpg',
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  height: 200,
+  width: '100%'
+};
+
+exports.headerWrapper = {
+  position: 'relative',
+  width: 1500,
+  height: 200,
+  margin: '0 auto'
+};
+
+exports.headerTitle = {
+  position: 'absolute',
+  width: 420,
+  top: 100,
+  fontSize: 30,
+  color: 'white'
+};
+
+exports.breadcrumbs = {
+  position: 'absolute',
+  width: 420,
+  top: 150,
+  left: 0,
+  right: 0
+};
+
+exports.breadcrumbsLink = {
+  textDecoration: 'none',
+  color: 'white'
+};
+
+exports.breadcrumbsLinkActive = {
+  textDecoration: 'none',
+  color: '#78C19D'
+};
+
+exports.wrapper = {
+  width: 1500,
+  margin: '0 auto',
+  overflow: 'hidden'
+};
+
+exports.title = {
+  fontSize: 25,
+  color: '#78C19D',
+  margin: '20px 0 50px'
+};
+
+exports.table = {
+  width: '100%',
+  borderSpacing: 0,
+  borderCollapse: 'collapse'
+};
+
+exports.th = {
+  padding: '0 5px 10px',
+  fontSize: 13,
+  fontWeight: 'normal',
+  height: 30,
+  lineHeight: 30,
+  color: '#5D5D5D',
+  borderTop: '1px solid #DDD',
+  borderLeft: '1px dashed #DDD',
+  borderRight: '1px dashed #DDD',
+  borderBottom: '1px solid #78C19D'
+};
+
+exports.thSpan = {
+  display: 'block',
+  width: '100%'
+};
+
+exports.tr = {
+  cursor: 'default',
+  borderBottom: '1px solid #EEE'
+};
+
+exports.trHover = {
+  backgroundColor: '#e5fbf0'
+};
+
+exports.td = {
+  padding: '0 5px',
+  fontSize: 13,
+  height: 30,
+  lineHeight: 30,
+  textAlign: 'center',
+  color: '#888',
+  borderLeft: '1px dashed #DDD',
+  borderLight: '1px dashed #DDD'
+};
+
+exports.tdPicture = {
+  width: 30,
+  height: 30,
+  borderRadius: 50,
+  border: '1px solid #78C19D',
+  display: 'inline-block',
+  position: 'relative',
+  top: 2
+};
+
+exports.tdPaperclip = {
+  fontSize: 25,
+  lineHeight: 40,
+  height: 40,
+  color: '#57B3A1'
+};
+
+
+},{}],6:[function(require,module,exports){
+var component, extend, style;
+
+component = require('../utils/component');
+
+style = require('./style');
+
+extend = require('../utils').extend;
+
+module.exports = component('login', function(arg) {
+  var E, cover, dom, events, hide, links, login, logout, menu, onEvent, onMouseout, onMouseover, service, setStyle, show, state, text, username;
+  dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  onEvent = events.onEvent, onMouseover = events.onMouseover, onMouseout = events.onMouseout;
+  menu = E(style.menu, cover = E(style.cover), E(style.wrapper, E('a', style.logo, E('img', style.logoImg), text('شرکت نرم‌افزاری داتیس آرین قشم')), E('a', style.en, 'EN'), E('a', style.contact, 'تماس با ما'), login = E(style.login, 'ورود'), username = E(style.username), logout = E(style.logout, 'خروج'), E(style.links, links = [
+    {
+      href: '',
+      text: 'خانه'
+    }, {
+      href: 'about',
+      text: 'درباره ما'
+    }, {
+      href: 'solutions',
+      text: 'راهکارها'
+    }, {
+      href: 'products',
+      text: 'محصولات'
+    }, {
+      href: 'services',
+      text: 'خدمات'
+    }, {
+      href: 'apply',
+      text: 'دعوت به همکاری'
+    }
+  ].map(function(arg1) {
+    var href, text;
+    href = arg1.href, text = arg1.text;
+    return E('a', extend({
+      href: "Home#" + href
+    }, style.link), text);
+  }))));
+  links.forEach(function(link) {
+    onMouseover(link, function() {
+      return setStyle(link, style.linkHover);
+    });
+    return onMouseout(link, function() {
+      return setStyle(link, style.link);
+    });
+  });
+  onEvent(login, 'click', function() {
+    return state.isInLoginPage.set(true);
+  });
+  onEvent(logout, 'click', function() {
+    setStyle(cover, {
+      visibility: 'visible',
+      opacity: 0.5
+    });
+    return service.logout().then(function() {
+      setStyle(cover, {
+        visibility: 'hidden',
+        opacity: 0
+      });
+      return state.user.set(null);
+    }).done();
+  });
+  state.all({
+    allowNull: true
+  }, ['user', 'isInLoginPage'], function(arg1) {
+    var isInLoginPage, user;
+    user = arg1[0], isInLoginPage = arg1[1];
+    if (user) {
+      hide(login);
+      show(username);
+      show(logout);
+      return setStyle(username, {
+        text: user.name
+      });
+    } else {
+      hide(username);
+      hide(logout);
+      if (isInLoginPage) {
+        return hide(login);
+      } else {
+        return show(login);
+      }
+    }
+  });
+  return menu;
+});
+
+
+},{"../utils":14,"../utils/component":10,"./style":7}],7:[function(require,module,exports){
+var extend;
+
+extend = require('../utils').extend;
+
+exports.menu = {
+  backgroundColor: '#FFF8E6'
+};
+
+exports.cover = {
+  backgroundColor: 'white',
+  zIndex: 1000,
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  visibility: 'hidden',
+  opacity: 0
+};
+
+exports.logo = {
+  href: 'Home',
+  textDecoration: 'none',
+  color: '#1D7453',
+  fontSize: 14,
+  position: 'relative',
+  top: 10,
+  right: 10
+};
+
+exports.logoImg = {
+  src: 'img/logo.png',
+  position: 'relative',
+  bottom: 2
+};
+
+exports.en = {
+  href: 'en.dotin.ir',
+  textDecoration: 'none',
+  position: 'absolute',
+  color: '#78C19D',
+  top: 5,
+  left: 100
+};
+
+exports.contact = {
+  href: '#',
+  textDecoration: 'none',
+  position: 'absolute',
+  color: '#78C19D',
+  top: 5,
+  left: 10
+};
+
+exports.login = exports.logout = {
+  cursor: 'pointer',
+  textDecoration: 'none',
+  position: 'absolute',
+  color: '#78C19D',
+  top: 30,
+  left: 10
+};
+
+exports.username = {
+  position: 'absolute',
+  color: '#636363',
+  top: 30,
+  left: 100
+};
+
+exports.links = {
+  position: 'absolute'
+};
+
+exports.link = {
+  textDecoration: 'none',
+  display: 'inline-block',
+  padding: '0 20px',
+  height: 63,
+  lineHeight: 63,
+  color: '#636363',
+  fontSize: 14,
+  fontWeight: 'bold',
+  borderTop: '2px solid #FFF8E6',
+  transition: '0.5s'
+};
+
+exports.linkHover = extend({}, exports.link, {
+  color: '#78C19D',
+  borderTop: '2px solid #78C19D'
+});
+
+exports.menu = extend(exports.menu, {
+  height: 65
+});
+
+exports.links = extend(exports.links, {
+  display: 'block',
+  top: 0,
+  right: 350
+});
+
+
+},{"../utils":14}],8:[function(require,module,exports){
+var body, component, login, mainView, menu;
 
 component = require('./utils/component');
 
+menu = require('./menu');
+
 login = require('./login');
+
+mainView = require('./mainView');
 
 body = require('./utils/dom').body;
 
 module.exports = component('page', function(arg) {
-  var E, append, dom, setStyle, state, username;
+  var E, append, currentPage, destroy, dom, state;
   dom = arg.dom, state = arg.state;
-  E = dom.E, append = dom.append, setStyle = dom.setStyle;
-  append(E(body), E('div', null, username = E('div'), E(login)));
+  E = dom.E, append = dom.append, destroy = dom.destroy;
+  append(E(body), E(menu));
+  currentPage = void 0;
   return state.user.on({
     allowNull: true
   }, function(user) {
-    var ref;
-    return setStyle(username, {
-      text: (ref = user != null ? user.name : void 0) != null ? ref : ''
-    });
+    if (currentPage) {
+      destroy(currentPage);
+    }
+    if (user) {
+      currentPage = E(mainView);
+      state.isInLoginPage.set(false);
+    } else {
+      currentPage = E(login);
+      state.isInLoginPage.set(true);
+    }
+    return append(E(body), currentPage);
   });
 });
 
 
-},{"./login":2,"./utils/component":5,"./utils/dom":7}],4:[function(require,module,exports){
+},{"./login":2,"./mainView":4,"./menu":6,"./utils/component":10,"./utils/dom":12}],9:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -2298,7 +2901,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":1}],5:[function(require,module,exports){
+},{"_process":1}],10:[function(require,module,exports){
 var dom, events, log, service, state;
 
 state = require('./state');
@@ -2334,7 +2937,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{"./dom":7,"./events":8,"./log":10,"./service":12,"./state":13}],6:[function(require,module,exports){
+},{"./dom":12,"./events":13,"./log":15,"./service":17,"./state":18}],11:[function(require,module,exports){
 exports.createCookie = function(name, value, days) {
   var date, expires;
   if (days) {
@@ -2367,7 +2970,7 @@ exports.eraseCookie = function(name) {
 };
 
 
-},{}],7:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var extend, log, ref, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -2499,6 +3102,18 @@ exports.instance = function(thisComponent) {
       return component;
     };
   })();
+  exports.text = function(text) {
+    var component, l;
+    l = log.text(thisComponent, text);
+    l();
+    component = {
+      name: "text[" + text + "]",
+      element: document.createTextNode(text),
+      off: function() {}
+    };
+    l();
+    return component;
+  };
   exports.append = function(parent, component) {
     var l;
     if (Array.isArray(component)) {
@@ -2509,6 +3124,7 @@ exports.instance = function(thisComponent) {
     l = log.append(thisComponent, parent, component);
     l();
     parent.element.appendChild(component.element);
+    component.domParent = parent;
     return l();
   };
   exports.destroy = function(component) {
@@ -2653,11 +3269,39 @@ exports.instance = function(thisComponent) {
     l();
     return component;
   };
+  exports.enable = function(component) {
+    var element, l;
+    if (Array.isArray(component)) {
+      return component.map(function(component) {
+        return exports.enable(component);
+      });
+    }
+    element = component.element;
+    l = log.enable(thisComponent, component);
+    l();
+    element.removeAttribute('disabled');
+    l();
+    return component;
+  };
+  exports.disable = function(component) {
+    var element, l;
+    if (Array.isArray(component)) {
+      return component.map(function(component) {
+        return exports.disable(component);
+      });
+    }
+    element = component.element;
+    l = log.disable(thisComponent, component);
+    l();
+    element.setAttribute('disabled', 'disabled');
+    l();
+    return component;
+  };
   return exports;
 };
 
 
-},{".":9,"./log":10}],8:[function(require,module,exports){
+},{".":14,"./log":15}],13:[function(require,module,exports){
 var body, isIn, log, ref, window,
   slice = [].slice;
 
@@ -2671,8 +3315,8 @@ isIn = function(component, arg) {
   rect = component.element.getBoundingClientRect();
   minX = rect.left;
   maxX = rect.left + rect.width;
-  minY = rect.top + window.scrollY;
-  maxY = rect.top + window.scrollY + rect.height;
+  minY = rect.top + window().element.scrollY;
+  maxY = rect.top + window().element.scrollY + rect.height;
   return (minX < pageX && pageX < maxX) && (minY < pageY && pageY < maxY);
 };
 
@@ -2716,13 +3360,6 @@ exports.instance = function(thisComponent) {
     }
     element = component.element;
     l = log.onEvent(thisComponent, component, event, ignores, callback);
-    l(0);
-    if (element.addEventListener) {
-      element.addEventListener(event, callback);
-    } else if (element.attachEvent) {
-      element.attachEvent("on" + (uppercaseFirst(event)), callback);
-    }
-    l(0);
     callback = (function(callback) {
       return function(e) {
         var shouldIgnore, target;
@@ -2749,7 +3386,15 @@ exports.instance = function(thisComponent) {
         return l(1, e);
       };
     })(callback);
+    l(0);
+    if (element.addEventListener) {
+      element.addEventListener(event, callback);
+    } else if (element.attachEvent) {
+      element.attachEvent("on" + (uppercaseFirst(event)), callback);
+    }
+    l(0);
     unbind = function() {
+      return;
       l(2);
       if (element.removeEventListener) {
         element.removeEventListener(event, callback);
@@ -2769,7 +3414,7 @@ exports.instance = function(thisComponent) {
     var l, unbind;
     l = log.onLoad(thisComponent, callback);
     l(0);
-    unbind = exports.onEvent(window, 'load', function(e) {
+    unbind = exports.onEvent(window(), 'load', function(e) {
       l(1, e);
       callback(e);
       return l(1, e);
@@ -2785,7 +3430,7 @@ exports.instance = function(thisComponent) {
     var l, unbind;
     l = log.onResize(thisComponent, callback);
     l(0);
-    unbind = exports.onEvent(window, 'resize', function(e) {
+    unbind = exports.onEvent(window(), 'resize', function(e) {
       l(1, e);
       callback(e);
       return l(1, e);
@@ -2802,7 +3447,7 @@ exports.instance = function(thisComponent) {
     l = log.onMouseover(thisComponent, component, callback);
     allreadyIn = false;
     l(0);
-    unbind = exports.onEvent(body, 'mousemove', function(e) {
+    unbind = exports.onEvent(body(), 'mousemove', function(e) {
       if (isIn(component, e)) {
         l(1, e);
         if (!allreadyIn) {
@@ -2826,7 +3471,7 @@ exports.instance = function(thisComponent) {
     l = log.onMouseout(thisComponent, component, callback);
     allreadyOut = false;
     l(0.0);
-    unbind0 = exports.onEvent(body, 'mousemove', function(e) {
+    unbind0 = exports.onEvent(body(), 'mousemove', function(e) {
       if (!isIn(component, e)) {
         l(1.0, e);
         if (!allreadyOut) {
@@ -2840,7 +3485,7 @@ exports.instance = function(thisComponent) {
     });
     l(0.0);
     l(0.1);
-    unbind1 = exports.onEvent(body, 'mouseout', function(e) {
+    unbind1 = exports.onEvent(body(), 'mouseout', function(e) {
       var from;
       from = e.relatedTarget || e.toElement;
       if (!from || from.nodeName === 'HTML') {
@@ -2862,14 +3507,14 @@ exports.instance = function(thisComponent) {
   exports.onMouseup = function(callback) {
     var unbind0, unbind1;
     l(0.0);
-    unbind0 = exports.onEvent(body, 'mouseup', function(e) {
+    unbind0 = exports.onEvent(body(), 'mouseup', function(e) {
       l(1.0, e);
       callback(e);
       return l(1.0, e);
     });
     l(0.0);
     l(0.1);
-    unbind1 = exports.onEvent(body, 'mouseout', function(e) {
+    unbind1 = exports.onEvent(body(), 'mouseout', function(e) {
       var from;
       from = e.relatedTarget || e.toElement;
       if (!from || from.nodeName === 'HTML') {
@@ -2910,7 +3555,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"./dom":7,"./log":10}],9:[function(require,module,exports){
+},{"./dom":12,"./log":15}],14:[function(require,module,exports){
 var slice = [].slice;
 
 exports.compare = function(a, b) {
@@ -2985,16 +3630,29 @@ exports.toPersian = function(value) {
   return value.replace(/ي/g, 'ی').replace(/ك/g, 'ک');
 };
 
+exports.toDate = function(timestamp) {
+  var date, day, j, month, year;
+  date = new Date(timestamp);
+  day = date.getDate();
+  month = date.getMonth() + 1;
+  year = date.getFullYear();
+  j = jalaali.toJalaali(year, month, day);
+  day = j.jd;
+  month = j.jm;
+  year = j.jy;
+  return String(year).substr(2) + '/' + month + '/' + day;
+};
+
 exports.collection = function(add, destroy, change) {
   var data;
   data = [];
   return function(newData) {
-    var j, l, m, n, ref, ref1, ref2, ref3, ref4, results, results1, results2, results3, results4;
+    var l, m, n, o, ref, ref1, ref2, ref3, ref4, results, results1, results2, results3, results4;
     if (newData.length > data.length) {
       if (data.length) {
         (function() {
           results = [];
-          for (var j = 0, ref = data.length - 1; 0 <= ref ? j <= ref : j >= ref; 0 <= ref ? j++ : j--){ results.push(j); }
+          for (var l = 0, ref = data.length - 1; 0 <= ref ? l <= ref : l >= ref; 0 <= ref ? l++ : l--){ results.push(l); }
           return results;
         }).apply(this).forEach(function(i) {
           return data[i] = change(newData[i], data[i]);
@@ -3002,7 +3660,7 @@ exports.collection = function(add, destroy, change) {
       }
       return (function() {
         results1 = [];
-        for (var l = ref1 = data.length, ref2 = newData.length - 1; ref1 <= ref2 ? l <= ref2 : l >= ref2; ref1 <= ref2 ? l++ : l--){ results1.push(l); }
+        for (var m = ref1 = data.length, ref2 = newData.length - 1; ref1 <= ref2 ? m <= ref2 : m >= ref2; ref1 <= ref2 ? m++ : m--){ results1.push(m); }
         return results1;
       }).apply(this).forEach(function(i) {
         return data[i] = add(newData[i]);
@@ -3011,7 +3669,7 @@ exports.collection = function(add, destroy, change) {
       if (newData.length) {
         (function() {
           results2 = [];
-          for (var m = 0, ref3 = newData.length - 1; 0 <= ref3 ? m <= ref3 : m >= ref3; 0 <= ref3 ? m++ : m--){ results2.push(m); }
+          for (var n = 0, ref3 = newData.length - 1; 0 <= ref3 ? n <= ref3 : n >= ref3; 0 <= ref3 ? n++ : n--){ results2.push(n); }
           return results2;
         }).apply(this).forEach(function(i) {
           return data[i] = change(newData[i], data[i]);
@@ -3026,7 +3684,7 @@ exports.collection = function(add, destroy, change) {
     } else if (data.length) {
       return (function() {
         results4 = [];
-        for (var n = 0, ref4 = data.length - 1; 0 <= ref4 ? n <= ref4 : n >= ref4; 0 <= ref4 ? n++ : n--){ results4.push(n); }
+        for (var o = 0, ref4 = data.length - 1; 0 <= ref4 ? o <= ref4 : o >= ref4; 0 <= ref4 ? o++ : o--){ results4.push(o); }
         return results4;
       }).apply(this).forEach(function(i) {
         return data[i] = change(newData[i], data[i]);
@@ -3036,7 +3694,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],10:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -3086,6 +3744,14 @@ exports.dom = {
     return function() {
       return;
       return log((part++) + ":" + logText);
+    };
+  },
+  text: function(thisComponent, text) {
+    var part;
+    part = 0;
+    return function() {
+      return;
+      return log((part++) + ":dom.text:" + text + "|" + (getFullName(thisComponent)));
     };
   },
   append: function(thisComponent, parent, component) {
@@ -3155,6 +3821,22 @@ exports.dom = {
     return function() {
       return;
       return log((part++) + ":dom.hide:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
+    };
+  },
+  enable: function(thisComponent, component) {
+    var part;
+    part = 0;
+    return function() {
+      return;
+      return log((part++) + ":dom.enable:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
+    };
+  },
+  disable: function(thisComponent, component) {
+    var part;
+    part = 0;
+    return function() {
+      return;
+      return log((part++) + ":dom.disable:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   }
 };
@@ -3271,35 +3953,69 @@ exports.service = {
   get: function(thisComponent, url, params) {
     return function(data) {
       return;
-      return log("service.get:" + url + ":" + (JSON.stringify(params)) + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
+      return log("service.get:" + url + (params ? ':' + JSON.stringify(params) : '') + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
     };
   },
   post: function(thisComponent, url, params) {
     return function(data) {
       return;
-      return log("service.post:" + url + ":" + (JSON.stringify(params)) + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
+      return log("service.post:" + url + (params ? ':' + JSON.stringify(params) : '') + (data ? ':' + JSON.stringify(data) : '') + "|" + (getFullName(thisComponent)));
     };
-  },
-  logout: function(thisComponent) {
-    return;
-    return log("service.logout|" + (getFullName(thisComponent)));
   }
 };
 
 
-},{}],11:[function(require,module,exports){
-var Q;
+},{}],16:[function(require,module,exports){
+var Q, applications;
 
 Q = require('../q');
 
+applications = [
+  {
+    firstName: 'علی',
+    lastName: 'درستی',
+    phoneNumber: '09121234567',
+    email: 'dorosty@doin.ir',
+    birthday: '1340/1/2',
+    jobs: 'Javascript developer',
+    resumeUrl: '',
+    picture: null,
+    createdAt: 1473132854116,
+    state: 0
+  }, {
+    firstName: 'سعید',
+    lastName: 'قیومیه',
+    phoneNumber: '09121234567',
+    email: 'ghayoomi@dotin.ir',
+    birthday: '1343/4/5',
+    jobs: 'UX designer',
+    resumeUrl: '',
+    picture: null,
+    createdAt: 1373132854116,
+    state: 1
+  }
+];
+
 exports.login = function(arg) {
-  var email, password;
-  email = arg.email, password = arg.password;
+  var email;
+  email = arg.email;
   return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
     switch (email) {
-      case 'ma.dorosty@gmail.com':
+      case 'hosseininejad@dotin.ir':
         return {
-          name: 'Ali Dorosty'
+          user: {
+            name: 'حامد حسینی‌نژاد',
+            type: 'hr'
+          },
+          applications: applications
+        };
+      case 'mohammadkhani@dotin.ir':
+        return {
+          user: {
+            name: 'روح‌الله محمد‌خانی',
+            type: 'manager'
+          },
+          applications: applications
         };
       default:
         return {
@@ -3309,8 +4025,14 @@ exports.login = function(arg) {
   });
 };
 
+exports.logout = function(arg) {
+  var email, password;
+  email = arg.email, password = arg.password;
+  return Q.delay(1000 + 2000 * Math.floor(Math.random()));
+};
 
-},{"../q":4}],12:[function(require,module,exports){
+
+},{"../q":9}],17:[function(require,module,exports){
 var Q, eraseCookie, get, handle, log, mock, post, state;
 
 mock = require('./mockService');
@@ -3368,9 +4090,6 @@ post = handle(false);
 exports.instance = function(thisComponent) {
   var exports;
   exports = {};
-  exports.logout = function(automatic) {
-    return log.logout(thisComponent);
-  };
   [].forEach(function(x) {
     return exports[x] = function(params) {
       var l;
@@ -3382,10 +4101,10 @@ exports.instance = function(thisComponent) {
       });
     };
   });
-  ['login'].forEach(function(x) {
+  ['login', 'logout'].forEach(function(x) {
     return exports[x] = function(params) {
       var l;
-      l = log.get(thisComponent, x, params);
+      l = log.post(thisComponent, x, params);
       l();
       return post(x, params).then(function(data) {
         l(data);
@@ -3397,7 +4116,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../q":4,"./cookies":6,"./log":10,"./mockService":11,"./state":13}],13:[function(require,module,exports){
+},{"../q":9,"./cookies":11,"./log":15,"./mockService":16,"./state":18}],18:[function(require,module,exports){
 var createPubSub, log, pubSubs;
 
 log = require('./log').state;
@@ -3456,7 +4175,7 @@ createPubSub = function() {
   };
 };
 
-pubSubs = ['user'].map(function(x) {
+pubSubs = ['user', 'isInLoginPage', 'applications'].map(function(x) {
   return {
     x: x,
     pubSub: createPubSub()
@@ -3558,7 +4277,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"./log":10}],14:[function(require,module,exports){
+},{"./log":15}],19:[function(require,module,exports){
 var addPageStyle, page;
 
 addPageStyle = require('./utils/dom').addPageStyle;
@@ -3570,9 +4289,9 @@ window.onerror = function() {
   return document.body.style.background = 'red';
 };
 
-addPageStyle("* { direction: rtl; font-family: 'yekan', tahoma; } .hidden { display: none; }");
+addPageStyle("@font-face { font-family: iransans; src:url('fonts/eot/IRANSansWeb.eot') format('eot'), url('fonts/eot/IRANSansWeb_Bold.eot') format('eot'), url('fonts/ttf/IRANSansWeb.ttf') format('truetype'), url('fonts/ttf/IRANSansWeb_Bold.ttf') format('truetype'), url('fonts/woff/IRANSansWeb.woff') format('woff'), url('fonts/woff/IRANSansWeb_Bold.woff') format('woff'), url('fonts/woff2/IRANSansWeb.woff2') format('woff2'), url('fonts/woff2/IRANSansWeb_Bold.woff2') format('woff2'); } * { font-family: 'iransans', tahoma; direction: rtl; } .hidden { display: none; }");
 
 page();
 
 
-},{"./page":3,"./utils/dom":7}]},{},[14]);
+},{"./page":8,"./utils/dom":12}]},{},[19]);

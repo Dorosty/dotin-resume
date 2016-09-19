@@ -45,6 +45,17 @@ exports.toPersian = (value) ->
     value = value.replace (new RegExp '' + i, 'g'), digit
   value.replace(/ي/g, 'ی').replace /ك/g, 'ک'
 
+exports.toDate = (timestamp) ->
+  date = new Date timestamp
+  day = date.getDate()
+  month = date.getMonth() + 1
+  year = date.getFullYear()
+  j = jalaali.toJalaali year, month, day
+  day = j.jd
+  month = j.jm
+  year = j.jy
+  String(year).substr(2) + '/' + month + '/' + day
+
 exports.collection = (add, destroy, change) ->
   data = []
   (newData) ->

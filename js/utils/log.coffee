@@ -32,6 +32,12 @@ exports.dom =
       return
       log "#{part++}:#{logText}"
 
+  text: (thisComponent, text) ->
+    part = 0
+    ->
+      return
+      log "#{part++}:dom.text:#{text}|#{getFullName thisComponent}"
+
   append: (thisComponent, parent, component) ->
     part = 0
     ->
@@ -83,6 +89,18 @@ exports.dom =
     ->
       return
       log "#{part++}:dom.hide:#{getFullName component}|#{getFullName thisComponent}"
+
+  enable: (thisComponent, component) ->
+    part = 0
+    ->
+      return
+      log "#{part++}:dom.enable:#{getFullName component}|#{getFullName thisComponent}"
+
+  disable: (thisComponent, component) ->
+    part = 0
+    ->
+      return
+      log "#{part++}:dom.disable:#{getFullName component}|#{getFullName thisComponent}"
 
 exports.events =
   onEvent: (thisComponent, component, event, ignores, callback) ->
@@ -162,13 +180,13 @@ exports.service =
   get: (thisComponent, url, params) ->
     (data) ->
       return
-      log "service.get:#{url}:#{JSON.stringify params}#{if data then ':' + JSON.stringify data else ''}|#{getFullName thisComponent}"
+      log "service.get:#{url}#{if params then ':' + JSON.stringify params else ''}#{if data then ':' + JSON.stringify data else ''}|#{getFullName thisComponent}"
 
   post: (thisComponent, url, params) ->
     (data) ->
       return
-      log "service.post:#{url}:#{JSON.stringify params}#{if data then ':' + JSON.stringify data else ''}|#{getFullName thisComponent}"
+      log "service.post:#{url}#{if params then ':' + JSON.stringify params else ''}#{if data then ':' + JSON.stringify data else ''}|#{getFullName thisComponent}"
 
-  logout: (thisComponent) ->
-    return
-    log "service.logout|#{getFullName thisComponent}"
+  # logout: (thisComponent) ->
+  #   return
+  #   log "service.logout|#{getFullName thisComponent}"

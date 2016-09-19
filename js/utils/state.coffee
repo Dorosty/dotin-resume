@@ -45,6 +45,8 @@ createPubSub = ->
 
 pubSubs = [
   'user'
+  'isInLoginPage'
+  'applications'
 ].map (x) ->
   x: x
   pubSub: createPubSub()

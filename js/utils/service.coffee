@@ -35,10 +35,6 @@ post = handle false
 exports.instance = (thisComponent) ->
   exports = {}
 
-  exports.logout = (automatic) ->
-    log.logout thisComponent
-    # eraseCookie
-
   [
   ]
   .forEach (x) ->
@@ -52,10 +48,11 @@ exports.instance = (thisComponent) ->
 
   [
     'login'
+    'logout'
   ]
   .forEach (x) ->
     exports[x] = (params) ->
-      l = log.get thisComponent, x, params
+      l = log.post thisComponent, x, params
       l()
       post x, params
       .then (data) ->
