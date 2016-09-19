@@ -40,13 +40,13 @@ module.exports = component 'login', ({dom, events, state, service}) ->
       password: password.element.value
       rememver: !!remember.element.checked
     .then (response) ->
-      enable [email, password, submit, remember]
       if response.invalid
         show invalid
       else
         state.user.set response.user
         state.applications.set response.applications
     .fin ->
+      enable [email, password, submit, remember]
       hide spinner
     .done()
 
