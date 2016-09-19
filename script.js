@@ -4053,7 +4053,7 @@ handle = function(isGet) {
     if (mock[url]) {
       return mock[url](params);
     }
-    url = "/" + url + "?rand=" + (Math.random()) + "&";
+    url = "/webApi/" + url + "?rand=" + (Math.random()) + "&";
     if (isGet) {
       url += Object.keys(params).map(function(param) {
         return param + "=" + params[param];
