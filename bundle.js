@@ -181,443 +181,371 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
-var component, extend, style;
+var addMessage, alert, service, uppercaseFirst,
+  slice = [].slice;
 
-component = require('../utils/component');
+service = require('./utils/service');
 
-style = require('./style');
+alert = require('./singletons/alert');
 
-extend = require('../utils').extend;
+uppercaseFirst = require('./utils').uppercaseFirst;
 
-module.exports = component('login', function(arg) {
-  var E, disable, doSubmit, dom, email, enable, events, hide, invalid, onEnter, onEvent, password, remember, service, setStyle, show, spinner, state, submit, text;
-  dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
-  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, enable = dom.enable, disable = dom.disable;
-  onEvent = events.onEvent, onEnter = events.onEnter;
-  component = E(null, E('img', style.bg), E(style.form, E('img', style.logo), E(style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'), E(style.formInputs, email = E('input', extend({
-    placeholder: 'ایمیل'
-  }, style.input)), password = E('input', extend({
-    placeholder: 'رمز عبور'
-  }, style.input)), E(style.submitSection, submit = E('button', style.submit, 'ورود'), E('label', style.rememberLabel, remember = E('input', extend({
-    type: 'checkbox'
-  }, style.remember)), text('مرا به خاطر بسپار')), spinner = E(style.spinner, 'در حال بارگذاری...'), hide(invalid = E(style.invalid, 'نام کاربری و یا رمز عبور اشتباه است.'))))));
-  hide(spinner);
-  [email, password].forEach(function(input) {
-    onEvent(input, 'focus', function() {
-      return setStyle(input, style.inputFocus);
-    });
-    return onEvent(input, 'blur', function() {
-      return setStyle(input, style.input);
-    });
-  });
-  doSubmit = function() {
-    disable([email, password, submit, remember]);
-    hide(invalid);
-    show(spinner);
-    return service.login({
-      email: email.element.value,
-      password: password.element.value,
-      rememver: !!remember.element.checked
-    }).then(function(response) {
-      enable([email, password, submit, remember]);
-      if (response.invalid) {
-        return show(invalid);
-      } else {
-        state.user.set(response.user);
-        return state.applications.set(response.applications);
-      }
-    }).fin(function() {
-      return hide(spinner);
-    }).done();
-  };
-  onEvent([email, password], 'input', function() {
-    return hide(invalid);
-  });
-  onEnter([email, password], doSubmit);
-  onEvent(submit, 'click', doSubmit);
-  return component;
-});
-
-
-},{"../utils":14,"../utils/component":10,"./style":3}],3:[function(require,module,exports){
-exports.bg = {
-  src: 'img/bg-1.jpg',
-  zIndex: -1,
-  minHeight: '100%',
-  minWidth: 1024,
-  width: '100%',
-  height: 'auto',
-  position: 'fixed',
-  top: 0,
-  left: 0
-};
-
-exports.form = {
-  margin: '100px auto 0',
-  width: 500,
-  backgroundColor: 'white',
-  textAlign: 'center',
-  paddingBottom: 100
-};
-
-exports.logo = {
-  width: 100,
-  marginTop: 100
-};
-
-exports.title = {
-  fontSize: 18,
-  color: '#1D7453'
-};
-
-exports.formInputs = {
-  marginTop: 50
-};
-
-exports.input = {
-  border: 0,
-  outline: 0,
-  width: 400,
-  padding: 4,
-  margin: '20px 0',
-  borderBottom: '1px solid #ddd',
-  transition: 'border-bottom .5s'
-};
-
-exports.inputFocus = {
-  borderBottom: '1px solid #6cc791'
-};
-
-exports.submit = {
-  backgroundColor: '#6cc791',
-  color: 'white',
-  padding: '7px 20px',
-  borderRadius: 5,
-  marginTop: 50,
-  marginLeft: 20,
-  border: 0,
-  cursor: 'pointer'
-};
-
-exports.submitSection = {
-  textAlign: 'right',
-  paddingRight: 50
-};
-
-exports.rememberLabel = {
-  fontSize: 11,
-  color: '#888',
-  cursor: 'pointer'
-};
-
-exports.remember = {
-  width: 'auto',
-  margin: '20px 5px',
-  position: 'relative',
-  top: 4
-};
-
-exports.spinner = {
-  color: '#999'
-};
-
-exports.invalid = {
-  color: 'red'
-};
-
-
-},{}],4:[function(require,module,exports){
-var collection, component, extend, ref, stateToPersian, style, toDate;
-
-component = require('../utils/component');
-
-style = require('./style');
-
-ref = require('../utils'), extend = ref.extend, toDate = ref.toDate, collection = ref.collection;
-
-stateToPersian = function(state) {
-  switch (state) {
-    case 0:
-      return 'ثبت شده';
-    case 1:
-      return 'تایید اولیه توسط مدیر';
-    case 2:
-      return 'مصاحبه تلفنی انجام شده';
-    case 3:
-      return 'اطلاعات تکمیل شده';
-    case 4:
-      return 'آزمون‌های شخصیت‌شناسی داده شده';
-    case 5:
-      return 'مصاحبه فنی برگزار شده';
-    case 6:
-      return 'کمیته جذب برگزار شده';
-    case 7:
-      return 'جذب شده';
-    case 8:
-      return 'بایگانی';
-  }
-};
-
-module.exports = component('mainView', function(arg) {
-  var E, addApplication, append, applications, changeApplication, destroy, dom, events, handleApplications, onEvent, removeApplication, searchFirstName, searchInputs, searchJobs, searchLastName, setStyle, state, tbody, updateTable, view;
-  dom = arg.dom, events = arg.events, state = arg.state;
-  E = dom.E, append = dom.append, destroy = dom.destroy, setStyle = dom.setStyle;
-  onEvent = events.onEvent;
-  view = E(null, E(style.header, E('img', style.headerImg), E(style.headerWrapper, E(style.headerTitle, 'انتخاب شغل‌های مورد تقاضا'), E(style.breadcrumbs, E('a', extend({
-    href: 'Home'
-  }, style.breadcrumbsLink), 'خانه > '), E('a', extend({
-    href: '#'
-  }, style.breadcrumbsLinkActive), 'انتخاب شغل‌های مورد تقاضا')))), E(style.wrapper, E(style.title, 'انتخاب شغل‌های مورد تقاضا'), E('table', style.table, E('thead', null, E('th', extend({
-    minWidth: 65
-  }, style.th)), E('th', style.th, E(style.thSpan, 'نام'), searchFirstName = E('input', {
-    placeholder: 'جستجو...',
-    "class": 'form-control'
-  })), E('th', style.th, E(style.thSpan, 'نام خانوادگی'), searchLastName = E('input', {
-    placeholder: 'جستجو...',
-    "class": 'form-control'
-  })), E('th', style.th, 'تاریخ تولد'), E('th', style.th, E(style.thSpan, 'مشاغل درخواستی'), searchJobs = E('input', {
-    placeholder: 'جستجو...',
-    "class": 'form-control'
-  })), E('th', style.th, 'تاریخ ثبت'), E('th', style.th, 'تلفن همراه'), E('th', style.th, 'ایمیل'), E('th', style.th, 'رزومه'), E('th', style.th, 'اطباعات تکمیل شده'), E('th', style.th, 'نتیجه آزمونها'), E('th', extend({
-    minWidth: 100
-  }, style.th), 'وضعیت')), tbody = E('tbody'))));
-  addApplication = function(application) {
-    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume, row;
-    append(tbody, row = E('tr', style.tr, E('td', style.td, img = E('img', extend({
-      src: application.picture || 'img/picicon.png'
-    }, style.tdPicture))), firstName = E('td', style.td, application.firstName), lastName = E('td', style.td, application.lastName), birthday = E('td', style.td, application.birthday), jobs = E('td', style.td, application.jobs), createdAt = E('td', style.td, toDate(application.createdAt)), phoneNumber = E('td', style.td, application.phoneNumber), email = E('td', extend({
-      englishText: application.email
-    }, style.td)), E('td', style.td, resume = E('a', {
-      href: application.resumeUrl
-    }, E('i', extend({
-      "class": 'fa fa-paperclip'
-    }, style.tdPaperclip)))), E('td', style.td, E('a', {
-      href: ''
-    }, E('i', extend({
-      "class": 'fa fa-paperclip'
-    }, style.tdPaperclip)))), E('td', style.td, E('a', {
-      href: ''
-    }, E('i', extend({
-      "class": 'fa fa-paperclip'
-    }, style.tdPaperclip)))), state = E('td', style.td, stateToPersian(application.state))));
-    return {
-      row: row,
-      img: img,
-      firstName: firstName,
-      lastName: lastName,
-      birthday: birthday,
-      jobs: jobs,
-      createdAt: createdAt,
-      phoneNumber: phoneNumber,
-      email: email,
-      resume: resume,
-      state: state
+addMessage = service.extendModule(function(exports) {
+  var addMessageLastRequestQ;
+  addMessageLastRequestQ = void 0;
+  return function(name, arg) {
+    var failure, prev, success;
+    success = arg.success, failure = arg.failure;
+    prev = exports[name];
+    return exports[name] = function() {
+      var addMessageRequestQ, args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return addMessageLastRequestQ = addMessageRequestQ = prev.apply(null, args).then(function(x) {
+        if (success) {
+          if (typeof success === 'function') {
+            alert.instance.show(success(e), true);
+          } else {
+            alert.instance.show(success, true);
+          }
+          setTimeout((function() {
+            if (addMessageLastRequestQ === addMessageRequestQ) {
+              return alert.instance.hide();
+            }
+          }), 3000);
+        }
+        return x;
+      })["catch"](function(e) {
+        if (failure) {
+          if (typeof failure === 'function') {
+            alert.instance.show(failure(e), false);
+          } else {
+            alert.instance.show(failure, false);
+          }
+          setTimeout((function() {
+            if (addMessageLastRequestQ === addMessageRequestQ) {
+              return alert.instance.hide();
+            }
+          }), 3000);
+        }
+        throw e;
+      });
     };
   };
-  removeApplication = function(arg1) {
-    var row;
-    row = arg1.row;
-    return destroy(row);
-  };
-  changeApplication = function(application, x) {
-    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume;
-    img = x.img, firstName = x.firstName, lastName = x.lastName, birthday = x.birthday, jobs = x.jobs, createdAt = x.createdAt, phoneNumber = x.phoneNumber, email = x.email, resume = x.resume, state = x.state;
-    setStyle(img, {
-      src: application.picture || 'img/picicon.png'
-    });
-    setStyle(firstName, {
-      text: application.firstName
-    });
-    setStyle(lastName, {
-      text: application.lastName
-    });
-    setStyle(birthday, {
-      text: application.birthday
-    });
-    setStyle(jobs, {
-      text: application.jobs
-    });
-    setStyle(createdAt, {
-      text: toDate(application.createdAt)
-    });
-    setStyle(phoneNumber, {
-      text: application.phoneNumber
-    });
-    setStyle(email, {
-      englishText: application.email
-    });
-    setStyle(resume, {
-      href: application.resumeUrl
-    });
-    setStyle(state, {
-      text: stateToPersian(application.state)
-    });
-    return x;
-  };
-  handleApplications = collection(addApplication, removeApplication, changeApplication);
-  searchInputs = {
-    'firstName': searchFirstName,
-    'lastName': searchLastName,
-    'jobs': searchJobs
-  };
-  updateTable = function() {
-    var filteredApplications;
-    filteredApplications = applications;
-    Object.keys(searchInputs).forEach(function(key) {
-      var value, words;
-      value = String(searchInputs[key].element.value);
-      if (value.trim() === '') {
-        return;
-      }
-      words = value.split(' ').map(function(word) {
-        return word.trim().toLowerCase();
-      }).filter(function(word) {
-        return word;
-      });
-      return filteredApplications = filteredApplications.filter(function(application) {
-        return words.some(function(word) {
-          return ~application[key].toLowerCase().indexOf(word);
-        });
-      });
-    });
-    return handleApplications(filteredApplications);
-  };
-  applications = void 0;
-  state.applications.on(function(_applications) {
-    applications = _applications;
-    return handleApplications(applications);
+});
+
+exports["do"] = function() {
+  addMessage('login', {
+    success: 'خوش آمدید.'
   });
-  Object.keys(searchInputs).forEach(function(key) {
-    return onEvent(searchInputs[key], 'input', updateTable);
+  return [
+    {
+      name: 'person',
+      persianName: 'شخص'
+    }
+  ].forEach(function(arg) {
+    var name, persianName;
+    name = arg.name, persianName = arg.persianName;
+    addMessage("create" + (uppercaseFirst(name)), {
+      success: persianName + " با موفقیت ایجاد شد."
+    });
+    addMessage("update" + (uppercaseFirst(name)), {
+      success: "تغییرات " + persianName + " با موفقیت ذخیره شد."
+    });
+    return addMessage("delete" + (uppercaseFirst(name)), {
+      success: persianName + " با موفقیت حذف شد."
+    });
   });
-  return view;
+};
+
+
+},{"./singletons/alert":11,"./utils":18,"./utils/service":24}],3:[function(require,module,exports){
+var component;
+
+component = require('../utils/component');
+
+module.exports = component('alert', function(arg) {
+  var E, addClass, alert, close, dom, events, onEvent, removeClass, returnObject, setStyle, text;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E, addClass = dom.addClass, removeClass = dom.removeClass, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  alert = E({
+    "class": 'alert fade',
+    position: 'absolute',
+    top: 100,
+    left: '20%',
+    right: '20%'
+  }, close = E('button', {
+    "class": 'close',
+    zIndex: 10
+  }, '×'), text = E('h4'));
+  onEvent(close, 'click', function() {
+    return removeClass(alert, 'in');
+  });
+  returnObject({
+    show: function(_text, isOk) {
+      removeClass(alert, ['success', 'danger'].map(function(x) {
+        return "alert-" + x;
+      }));
+      addClass(alert, ['in', "alert-" + (isOk ? 'success' : 'danger')]);
+      return setStyle(text, {
+        text: _text
+      });
+    },
+    hide: function() {
+      return removeClass(alert, 'in');
+    }
+  });
+  return alert;
 });
 
 
-},{"../utils":14,"../utils/component":10,"./style":5}],5:[function(require,module,exports){
-exports.header = {
-  position: 'relative',
-  height: 208,
-  overflow: 'hidden'
-};
-
-exports.headerImg = {
-  src: 'img/bg-2.jpg',
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  height: 200,
-  width: '100%'
-};
-
-exports.headerWrapper = {
-  position: 'relative',
-  width: 1500,
-  height: 200,
-  margin: '0 auto'
-};
-
-exports.headerTitle = {
-  position: 'absolute',
-  width: 420,
-  top: 100,
-  fontSize: 30,
-  color: 'white'
-};
-
-exports.breadcrumbs = {
-  position: 'absolute',
-  width: 420,
-  top: 150,
-  left: 0,
-  right: 0
-};
-
-exports.breadcrumbsLink = {
-  textDecoration: 'none',
-  color: 'white'
-};
-
-exports.breadcrumbsLinkActive = {
-  textDecoration: 'none',
-  color: '#78C19D'
-};
-
-exports.wrapper = {
-  width: 1500,
-  margin: '0 auto',
-  overflow: 'hidden'
-};
-
-exports.title = {
-  fontSize: 25,
-  color: '#78C19D',
-  margin: '20px 0 50px'
-};
-
-exports.table = {
-  width: '100%',
-  borderSpacing: 0,
-  borderCollapse: 'collapse'
-};
-
-exports.th = {
-  padding: '0 5px 10px',
-  fontSize: 13,
-  fontWeight: 'normal',
-  height: 30,
-  lineHeight: 30,
-  color: '#5D5D5D',
-  borderTop: '1px solid #DDD',
-  borderLeft: '1px dashed #DDD',
-  borderRight: '1px dashed #DDD',
-  borderBottom: '1px solid #78C19D'
-};
-
-exports.thSpan = {
-  display: 'block',
-  width: '100%'
-};
-
-exports.tr = {
-  cursor: 'default',
-  borderBottom: '1px solid #EEE'
-};
-
-exports.trHover = {
-  backgroundColor: '#e5fbf0'
-};
-
-exports.td = {
-  padding: '0 5px',
-  fontSize: 13,
-  height: 30,
-  lineHeight: 30,
-  textAlign: 'center',
-  color: '#888',
-  borderLeft: '1px dashed #DDD',
-  borderLight: '1px dashed #DDD'
-};
-
-exports.tdPicture = {
-  width: 30,
-  height: 30,
-  borderRadius: 50,
-  border: '1px solid #78C19D',
-  display: 'inline-block',
-  position: 'relative',
-  top: 2
-};
-
-exports.tdPaperclip = {
-  fontSize: 25,
-  lineHeight: 40,
-  height: 40,
-  color: '#57B3A1'
+},{"../utils/component":14}],4:[function(require,module,exports){
+exports.create = function(arg) {
+  var addClass, append, components, disable, dom, empty, enable, functions, hide, removeClass, setStyle, show, variables;
+  variables = arg.variables, components = arg.components, dom = arg.dom;
+  setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide, show = dom.show, enable = dom.enable, disable = dom.disable, addClass = dom.addClass, removeClass = dom.removeClass;
+  return functions = {
+    submit: void 0,
+    close: void 0,
+    setEnabled: function(enabled) {
+      variables.enabled = enabled;
+      if (enabled) {
+        return enable(components.submit);
+      } else {
+        return disable(components.submit);
+      }
+    },
+    hide: function() {
+      if (typeof functions.close === "function") {
+        functions.close();
+      }
+      return $(components.modal.fn.element).modal('hide');
+    },
+    display: function(arg1) {
+      var autoHide, close, closeText, contents, enabled, ref, ref1, ref2, submit, submitText, submitType, title;
+      autoHide = (ref = arg1.autoHide) != null ? ref : false, submit = arg1.submit, close = arg1.close, title = arg1.title, contents = arg1.contents, submitText = arg1.submitText, closeText = arg1.closeText, submitType = (ref1 = arg1.submitType) != null ? ref1 : 'primary', enabled = (ref2 = arg1.enabled) != null ? ref2 : true;
+      variables.autoHide = autoHide;
+      setStyle(components.title, {
+        text: title
+      });
+      empty(components.contents);
+      append(components.contents, contents);
+      functions.setEnabled(enabled);
+      setStyle(components.submit, {
+        text: submitText
+      });
+      if (submitText) {
+        show(components.submit);
+      } else {
+        hide(components.submit);
+      }
+      setStyle(components.close, {
+        text: closeText
+      });
+      if (closeText) {
+        show(components.close);
+      } else {
+        hide(components.close);
+      }
+      ['btn-primary', 'btn-danger'].forEach(function(klass) {
+        return removeClass(components.submit, klass);
+      });
+      addClass(components.submit, "btn-" + submitType);
+      functions.submit = submit;
+      functions.close = close;
+      return $(components.modal.fn.element).modal({
+        keyboard: false,
+        backdrop: 'static'
+      });
+    }
+  };
 };
 
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
+var Q, _functions, component;
+
+component = require('../../utils/component');
+
+Q = require('../../q');
+
+_functions = require('./functions');
+
+module.exports = component('modal', function(arg) {
+  var E, components, disable, dom, events, functions, onEvent, returnObject, variables;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E, disable = dom.disable;
+  onEvent = events.onEvent;
+  variables = {
+    enabled: false,
+    autoHide: false
+  };
+  components = {
+    modal: void 0,
+    title: void 0,
+    contents: void 0,
+    submit: void 0,
+    close: void 0
+  };
+  components.modal = E({
+    "class": 'modal fade'
+  }, E('div', {
+    "class": 'modal-dialog'
+  }, E('div', {
+    "class": 'modal-content'
+  }, E('div', {
+    "class": 'modal-header'
+  }, E('button', {
+    "class": 'close'
+  }), components.title = E('h4', {
+    "class": 'modal-title'
+  })), components.contents = E('div', {
+    "class": 'modal-body'
+  }), E('div', {
+    "class": 'modal-footer'
+  }, components.submit = E('button', {
+    "class": 'btn btn-primary'
+  }), components.close = E('button', {
+    "class": 'btn btn-default'
+  })))));
+  functions = _functions.create({
+    variables: variables,
+    components: components,
+    dom: dom
+  });
+  onEvent(components.close, 'click', functions.hide);
+  onEvent(components.submit, 'click', function() {
+    if (!variables.enabled) {
+      return;
+    }
+    if (variables.autoHide) {
+      disable(components.submit);
+      return Q(functions.submit()).fin(function() {
+        return functions.hide();
+      }).done();
+    } else {
+      return functions.submit();
+    }
+  });
+  returnObject({
+    setEnabled: functions.setEnabled,
+    display: functions.display,
+    hide: functions.hide
+  });
+  return components.modal;
+});
+
+
+},{"../../q":10,"../../utils/component":14,"./functions":4}],6:[function(require,module,exports){
+var Q, component, generateId, modal;
+
+component = require('../utils/component');
+
+Q = require('../q');
+
+modal = require('../singletons/modal');
+
+generateId = require('../utils/dom').generateId;
+
+module.exports = component('sheet', function(arg) {
+  var E, disable, dom, enable, events, isEnabled, onEnter, onEvent, returnObject, setStyle;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E, setStyle = dom.setStyle, enable = dom.enable, disable = dom.disable;
+  onEvent = events.onEvent, onEnter = events.onEnter;
+  isEnabled = false;
+  return returnObject({
+    setEnabled: function(enabled) {
+      return isEnabled = enabled;
+    },
+    hide: function() {
+      return modal.instance.hide();
+    },
+    display: function(arg1) {
+      var close, closeText, contents, enabled, fields, ref, ref1, setEnabled, submit, submitText, title, viewDidLoad;
+      fields = arg1.fields, viewDidLoad = arg1.viewDidLoad, enabled = arg1.enabled, submit = arg1.submit, close = arg1.close, title = arg1.title, submitText = (ref = arg1.submitText) != null ? ref : 'ثبت', closeText = (ref1 = arg1.closeText) != null ? ref1 : 'بستن';
+      isEnabled = enabled;
+      contents = fields.map(function(arg2) {
+        var component, group, id, label, name, restyle;
+        name = arg2.name, component = arg2.component, restyle = arg2.restyle;
+        id = generateId();
+        setStyle(component, {
+          id: id,
+          "class": 'form-control'
+        });
+        group = E({
+          "class": 'form-group'
+        }, label = E('label', {
+          "for": id
+        }, name), component);
+        if (typeof restyle === "function") {
+          restyle(group, label, component);
+        }
+        return group;
+      });
+      setEnabled = function() {
+        if (isEnabled) {
+          enabled = isEnabled();
+        } else {
+          enabled = fields.every(function(arg2) {
+            var component, optional;
+            optional = arg2.optional, component = arg2.component;
+            return optional || component.value();
+          });
+        }
+        return modal.instance.setEnabled(enabled);
+      };
+      submit = (function(submit) {
+        return function() {
+          disable(fields.map(function(arg2) {
+            var component;
+            component = arg2.component;
+            return component;
+          }));
+          return Q(submit()).then(function() {
+            return enable(fields.map(function(arg2) {
+              var component;
+              component = arg2.component;
+              return component;
+            }));
+          })["catch"](function(e) {
+            enable(fields.map(function(arg2) {
+              var component;
+              component = arg2.component;
+              return component;
+            }));
+            throw e;
+          });
+        };
+      })(submit);
+      onEvent(fields.map(function(arg2) {
+        var component;
+        component = arg2.component;
+        return component;
+      }), ['input', 'pInput'], setEnabled);
+      onEnter(fields.filter(function(field) {
+        return !field.noEnter;
+      }).map(function(arg2) {
+        var element;
+        element = arg2.element;
+        return element;
+      }), submit);
+      modal.instance.display({
+        autoHide: true,
+        title: title,
+        contents: contents,
+        submitText: submitText,
+        closeText: closeText,
+        submit: submit,
+        close: close
+      });
+      setEnabled();
+      return typeof viewDidLoad === "function" ? viewDidLoad() : void 0;
+    }
+  });
+});
+
+
+},{"../q":10,"../singletons/modal":12,"../utils/component":14,"../utils/dom":16}],7:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../utils/component');
@@ -626,12 +554,12 @@ style = require('./style');
 
 extend = require('../utils').extend;
 
-module.exports = component('login', function(arg) {
-  var E, cover, dom, events, hide, links, login, logout, menu, onEvent, onMouseout, onMouseover, service, setStyle, show, state, text, username;
+module.exports = component('menu', function(arg) {
+  var E, cover, dom, events, hide, links, logout, menu, onEvent, onMouseout, onMouseover, service, setStyle, show, state, text, username;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent, onMouseover = events.onMouseover, onMouseout = events.onMouseout;
-  menu = E(style.menu, cover = E(style.cover), E(style.wrapper, E('a', style.logo, E('img', style.logoImg), text('شرکت نرم‌افزاری داتیس آرین قشم')), E('a', style.en, 'EN'), E('a', style.contact, 'تماس با ما'), login = E(style.login, 'ورود'), username = E(style.username), logout = E(style.logout, 'خروج'), E(style.links, links = [
+  menu = E(style.menu, cover = E(style.cover), E(style.wrapper, E('a', style.logo, E('img', style.logoImg), text('شرکت نرم‌افزاری داتیس آرین قشم')), E('a', style.en, 'EN'), E('a', style.contact, 'تماس با ما'), username = E(style.username), logout = E(style.logout, 'خروج'), E(style.links, links = [
     {
       href: '',
       text: 'خانه'
@@ -666,29 +594,22 @@ module.exports = component('login', function(arg) {
       return setStyle(link, style.link);
     });
   });
-  onEvent(login, 'click', function() {
-    return state.isInLoginPage.set(true);
-  });
   onEvent(logout, 'click', function() {
     setStyle(cover, {
       visibility: 'visible',
       opacity: 0.5
     });
-    return service.logout().then(function() {
-      setStyle(cover, {
+    return service.logout().fin(function() {
+      return setStyle(cover, {
         visibility: 'hidden',
         opacity: 0
       });
-      return state.user.set(null);
     }).done();
   });
-  state.all({
+  state.user.on({
     allowNull: true
-  }, ['user', 'isInLoginPage'], function(arg1) {
-    var isInLoginPage, user;
-    user = arg1[0], isInLoginPage = arg1[1];
+  }, function(user) {
     if (user) {
-      hide(login);
       show(username);
       show(logout);
       return setStyle(username, {
@@ -696,19 +617,14 @@ module.exports = component('login', function(arg) {
       });
     } else {
       hide(username);
-      hide(logout);
-      if (isInLoginPage) {
-        return hide(login);
-      } else {
-        return show(login);
-      }
+      return hide(logout);
     }
   });
   return menu;
 });
 
 
-},{"../utils":14,"../utils/component":10,"./style":7}],7:[function(require,module,exports){
+},{"../utils":18,"../utils/component":14,"./style":8}],8:[function(require,module,exports){
 var extend;
 
 extend = require('../utils').extend;
@@ -812,44 +728,44 @@ exports.links = extend(exports.links, {
 });
 
 
-},{"../utils":14}],8:[function(require,module,exports){
-var body, component, login, mainView, menu;
+},{"../utils":18}],9:[function(require,module,exports){
+var alert, body, component, menu, modal, sheet, singletonAlert, singletonModal, singletonSheet, views;
 
 component = require('./utils/component');
 
 menu = require('./menu');
 
-login = require('./login');
+views = require('./views');
 
-mainView = require('./mainView');
+alert = require('./components/alert');
+
+modal = require('./components/modal');
+
+sheet = require('./components/sheet');
+
+singletonAlert = require('./singletons/alert');
+
+singletonModal = require('./singletons/modal');
+
+singletonSheet = require('./singletons/sheet');
 
 body = require('./utils/dom').body;
 
 module.exports = component('page', function(arg) {
-  var E, append, currentPage, destroy, dom, state;
-  dom = arg.dom, state = arg.state;
-  E = dom.E, append = dom.append, destroy = dom.destroy;
+  var E, alertE, append, dom, modalE;
+  dom = arg.dom;
+  E = dom.E, append = dom.append;
   append(E(body), E(menu));
-  currentPage = void 0;
-  return state.user.on({
-    allowNull: true
-  }, function(user) {
-    if (currentPage) {
-      destroy(currentPage);
-    }
-    if (user) {
-      currentPage = E(mainView);
-      state.isInLoginPage.set(false);
-    } else {
-      currentPage = E(login);
-      state.isInLoginPage.set(true);
-    }
-    return append(E(body), currentPage);
-  });
+  append(E(body), E(views));
+  append(E(body), alertE = E(alert));
+  append(E(body), modalE = E(modal));
+  singletonAlert.set(alertE);
+  singletonModal.set(modalE);
+  return singletonSheet.set(E(sheet));
 });
 
 
-},{"./login":2,"./mainView":4,"./menu":6,"./utils/component":10,"./utils/dom":12}],9:[function(require,module,exports){
+},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":34}],10:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -2901,8 +2817,19 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":1}],10:[function(require,module,exports){
-var dom, events, log, service, state;
+},{"_process":1}],11:[function(require,module,exports){
+exports.set = function(x) {
+  return exports.instance = x;
+};
+
+
+},{}],12:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],13:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],14:[function(require,module,exports){
+var dom, events, extend, log, service, state,
+  slice = [].slice;
 
 state = require('./state');
 
@@ -2914,22 +2841,32 @@ events = require('./events');
 
 log = require('./log').component;
 
+extend = require('.').extend;
+
 module.exports = function(componentName, create) {
   return function() {
-    var c, component;
-    component = {
+    var args, c, component, ref;
+    args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+    component = {};
+    component.fn = {
       name: componentName,
       off: function() {}
     };
     log.create(0, component);
-    c = create({
+    c = create.apply(null, [{
       dom: dom.instance(component),
       events: events.instance(component),
       state: state.instance(component),
-      service: service.instance(component)
-    });
-    if (c != null ? c.element : void 0) {
-      component.element = c.element;
+      service: service.instance(component),
+      returnObject: function(returnObject) {
+        return extend(component, returnObject);
+      },
+      setOff: function(x) {
+        return component.fn.off = x;
+      }
+    }].concat(slice.call(args)));
+    if (c != null ? (ref = c.fn) != null ? ref.element : void 0 : void 0) {
+      component.fn.element = c.fn.element;
     }
     log.create(1, component);
     return component;
@@ -2937,8 +2874,10 @@ module.exports = function(componentName, create) {
 };
 
 
-},{"./dom":12,"./events":13,"./log":15,"./service":17,"./state":18}],11:[function(require,module,exports){
-exports.createCookie = function(name, value, days) {
+},{".":18,"./dom":16,"./events":17,"./log":19,"./service":24,"./state":28}],15:[function(require,module,exports){
+var createCookie, eraseCookie, readCookie;
+
+createCookie = function(name, value, days) {
   var date, expires;
   if (days) {
     date = new Date();
@@ -2950,7 +2889,7 @@ exports.createCookie = function(name, value, days) {
   return document.cookie = name + "=" + value + expires + "; path=/";
 };
 
-exports.readCookie = function(name) {
+readCookie = function(name) {
   var nameEQ, result, resultArray;
   nameEQ = name + "=";
   resultArray = document.cookie.split(';').map(function(c) {
@@ -2965,48 +2904,62 @@ exports.readCookie = function(name) {
   return result != null ? result.substring(nameEQ.length) : void 0;
 };
 
-exports.eraseCookie = function(name) {
+eraseCookie = function(name) {
   return createCookie(name, '', -1);
 };
 
+module.exports = {
+  createCookie: createCookie,
+  readCookie: readCookie,
+  eraseCookie: eraseCookie
+};
 
-},{}],12:[function(require,module,exports){
-var extend, log, ref, toPersian, uppercaseFirst,
+
+},{}],16:[function(require,module,exports){
+var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
 log = require('./log').dom;
 
-ref = require('.'), toPersian = ref.toPersian, uppercaseFirst = ref.uppercaseFirst, extend = ref.extend;
+ref = require('.'), toPersian = ref.toPersian, uppercaseFirst = ref.uppercaseFirst, extend = ref.extend, remove = ref.remove;
 
 exports.window = function() {
   return {
-    name: 'window',
-    element: window,
-    off: function() {}
+    fn: {
+      name: 'window',
+      element: window,
+      off: function() {}
+    }
   };
 };
 
 exports.document = function() {
   return {
-    name: 'document',
-    element: document,
-    off: function() {}
+    fn: {
+      name: 'document',
+      element: document,
+      off: function() {}
+    }
   };
 };
 
 exports.body = function() {
   return {
-    name: 'body',
-    element: document.body,
-    off: function() {}
+    fn: {
+      name: 'body',
+      element: document.body,
+      off: function() {}
+    }
   };
 };
 
 exports.head = function() {
   return {
-    name: 'head',
-    element: document.head,
-    off: function() {}
+    fn: {
+      name: 'head',
+      element: document.head,
+      off: function() {}
+    }
   };
 };
 
@@ -3014,7 +2967,7 @@ exports.addPageCSS = function(url) {
   var cssNode;
   cssNode = document.createElement('link');
   cssNode.setAttribute('rel', 'stylesheet');
-  cssNode.setAttribute('href', "/assets/" + url);
+  cssNode.setAttribute('href', "assets/" + url);
   return document.head.appendChild(cssNode);
 };
 
@@ -3043,10 +2996,24 @@ exports.instance = function(thisComponent) {
       var appendChildren, component, element;
       element = document.createElement(tagName);
       component = {
-        name: tagName,
-        element: element,
-        parent: parent,
-        off: function() {}
+        value: function() {
+          return element.value;
+        },
+        checked: function() {
+          return element.checked;
+        },
+        focus: function() {
+          return element.focus();
+        },
+        blur: function() {
+          return element.blur();
+        },
+        fn: {
+          name: tagName,
+          element: element,
+          parent: parent,
+          off: function() {}
+        }
       };
       exports.setStyle(component, style);
       (appendChildren = function(children) {
@@ -3066,15 +3033,16 @@ exports.instance = function(thisComponent) {
       return component;
     };
     return function() {
-      var args, children, component, firstArg, l, prevOff, style, tagName;
+      var args, children, component, firstArg, l, prevOff, restOfArgs, style, tagName;
       args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
       firstArg = args[0];
       if (typeof firstArg === 'function') {
         l = log.E0(thisComponent);
-        l();
-        component = firstArg();
-        component.parent = thisComponent;
-        l(component);
+        restOfArgs = args.slice(1);
+        l(null, restOfArgs);
+        component = firstArg.apply(null, restOfArgs);
+        component.fn.parent = thisComponent;
+        l(component, restOfArgs);
       } else {
         if (typeof firstArg === 'string') {
           tagName = firstArg;
@@ -3094,10 +3062,10 @@ exports.instance = function(thisComponent) {
         component = e(thisComponent, tagName, style, children);
         l();
       }
-      prevOff = thisComponent.off;
-      thisComponent.off = function() {
+      prevOff = thisComponent.fn.off;
+      thisComponent.fn.off = function() {
         prevOff();
-        return component.off();
+        return component.fn.off();
       };
       return component;
     };
@@ -3107,15 +3075,20 @@ exports.instance = function(thisComponent) {
     l = log.text(thisComponent, text);
     l();
     component = {
-      name: "text[" + text + "]",
-      element: document.createTextNode(text),
-      off: function() {}
+      fn: {
+        name: "text[" + text + "]",
+        element: document.createTextNode(text),
+        off: function() {}
+      }
     };
     l();
     return component;
   };
   exports.append = function(parent, component) {
-    var l;
+    var base, l;
+    if (!component) {
+      return;
+    }
     if (Array.isArray(component)) {
       return component.forEach(function(component) {
         return exports.append(parent, component);
@@ -3123,8 +3096,12 @@ exports.instance = function(thisComponent) {
     }
     l = log.append(thisComponent, parent, component);
     l();
-    parent.element.appendChild(component.element);
-    component.domParent = parent;
+    parent.fn.element.appendChild(component.fn.element);
+    component.fn.domParent = parent;
+    if ((base = parent.fn).childComponents == null) {
+      base.childComponents = [];
+    }
+    parent.fn.childComponents.push(component);
     return l();
   };
   exports.destroy = function(component) {
@@ -3134,11 +3111,12 @@ exports.instance = function(thisComponent) {
         return exports.destroy(component);
       });
     }
-    element = component.element;
+    element = component.fn.element;
     l = log.destroy(thisComponent, component);
     l();
     element.parentNode.removeChild(element);
-    component.off();
+    remove(component.fn.domParent.fn.childComponents, component);
+    component.fn.off();
     return l();
   };
   exports.empty = function(component) {
@@ -3148,13 +3126,11 @@ exports.instance = function(thisComponent) {
         return exports.empty(elemcomponentent);
       });
     }
-    element = component.element;
+    element = component.fn.element;
     l = log.empty(thisComponent, component);
     l();
-    while ((ref1 = element.children) != null ? ref1.length : void 0) {
-      exports.destroy({
-        element: element.children[0]
-      });
+    if ((ref1 = component.fn.childComponents) != null) {
+      ref1.slice().forEach(exports.destroy);
     }
     return l();
   };
@@ -3168,9 +3144,11 @@ exports.instance = function(thisComponent) {
         return exports.setStyle(component, style);
       });
     }
-    element = component.element;
+    element = component.fn.element;
+    element;
     l = log.setStyle(thisComponent, component, style, thisComponent);
     l();
+    component.fn.style = style;
     Object.keys(style).forEach(function(key) {
       var value;
       value = style[key];
@@ -3222,7 +3200,7 @@ exports.instance = function(thisComponent) {
       return component;
     }
     exports.removeClass(component, klass);
-    element = component.element;
+    element = component.fn.element;
     l = log.addClass(thisComponent, component, klass);
     l();
     element.setAttribute('class', (((ref1 = element.getAttribute('class')) != null ? ref1 : '') + ' ' + klass).replace(/\ +/g, ' ').trim());
@@ -3242,7 +3220,7 @@ exports.instance = function(thisComponent) {
       });
       return component;
     }
-    element = component.element;
+    element = component.fn.element;
     l = log.removeClass(thisComponent, component, klass);
     l();
     previousClass = (ref1 = element.getAttribute('class')) != null ? ref1 : '';
@@ -3276,7 +3254,7 @@ exports.instance = function(thisComponent) {
         return exports.enable(component);
       });
     }
-    element = component.element;
+    element = component.fn.element;
     l = log.enable(thisComponent, component);
     l();
     element.removeAttribute('disabled');
@@ -3290,7 +3268,7 @@ exports.instance = function(thisComponent) {
         return exports.disable(component);
       });
     }
-    element = component.element;
+    element = component.fn.element;
     l = log.disable(thisComponent, component);
     l();
     element.setAttribute('disabled', 'disabled');
@@ -3301,7 +3279,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":14,"./log":15}],13:[function(require,module,exports){
+},{".":18,"./log":19}],17:[function(require,module,exports){
 var body, isIn, log, ref, window,
   slice = [].slice;
 
@@ -3312,11 +3290,11 @@ ref = require('./dom'), window = ref.window, body = ref.body;
 isIn = function(component, arg) {
   var maxX, maxY, minX, minY, pageX, pageY, rect;
   pageX = arg.pageX, pageY = arg.pageY;
-  rect = component.element.getBoundingClientRect();
+  rect = component.fn.element.getBoundingClientRect();
   minX = rect.left;
   maxX = rect.left + rect.width;
-  minY = rect.top + window().element.scrollY;
-  maxY = rect.top + window().element.scrollY + rect.height;
+  minY = rect.top + window().fn.element.scrollY;
+  maxY = rect.top + window().fn.element.scrollY + rect.height;
   return (minX < pageX && pageX < maxX) && (minY < pageY && pageY < maxY);
 };
 
@@ -3358,7 +3336,7 @@ exports.instance = function(thisComponent) {
         });
       };
     }
-    element = component.element;
+    element = component.fn.element;
     l = log.onEvent(thisComponent, component, event, ignores, callback);
     callback = (function(callback) {
       return function(e) {
@@ -3368,17 +3346,17 @@ exports.instance = function(thisComponent) {
         }
         if (ignores) {
           target = e.target;
-          while (target !== document.body) {
+          while (target !== document && target !== document.body) {
             shouldIgnore = ignores.some(function(ignore) {
-              if (target === ignore.element) {
-                l.ingore(ignore, e);
+              if (target === ignore.fn.element) {
+                l.ignore(ignore, e);
                 return true;
               }
             });
             if (shouldIgnore) {
               return;
             }
-            target = target.parentNode;
+            target = target.parentNode || target.parentElement;
           }
         }
         l(1, e);
@@ -3403,8 +3381,8 @@ exports.instance = function(thisComponent) {
       }
       return l(2);
     };
-    prevOff = component.off;
-    component.off = function() {
+    prevOff = component.fn.off;
+    component.fn.off = function() {
       prevOff();
       return unbind();
     };
@@ -3555,7 +3533,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"./dom":12,"./log":15}],14:[function(require,module,exports){
+},{"./dom":16,"./log":19}],18:[function(require,module,exports){
 var slice = [].slice;
 
 exports.compare = function(a, b) {
@@ -3582,23 +3560,7 @@ exports.extend = function() {
   target = arguments[0], sources = 2 <= arguments.length ? slice.call(arguments, 1) : [];
   sources.forEach(function(source) {
     return Object.keys(source).forEach(function(key) {
-      var value;
-      value = source[key];
-      if (key !== 'except') {
-        return target[key] = value;
-      } else {
-        if (Array.isArray(value)) {
-          return value.forEach(function(k) {
-            return delete target[k];
-          });
-        } else if (typeof value === 'object') {
-          return Object.keys(value).forEach(function(k) {
-            return delete target[k];
-          });
-        } else {
-          return delete target[value];
-        }
-      }
+      return target[key] = source[key];
     });
   });
   return target;
@@ -3643,16 +3605,35 @@ exports.toDate = function(timestamp) {
   return String(year).substr(2) + '/' + month + '/' + day;
 };
 
+exports.textIsInSearch = function(text, search) {
+  var searchWords, textWords;
+  searchWords = search.trim().split(' ').map(function(x) {
+    return x.trim();
+  }).filter(function(x) {
+    return x;
+  });
+  textWords = text.trim().split(' ').map(function(x) {
+    return x.trim();
+  }).filter(function(x) {
+    return x;
+  });
+  return searchWords.every(function(word) {
+    return textWords.some(function(textWord) {
+      return ~textWord.indexOf(word);
+    });
+  });
+};
+
 exports.collection = function(add, destroy, change) {
   var data;
   data = [];
   return function(newData) {
-    var l, m, n, o, ref, ref1, ref2, ref3, ref4, results, results1, results2, results3, results4;
+    var k, l, m, n, ref, ref1, ref2, ref3, ref4, results, results1, results2, results3, results4;
     if (newData.length > data.length) {
       if (data.length) {
         (function() {
           results = [];
-          for (var l = 0, ref = data.length - 1; 0 <= ref ? l <= ref : l >= ref; 0 <= ref ? l++ : l--){ results.push(l); }
+          for (var k = 0, ref = data.length - 1; 0 <= ref ? k <= ref : k >= ref; 0 <= ref ? k++ : k--){ results.push(k); }
           return results;
         }).apply(this).forEach(function(i) {
           return data[i] = change(newData[i], data[i]);
@@ -3660,7 +3641,7 @@ exports.collection = function(add, destroy, change) {
       }
       return (function() {
         results1 = [];
-        for (var m = ref1 = data.length, ref2 = newData.length - 1; ref1 <= ref2 ? m <= ref2 : m >= ref2; ref1 <= ref2 ? m++ : m--){ results1.push(m); }
+        for (var l = ref1 = data.length, ref2 = newData.length - 1; ref1 <= ref2 ? l <= ref2 : l >= ref2; ref1 <= ref2 ? l++ : l--){ results1.push(l); }
         return results1;
       }).apply(this).forEach(function(i) {
         return data[i] = add(newData[i]);
@@ -3669,7 +3650,7 @@ exports.collection = function(add, destroy, change) {
       if (newData.length) {
         (function() {
           results2 = [];
-          for (var n = 0, ref3 = newData.length - 1; 0 <= ref3 ? n <= ref3 : n >= ref3; 0 <= ref3 ? n++ : n--){ results2.push(n); }
+          for (var m = 0, ref3 = newData.length - 1; 0 <= ref3 ? m <= ref3 : m >= ref3; 0 <= ref3 ? m++ : m--){ results2.push(m); }
           return results2;
         }).apply(this).forEach(function(i) {
           return data[i] = change(newData[i], data[i]);
@@ -3684,7 +3665,7 @@ exports.collection = function(add, destroy, change) {
     } else if (data.length) {
       return (function() {
         results4 = [];
-        for (var o = 0, ref4 = data.length - 1; 0 <= ref4 ? o <= ref4 : o >= ref4; 0 <= ref4 ? o++ : o--){ results4.push(o); }
+        for (var n = 0, ref4 = data.length - 1; 0 <= ref4 ? n <= ref4 : n >= ref4; 0 <= ref4 ? n++ : n--){ results4.push(n); }
         return results4;
       }).apply(this).forEach(function(i) {
         return data[i] = change(newData[i], data[i]);
@@ -3694,7 +3675,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],15:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -3705,7 +3686,7 @@ getFullName = function(component) {
   var name;
   name = '';
   while (component) {
-    name = component.name + ">" + name;
+    name = component.fn.name + ">" + name;
     component = component.parent;
   }
   return name.substr(0, name.length - 1);
@@ -3722,16 +3703,18 @@ exports.dom = {
   E0: function(thisComponent) {
     var part;
     part = 0;
-    return function(component) {
+    return function(component, args) {
       return;
-      return log((part++) + ":dom.E:" + (component ? getFullName(component) : 'UnknownComponent') + "|" + thisComponent.name);
+      return log((part++) + ":dom.E:" + (component ? getFullName(component) : 'UnknownComponent') + (args.length ? ':' + JSON.stringify(args) : '') + "|" + (getFullName(thisComponent)));
     };
   },
   E1: function(thisComponent, tagName, style, children) {
     var logText, part;
     logText = "dom.E:" + (getFullName({
-      name: tagName,
-      parent: thisComponent
+      fn: {
+        name: tagName,
+        parent: thisComponent
+      }
     }));
     if (Object.keys(style).length) {
       logText += ':' + JSON.stringify(style);
@@ -3850,7 +3833,7 @@ exports.events = {
         return getFullName(component);
       })));
     }
-    logText += "|" + thisComponent.name;
+    logText += "|" + (getFullName(thisComponent));
     parts = [0, 0, 0];
     l = function(partIndex, e) {
       return;
@@ -3965,10 +3948,285 @@ exports.service = {
 };
 
 
-},{}],16:[function(require,module,exports){
-var Q, applications;
+},{}],20:[function(require,module,exports){
+exports.emailIsValid = function(email) {
+  return /^.+@.+\..+$/.test(email);
+};
 
-Q = require('../q');
+exports.passwordIsValid = function(password) {
+  return password.length >= 6;
+};
+
+exports.stateToPersian = function(state) {
+  switch (state) {
+    case 0:
+      return 'ثبت شده';
+    case 1:
+      return 'تایید اولیه توسط مدیر';
+    case 2:
+      return 'مصاحبه تلفنی انجام شده';
+    case 3:
+      return 'اطلاعات تکمیل شده';
+    case 4:
+      return 'آزمون‌های شخصیت‌شناسی داده شده';
+    case 5:
+      return 'مصاحبه فنی برگزار شده';
+    case 6:
+      return 'کمیته جذب برگزار شده';
+    case 7:
+      return 'جذب شده';
+    case 8:
+      return 'بایگانی';
+  }
+};
+
+
+},{}],21:[function(require,module,exports){
+var Q, mock;
+
+Q = require('../../q');
+
+mock = require('./mock');
+
+module.exports = function(isGet, serviceName, params) {
+  var url;
+  if (params == null) {
+    params = {};
+  }
+  if (mock[serviceName]) {
+    return mock[serviceName](params);
+  }
+  url = "/webApi/" + serviceName;
+  if (isGet) {
+    url += '&' + Object.keys(params).map(function(param) {
+      return param + "=" + params[param];
+    }).join('&');
+  }
+  return Q.promise(function(resolve, reject) {
+    var methodType, xhr;
+    xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          return resolve(JSON.parse(xhr.responseText));
+        } else {
+          return reject(xhr.responseText);
+        }
+      }
+    };
+    methodType = isGet ? 'GET' : 'POST';
+    xhr.open(methodType, url, true);
+    if (isGet) {
+      return xhr.send();
+    } else {
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      return xhr.send(JSON.stringify(params));
+    }
+  });
+};
+
+
+},{"../../q":10,"./mock":25}],22:[function(require,module,exports){
+var Q, cruds, eraseCookie, get, gets, post, posts, ref, ref1, state, stateChangingServices, uppercaseFirst;
+
+Q = require('../../q');
+
+state = require('../state');
+
+stateChangingServices = require('./stateChangingServices');
+
+ref = require('./names'), gets = ref.gets, posts = ref.posts, cruds = ref.cruds;
+
+ref1 = require('./getPost'), get = ref1.get, post = ref1.post;
+
+eraseCookie = require('../cookies').eraseCookie;
+
+uppercaseFirst = require('..').uppercaseFirst;
+
+gets.forEach(function(x) {
+  return exports[x] = function(params) {
+    return get(x, params);
+  };
+});
+
+posts.forEach(function(x) {
+  return exports[x] = function(params) {
+    return post(x, params);
+  };
+});
+
+cruds.forEach(function(arg) {
+  var name, persianName;
+  name = arg.name, persianName = arg.persianName;
+  exports["update" + (uppercaseFirst(name))] = function(entity) {
+    return post("update" + (uppercaseFirst(name)), entity).then(function() {
+      return state[name + "s"].on({
+        once: true
+      }, function(entities) {
+        entities = entities.filter(function(arg1) {
+          var id;
+          id = arg1.id;
+          return id !== entity.id;
+        });
+        entities.push(entity);
+        return state[name + "s"].set(entities);
+      });
+    });
+  };
+  exports["create" + (uppercaseFirst(name))] = function(entity) {
+    return post("create" + (uppercaseFirst(name)), entity).then(function(id) {
+      return state[name + "s"].on({
+        once: true
+      }, function(entities) {
+        extend(entity, {
+          id: id
+        });
+        entities.push(entity);
+        return state[name + "s"].set(entities);
+      });
+    });
+  };
+  return exports["delete" + (uppercaseFirst(name))] = function(id) {
+    return post("delete" + (uppercaseFirst(name)), {
+      id: id
+    }).then(function() {
+      return state[name + "s"].on({
+        once: true
+      }, function(entities) {
+        var deletedId;
+        deletedId = id;
+        entities = entities.filter(function(arg1) {
+          var id;
+          id = arg1.id;
+          return id !== deletedId;
+        });
+        return state[name + "s"].set(entities);
+      });
+    });
+  };
+});
+
+
+},{"..":18,"../../q":10,"../cookies":15,"../state":28,"./getPost":23,"./names":26,"./stateChangingServices":27}],23:[function(require,module,exports){
+var ajax, ex, handle, state, stateChangingServices, states;
+
+ajax = require('./ajax');
+
+stateChangingServices = require('./stateChangingServices');
+
+ex = require('./ex');
+
+states = require('./names').states;
+
+state = require('../state');
+
+handle = function(isGet) {
+  return function(serviceName, params) {
+    var ref, startedAt;
+    if ((ref = stateChangingServices[serviceName]) != null) {
+      ref.running = true;
+    }
+    startedAt = +new Date();
+    return ajax(isGet, serviceName, params).then(function(response) {
+      states.forEach(function(name) {
+        var dontSetState, ref1, ref2;
+        if ((ref1 = stateChangingServices[serviceName]) != null) {
+          ref1.running = false;
+        }
+        if ((ref2 = stateChangingServices[serviceName]) != null) {
+          ref2.endedAt = +new Date();
+        }
+        dontSetState = Object.keys(stateChangingServices).some(function(_serviceName) {
+          var service;
+          service = stateChangingServices[_serviceName];
+          if (service.stateName === name) {
+            if (_serviceName === serviceName) {
+              return false;
+            } else if (service.running) {
+              return true;
+            } else if (!service.endedAt) {
+              return false;
+            } else {
+              return service.endedAt >= startedAt;
+            }
+          } else {
+            return false;
+          }
+        });
+        if (!dontSetState) {
+          if (response[name]) {
+            state[name].set(response[name]);
+          }
+          if (name === 'user' && response.loggedOut) {
+            return state.user.set(null);
+          }
+        }
+      });
+      delete response.user;
+      delete response.loggedOut;
+      if (response.value != null) {
+        response = response.value;
+      }
+      return response;
+    });
+  };
+};
+
+exports.get = handle(true);
+
+exports.post = handle(false);
+
+
+},{"../state":28,"./ajax":21,"./ex":22,"./names":26,"./stateChangingServices":27}],24:[function(require,module,exports){
+var ex, gets, log, others, post, posts, ref;
+
+ex = require('./ex');
+
+ref = require('./names'), gets = ref.gets, posts = ref.posts, others = ref.others;
+
+post = require('./getPost').post;
+
+log = require('../log').service;
+
+exports.instance = function(thisComponent) {
+  var exports;
+  exports = {};
+  gets.concat(posts).concat(others).forEach(function(x) {
+    return exports[x] = function(params) {
+      var l;
+      l = log.get(thisComponent, x, params);
+      l();
+      return ex[x](params).then(function(data) {
+        l(data);
+        return data;
+      });
+    };
+  });
+  return exports;
+};
+
+exports.extendModule = function(fn) {
+  return fn(ex);
+};
+
+exports.getUser = function() {
+  return post('getUser');
+};
+
+exports.autoPing = function() {
+  var fn;
+  return (fn = function() {
+    return post('ping').then(function() {
+      return setTimeout(fn);
+    }).done();
+  })();
+};
+
+
+},{"../log":19,"./ex":22,"./getPost":23,"./names":26}],25:[function(require,module,exports){
+var Q, applications, user;
+
+Q = require('../../q');
 
 applications = [
   {
@@ -3996,6 +4254,16 @@ applications = [
   }
 ];
 
+user = void 0;
+
+exports.ping = function() {};
+
+exports.getUser = function() {
+  return Q({
+    value: user
+  });
+};
+
 exports.login = function(arg) {
   var email;
   email = arg.email;
@@ -4003,7 +4271,7 @@ exports.login = function(arg) {
     switch (email) {
       case 'hosseininejad@dotin.ir':
         return {
-          user: {
+          user: user = {
             name: 'حامد حسینی‌نژاد',
             type: 'hr'
           },
@@ -4011,16 +4279,21 @@ exports.login = function(arg) {
         };
       case 'mohammadkhani@dotin.ir':
         return {
-          user: {
+          user: user = {
             name: 'روح‌الله محمد‌خانی',
             type: 'manager'
           },
           applications: applications
         };
-      default:
+      case 'dorosty@dotin.ir':
         return {
-          invalid: true
+          user: user = {
+            name: 'علی درستی',
+            type: 'applicant'
+          }
         };
+      default:
+        throw 'invalid';
     }
   });
 };
@@ -4028,100 +4301,72 @@ exports.login = function(arg) {
 exports.logout = function(arg) {
   var email, password;
   email = arg.email, password = arg.password;
-  return Q.delay(1000 + 2000 * Math.floor(Math.random()));
-};
-
-
-},{"../q":9}],17:[function(require,module,exports){
-var Q, eraseCookie, get, handle, log, mock, post, state;
-
-mock = require('./mockService');
-
-log = require('./log').service;
-
-Q = require('../q');
-
-state = require('./state');
-
-eraseCookie = require('./cookies').eraseCookie;
-
-handle = function(isGet) {
-  return function(url, params) {
-    if (params == null) {
-      params = {};
-    }
-    if (mock[url]) {
-      return mock[url](params);
-    }
-    url = "/webApi/" + url + "?rand=" + (Math.random()) + "&";
-    if (isGet) {
-      url += Object.keys(params).map(function(param) {
-        return param + "=" + params[param];
-      }).join('&');
-    }
-    return Q.promise(function(resolve, reject) {
-      var methodType, xhr;
-      xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            return resolve(JSON.parse(xhr.responseText));
-          } else {
-            return reject(xhr.responseText);
-          }
-        }
-      };
-      methodType = isGet ? 'GET' : 'POST';
-      xhr.open(methodType, url, true);
-      if (isGet) {
-        return xhr.send();
-      } else {
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        return xhr.send(JSON.stringify(params));
-      }
-    });
-  };
-};
-
-get = handle(true);
-
-post = handle(false);
-
-exports.instance = function(thisComponent) {
-  var exports;
-  exports = {};
-  [].forEach(function(x) {
-    return exports[x] = function(params) {
-      var l;
-      l = log.get(thisComponent, x, params);
-      l();
-      return get(x, params).then(function(data) {
-        l(data);
-        return data;
-      });
+  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+    return {
+      loggedOut: true
     };
   });
-  ['login', 'logout'].forEach(function(x) {
-    return exports[x] = function(params) {
-      var l;
-      l = log.post(thisComponent, x, params);
-      l();
-      return post(x, params).then(function(data) {
-        l(data);
-        return data;
-      });
-    };
+};
+
+exports.addJob = function() {
+  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+    return {};
   });
-  return exports;
 };
 
 
-},{"../q":9,"./cookies":11,"./log":15,"./mockService":16,"./state":18}],18:[function(require,module,exports){
-var createPubSub, log, pubSubs;
+},{"../../q":10}],26:[function(require,module,exports){
+exports.gets = [];
 
-log = require('./log').state;
+exports.posts = ['login', 'logout', 'addJob'];
 
-createPubSub = function() {
+exports.cruds = [
+  {
+    name: 'person',
+    persianName: 'شخص'
+  }
+];
+
+exports.others = [];
+
+exports.states = ['user', 'applications'];
+
+
+},{}],27:[function(require,module,exports){
+var cruds, uppercaseFirst;
+
+cruds = require('./names').cruds;
+
+uppercaseFirst = require('..').uppercaseFirst;
+
+module.exports = {
+  logout: {
+    stateName: 'user'
+  },
+  login: {
+    stateName: 'user'
+  }
+};
+
+cruds.forEach(function(arg) {
+  var name;
+  name = arg.name;
+  return ['create', 'update', 'delete'].forEach(function(method) {
+    return exports["" + method + (uppercaseFirst(name))] = {
+      stateName: name
+    };
+  });
+});
+
+
+},{"..":18,"./names":26}],28:[function(require,module,exports){
+var createPubSub, log, names, pubSubs;
+
+names = require('./names');
+
+log = require('../log').state;
+
+createPubSub = function(name) {
   var data, dataNotNull, subscribers;
   data = dataNotNull = void 0;
   subscribers = [];
@@ -4175,10 +4420,10 @@ createPubSub = function() {
   };
 };
 
-pubSubs = ['user', 'isInLoginPage', 'applications'].map(function(x) {
+pubSubs = names.map(function(name) {
   return {
-    x: x,
-    pubSub: createPubSub()
+    name: name,
+    pubSub: exports[name] = createPubSub(name)
   };
 });
 
@@ -4186,9 +4431,9 @@ exports.instance = function(thisComponent) {
   var exports;
   exports = {};
   pubSubs.forEach(function(arg) {
-    var instancePubSub, l, pubSub, x;
-    x = arg.x, pubSub = arg.pubSub;
-    l = log.pubsub(thisComponent, x);
+    var instancePubSub, l, name, pubSub;
+    name = arg.name, pubSub = arg.pubSub;
+    l = log.pubsub(thisComponent, name);
     instancePubSub = {};
     instancePubSub.on = function() {
       var callback, ll, options, prevOff, unsubscribe;
@@ -4213,8 +4458,8 @@ exports.instance = function(thisComponent) {
           return ll(2);
         };
       })(unsubscribe);
-      prevOff = thisComponent.off;
-      thisComponent.off = function() {
+      prevOff = thisComponent.fn.off;
+      thisComponent.fn.off = function() {
         prevOff();
         return unsubscribe();
       };
@@ -4227,7 +4472,7 @@ exports.instance = function(thisComponent) {
       pubSub.set(data);
       return ll();
     };
-    return exports[x] = instancePubSub;
+    return exports[name] = instancePubSub;
   });
   exports.all = function() {
     var callback, keys, l, options, prevOff, resolved, unsubscribe, unsubscribes, values;
@@ -4242,10 +4487,10 @@ exports.instance = function(thisComponent) {
     values = {};
     l(0);
     unsubscribes = keys.map(function(key) {
-      return exports[key].on(options, function(x) {
+      return exports[key].on(options, function(values) {
         var data;
         resolved[key] = true;
-        values[key] = x;
+        values[key] = values;
         if (keys.every(function(keys) {
           return resolved[keys];
         })) {
@@ -4266,8 +4511,8 @@ exports.instance = function(thisComponent) {
       });
       return l(2);
     };
-    prevOff = thisComponent.off;
-    thisComponent.off = function() {
+    prevOff = thisComponent.fn.off;
+    thisComponent.fn.off = function() {
       prevOff();
       return unsubscribe();
     };
@@ -4277,21 +4522,696 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"./log":15}],19:[function(require,module,exports){
-var addPageStyle, page;
+},{"../log":19,"./names":29}],29:[function(require,module,exports){
+module.exports = ['user', 'applications'];
 
-addPageStyle = require('./utils/dom').addPageStyle;
+
+},{}],30:[function(require,module,exports){
+var component, header, tabNames;
+
+component = require('../../utils/component');
+
+header = require('../header');
+
+tabNames = ['تکمیل اطلاعات', 'آزمون‌های شخصیت‌شناسی'];
+
+module.exports = component('applicantView', function(arg) {
+  var E, addClass, append, changeTabIndex, content, contents, currentTabIndex, destroy, dom, e, error, events, onEvent, removeClass, tabContents, tabs, view;
+  dom = arg.dom, events = arg.events;
+  E = dom.E, addClass = dom.addClass, removeClass = dom.removeClass, append = dom.append, destroy = dom.destroy;
+  onEvent = events.onEvent;
+  try {
+    tabContents = [E(null, 'a'), E(null, 'b')];
+    content = void 0;
+    currentTabIndex = 0;
+    view = E(null, E(header, 'حساب کاربری'), contents = E({
+      width: 1500,
+      margin: '0 auto',
+      overflow: 'hidden'
+    }, E('ul', {
+      "class": 'nav nav-tabs',
+      marginBottom: 20
+    }, tabs = tabNames.map(function(tabName, index) {
+      var tab;
+      tab = E('li', null, E('a', {
+        cursor: 'pointer'
+      }, tabName));
+      onEvent(tab, 'click', function() {
+        return changeTabIndex(index);
+      });
+      return tab;
+    }))));
+    changeTabIndex = function(index) {
+      if (content) {
+        destroy(content);
+      }
+      removeClass(tabs[currentTabIndex], 'active');
+      currentTabIndex = index;
+      append(contents, content = tabContents[currentTabIndex]);
+      return addClass(tabs[currentTabIndex], 'active');
+    };
+    changeTabIndex(0);
+    return view;
+  } catch (error) {
+    e = error;
+    return console.log(e);
+  }
+});
+
+
+},{"../../utils/component":14,"../header":31}],31:[function(require,module,exports){
+var component, extend, style;
+
+component = require('../../utils/component');
+
+style = require('./style');
+
+extend = require('../../utils').extend;
+
+module.exports = component('header', function(arg, title) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(style.header, E('img', style.img), E(style.wrapper, E(style.title, title), E(style.breadcrumbs, E('a', extend({
+    href: 'Home'
+  }, style.breadcrumbsLink), 'خانه > '), E('a', extend({
+    href: '#'
+  }, style.breadcrumbsLinkActive), title))));
+});
+
+
+},{"../../utils":18,"../../utils/component":14,"./style":32}],32:[function(require,module,exports){
+exports.header = {
+  position: 'relative',
+  height: 208,
+  overflow: 'hidden'
+};
+
+exports.img = {
+  src: 'img/bg-2.jpg',
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  height: 200,
+  width: '100%'
+};
+
+exports.wrapper = {
+  position: 'relative',
+  width: 1500,
+  height: 200,
+  margin: '0 auto'
+};
+
+exports.title = {
+  position: 'absolute',
+  width: 420,
+  top: 100,
+  fontSize: 30,
+  color: 'white'
+};
+
+exports.breadcrumbs = {
+  position: 'absolute',
+  width: 420,
+  top: 150,
+  left: 0,
+  right: 0
+};
+
+exports.breadcrumbsLink = {
+  textDecoration: 'none',
+  color: 'white'
+};
+
+exports.breadcrumbsLinkActive = {
+  textDecoration: 'none',
+  color: '#78C19D'
+};
+
+
+},{}],33:[function(require,module,exports){
+var component, generateId, modal, tableView;
+
+component = require('../../utils/component');
+
+tableView = require('../tableView');
+
+modal = require('../../singletons/modal');
+
+generateId = require('../../utils/dom').generateId;
+
+module.exports = component('hrView', function(arg) {
+  var E, addDuty, addRequirement, append, contents, description, descriptionId, dom, duties, dutiesList, events, onEvent, requirements, requirementsList, service, setEnabled, submit, text, title, titleId;
+  dom = arg.dom, events = arg.events, service = arg.service;
+  E = dom.E, text = dom.text, append = dom.append;
+  onEvent = events.onEvent;
+  requirements = [];
+  duties = [];
+  contents = [
+    E({
+      "class": 'form-group'
+    }, E('label', {
+      "for": (titleId = generateId())
+    }, 'نام شغل'), title = E('input', {
+      id: titleId,
+      "class": 'form-control'
+    })), E({
+      "class": 'form-group'
+    }, E('label', {
+      "for": (descriptionId = generateId())
+    }, 'توضیحات'), description = E('textarea', {
+      minHeight: 100,
+      maxHeight: 100,
+      id: descriptionId,
+      "class": 'form-control'
+    })), E({
+      "class": 'form-group'
+    }, E('label', null, text('مهارتهای مورد نیاز'), addRequirement = E('i', {
+      "class": 'fa fa-plus',
+      color: 'green',
+      marginRight: 10,
+      cursor: 'pointer'
+    })), requirementsList = E()), E({
+      "class": 'form-group'
+    }, E('label', null, text('وظایف'), addDuty = E('i', {
+      "class": 'fa fa-plus',
+      color: 'green',
+      marginRight: 10,
+      cursor: 'pointer'
+    })), dutiesList = E())
+  ];
+  onEvent(addRequirement, 'click', function() {
+    var group, input;
+    requirements.push(input = E('input', {
+      "class": 'form-control'
+    }));
+    onEvent(input, 'input', setEnabled);
+    group = E({
+      "class": 'form-group'
+    }, input);
+    append(requirementsList, group);
+    return input.focus();
+  });
+  onEvent(addDuty, 'click', function() {
+    var group, input;
+    duties.push(input = E('input', {
+      "class": 'form-control'
+    }));
+    onEvent(input, 'input', setEnabled);
+    group = E({
+      "class": 'form-group'
+    }, input);
+    append(dutiesList, group);
+    return input.focus();
+  });
+  onEvent([title, description], 'input', setEnabled = function() {
+    return modal.instance.setEnabled(title.value() && description.value() && requirements.length && duties.length && requirements.every(function(x) {
+      return x.value();
+    }) && duties.every(function(x) {
+      return x.value();
+    }));
+  });
+  submit = function() {
+    return service.addJob({
+      title: title.value(),
+      description: description.value(),
+      requirements: requirements.map(function(x) {
+        return x.value();
+      }),
+      duties: duties.map(function(x) {
+        return x.value();
+      })
+    });
+  };
+  return E(tableView, {
+    addJob: function() {
+      modal.instance.display({
+        autoHide: true,
+        title: 'ثبت درخواست شغلی',
+        submitText: 'ثبت',
+        closeText: 'لغو',
+        contents: contents,
+        submit: submit
+      });
+      return setEnabled();
+    }
+  });
+});
+
+
+},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":38}],34:[function(require,module,exports){
+var applicantView, component, hrView, login, managerView;
+
+component = require('../utils/component');
+
+login = require('./login');
+
+hrView = require('./hrView');
+
+managerView = require('./managerView');
+
+applicantView = require('./applicantView');
+
+module.exports = component('views', function(arg) {
+  var E, append, currentPage, dom, empty, state, wrapper;
+  dom = arg.dom, state = arg.state;
+  E = dom.E, append = dom.append, empty = dom.empty;
+  wrapper = E();
+  currentPage = void 0;
+  state.user.on({
+    allowNull: true
+  }, function(user) {
+    empty(wrapper);
+    currentPage = (function() {
+      if (user) {
+        switch (user.type) {
+          case 'hr':
+            return hrView;
+          case 'manager':
+            return managerView;
+          case 'applicant':
+            return applicantView;
+        }
+      } else {
+        return login;
+      }
+    })();
+    return append(wrapper, E(currentPage));
+  });
+  return wrapper;
+});
+
+
+},{"../utils/component":14,"./applicantView":30,"./hrView":33,"./login":35,"./managerView":37}],35:[function(require,module,exports){
+var component, extend, style;
+
+component = require('../../utils/component');
+
+style = require('./style');
+
+extend = require('../../utils').extend;
+
+module.exports = component('login', function(arg) {
+  var E, disable, doSubmit, dom, email, enable, events, hide, invalid, onEnter, onEvent, password, remember, service, setStyle, show, spinner, submit, text;
+  dom = arg.dom, events = arg.events, service = arg.service;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, enable = dom.enable, disable = dom.disable;
+  onEvent = events.onEvent, onEnter = events.onEnter;
+  component = E(null, E('img', style.bg), E(style.form, E('img', style.logo), E(style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'), E(style.formInputs, email = E('input', extend({
+    placeholder: 'ایمیل'
+  }, style.input)), password = E('input', extend({
+    placeholder: 'رمز عبور'
+  }, style.input)), E(style.submitSection, submit = E('button', style.submit, 'ورود'), E('label', style.rememberLabel, remember = E('input', extend({
+    type: 'checkbox'
+  }, style.remember)), text('مرا به خاطر بسپار')), spinner = E(style.spinner, 'در حال بارگذاری...'), hide(invalid = E(style.invalid, 'نام کاربری و یا رمز عبور اشتباه است.'))))));
+  hide(spinner);
+  [email, password].forEach(function(input) {
+    onEvent(input, 'focus', function() {
+      return setStyle(input, style.inputFocus);
+    });
+    return onEvent(input, 'blur', function() {
+      return setStyle(input, style.input);
+    });
+  });
+  doSubmit = function() {
+    disable([email, password, submit, remember]);
+    hide(invalid);
+    show(spinner);
+    return service.login({
+      email: email.value(),
+      password: password.value(),
+      remember: !!remember.checked()
+    })["catch"](function() {
+      return show(invalid);
+    }).fin(function() {
+      enable([email, password, submit, remember]);
+      return hide(spinner);
+    }).done();
+  };
+  onEvent([email, password], 'input', function() {
+    return hide(invalid);
+  });
+  onEnter([email, password], doSubmit);
+  onEvent(submit, 'click', doSubmit);
+  return component;
+});
+
+
+},{"../../utils":18,"../../utils/component":14,"./style":36}],36:[function(require,module,exports){
+exports.bg = {
+  src: 'img/bg-1.jpg',
+  zIndex: -1,
+  minHeight: '100%',
+  minWidth: 1024,
+  width: '100%',
+  height: 'auto',
+  position: 'fixed',
+  top: 0,
+  left: 0
+};
+
+exports.form = {
+  margin: '100px auto 0',
+  width: 500,
+  backgroundColor: 'white',
+  textAlign: 'center',
+  paddingBottom: 100
+};
+
+exports.logo = {
+  src: 'img/logo.png',
+  width: 100,
+  marginTop: 100
+};
+
+exports.title = {
+  fontSize: 18,
+  color: '#1D7453'
+};
+
+exports.formInputs = {
+  marginTop: 50
+};
+
+exports.input = {
+  border: 0,
+  outline: 0,
+  width: 400,
+  padding: 4,
+  margin: '20px 0',
+  borderBottom: '1px solid #ddd',
+  transition: 'border-bottom .5s'
+};
+
+exports.inputFocus = {
+  borderBottom: '1px solid #6cc791'
+};
+
+exports.submit = {
+  backgroundColor: '#6cc791',
+  color: 'white',
+  padding: '7px 20px',
+  borderRadius: 5,
+  marginTop: 50,
+  marginLeft: 20,
+  border: 0,
+  cursor: 'pointer'
+};
+
+exports.submitSection = {
+  textAlign: 'right',
+  paddingRight: 50
+};
+
+exports.rememberLabel = {
+  fontSize: 11,
+  color: '#888',
+  cursor: 'pointer'
+};
+
+exports.remember = {
+  width: 'auto',
+  margin: '20px 5px',
+  position: 'relative',
+  top: 4
+};
+
+exports.spinner = {
+  color: '#999'
+};
+
+exports.invalid = {
+  color: 'red'
+};
+
+
+},{}],37:[function(require,module,exports){
+var tableView;
+
+tableView = require('../tableView');
+
+module.exports = tableView;
+
+
+},{"../tableView":38}],38:[function(require,module,exports){
+var collection, component, extend, header, ref, stateToPersian, style, toDate;
+
+component = require('../../utils/component');
+
+style = require('./style');
+
+header = require('../header');
+
+ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, collection = ref.collection;
+
+stateToPersian = require('../../utils/logic').stateToPersian;
+
+module.exports = component('tableView', function(arg, arg1) {
+  var E, _addJob, addApplication, addJob, append, applications, changeApplication, destroy, dom, events, handleApplications, onEvent, removeApplication, searchFirstName, searchInputs, searchJobs, searchLastName, setStyle, state, tbody, updateTable, view;
+  dom = arg.dom, events = arg.events, state = arg.state;
+  addJob = arg1.addJob;
+  E = dom.E, append = dom.append, destroy = dom.destroy, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  view = E(null, E(header, 'انتخاب شغل‌های مورد تقاضا'), E(style.wrapper, E(style.title, 'انتخاب شغل‌های مورد تقاضا', E({
+    "class": 'row',
+    paddingRight: 30
+  }, _addJob = E({
+    "class": 'btn btn-default'
+  }, 'ثبت فرصت شغلی'))), E('table', style.table, E('thead', null, E('th', extend({
+    minWidth: 65
+  }, style.th)), E('th', style.th, E(style.thSpan, 'نام'), searchFirstName = E('input', {
+    placeholder: 'جستجو...',
+    "class": 'form-control'
+  })), E('th', style.th, E(style.thSpan, 'نام خانوادگی'), searchLastName = E('input', {
+    placeholder: 'جستجو...',
+    "class": 'form-control'
+  })), E('th', style.th, 'تاریخ تولد'), E('th', style.th, E(style.thSpan, 'مشاغل درخواستی'), searchJobs = E('input', {
+    placeholder: 'جستجو...',
+    "class": 'form-control'
+  })), E('th', style.th, 'تاریخ ثبت'), E('th', style.th, 'تلفن همراه'), E('th', style.th, 'ایمیل'), E('th', style.th, 'رزومه'), E('th', style.th, 'اطباعات تکمیل شده'), E('th', style.th, 'نتیجه آزمونها'), E('th', extend({
+    minWidth: 100
+  }, style.th), 'وضعیت')), tbody = E('tbody'))));
+  onEvent(_addJob, 'click', function() {
+    return addJob();
+  });
+  addApplication = function(application) {
+    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume, row;
+    append(tbody, row = E('tr', style.tr, E('td', style.td, img = E('img', extend({
+      src: application.picture || 'img/picicon.png'
+    }, style.tdPicture))), firstName = E('td', style.td, application.firstName), lastName = E('td', style.td, application.lastName), birthday = E('td', style.td, application.birthday), jobs = E('td', style.td, application.jobs), createdAt = E('td', style.td, toDate(application.createdAt)), phoneNumber = E('td', style.td, application.phoneNumber), email = E('td', extend({
+      englishText: application.email
+    }, style.td)), E('td', style.td, resume = E('a', {
+      href: application.resumeUrl
+    }, E('i', extend({
+      "class": 'fa fa-paperclip'
+    }, style.tdPaperclip)))), E('td', style.td, E('a', {
+      href: ''
+    }, E('i', extend({
+      "class": 'fa fa-paperclip'
+    }, style.tdPaperclip)))), E('td', style.td, E('a', {
+      href: ''
+    }, E('i', extend({
+      "class": 'fa fa-paperclip'
+    }, style.tdPaperclip)))), state = E('td', style.td, stateToPersian(application.state))));
+    return {
+      row: row,
+      img: img,
+      firstName: firstName,
+      lastName: lastName,
+      birthday: birthday,
+      jobs: jobs,
+      createdAt: createdAt,
+      phoneNumber: phoneNumber,
+      email: email,
+      resume: resume,
+      state: state
+    };
+  };
+  removeApplication = function(arg2) {
+    var row;
+    row = arg2.row;
+    return destroy(row);
+  };
+  changeApplication = function(application, x) {
+    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume;
+    img = x.img, firstName = x.firstName, lastName = x.lastName, birthday = x.birthday, jobs = x.jobs, createdAt = x.createdAt, phoneNumber = x.phoneNumber, email = x.email, resume = x.resume, state = x.state;
+    setStyle(img, {
+      src: application.picture || 'img/picicon.png'
+    });
+    setStyle(firstName, {
+      text: application.firstName
+    });
+    setStyle(lastName, {
+      text: application.lastName
+    });
+    setStyle(birthday, {
+      text: application.birthday
+    });
+    setStyle(jobs, {
+      text: application.jobs
+    });
+    setStyle(createdAt, {
+      text: toDate(application.createdAt)
+    });
+    setStyle(phoneNumber, {
+      text: application.phoneNumber
+    });
+    setStyle(email, {
+      englishText: application.email
+    });
+    setStyle(resume, {
+      href: application.resumeUrl
+    });
+    setStyle(state, {
+      text: stateToPersian(application.state)
+    });
+    return x;
+  };
+  handleApplications = collection(addApplication, removeApplication, changeApplication);
+  searchInputs = {
+    'firstName': searchFirstName,
+    'lastName': searchLastName,
+    'jobs': searchJobs
+  };
+  updateTable = function() {
+    var filteredApplications;
+    filteredApplications = applications;
+    Object.keys(searchInputs).forEach(function(key) {
+      var value, words;
+      value = String(searchInputs[key].element.value);
+      if (value.trim() === '') {
+        return;
+      }
+      words = value.split(' ').map(function(word) {
+        return word.trim().toLowerCase();
+      }).filter(function(word) {
+        return word;
+      });
+      return filteredApplications = filteredApplications.filter(function(application) {
+        return words.some(function(word) {
+          return ~application[key].toLowerCase().indexOf(word);
+        });
+      });
+    });
+    return handleApplications(filteredApplications);
+  };
+  applications = void 0;
+  state.applications.on(function(_applications) {
+    applications = _applications;
+    return handleApplications(applications);
+  });
+  Object.keys(searchInputs).forEach(function(key) {
+    return onEvent(searchInputs[key], 'input', updateTable);
+  });
+  return view;
+});
+
+
+},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"../header":31,"./style":39}],39:[function(require,module,exports){
+exports.wrapper = {
+  width: 1500,
+  margin: '0 auto',
+  overflow: 'hidden'
+};
+
+exports.title = {
+  fontSize: 25,
+  color: '#78C19D',
+  margin: '20px 0 50px'
+};
+
+exports.table = {
+  width: '100%',
+  borderSpacing: 0,
+  borderCollapse: 'collapse'
+};
+
+exports.th = {
+  padding: '0 5px 10px',
+  fontSize: 13,
+  fontWeight: 'normal',
+  height: 30,
+  lineHeight: 30,
+  color: '#5D5D5D',
+  borderTop: '1px solid #DDD',
+  borderLeft: '1px dashed #DDD',
+  borderRight: '1px dashed #DDD',
+  borderBottom: '1px solid #78C19D'
+};
+
+exports.thSpan = {
+  display: 'block',
+  width: '100%'
+};
+
+exports.tr = {
+  cursor: 'default',
+  borderBottom: '1px solid #EEE'
+};
+
+exports.trHover = {
+  backgroundColor: '#e5fbf0'
+};
+
+exports.td = {
+  padding: '0 5px',
+  fontSize: 13,
+  height: 30,
+  lineHeight: 30,
+  textAlign: 'center',
+  color: '#888',
+  borderLeft: '1px dashed #DDD',
+  borderLight: '1px dashed #DDD'
+};
+
+exports.tdPicture = {
+  width: 30,
+  height: 30,
+  borderRadius: 50,
+  border: '1px solid #78C19D',
+  display: 'inline-block',
+  position: 'relative',
+  top: 2
+};
+
+exports.tdPaperclip = {
+  fontSize: 25,
+  lineHeight: 40,
+  height: 40,
+  color: '#57B3A1'
+};
+
+
+},{}],40:[function(require,module,exports){
+var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
+
+Q = require('./q');
+
+service = require('./utils/service');
 
 page = require('./page');
 
-window.onerror = function() {
-  document.body.innerText = document.body.innerHTML = JSON.stringify([].slice.call(arguments));
-  return document.body.style.background = 'red';
-};
+alertMessages = require('./alertMessages');
 
-addPageStyle("@font-face { font-family: iransans; src:url('fonts/eot/IRANSansWeb.eot') format('eot'), url('fonts/eot/IRANSansWeb_Bold.eot') format('eot'), url('fonts/ttf/IRANSansWeb.ttf') format('truetype'), url('fonts/ttf/IRANSansWeb_Bold.ttf') format('truetype'), url('fonts/woff/IRANSansWeb.woff') format('woff'), url('fonts/woff/IRANSansWeb_Bold.woff') format('woff'), url('fonts/woff2/IRANSansWeb.woff2') format('woff2'), url('fonts/woff2/IRANSansWeb_Bold.woff2') format('woff2'); } * { font-family: 'iransans', tahoma; direction: rtl; } .hidden { display: none; }");
+ref = require('./utils/dom'), addPageCSS = ref.addPageCSS, addPageStyle = ref.addPageStyle;
+
+Q.longStackSupport = true;
+
+addPageCSS('font-awesome/css/font-awesome.css');
+
+addPageCSS('bootstrap.css');
+
+addPageCSS('bootstrap-rtl.css');
+
+addPageStyle("@font-face { font-family: iransans; src:url('assets/fonts/eot/IRANSansWeb.eot') format('eot'), url('assets/fonts/eot/IRANSansWeb_Bold.eot') format('eot'), url('assets/fonts/ttf/IRANSansWeb.ttf') format('truetype'), url('assets/fonts/ttf/IRANSansWeb_Bold.ttf') format('truetype'), url('assets/fonts/woff/IRANSansWeb.woff') format('woff'), url('assets/fonts/woff/IRANSansWeb_Bold.woff') format('woff'), url('assets/fonts/woff2/IRANSansWeb.woff2') format('woff2'), url('assets/fonts/woff2/IRANSansWeb_Bold.woff2') format('woff2'); } * { font-family: 'iransans', tahoma; direction: rtl; } .hidden { display: none; } .alert { padding: 0; margin-bottom: 0; height: 0; transition: all .15s linear } .alert.in { padding: 15px; margin-bottom: 20px; height: auto; }");
+
+document.title = 'سامانه جذب داتین';
+
+alertMessages["do"]();
+
+service.getUser();
 
 page();
 
 
-},{"./page":8,"./utils/dom":12}]},{},[19]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[40]);

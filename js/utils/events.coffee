@@ -2,11 +2,11 @@ log = require('./log').events
 {window, body} = require './dom'
 
 isIn = (component, {pageX, pageY}) ->
-  rect = component.element.getBoundingClientRect()
+  rect = component.fn.element.getBoundingClientRect()
   minX = rect.left
   maxX = rect.left + rect.width
-  minY = rect.top + window().element.scrollY
-  maxY = rect.top + window().element.scrollY + rect.height
+  minY = rect.top + window().fn.element.scrollY
+  maxY = rect.top + window().fn.element.scrollY + rect.height
   minX < pageX < maxX and minY < pageY < maxY
 
 exports.instance = (thisComponent) ->
@@ -32,7 +32,7 @@ exports.instance = (thisComponent) ->
         exports.onEvent.apply null, args
       return -> unbinds.forEach (unbind) -> unbind()
 
-    {element} = component
+    {element} = component.fn
 
     l = log.onEvent thisComponent, component, event, ignores, callback
 
@@ -40,14 +40,14 @@ exports.instance = (thisComponent) ->
       e.target ?= e.srcElement
       if ignores
         target = e.target
-        while target isnt document.body
+        while target isnt document and target isnt document.body
           shouldIgnore = ignores.some (ignore) ->
-            if target is ignore.element
-              l.ingore ignore, e
+            if target is ignore.fn.element
+              l.ignore ignore, e
               return true
           if shouldIgnore
             return
-          target = target.parentNode
+          target = target.parentNode or target.parentElement
       l 1, e
       callback e
       l 1, e
@@ -68,8 +68,8 @@ exports.instance = (thisComponent) ->
         element.detachEvent "on#{uppercaseFirst event}", callback
       l 2
 
-    prevOff = component.off
-    component.off = ->
+    prevOff = component.fn.off
+    component.fn.off = ->
       prevOff()
       unbind()
 

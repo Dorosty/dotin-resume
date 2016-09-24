@@ -20,6 +20,7 @@ exports.form =
   paddingBottom: 100
 
 exports.logo =
+  src: 'img/logo.png'
   width: 100
   marginTop: 100
 

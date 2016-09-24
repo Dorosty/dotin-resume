@@ -1,43 +1,20 @@
-component = require '../utils/component'
+component = require '../../utils/component'
 style = require './style'
-{extend, toDate, collection} = require '../utils'
+header = require '../header'
+{extend, toDate, collection} = require '../../utils'
+{stateToPersian} = require '../../utils/logic'
 
-stateToPersian = (state) ->
-  switch state
-    when 0
-      'ثبت شده'
-    when 1
-      'تایید اولیه توسط مدیر'
-    when 2
-      'مصاحبه تلفنی انجام شده'
-    when 3
-      'اطلاعات تکمیل شده'
-    when 4
-      'آزمون‌های شخصیت‌شناسی داده شده'
-    when 5
-      'مصاحبه فنی برگزار شده'
-    when 6
-      'کمیته جذب برگزار شده'
-    when 7
-      'جذب شده'
-    when 8
-      'بایگانی'
-
-module.exports = component 'mainView', ({dom, events, state}) ->
+module.exports = component 'tableView', ({dom, events, state}, {addJob}) ->
 
   {E, append, destroy, setStyle} = dom
   {onEvent} = events
 
   view = E null,
-    E style.header,
-      E 'img', style.headerImg
-      E style.headerWrapper,
-        E style.headerTitle, 'انتخاب شغل‌های مورد تقاضا'
-        E style.breadcrumbs,
-          E 'a', extend({href: 'Home'}, style.breadcrumbsLink), 'خانه > '
-          E 'a', extend({href: '#'}, style.breadcrumbsLinkActive), 'انتخاب شغل‌های مورد تقاضا'
+    E header, 'انتخاب شغل‌های مورد تقاضا'
     E style.wrapper,
-      E style.title, 'انتخاب شغل‌های مورد تقاضا'
+      E style.title, 'انتخاب شغل‌های مورد تقاضا',
+      E class: 'row', paddingRight: 30,
+        _addJob = E class: 'btn btn-default', 'ثبت فرصت شغلی'
       E 'table', style.table,
         E 'thead', null,
           E 'th', extend({minWidth: 65}, style.th)
@@ -60,6 +37,8 @@ module.exports = component 'mainView', ({dom, events, state}) ->
           E 'th', extend({minWidth: 100}, style.th), 'وضعیت'
           # E 'th', extend({minWidth: 50}, style.th), 'تایید‌/رد'
         tbody = E 'tbody'
+
+  onEvent _addJob, 'click', -> addJob()
 
   addApplication = (application) ->
     append tbody, row = E 'tr', style.tr,

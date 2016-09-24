@@ -1,8 +1,8 @@
-component = require '../utils/component'
+component = require '../../utils/component'
 style = require './style'
-{extend} = require '../utils'
+{extend} = require '../../utils'
 
-module.exports = component 'login', ({dom, events, state, service}) ->
+module.exports = component 'login', ({dom, events, service}) ->
 
   {E, text, setStyle, show, hide, enable, disable} = dom
   {onEvent, onEnter} = events
@@ -36,15 +36,11 @@ module.exports = component 'login', ({dom, events, state, service}) ->
     hide invalid
     show spinner
     service.login
-      email: email.element.value
-      password: password.element.value
-      rememver: !!remember.element.checked
-    .then (response) ->
-      if response.invalid
-        show invalid
-      else
-        state.user.set response.user
-        state.applications.set response.applications
+      email: email.value()
+      password: password.value()
+      remember: !!remember.checked()
+    .catch ->
+      show invalid
     .fin ->
       enable [email, password, submit, remember]
       hide spinner

@@ -1,6 +1,7 @@
-log = require('./log').state
+names = require './names'
+log = require('../log').state
 
-createPubSub = ->
+createPubSub = (name) ->
   data = dataNotNull = undefined
   subscribers = []
   on: (options, callback) ->
@@ -43,21 +44,17 @@ createPubSub = ->
 
     subscribers.forEach (callback) -> callback data
 
-pubSubs = [
-  'user'
-  'isInLoginPage'
-  'applications'
-].map (x) ->
-  x: x
-  pubSub: createPubSub()
+pubSubs = names.map (name) ->
+  name: name
+  pubSub: exports[name] = createPubSub name
 
 exports.instance = (thisComponent) ->
 
   exports = {}
 
-  pubSubs.forEach ({x, pubSub}) ->
+  pubSubs.forEach ({name, pubSub}) ->
 
-    l = log.pubsub thisComponent, x
+    l = log.pubsub thisComponent, name
     
     instancePubSub = {}
 
@@ -81,8 +78,8 @@ exports.instance = (thisComponent) ->
         ll 2
         unsubscribe()
         ll 2
-      prevOff = thisComponent.off
-      thisComponent.off = ->
+      prevOff = thisComponent.fn.off
+      thisComponent.fn.off = ->
         prevOff()
         unsubscribe()
       unsubscribe
@@ -93,7 +90,7 @@ exports.instance = (thisComponent) ->
       pubSub.set data
       ll()
 
-    exports[x] = instancePubSub
+    exports[name] = instancePubSub
 
   exports.all = ->
 
@@ -109,9 +106,9 @@ exports.instance = (thisComponent) ->
     values = {}
     l 0
     unsubscribes = keys.map (key) ->
-      exports[key].on options, (x) ->
+      exports[key].on options, (values) ->
         resolved[key] = true
-        values[key] = x
+        values[key] = values
         if (keys.every (keys) -> resolved[keys])
           data = keys.map (key) -> values[key]
           l 1
@@ -124,8 +121,8 @@ exports.instance = (thisComponent) ->
       unsubscribes.forEach (unsubscribe) -> unsubscribe()
       l 2
 
-    prevOff = thisComponent.off
-    thisComponent.off = ->
+    prevOff = thisComponent.fn.off
+    thisComponent.fn.off = ->
       prevOff()
       unsubscribe()
 

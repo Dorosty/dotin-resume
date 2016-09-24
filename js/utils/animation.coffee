@@ -1,4 +1,5 @@
-exports.linear = (rawCallback, wrapCallback) ->
+
+linear = (rawCallback, wrapCallback) ->
   
   lastX = undefined
   callback = (x) ->
@@ -33,7 +34,7 @@ exports.linear = (rawCallback, wrapCallback) ->
       requestAnimationFrame animate
 
 timeStep = 1 / 60
-exports.spring = ([k, m], rawCallback) ->
+spring = ([k, m], rawCallback) ->
   
   lastX = undefined
   callback = (x) ->
@@ -88,3 +89,9 @@ exports.spring = ([k, m], rawCallback) ->
         running = true
         lastTime = performance.now()
         requestAnimationFrame animate
+
+
+module.exports = {
+  linear
+  spring
+}

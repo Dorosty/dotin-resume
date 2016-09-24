@@ -1,30 +1,34 @@
 log = require('./log').dom
-{toPersian, uppercaseFirst, extend} = require '.'
+{toPersian, uppercaseFirst, extend, remove} = require '.'
 
 exports.window = ->
-  name: 'window'
-  element: window
-  off: ->
+  fn:
+    name: 'window'
+    element: window
+    off: ->
 
 exports.document = ->
-  name: 'document'
-  element: document
-  off: ->
+  fn:
+    name: 'document'
+    element: document
+    off: ->
 
 exports.body = ->
-  name: 'body'
-  element: document.body
-  off: ->
+  fn:
+    name: 'body'
+    element: document.body
+    off: ->
 
 exports.head = ->
-  name: 'head'
-  element: document.head
-  off: ->
+  fn:
+    name: 'head'
+    element: document.head
+    off: ->
 
 exports.addPageCSS = (url) ->
   cssNode = document.createElement 'link'
   cssNode.setAttribute 'rel', 'stylesheet'
-  cssNode.setAttribute 'href', "/assets/#{url}"
+  cssNode.setAttribute 'href', "assets/#{url}"
   document.head.appendChild cssNode
 
 exports.addPageStyle = (code) ->
@@ -44,10 +48,15 @@ exports.instance = (thisComponent) ->
     e = (parent, tagName, style, children) ->
       element = document.createElement tagName
       component =
-        name: tagName
-        element: element
-        parent: parent
-        off: ->
+        value: -> element.value
+        checked: -> element.checked
+        focus: -> element.focus()
+        blur: -> element.blur()
+        fn:
+          name: tagName
+          element: element
+          parent: parent
+          off: ->
       exports.setStyle component, style
       do appendChildren = (children) ->
         children.forEach (x) ->
@@ -63,10 +72,11 @@ exports.instance = (thisComponent) ->
       firstArg = args[0]
       if typeof firstArg is 'function'
         l = log.E0 thisComponent
-        l()
-        component = firstArg()
-        component.parent = thisComponent
-        l component
+        restOfArgs = args[1..]
+        l null, restOfArgs
+        component = firstArg restOfArgs...
+        component.fn.parent = thisComponent
+        l component, restOfArgs
       else
         if typeof firstArg is 'string'
           tagName = firstArg
@@ -85,10 +95,10 @@ exports.instance = (thisComponent) ->
         component = e thisComponent, tagName, style, children
         l()
 
-      prevOff = thisComponent.off
-      thisComponent.off = ->
+      prevOff = thisComponent.fn.off
+      thisComponent.fn.off = ->
         prevOff()
-        component.off()
+        component.fn.off()
 
       component
 
@@ -96,47 +106,54 @@ exports.instance = (thisComponent) ->
     l = log.text thisComponent, text
     l()
     component =
-      name: "text[#{text}]"
-      element: document.createTextNode text
-      off: ->
+      fn:
+        name: "text[#{text}]"
+        element: document.createTextNode text
+        off: ->
     l()
     component
 
   exports.append = (parent, component) ->
+    unless component
+      return
     if Array.isArray component
       return component.forEach (component) -> exports.append parent, component
     l = log.append thisComponent, parent, component
     l()
-    parent.element.appendChild component.element
-    component.domParent = parent
+    parent.fn.element.appendChild component.fn.element
+    component.fn.domParent = parent
+    parent.fn.childComponents ?= []
+    parent.fn.childComponents.push component
     l()
 
   exports.destroy = (component) ->
     if Array.isArray component
       return component.map (component) -> exports.destroy component
-    {element} = component
+    {element} = component.fn
     l = log.destroy thisComponent, component
     l()
     element.parentNode.removeChild element
-    component.off()
+    remove component.fn.domParent.fn.childComponents, component
+    component.fn.off()
     l()
 
   exports.empty = (component) ->
     if Array.isArray component
       return component.map (component) -> exports.empty elemcomponentent
-    {element} = component
+    {element} = component.fn
     l = log.empty thisComponent, component
     l()
-    while element.children?.length
-      exports.destroy element: element.children[0]
+    component.fn.childComponents?.slice().forEach exports.destroy
     l()
 
   exports.setStyle = (component, style = {}) ->
     if Array.isArray component
       return component.map (component) -> exports.setStyle component, style
-    {element} = component
+    {element} = component.fn
+    element
     l = log.setStyle thisComponent, component, style, thisComponent
     l()
+    component.fn.style = style
     Object.keys(style).forEach (key) ->
       value = style[key]
       switch key
@@ -170,7 +187,7 @@ exports.instance = (thisComponent) ->
       klass.forEach (klass) -> exports.addClass component, klass
       return component
     exports.removeClass component, klass
-    {element} = component
+    {element} = component.fn
     l = log.addClass thisComponent, component, klass
     l()
     element.setAttribute 'class', ((element.getAttribute('class') ? '') + ' ' + klass).replace(/\ +/g, ' ').trim()
@@ -183,7 +200,7 @@ exports.instance = (thisComponent) ->
     if Array.isArray klass
       klass.forEach (klass) -> exports.removeClass component, klass
       return component
-    {element} = component
+    {element} = component.fn
     l = log.removeClass thisComponent, component, klass
     l()
     previousClass = (element.getAttribute 'class') ? ''
@@ -210,7 +227,7 @@ exports.instance = (thisComponent) ->
   exports.enable = (component) ->
     if Array.isArray component
       return component.map (component) -> exports.enable component
-    {element} = component
+    {element} = component.fn
     l = log.enable thisComponent, component
     l()
     element.removeAttribute 'disabled'
@@ -220,7 +237,7 @@ exports.instance = (thisComponent) ->
   exports.disable = (component) ->
     if Array.isArray component
       return component.map (component) -> exports.disable component
-    {element} = component
+    {element} = component.fn
     l = log.disable thisComponent, component
     l()
     element.setAttribute 'disabled', 'disabled'

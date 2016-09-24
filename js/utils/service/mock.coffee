@@ -1,4 +1,4 @@
-Q = require '../q'
+Q = require '../../q'
 
 applications = [{
   firstName: 'علی',
@@ -24,22 +24,38 @@ applications = [{
   state: 1,
 }]
 
+user = undefined
+
+exports.ping = ->
+
+exports.getUser = ->
+  Q value: user
+
 exports.login = ({email}) ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then ->
     switch email
       when 'hosseininejad@dotin.ir'
-        user:
+        user: user =
           name: 'حامد حسینی‌نژاد'
           type: 'hr'
         applications: applications
       when 'mohammadkhani@dotin.ir'
-        user:
+        user: user =
           name: 'روح‌الله محمد‌خانی'
           type: 'manager'
         applications: applications
+      when 'dorosty@dotin.ir'
+        user: user =
+          name: 'علی درستی'
+          type: 'applicant'
       else
-        invalid: true
+        throw 'invalid'
 
 exports.logout = ({email, password}) ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
+  .then -> loggedOut: true
+
+exports.addJob = ->
+  Q.delay 1000 + 2000 * Math.floor Math.random()
+  .then -> {}

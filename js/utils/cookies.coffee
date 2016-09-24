@@ -1,4 +1,5 @@
-exports.createCookie = (name, value, days) ->
+
+createCookie = (name, value, days) ->
   if days
     date = new Date()
     date.setTime +date + (days * 24 * 60 * 60 * 1000)
@@ -7,7 +8,7 @@ exports.createCookie = (name, value, days) ->
     expires = ''
   document.cookie = "#{name}=#{value}#{expires}; path=/"
 
-exports.readCookie = (name) ->
+readCookie = (name) ->
   nameEQ = "#{name}="
   resultArray = document.cookie.split ';'
   .map (c) ->
@@ -19,5 +20,12 @@ exports.readCookie = (name) ->
   [result] = resultArray
   result?.substring nameEQ.length
 
-exports.eraseCookie = (name) ->
+eraseCookie = (name) ->
   createCookie name, '', -1
+
+
+module.exports = {
+  createCookie
+  readCookie
+  eraseCookie
+}

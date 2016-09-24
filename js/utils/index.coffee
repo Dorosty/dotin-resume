@@ -14,16 +14,7 @@ exports.remove = (array, item) ->
 exports.extend = (target, sources...) ->
   sources.forEach (source) ->
     Object.keys(source).forEach (key) ->
-      value = source[key]
-      unless key is 'except'
-        target[key] = value
-      else
-        if Array.isArray value
-          value.forEach (k) -> delete target[k]
-        else if typeof value is 'object'
-          Object.keys(value).forEach (k) -> delete target[k]
-        else
-          delete target[value]
+      target[key] = source[key]
   target
 
 exports.uppercaseFirst = (name) ->
@@ -55,6 +46,17 @@ exports.toDate = (timestamp) ->
   month = j.jm
   year = j.jy
   String(year).substr(2) + '/' + month + '/' + day
+
+exports.textIsInSearch = (text, search) ->
+  searchWords = search.trim().split ' '
+  .map (x) -> x.trim()
+  .filter (x) -> x
+  textWords = text.trim().split ' '
+  .map (x) -> x.trim()
+  .filter (x) -> x
+  searchWords.every (word) ->
+    textWords.some (textWord) ->
+      ~textWord.indexOf word
 
 exports.collection = (add, destroy, change) ->
   data = []

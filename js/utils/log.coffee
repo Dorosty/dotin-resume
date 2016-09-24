@@ -1,10 +1,11 @@
 log = (x) ->
+  # return
   console.log x
 
 getFullName = (component) ->
   name = ''
   while component
-    name = "#{component.name}>#{name}"
+    name = "#{component.fn.name}>#{name}"
     component = component.parent
   name.substr 0, name.length - 1
 
@@ -16,12 +17,12 @@ exports.component =
 exports.dom =
   E0: (thisComponent) ->
     part = 0
-    (component) ->
+    (component, args) ->
       return
-      log "#{part++}:dom.E:#{if component then getFullName component else 'UnknownComponent'}|#{thisComponent.name}"
+      log "#{part++}:dom.E:#{if component then getFullName component else 'UnknownComponent'}#{if args.length then ':' + JSON.stringify args else ''}|#{getFullName thisComponent}"
 
   E1: (thisComponent, tagName, style, children) ->
-    logText = "dom.E:#{getFullName {name: tagName, parent: thisComponent}}"
+    logText = "dom.E:#{getFullName fn: {name: tagName, parent: thisComponent}}"
     if Object.keys(style).length
       logText += ':' + JSON.stringify style
     if children.length
@@ -107,7 +108,7 @@ exports.events =
     logText = "events.onEvent:#{getFullName component}:#{event}"
     if ignores
       logText += ":ignore:#{JSON.stringify ignores.map (component) -> getFullName component}"
-    logText += "|#{thisComponent.name}"
+    logText += "|#{getFullName thisComponent}"
     parts = [0, 0, 0]
     l = (partIndex, e) ->
       return
@@ -186,7 +187,3 @@ exports.service =
     (data) ->
       return
       log "service.post:#{url}#{if params then ':' + JSON.stringify params else ''}#{if data then ':' + JSON.stringify data else ''}|#{getFullName thisComponent}"
-
-  # logout: (thisComponent) ->
-  #   return
-  #   log "service.logout|#{getFullName thisComponent}"
