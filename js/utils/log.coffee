@@ -155,6 +155,22 @@ exports.events =
       log "#{partIndex}:#{parts[partIndex]++}:events.onEnter:#{getFullName component}|#{getFullName thisComponent}"
 
 exports.state =
+  createPubsub: (thisComponent) ->
+    on: (options, callback) ->
+      parts = [0, 0, 0]
+      (partIndex, data) ->
+        return
+        logText = "#{partIndex}:#{parts[partIndex]++}:state.createPubsub.on:#{JSON.stringify options}"
+        if partIndex is 1
+          logText += ':' + JSON.stringify data
+        logText += "|#{getFullName thisComponent}"
+        log logText
+    set: (data) ->
+      part = 0
+      ->
+        return
+        log "#{part++}:state.createPubsub.set:#{JSON.stringify data}|#{getFullName thisComponent}"
+
   pubsub: (thisComponent, name) ->
     on: (options, callback) ->
       parts = [0, 0, 0]

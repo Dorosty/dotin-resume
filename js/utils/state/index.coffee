@@ -52,6 +52,40 @@ exports.instance = (thisComponent) ->
 
   exports = {}
 
+  exports.createPubSub = (name) ->
+    l = log.pubsub thisComponent, name
+    pubsub = createPubSub name
+    on: ->
+      if arguments.length is 1
+        [callback] = arguments
+        options = {}
+      else
+        [options, callback] = arguments
+
+      ll = l.on options, callback
+
+      ll 0
+      unsubscribe = pubSub.on options, (data) ->
+        ll 1, data
+        callback data
+        ll 1, data
+      ll 0
+      unsubscribe = do (unsubscribe) -> ->
+        ll 2
+        unsubscribe()
+        ll 2
+      prevOff = thisComponent.fn.off
+      thisComponent.fn.off = ->
+        prevOff()
+        unsubscribe()
+      unsubscribe
+
+    set: ->
+      ll = l.set data
+      ll()
+      pubSub.set data
+      ll()
+
   pubSubs.forEach ({name, pubSub}) ->
 
     l = log.pubsub thisComponent, name
@@ -98,7 +132,7 @@ exports.instance = (thisComponent) ->
       [keys, callback] = arguments
       options = {}
     else
-      [options, keys, callback] = arguments
+      [keys, options, callback] = arguments
 
     l = log.all thisComponent, options, keys, callback
 
@@ -106,13 +140,12 @@ exports.instance = (thisComponent) ->
     values = {}
     l 0
     unsubscribes = keys.map (key) ->
-      exports[key].on options, (values) ->
+      exports[key].on options, (value) ->
         resolved[key] = true
-        values[key] = values
+        values[key] = value
         if (keys.every (keys) -> resolved[keys])
-          data = keys.map (key) -> values[key]
           l 1
-          callback data
+          callback keys.map (key) -> values[key]
           l 1
     l 0
 

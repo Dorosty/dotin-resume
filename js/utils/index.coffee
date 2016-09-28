@@ -47,16 +47,22 @@ exports.toDate = (timestamp) ->
   year = j.jy
   String(year).substr(2) + '/' + month + '/' + day
 
-exports.textIsInSearch = (text, search) ->
+exports.textIsInSearch = (text, search, persian, lowerCase) ->
+  if persian
+    text = exports.toPersian text
+    search = exports.toPersian search
+  if lowerCase
+    text = text.toLowerCase()
+    search = search.toLowerCase()
   searchWords = search.trim().split ' '
   .map (x) -> x.trim()
   .filter (x) -> x
   textWords = text.trim().split ' '
   .map (x) -> x.trim()
   .filter (x) -> x
-  searchWords.every (word) ->
+  searchWords.every (searchWord) ->
     textWords.some (textWord) ->
-      ~textWord.indexOf word
+      ~textWord.indexOf searchWord
 
 exports.collection = (add, destroy, change) ->
   data = []

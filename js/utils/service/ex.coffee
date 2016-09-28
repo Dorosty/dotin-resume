@@ -13,26 +13,31 @@ gets.forEach (x) ->
 posts.forEach (x) ->
   exports[x] = (params) ->
     post x, params
-    
+
 cruds.forEach ({name, persianName}) ->
-  exports["update#{uppercaseFirst(name)}"] = (entity) ->
-    post "update#{uppercaseFirst(name)}", entity
+  posts.push serviceName = "update#{uppercaseFirst(name)}"  
+  exports[serviceName] = (entity) ->
+    post serviceName, entity
     .then ->
       state["#{name}s"].on once: true, (entities) ->
         entities = entities.filter ({id}) -> id isnt entity.id
         entities.push entity
         state["#{name}s"].set entities
 
-  exports["create#{uppercaseFirst(name)}"] = (entity) ->
-    post "create#{uppercaseFirst(name)}", entity
+cruds.forEach ({name, persianName}) ->
+  posts.push serviceName = "create#{uppercaseFirst(name)}"
+  exports[serviceName] = (entity) ->
+    post serviceName, entity
     .then (id) ->
       state["#{name}s"].on once: true, (entities) ->
         extend entity, {id}
         entities.push entity
         state["#{name}s"].set entities
 
-  exports["delete#{uppercaseFirst(name)}"] = (id) ->
-    post "delete#{uppercaseFirst(name)}", {id}
+cruds.forEach ({name, persianName}) ->
+  posts.push serviceName = "delete#{uppercaseFirst(name)}"
+  exports[serviceName] = (id) ->
+    post serviceName, {id}
     .then ->
       state["#{name}s"].on once: true, (entities) ->
         deletedId = id

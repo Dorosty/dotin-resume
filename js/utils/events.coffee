@@ -1,5 +1,6 @@
 log = require('./log').events
 {window, body} = require './dom'
+{remove} = require '.'
 
 isIn = (component, {pageX, pageY}) ->
   rect = component.fn.element.getBoundingClientRect()
@@ -19,7 +20,7 @@ exports.instance = (thisComponent) ->
       when 4
         [component, event, ignores, callback] = args
         unless Array.isArray ignores
-          ignores = [ignores]
+          ignores = [ignores].filter (x) -> x
 
     if Array.isArray component
       unbinds = component.map (component) ->
@@ -40,7 +41,7 @@ exports.instance = (thisComponent) ->
       e.target ?= e.srcElement
       if ignores
         target = e.target
-        while target isnt document and target isnt document.body
+        while target and target isnt document and target isnt document.body
           shouldIgnore = ignores.some (ignore) ->
             if target is ignore.fn.element
               l.ignore ignore, e
@@ -53,16 +54,19 @@ exports.instance = (thisComponent) ->
       l 1, e
 
     l 0
-    if element.addEventListener
+    if event is 'pInput'
+      component.fn.pInputListeners.push callback
+    else if element.addEventListener
       element.addEventListener event, callback
     else if element.attachEvent
       element.attachEvent "on#{uppercaseFirst event}", callback
     l 0
 
     unbind = ->
-      return
       l 2
-      if element.removeEventListener
+      if event is 'pInput'
+        remove component.fn.pInputListeners, callback
+      else if element.removeEventListener
         element.removeEventListener event, callback
       else if element.detachEvent
         element.detachEvent "on#{uppercaseFirst event}", callback

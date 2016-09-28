@@ -1,1 +1,1 @@
-browserify -t coffeeify js --extension=".coffee" -o bundle.js
+browserify -t coffeeify js --extension=".coffee" -o recruitment.js

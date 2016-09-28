@@ -52,7 +52,9 @@ exports.instance = (thisComponent) ->
         checked: -> element.checked
         focus: -> element.focus()
         blur: -> element.blur()
+        select: -> element.select()
         fn:
+          pInputListeners: []
           name: tagName
           element: element
           parent: parent
@@ -150,7 +152,6 @@ exports.instance = (thisComponent) ->
     if Array.isArray component
       return component.map (component) -> exports.setStyle component, style
     {element} = component.fn
-    element
     l = log.setStyle thisComponent, component, style, thisComponent
     l()
     component.fn.style = style
@@ -162,9 +163,13 @@ exports.instance = (thisComponent) ->
         when 'englishText'
           element.textContent = element.innerText = value ? ''
         when 'value'
-          element.value = toPersian value
+          unless element.value is toPersian value
+            element.value = toPersian value
+            component.fn.pInputListeners.forEach (x) -> x {}
         when 'englishValue'
-          element.value = value ? ''
+          unless element.value is value
+            element.value = value ? ''
+            component.fn.pInputListeners.forEach (x) -> x {}
         when 'checked'
           element.checked = value
         when 'placeholder'

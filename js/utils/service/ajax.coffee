@@ -6,9 +6,9 @@ module.exports = (isGet, serviceName, params = {}) ->
   if mock[serviceName]
     return mock[serviceName] params
 
-  url = "/webApi/#{serviceName}"
+  url = "/#{serviceName}"
   if isGet
-    url += '&' + Object.keys(params).map((param) -> "#{param}=#{params[param]}").join '&'
+    url += '?' + Object.keys(params).map((param) -> "#{param}=#{params[param]}").join '&'
   Q.promise (resolve, reject) ->
     xhr = new XMLHttpRequest()
     xhr.onreadystatechange = ->

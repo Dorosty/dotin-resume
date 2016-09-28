@@ -27,10 +27,13 @@ handle = (isGet) -> (serviceName, params) ->
           false
       unless dontSetState
         if response[name]
-          state[name].set response[name]
-        if name is 'user' and response.loggedOut
-          state.user.set null
-    delete response.user
+          responseValue = response[name]
+          setTimeout ->
+            state[name].set responseValue
+        if name is 'person' and response.loggedOut
+          setTimeout ->
+            ex.logout true
+    delete response.person
     delete response.loggedOut
     if response.value?
       response = response.value
