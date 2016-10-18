@@ -78,20 +78,21 @@ module.exports = component 'apply', ({dom, events}) ->
         E style.formResume,
           do ->
             button = E style.formResumeButton,
-              E 'i', class: 'fa fa-paperclip', fontSize: 20
+              E 'i', class: 'fa fa-paperclip', fontSize: 20, marginLeft: 10
               text 'بارگزاری رزومه'
             onEvent button, 'mouseover', ->
               setStyle button, style.formResumeButtonHover
             onEvent button, 'mouseout', ->
               setStyle button, style.formResumeButton
             button
-          do ->
             link = E 'a', style.formResumeLink, 'نمونه رزومه'
             onEvent link, 'mouseover', ->
               setStyle link, style.formResumeLinkHover
             onEvent link, 'mouseout', ->
               setStyle link, style.formResumeLink
             link
+        E style.submit, 'ارسال'
+
     E style.footer,
       E style.footerText,
         text '© ۱۳۹۵ '

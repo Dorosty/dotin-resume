@@ -155,6 +155,17 @@ exports.formResumeLink =
 exports.formResumeLinkHover =
   color: '#78C29E'
 
+exports.submit =
+  display: 'inline-block'
+  height: 50
+  lineHeight: 50
+  padding: '0 35px'
+  borderRadius: 50
+  cursor: 'pointer'
+  color: 'white'
+  transition: '0.2s'
+  backgroundColor: 'gray'
+
 exports.footer =
   backgroundColor: '#1f1f1f'
   padding: '20px 30px'
