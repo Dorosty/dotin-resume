@@ -12,7 +12,6 @@ singletonSheet = require './singletons/sheet'
 module.exports = component 'page', ({dom}) ->
   {E, append} = dom
 
-  append E(body), E menu
   append E(body), E views
   append E(body), alertE = E alert
   append E(body), modalE = E modal

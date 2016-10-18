@@ -78,15 +78,20 @@ exports.linkHover = extend {}, exports.link,
   color: '#78C19D'
   borderTop: '2px solid #78C19D'
 
-# width dependent
+extend exports,
 
-exports.menu = extend exports.menu,
-  height: 65
+  menu1:
+    height: 65
 
-# exports.logo = extend exports.logo,
-#   top: 0
+  menu2:
+    height: menu2Height = 130
 
-exports.links = extend exports.links,
-  display: 'block'
-  top: 0
-  right: 350
+
+
+  links1:
+    top: 0
+    right: 300
+
+  links2:
+    top: menu2Height - 65
+    right: 0

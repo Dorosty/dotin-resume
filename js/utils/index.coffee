@@ -47,11 +47,11 @@ exports.toDate = (timestamp) ->
   year = j.jy
   String(year).substr(2) + '/' + month + '/' + day
 
-exports.textIsInSearch = (text, search, persian, lowerCase) ->
-  if persian
+exports.textIsInSearch = (text, search, notPersian, caseSensitive) ->
+  unless notPersian
     text = exports.toPersian text
     search = exports.toPersian search
-  if lowerCase
+  unless caseSensitive
     text = text.toLowerCase()
     search = search.toLowerCase()
   searchWords = search.trim().split ' '

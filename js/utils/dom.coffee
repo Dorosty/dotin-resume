@@ -128,14 +128,22 @@ exports.instance = (thisComponent) ->
     parent.fn.childComponents.push component
     l()
 
-  exports.destroy = (component) ->
+  exports.detatch = (component) ->
     if Array.isArray component
-      return component.map (component) -> exports.destroy component
+      return component.map (component) -> exports.detatch component
     {element} = component.fn
-    l = log.destroy thisComponent, component
+    l = log.detatch thisComponent, component
     l()
     element.parentNode.removeChild element
     remove component.fn.domParent.fn.childComponents, component
+    l()
+
+  exports.destroy = (component) ->
+    if Array.isArray component
+      return component.map (component) -> exports.destroy component
+    l = log.destroy thisComponent, component
+    l()
+    exports.detatch component
     component.fn.off()
     l()
 
@@ -158,6 +166,10 @@ exports.instance = (thisComponent) ->
     Object.keys(style).forEach (key) ->
       value = style[key]
       switch key
+        when 'html'
+          element.innerHTML = toPersian value
+        when 'englishHtml'
+          element.innerHTML = value ? ''
         when 'text'
           element.textContent = element.innerText = toPersian value
         when 'englishText'
@@ -165,11 +177,13 @@ exports.instance = (thisComponent) ->
         when 'value'
           unless element.value is toPersian value
             element.value = toPersian value
-            component.fn.pInputListeners.forEach (x) -> x {}
+            setTimeout ->
+              component.fn.pInputListeners.forEach (x) -> x {}
         when 'englishValue'
           unless element.value is value
             element.value = value ? ''
-            component.fn.pInputListeners.forEach (x) -> x {}
+            setTimeout ->
+              component.fn.pInputListeners.forEach (x) -> x {}
         when 'checked'
           element.checked = value
         when 'placeholder'

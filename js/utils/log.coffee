@@ -19,7 +19,12 @@ exports.dom =
     part = 0
     (component, args) ->
       return
-      log "#{part++}:dom.E:#{if component then getFullName component else 'UnknownComponent'}#{if args.length then ':' + JSON.stringify args else ''}|#{getFullName thisComponent}"
+      try
+        stringifiedArgs = JSON.stringify args
+      catch
+        stringifiedArgs = '[Cannot Stringify]'
+      log "#{part++}:dom.E:#{if component then getFullName component else 'UnknownComponent'}#{if args.length then ':' + stringifiedArgs else ''}|#{getFullName thisComponent}"
+      
 
   E1: (thisComponent, tagName, style, children) ->
     logText = "dom.E:#{getFullName fn: {name: tagName, parent: thisComponent}}"
@@ -44,6 +49,12 @@ exports.dom =
     ->
       return
       log "#{part++}:dom.append:#{getFullName parent}--->#{getFullName component}|#{getFullName thisComponent}"
+
+  detatch: (thisComponent, component) ->
+    part = 0
+    ->
+      return
+      log "#{part++}:dom.detatch:#{getFullName component}|#{getFullName thisComponent}"
 
   destroy: (thisComponent, component) ->
     part = 0

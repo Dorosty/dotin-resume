@@ -554,12 +554,12 @@ style = require('./style');
 
 extend = require('../utils').extend;
 
-module.exports = component('menu', function(arg) {
-  var E, cover, dom, events, hide, links, logout, menu, onEvent, onMouseout, onMouseover, service, setStyle, show, state, text, username;
+module.exports = component('menu', function(arg, handlers) {
+  var E, cover, dom, events, hide, links, linksPlaceholder, logout, menu, onEvent, onMouseout, onMouseover, onResize, resize, service, setStyle, show, state, text, username;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
-  onEvent = events.onEvent, onMouseover = events.onMouseover, onMouseout = events.onMouseout;
-  menu = E(style.menu, cover = E(style.cover), E(style.wrapper, E('a', style.logo, E('img', style.logoImg), text('شرکت نرم‌افزاری داتیس آرین قشم')), E('a', style.en, 'EN'), E('a', style.contact, 'تماس با ما'), username = E(style.username), logout = E(style.logout, 'خروج'), E(style.links, links = [
+  onEvent = events.onEvent, onMouseover = events.onMouseover, onMouseout = events.onMouseout, onResize = events.onResize;
+  menu = E(style.menu, cover = E(style.cover), E('a', style.logo, E('img', style.logoImg), text('شرکت نرم‌افزاری داتیس آرین قشم')), E('a', style.en, 'EN'), E('a', style.contact, 'تماس با ما'), username = E(style.username), logout = E(style.logout, 'خروج'), linksPlaceholder = E(style.links, links = [
     {
       href: '',
       text: 'خانه'
@@ -585,13 +585,28 @@ module.exports = component('menu', function(arg) {
     return E('a', extend({
       href: "Home#" + href
     }, style.link), text);
-  }))));
-  links.forEach(function(link) {
+  })));
+  (resize = function() {
+    var width;
+    width = window.innerWidth;
+    if (width > 1010) {
+      setStyle(menu, style.menu1);
+      return setStyle(linksPlaceholder, style.links1);
+    } else {
+      setStyle(menu, style.menu2);
+      return setStyle(linksPlaceholder, style.links2);
+    }
+  })();
+  onResize(resize);
+  links.forEach(function(link, i) {
     onMouseover(link, function() {
       return setStyle(link, style.linkHover);
     });
-    return onMouseout(link, function() {
+    onMouseout(link, function() {
       return setStyle(link, style.link);
+    });
+    return onEvent(link, 'click', function() {
+      return handlers.click(i);
     });
   });
   onEvent(logout, 'click', function() {
@@ -625,7 +640,7 @@ module.exports = component('menu', function(arg) {
 
 
 },{"../utils":18,"../utils/component":14,"./style":8}],8:[function(require,module,exports){
-var extend;
+var extend, menu2Height;
 
 extend = require('../utils').extend;
 
@@ -717,14 +732,21 @@ exports.linkHover = extend({}, exports.link, {
   borderTop: '2px solid #78C19D'
 });
 
-exports.menu = extend(exports.menu, {
-  height: 65
-});
-
-exports.links = extend(exports.links, {
-  display: 'block',
-  top: 0,
-  right: 350
+extend(exports, {
+  menu1: {
+    height: 65
+  },
+  menu2: {
+    height: menu2Height = 130
+  },
+  links1: {
+    top: 0,
+    right: 300
+  },
+  links2: {
+    top: menu2Height - 65,
+    right: 0
+  }
 });
 
 
@@ -755,7 +777,6 @@ module.exports = component('page', function(arg) {
   var E, alertE, append, dom, modalE;
   dom = arg.dom;
   E = dom.E, append = dom.append;
-  append(E(body), E(menu));
   append(E(body), E(views));
   append(E(body), alertE = E(alert));
   append(E(body), modalE = E(modal));
@@ -765,7 +786,7 @@ module.exports = component('page', function(arg) {
 });
 
 
-},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":37}],10:[function(require,module,exports){
+},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":40}],10:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3126,18 +3147,30 @@ exports.instance = function(thisComponent) {
     parent.fn.childComponents.push(component);
     return l();
   };
-  exports.destroy = function(component) {
+  exports.detatch = function(component) {
     var element, l;
+    if (Array.isArray(component)) {
+      return component.map(function(component) {
+        return exports.detatch(component);
+      });
+    }
+    element = component.fn.element;
+    l = log.detatch(thisComponent, component);
+    l();
+    element.parentNode.removeChild(element);
+    remove(component.fn.domParent.fn.childComponents, component);
+    return l();
+  };
+  exports.destroy = function(component) {
+    var l;
     if (Array.isArray(component)) {
       return component.map(function(component) {
         return exports.destroy(component);
       });
     }
-    element = component.fn.element;
     l = log.destroy(thisComponent, component);
     l();
-    element.parentNode.removeChild(element);
-    remove(component.fn.domParent.fn.childComponents, component);
+    exports.detatch(component);
     component.fn.off();
     return l();
   };
@@ -3174,6 +3207,10 @@ exports.instance = function(thisComponent) {
       var value;
       value = style[key];
       switch (key) {
+        case 'html':
+          return element.innerHTML = toPersian(value);
+        case 'englishHtml':
+          return element.innerHTML = value != null ? value : '';
         case 'text':
           return element.textContent = element.innerText = toPersian(value);
         case 'englishText':
@@ -3181,16 +3218,20 @@ exports.instance = function(thisComponent) {
         case 'value':
           if (element.value !== toPersian(value)) {
             element.value = toPersian(value);
-            return component.fn.pInputListeners.forEach(function(x) {
-              return x({});
+            return setTimeout(function() {
+              return component.fn.pInputListeners.forEach(function(x) {
+                return x({});
+              });
             });
           }
           break;
         case 'englishValue':
           if (element.value !== value) {
             element.value = value != null ? value : '';
-            return component.fn.pInputListeners.forEach(function(x) {
-              return x({});
+            return setTimeout(function() {
+              return component.fn.pInputListeners.forEach(function(x) {
+                return x({});
+              });
             });
           }
           break;
@@ -3488,26 +3529,29 @@ exports.instance = function(thisComponent) {
     var allreadyOut, l, unbind0, unbind1;
     l = log.onMouseout(thisComponent, component, callback);
     allreadyOut = false;
-    l(0.0);
-    unbind0 = exports.onEvent(body(), 'mousemove', function(e) {
-      if (!isIn(component, e)) {
-        l(1.0, e);
-        if (!allreadyOut) {
-          callback(e);
+    if (component) {
+      l(0.0);
+      unbind0 = exports.onEvent(body(), 'mousemove', function(e) {
+        if (!isIn(component, e)) {
+          l(1.0, e);
+          if (!allreadyOut) {
+            callback(e);
+          }
+          l(1.0, e);
+          return allreadyOut = true;
+        } else {
+          return allreadyOut = false;
         }
-        l(1.0, e);
-        return allreadyOut = true;
-      } else {
-        return allreadyOut = false;
-      }
-    });
-    l(0.0);
+      });
+      l(0.0);
+    }
     l(0.1);
     unbind1 = exports.onEvent(body(), 'mouseout', function(e) {
       var from;
       from = e.relatedTarget || e.toElement;
       if (!from || from.nodeName === 'HTML') {
         l(1.1, e);
+        allreadyOut = true;
         callback(e);
         return l(1.1, e);
       }
@@ -3515,7 +3559,9 @@ exports.instance = function(thisComponent) {
     l(0.1);
     return function() {
       l(2.0);
-      unbind0();
+      if (typeof unbind0 === "function") {
+        unbind0();
+      }
       l(2.0);
       l(2.1);
       unbind1();
@@ -3645,13 +3691,13 @@ exports.toDate = function(timestamp) {
   return String(year).substr(2) + '/' + month + '/' + day;
 };
 
-exports.textIsInSearch = function(text, search, persian, lowerCase) {
+exports.textIsInSearch = function(text, search, notPersian, caseSensitive) {
   var searchWords, textWords;
-  if (persian) {
+  if (!notPersian) {
     text = exports.toPersian(text);
     search = exports.toPersian(search);
   }
-  if (lowerCase) {
+  if (!caseSensitive) {
     text = text.toLowerCase();
     search = search.toLowerCase();
   }
@@ -3752,8 +3798,14 @@ exports.dom = {
     var part;
     part = 0;
     return function(component, args) {
+      var error, stringifiedArgs;
       return;
-      return log((part++) + ":dom.E:" + (component ? getFullName(component) : 'UnknownComponent') + (args.length ? ':' + JSON.stringify(args) : '') + "|" + (getFullName(thisComponent)));
+      try {
+        stringifiedArgs = JSON.stringify(args);
+      } catch (error) {
+        stringifiedArgs = '[Cannot Stringify]';
+      }
+      return log((part++) + ":dom.E:" + (component ? getFullName(component) : 'UnknownComponent') + (args.length ? ':' + stringifiedArgs : '') + "|" + (getFullName(thisComponent)));
     };
   },
   E1: function(thisComponent, tagName, style, children) {
@@ -3791,6 +3843,14 @@ exports.dom = {
     return function() {
       return;
       return log((part++) + ":dom.append:" + (getFullName(parent)) + "--->" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
+    };
+  },
+  detatch: function(thisComponent, component) {
+    var part;
+    part = 0;
+    return function() {
+      return;
+      return log((part++) + ":dom.detatch:" + (getFullName(component)) + "|" + (getFullName(thisComponent)));
     };
   },
   destroy: function(thisComponent, component) {
@@ -4836,7 +4896,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils/component":14,"../header":34,"./form":30,"./tests":33}],33:[function(require,module,exports){
+},{"../../utils/component":14,"../header":37,"./form":30,"./tests":33}],33:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -4850,6 +4910,427 @@ module.exports = component('applicantTests', function(arg) {
 
 
 },{"../../../utils/component":14}],34:[function(require,module,exports){
+var component, extend, jobs, ref, style, toEnglish;
+
+component = require('../../utils/component');
+
+style = require('./style');
+
+ref = require('../../utils'), extend = ref.extend, toEnglish = ref.toEnglish;
+
+jobs = require('./jobs');
+
+module.exports = component('apply', function(arg) {
+  var E, append, dom, events, i, j, jobsPlaceholder, onEvent, results, results1, setStyle, text, view;
+  dom = arg.dom, events = arg.events;
+  E = dom.E, text = dom.text, append = dom.append, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  view = E('span', null, E(style.header, E(style.headerMarginfix), E(style.title, 'تقاضای استخدام'), E(style.breadcrumbs, E({
+    color: 'white'
+  }, E('a', style.breadcrumbsLink, 'خانه'), E('i', {
+    "class": 'fa fa-angle-double-left'
+  }), E('a', style.breadcrumbsLink, 'دعوت به همکاری'), E('i', {
+    "class": 'fa fa-angle-double-left'
+  }), E('a', style.breadcrumbsLinkActive, 'تقاضای استخدام')))), E(style.sectionTitle, 'انتخاب شغل های مورد تقاضا'), jobsPlaceholder = E(), E(style.form, E(style.formBackground), E(style.formInner, E(style.formTitle, 'مشخصات فردی'), [
+    {
+      key: 'name',
+      text: 'نام',
+      isPersian: true
+    }, {
+      key: 'surname',
+      text: 'نام خانوادگی',
+      isPersian: true
+    }, {
+      key: 'phoneNumber',
+      text: 'تلفن همراه',
+      isNumber: true
+    }, {
+      key: 'email',
+      text: 'ایمیل'
+    }
+  ].map(function(arg1) {
+    var group, input, isNumber, isPersian, key, previousValue, text;
+    key = arg1.key, text = arg1.text, isNumber = arg1.isNumber, isPersian = arg1.isPersian;
+    group = E(null, input = E('input', extend({
+      placeholder: text
+    }, style.formInput)));
+    if (isNumber || isPersian) {
+      previousValue = '';
+      onEvent(input, 'input', function() {
+        if ((!isNumber || !isNaN(toEnglish(input.value()))) && (!isPersian || !/^[آئا-ی]*$/.test(input.value()))) {
+          previousValue = input.value();
+          setTimeout(function() {
+            return $(input.fn.element).tooltip('hide');
+          });
+        } else {
+          $(input.fn.element).tooltip({
+            trigger: 'manual',
+            placement: 'bottom',
+            title: isNumber ? 'لطفا عدد وارد کنید.' : 'لطفا زبان کیبورد را به فارسی تغییر دهید.'
+          });
+          setTimeout(function() {
+            return $(input.fn.element).tooltip('show');
+          });
+        }
+        return setStyle(input, {
+          value: previousValue
+        });
+      });
+    }
+    onEvent(input, 'blur', function() {
+      return $(input.fn.element).tooltip('hide');
+    });
+    return group;
+  }), E(null, text('تاریخ تولد'), E(style.formBirthdayLabel, 'روز'), E('select', style.formBirthdayDropdown, (function() {
+    results = [];
+    for (i = 1; i <= 31; i++){ results.push(i); }
+    return results;
+  }).apply(this).map(function(x) {
+    return E('option', null, x);
+  })), E(style.formBirthdayLabel, 'ماه'), E('select', style.formBirthdayDropdown, ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'].map(function(x) {
+    return E('option', null, x);
+  })), E(style.formBirthdayLabel, 'سال'), E('select', style.formBirthdayDropdown, (function() {
+    results1 = [];
+    for (j = 1340; j <= 1390; j++){ results1.push(j); }
+    return results1;
+  }).apply(this).map(function(x) {
+    return E('option', null, x);
+  }))), E(style.formResume, (function() {
+    var button;
+    button = E(style.formResumeButton, E('i', {
+      "class": 'fa fa-paperclip',
+      fontSize: 20
+    }), text('بارگزاری رزومه'));
+    onEvent(button, 'mouseover', function() {
+      return setStyle(button, style.formResumeButtonHover);
+    });
+    onEvent(button, 'mouseout', function() {
+      return setStyle(button, style.formResumeButton);
+    });
+    return button;
+  })(), (function() {
+    var link;
+    link = E('a', style.formResumeLink, 'نمونه رزومه');
+    onEvent(link, 'mouseover', function() {
+      return setStyle(link, style.formResumeLinkHover);
+    });
+    onEvent(link, 'mouseout', function() {
+      return setStyle(link, style.formResumeLink);
+    });
+    return link;
+  })()))), E(style.footer, E(style.footerText, text('© ۱۳۹۵ '), E('a', style.footerLogo)), E(style.footerSubtext, text('تمامی حقوق مادی و معنوی این وبسایت متعلق به '), E('a', style.footerLink, 'شرکت داتیس آرین قشم (داتین)'), text(' است'))));
+  jobs.forEach(function(arg1) {
+    var chores, description, icon, requirements, title;
+    title = arg1.title, description = arg1.description, icon = arg1.icon, requirements = arg1.requirements, chores = arg1.chores;
+    return append(jobsPlaceholder, E(style.job, E(style.jobHeader, E(style.jobAdorner), E(style.jobAdorner2), E(style.jobTitle, title), E(extend({
+      html: description
+    }, style.jobDescription)))));
+  });
+  return view;
+});
+
+
+},{"../../utils":18,"../../utils/component":14,"./jobs":35,"./style":36}],35:[function(require,module,exports){
+module.exports = [{
+    id: 1,
+    title: 'کارشناس کنترل کیفیت',
+    description: 'حفظ و بهبود نرم افزارهای موجود و تلاش در جهت توسعه ویژگی‌های جدید و مورد نیاز مشتری.<br />طراحی و پیاده‌سازی نیازهای استخراج‌شده‌ی مشتری. همکاری در تیم با دیگر توسعه دهندگان نرم افزار، تحلیلگران، آزمون‌گران، و غیره.',
+    icon: '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve"><style type="text/css">st0{}.st1{}.st2{}.st3{}.st4{opacity:0.4;}.st5{clip-path:url(#XMLID_462_);}.st6{clip-path:url(#XMLID_479_);}.st7{clip-path:url(#XMLID_717_);}.st8{}.st9{opacity:0.3;}.st10{}.st11{}.st12{opacity:0.7;}.st13{stroke:#114632;stroke-width:2;stroke-miterlimit:10;}.st14{opacity:0.5;}.st15{opacity:0.7;stroke:#114632;stroke-linejoin:bevel;stroke-miterlimit:10;}.st16{opacity:0.3;}.st17{opacity:0.7;}.st18{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st19{opacity:0.5;}.st20{opacity:0.7;stroke:#F7901E;stroke-linejoin:bevel;stroke-miterlimit:10;}.st21{}.st22{}.st23{stroke:#FFFFFF;stroke-miterlimit:10;}.st24{opacity:0.3;}.st25{stroke:#FFF9E7;stroke-width:2;stroke-miterlimit:10;}.st26{opacity:0.5;}.st27{opacity:0.7;stroke:#C8E0D7;stroke-linejoin:bevel;stroke-miterlimit:10;}.st28{clip-path:url(#XMLID_719_);}.st29{clip-path:url(#XMLID_723_);}.st30{}.st31{}.st32{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st33{}.st34{stroke:#E0E0E0;stroke-miterlimit:10;}.st35{}.st36{}.st37{stroke:#E5E5E5;stroke-miterlimit:10;}.st38{display:none;stroke:#E5E5E5;stroke-miterlimit:10;}.st39{}.st40{}.st41{display:none;}.st42{stroke:#78C19D;stroke-miterlimit:10;}.st43{stroke:#F1F1F1;stroke-miterlimit:10;}.st44{stroke:#78C19D;stroke-miterlimit:10;}.st45{stroke:#78C19D;stroke-miterlimit:10;}.st46{}.st47{stroke:#B2B2B2;stroke-miterlimit:10;}.st48{stroke:#B2B2B2;stroke-miterlimit:10;}.st49{stroke:#78C19D;stroke-width:0.5;stroke-miterlimit:10;}.st50{clip-path:url(#XMLID_901_);}.st51{clip-path:url(#XMLID_902_);}.st52{}.st53{stroke:#F0EBDF;stroke-miterlimit:10;}.st54{stroke:#E8DBBA;stroke-miterlimit:10;}.st55{}.st56{opacity:0.75;}.st57{}.st58{stroke:#F5EEDC;stroke-miterlimit:10;}.st59{stroke:#F5EEDC;stroke-miterlimit:10;}.st60{opacity:0.1;}</style><g id="New_Symbol"></g><g id="XMLID_465_"><g id="XMLID_2096_"><g id="XMLID_2105_"><g id="XMLID_2106_"><path id="XMLID_2114_" class="st3" d="M6.2,21.4C6.2,21.4,6.2,21.3,6.2,21.4c0,0,0.1,0.1,0.1,0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0,0,0.1-0.1c0,0,0-0.1,0.1-0.1c0,0,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.2,0-0.3v-1.8c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1v1.8c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2-0.1,0.2c0,0.1-0.1,0.1-0.1,0.2c0,0.1-0.1,0.1-0.2,0.2c-0.1,0.1-0.1,0.1-0.2,0.1C7.1,21.9,7,22,6.9,22c-0.1,0-0.2,0-0.3,0c-0.1,0-0.1,0-0.2,0c0,0,0,0,0,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.2l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1l0,0c0,0,0.1,0,0.1,0C6.1,21.3,6.2,21.3,6.2,21.4"/><path id="XMLID_2111_" class="st3" d="M10.2,22C10.2,22,10.1,22,10.2,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C10.3,22,10.2,22,10.2,22z M9.3,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C9.4,20.8,9.3,20.8,9.3,20.8z"/><path id="XMLID_2110_" class="st3" d="M12,22C12,22,11.9,22,12,22c-0.1,0-0.1,0-0.1,0c0,0,0,0-0.1,0c0,0,0,0,0-0.1l-0.9-2.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1L12,21l0.7-1.5c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1c0,0,0,0.1,0,0.1l-0.9,2.1c0,0,0,0,0,0.1c0,0,0,0-0.1,0C12.1,22,12.1,22,12,22C12.1,22,12,22,12,22z"/><path id="XMLID_2107_" class="st3" d="M15.6,22C15.6,22,15.6,22,15.6,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C15.7,22,15.7,22,15.6,22z M14.7,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C14.9,20.8,14.8,20.8,14.7,20.8z"/></g></g><path id="XMLID_2104_" class="st3" d="M12.1,8.9c-0.1,0-0.2,0-0.2-0.1c0-0.1,0-0.1,0-0.2c0-0.1,0.1-0.1,0.1-0.1c0.3-0.1,0.5-0.3,0.6-0.6c0.1-0.2,0-0.3,0-0.5c-0.1-0.1-0.1-0.2-0.2-0.3c-0.1-0.1-0.1-0.2-0.2-0.3C12,6.7,12,6.6,12,6.5c0-0.1,0-0.2,0-0.3c0,0,0-0.1,0-0.1C12.2,5.5,12.5,5,13,4.8c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0.1c0,0.1,0,0.1,0,0.2c0,0.1-0.1,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1l0,0c0,0,0,0,0,0l0,0c0,0,0,0,0,0c-0.1,0-0.1,0.1-0.2,0.2c-0.1,0.1-0.2,0.2-0.2,0.4c0,0.1-0.1,0.2-0.1,0.3c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1l0,0l0,0c0,0,0,0,0,0.1c0,0,0.1,0.1,0.1,0.2c0.2,0.4,0.5,0.7,0.4,1.2c-0.1,0.4-0.4,0.8-0.8,1C12.2,8.9,12.1,8.9,12.1,8.9z"/><path id="XMLID_2103_" class="st3" d="M10.4,10.3c-0.7,0-1.4,0-1.9-0.1C7.3,10,7.1,9.7,7.1,9.5c0-0.4,0.6-0.6,0.8-0.7c0.4-0.1,0.9-0.2,1.5-0.3L9.5,9c-0.6,0.1-1,0.2-1.4,0.3c0,0,0,0,0,0L8,9.4C8,9.4,8,9.5,8,9.6l0.1,0c0,0,0,0,0,0c0.5,0.1,1.4,0.2,2.3,0.2c0.3,0,0.6,0,0.9,0c1.7-0.1,2.9-0.3,3.4-0.5l0.2,0.5c-0.7,0.3-2,0.5-3.6,0.6C11,10.3,10.7,10.3,10.4,10.3z"/><path id="XMLID_2102_" class="st3" d="M10.7,12c-1.5,0-2.1-0.3-2.3-0.5c-0.2-0.2-0.2-0.3-0.2-0.4c0-0.1,0-0.3,0.6-0.5L8.9,11c0,0-0.3,0.2-0.3,0.2l0.3,0.1c0.2,0.1,0.7,0.2,1.8,0.2c0.3,0,0.5,0,0.8,0c1-0.1,2.3-0.3,2.7-0.4l0.1,0.5c-0.4,0.1-1.7,0.3-2.8,0.4C11.2,12,10.9,12,10.7,12z"/><path id="XMLID_2101_" class="st3" d="M9.3,12.9L9.3,12.9c0,0.2,0.1,0.3,0.2,0.4c0.2,0.1,0.7,0.2,1.3,0.2c0.9,0,2.3-0.1,3-0.4l0.2,0.5c-0.8,0.4-2.2,0.5-3.2,0.5c-0.7,0-1.2-0.1-1.5-0.3c-0.3-0.2-0.5-0.5-0.5-0.8c0-0.2,0.2-0.4,0.3-0.5l0.2,0.4"/><path id="XMLID_2100_" class="st3" d="M11.1,15.9c-1.3,0-2.4-0.1-3.4-0.3c-1.9-0.4-1.9-0.8-1.9-1c0-0.2,0.1-0.3,0.2-0.4c0.3-0.3,1-0.5,1.8-0.5v0.5c-0.7,0-1.1,0.2-1.3,0.3l-0.2,0.1l0.2,0.1C6.6,14.8,7.1,15,8,15.1c0.9,0.2,2,0.2,3.1,0.2c0.2,0,0.4,0,0.7,0c3-0.1,4.5-0.7,5.3-1.3l0.3,0.4c-0.8,0.6-2.4,1.3-5.6,1.4C11.6,15.9,11.3,15.9,11.1,15.9z"/><path id="XMLID_2099_" class="st3" d="M11.6,17.1c-1.5,0-2.9-0.1-4.1-0.4l0.1-0.5c1.1,0.3,2.5,0.4,4,0.4c3.3,0,5.2-0.9,6.3-1.6l0.3,0.4C17.1,16.2,15.1,17.1,11.6,17.1z"/><path id="XMLID_2098_" class="st3" d="M15.3,11.6c0.2,0,0.5-0.1,0.7-0.2c0.5-0.2,1-0.6,1.2-0.9c0.1-0.2,0.4-0.6,0.2-1c-0.1-0.3-0.6-0.6-1.2-0.6c-0.1,0-0.3,0-0.4,0l-0.1-0.5c0.2,0,0.3,0,0.5,0c0.8,0,1.4,0.3,1.7,0.9c0.2,0.4,0.1,1-0.3,1.5c-0.3,0.5-0.8,0.9-1.5,1.1c-0.3,0.1-0.5,0.2-0.8,0.2L15.3,11.6z"/><path id="XMLID_2097_" class="st3" d="M11.6,7.9c-0.1,0-0.2-0.1-0.2-0.1c-0.3-0.4-0.7-0.9-0.8-1.5c-0.1-0.6,0-1.1,0.3-1.5c0.2-0.2,0.4-0.4,0.7-0.6C11.7,4,11.9,3.8,12,3.7c0.5-0.4,0.6-0.9,0.5-1.4c0-0.1,0-0.1,0-0.2C12.6,2,12.7,2,12.8,2c0.1,0,0.2,0.1,0.3,0.2c0.1,0.5,0,1.1-0.3,1.5c-0.2,0.3-0.5,0.6-0.9,0.8c-0.1,0.1-0.2,0.1-0.3,0.2C11.1,5.1,11,5.5,11,6c0.1,0.5,0.4,1,0.7,1.4l0,0.1c0,0,0,0.1,0,0.2c0,0.1-0.1,0.2-0.1,0.2C11.7,7.9,11.6,7.9,11.6,7.9z"/></g></g></svg>',
+    requirements: [
+        'اصول برنامه نویسی و طراحی شی گرا'
+    ],
+    chores: [
+        'اصول برنامه نویسی و طراحی شی گرا',
+        'مهارت در Angular JS، جاوا اسکریپت، MVC، فرم‌های وب Asp.net',
+        'مهارت بالا در چارچوب‌های دات نت و C#',
+        'دانش و مهارتSQL Server',
+        'آشنایی با مفاهیم  وب‌سرویس، WCF، SOA، WEP API',
+        'آشنایی با مفاهیم امنیت در تولید نرم‌افزار',
+        'تخصص در طراحی، توسعه، تست و برنامه‌های کاربردی استقرار',
+        'داشتن حداقل 3 سال سابقه کار مرتبط یک مزیت محسوب خواهد شد.',
+        'آشنایی با مفاهیم حوزه بانکی یک مزیت محسوب خواهد شد.'
+    ],
+    selected: true
+}, {
+    id: 2,
+    title: 'برنامه نویس جاوا',
+    description: 'حفظ و بهبود نرم افزارهای موجود و تلاش در جهت توسعه ویژگی‌های جدید و مورد نیاز مشتری.',
+    icon: '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve"><style type="text/css">st0{}.st1{}.st2{}.st3{}.st4{opacity:0.4;}.st5{clip-path:url(#XMLID_462_);}.st6{clip-path:url(#XMLID_479_);}.st7{clip-path:url(#XMLID_717_);}.st8{}.st9{opacity:0.3;}.st10{}.st11{}.st12{opacity:0.7;}.st13{stroke:#114632;stroke-width:2;stroke-miterlimit:10;}.st14{opacity:0.5;}.st15{opacity:0.7;stroke:#114632;stroke-linejoin:bevel;stroke-miterlimit:10;}.st16{opacity:0.3;}.st17{opacity:0.7;}.st18{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st19{opacity:0.5;}.st20{opacity:0.7;stroke:#F7901E;stroke-linejoin:bevel;stroke-miterlimit:10;}.st21{}.st22{}.st23{stroke:#FFFFFF;stroke-miterlimit:10;}.st24{opacity:0.3;}.st25{stroke:#FFF9E7;stroke-width:2;stroke-miterlimit:10;}.st26{opacity:0.5;}.st27{opacity:0.7;stroke:#C8E0D7;stroke-linejoin:bevel;stroke-miterlimit:10;}.st28{clip-path:url(#XMLID_719_);}.st29{clip-path:url(#XMLID_723_);}.st30{}.st31{}.st32{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st33{}.st34{stroke:#E0E0E0;stroke-miterlimit:10;}.st35{}.st36{}.st37{stroke:#E5E5E5;stroke-miterlimit:10;}.st38{display:none;stroke:#E5E5E5;stroke-miterlimit:10;}.st39{}.st40{}.st41{display:none;}.st42{stroke:#78C19D;stroke-miterlimit:10;}.st43{stroke:#F1F1F1;stroke-miterlimit:10;}.st44{stroke:#78C19D;stroke-miterlimit:10;}.st45{stroke:#78C19D;stroke-miterlimit:10;}.st46{}.st47{stroke:#B2B2B2;stroke-miterlimit:10;}.st48{stroke:#B2B2B2;stroke-miterlimit:10;}.st49{stroke:#78C19D;stroke-width:0.5;stroke-miterlimit:10;}.st50{clip-path:url(#XMLID_901_);}.st51{clip-path:url(#XMLID_902_);}.st52{}.st53{stroke:#F0EBDF;stroke-miterlimit:10;}.st54{stroke:#E8DBBA;stroke-miterlimit:10;}.st55{}.st56{opacity:0.75;}.st57{}.st58{stroke:#F5EEDC;stroke-miterlimit:10;}.st59{stroke:#F5EEDC;stroke-miterlimit:10;}.st60{opacity:0.1;}</style><g id="New_Symbol"></g><g id="XMLID_465_"><g id="XMLID_2096_"><g id="XMLID_2105_"><g id="XMLID_2106_"><path id="XMLID_2114_" class="st3" d="M6.2,21.4C6.2,21.4,6.2,21.3,6.2,21.4c0,0,0.1,0.1,0.1,0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0,0,0.1-0.1c0,0,0-0.1,0.1-0.1c0,0,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.2,0-0.3v-1.8c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1v1.8c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2-0.1,0.2c0,0.1-0.1,0.1-0.1,0.2c0,0.1-0.1,0.1-0.2,0.2c-0.1,0.1-0.1,0.1-0.2,0.1C7.1,21.9,7,22,6.9,22c-0.1,0-0.2,0-0.3,0c-0.1,0-0.1,0-0.2,0c0,0,0,0,0,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.2l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1l0,0c0,0,0.1,0,0.1,0C6.1,21.3,6.2,21.3,6.2,21.4"/><path id="XMLID_2111_" class="st3" d="M10.2,22C10.2,22,10.1,22,10.2,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C10.3,22,10.2,22,10.2,22z M9.3,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C9.4,20.8,9.3,20.8,9.3,20.8z"/><path id="XMLID_2110_" class="st3" d="M12,22C12,22,11.9,22,12,22c-0.1,0-0.1,0-0.1,0c0,0,0,0-0.1,0c0,0,0,0,0-0.1l-0.9-2.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1L12,21l0.7-1.5c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1c0,0,0,0.1,0,0.1l-0.9,2.1c0,0,0,0,0,0.1c0,0,0,0-0.1,0C12.1,22,12.1,22,12,22C12.1,22,12,22,12,22z"/><path id="XMLID_2107_" class="st3" d="M15.6,22C15.6,22,15.6,22,15.6,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C15.7,22,15.7,22,15.6,22z M14.7,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C14.9,20.8,14.8,20.8,14.7,20.8z"/></g></g><path id="XMLID_2104_" class="st3" d="M12.1,8.9c-0.1,0-0.2,0-0.2-0.1c0-0.1,0-0.1,0-0.2c0-0.1,0.1-0.1,0.1-0.1c0.3-0.1,0.5-0.3,0.6-0.6c0.1-0.2,0-0.3,0-0.5c-0.1-0.1-0.1-0.2-0.2-0.3c-0.1-0.1-0.1-0.2-0.2-0.3C12,6.7,12,6.6,12,6.5c0-0.1,0-0.2,0-0.3c0,0,0-0.1,0-0.1C12.2,5.5,12.5,5,13,4.8c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0.1c0,0.1,0,0.1,0,0.2c0,0.1-0.1,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1l0,0c0,0,0,0,0,0l0,0c0,0,0,0,0,0c-0.1,0-0.1,0.1-0.2,0.2c-0.1,0.1-0.2,0.2-0.2,0.4c0,0.1-0.1,0.2-0.1,0.3c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1l0,0l0,0c0,0,0,0,0,0.1c0,0,0.1,0.1,0.1,0.2c0.2,0.4,0.5,0.7,0.4,1.2c-0.1,0.4-0.4,0.8-0.8,1C12.2,8.9,12.1,8.9,12.1,8.9z"/><path id="XMLID_2103_" class="st3" d="M10.4,10.3c-0.7,0-1.4,0-1.9-0.1C7.3,10,7.1,9.7,7.1,9.5c0-0.4,0.6-0.6,0.8-0.7c0.4-0.1,0.9-0.2,1.5-0.3L9.5,9c-0.6,0.1-1,0.2-1.4,0.3c0,0,0,0,0,0L8,9.4C8,9.4,8,9.5,8,9.6l0.1,0c0,0,0,0,0,0c0.5,0.1,1.4,0.2,2.3,0.2c0.3,0,0.6,0,0.9,0c1.7-0.1,2.9-0.3,3.4-0.5l0.2,0.5c-0.7,0.3-2,0.5-3.6,0.6C11,10.3,10.7,10.3,10.4,10.3z"/><path id="XMLID_2102_" class="st3" d="M10.7,12c-1.5,0-2.1-0.3-2.3-0.5c-0.2-0.2-0.2-0.3-0.2-0.4c0-0.1,0-0.3,0.6-0.5L8.9,11c0,0-0.3,0.2-0.3,0.2l0.3,0.1c0.2,0.1,0.7,0.2,1.8,0.2c0.3,0,0.5,0,0.8,0c1-0.1,2.3-0.3,2.7-0.4l0.1,0.5c-0.4,0.1-1.7,0.3-2.8,0.4C11.2,12,10.9,12,10.7,12z"/><path id="XMLID_2101_" class="st3" d="M9.3,12.9L9.3,12.9c0,0.2,0.1,0.3,0.2,0.4c0.2,0.1,0.7,0.2,1.3,0.2c0.9,0,2.3-0.1,3-0.4l0.2,0.5c-0.8,0.4-2.2,0.5-3.2,0.5c-0.7,0-1.2-0.1-1.5-0.3c-0.3-0.2-0.5-0.5-0.5-0.8c0-0.2,0.2-0.4,0.3-0.5l0.2,0.4"/><path id="XMLID_2100_" class="st3" d="M11.1,15.9c-1.3,0-2.4-0.1-3.4-0.3c-1.9-0.4-1.9-0.8-1.9-1c0-0.2,0.1-0.3,0.2-0.4c0.3-0.3,1-0.5,1.8-0.5v0.5c-0.7,0-1.1,0.2-1.3,0.3l-0.2,0.1l0.2,0.1C6.6,14.8,7.1,15,8,15.1c0.9,0.2,2,0.2,3.1,0.2c0.2,0,0.4,0,0.7,0c3-0.1,4.5-0.7,5.3-1.3l0.3,0.4c-0.8,0.6-2.4,1.3-5.6,1.4C11.6,15.9,11.3,15.9,11.1,15.9z"/><path id="XMLID_2099_" class="st3" d="M11.6,17.1c-1.5,0-2.9-0.1-4.1-0.4l0.1-0.5c1.1,0.3,2.5,0.4,4,0.4c3.3,0,5.2-0.9,6.3-1.6l0.3,0.4C17.1,16.2,15.1,17.1,11.6,17.1z"/><path id="XMLID_2098_" class="st3" d="M15.3,11.6c0.2,0,0.5-0.1,0.7-0.2c0.5-0.2,1-0.6,1.2-0.9c0.1-0.2,0.4-0.6,0.2-1c-0.1-0.3-0.6-0.6-1.2-0.6c-0.1,0-0.3,0-0.4,0l-0.1-0.5c0.2,0,0.3,0,0.5,0c0.8,0,1.4,0.3,1.7,0.9c0.2,0.4,0.1,1-0.3,1.5c-0.3,0.5-0.8,0.9-1.5,1.1c-0.3,0.1-0.5,0.2-0.8,0.2L15.3,11.6z"/><path id="XMLID_2097_" class="st3" d="M11.6,7.9c-0.1,0-0.2-0.1-0.2-0.1c-0.3-0.4-0.7-0.9-0.8-1.5c-0.1-0.6,0-1.1,0.3-1.5c0.2-0.2,0.4-0.4,0.7-0.6C11.7,4,11.9,3.8,12,3.7c0.5-0.4,0.6-0.9,0.5-1.4c0-0.1,0-0.1,0-0.2C12.6,2,12.7,2,12.8,2c0.1,0,0.2,0.1,0.3,0.2c0.1,0.5,0,1.1-0.3,1.5c-0.2,0.3-0.5,0.6-0.9,0.8c-0.1,0.1-0.2,0.1-0.3,0.2C11.1,5.1,11,5.5,11,6c0.1,0.5,0.4,1,0.7,1.4l0,0.1c0,0,0,0.1,0,0.2c0,0.1-0.1,0.2-0.1,0.2C11.7,7.9,11.6,7.9,11.6,7.9z"/></g></g></svg>',
+    requirements: [
+        'اصول برنامه نویسی و طراحی شی گرا',
+        'مهارت در Angular JS، جاوا اسکریپت، MVC، فرم‌های وب Asp.net',
+        'مهارت بالا در چارچوب‌های دات نت و C#',
+        'دانش و مهارتSQL Server',
+        'آشنایی با مفاهیم  وب‌سرویس، WCF، SOA، WEP API',
+        'آشنایی با مفاهیم امنیت در تولید نرم‌افزار',
+        'تخصص در طراحی، توسعه، تست و برنامه‌های کاربردی استقرار',
+        'داشتن حداقل 3 سال سابقه کار مرتبط یک مزیت محسوب خواهد شد.',
+        'آشنایی با مفاهیم حوزه بانکی یک مزیت محسوب خواهد شد.'
+    ],
+    chores: [
+        'اصول برنامه نویسی و طراحی شی گرا'
+    ],
+    selected: true
+}, {
+    id: 3,
+    title: 'برنامه نویس دات نت',
+    description: 'حفظ و بهبود نرم افزارهای موجود و تلاش در جهت توسعه ویژگی‌های جدید و مورد نیاز مشتری.<br />طراحی و پیاده‌سازی نیازهای استخراج‌شده‌ی مشتری. همکاری در تیم با دیگر توسعه دهندگان نرم افزار، تحلیلگران، آزمون‌گران، و غیره.',
+    icon: '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve"><style type="text/css">st0{}.st1{}.st2{}.st3{}.st4{opacity:0.4;}.st5{clip-path:url(#XMLID_462_);}.st6{clip-path:url(#XMLID_479_);}.st7{clip-path:url(#XMLID_717_);}.st8{}.st9{opacity:0.3;}.st10{}.st11{}.st12{opacity:0.7;}.st13{stroke:#114632;stroke-width:2;stroke-miterlimit:10;}.st14{opacity:0.5;}.st15{opacity:0.7;stroke:#114632;stroke-linejoin:bevel;stroke-miterlimit:10;}.st16{opacity:0.3;}.st17{opacity:0.7;}.st18{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st19{opacity:0.5;}.st20{opacity:0.7;stroke:#F7901E;stroke-linejoin:bevel;stroke-miterlimit:10;}.st21{}.st22{}.st23{stroke:#FFFFFF;stroke-miterlimit:10;}.st24{opacity:0.3;}.st25{stroke:#FFF9E7;stroke-width:2;stroke-miterlimit:10;}.st26{opacity:0.5;}.st27{opacity:0.7;stroke:#C8E0D7;stroke-linejoin:bevel;stroke-miterlimit:10;}.st28{clip-path:url(#XMLID_719_);}.st29{clip-path:url(#XMLID_723_);}.st30{}.st31{}.st32{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st33{}.st34{stroke:#E0E0E0;stroke-miterlimit:10;}.st35{}.st36{}.st37{stroke:#E5E5E5;stroke-miterlimit:10;}.st38{display:none;stroke:#E5E5E5;stroke-miterlimit:10;}.st39{}.st40{}.st41{display:none;}.st42{stroke:#78C19D;stroke-miterlimit:10;}.st43{stroke:#F1F1F1;stroke-miterlimit:10;}.st44{stroke:#78C19D;stroke-miterlimit:10;}.st45{stroke:#78C19D;stroke-miterlimit:10;}.st46{}.st47{stroke:#B2B2B2;stroke-miterlimit:10;}.st48{stroke:#B2B2B2;stroke-miterlimit:10;}.st49{stroke:#78C19D;stroke-width:0.5;stroke-miterlimit:10;}.st50{clip-path:url(#XMLID_901_);}.st51{clip-path:url(#XMLID_902_);}.st52{}.st53{stroke:#F0EBDF;stroke-miterlimit:10;}.st54{stroke:#E8DBBA;stroke-miterlimit:10;}.st55{}.st56{opacity:0.75;}.st57{}.st58{stroke:#F5EEDC;stroke-miterlimit:10;}.st59{stroke:#F5EEDC;stroke-miterlimit:10;}.st60{opacity:0.1;}</style><g id="New_Symbol"></g><g id="XMLID_465_"><g id="XMLID_2096_"><g id="XMLID_2105_"><g id="XMLID_2106_"><path id="XMLID_2114_" class="st3" d="M6.2,21.4C6.2,21.4,6.2,21.3,6.2,21.4c0,0,0.1,0.1,0.1,0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0,0,0.1-0.1c0,0,0-0.1,0.1-0.1c0,0,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.2,0-0.3v-1.8c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1v1.8c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2-0.1,0.2c0,0.1-0.1,0.1-0.1,0.2c0,0.1-0.1,0.1-0.2,0.2c-0.1,0.1-0.1,0.1-0.2,0.1C7.1,21.9,7,22,6.9,22c-0.1,0-0.2,0-0.3,0c-0.1,0-0.1,0-0.2,0c0,0,0,0,0,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.2l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1l0,0c0,0,0.1,0,0.1,0C6.1,21.3,6.2,21.3,6.2,21.4"/><path id="XMLID_2111_" class="st3" d="M10.2,22C10.2,22,10.1,22,10.2,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C10.3,22,10.2,22,10.2,22z M9.3,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C9.4,20.8,9.3,20.8,9.3,20.8z"/><path id="XMLID_2110_" class="st3" d="M12,22C12,22,11.9,22,12,22c-0.1,0-0.1,0-0.1,0c0,0,0,0-0.1,0c0,0,0,0,0-0.1l-0.9-2.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1L12,21l0.7-1.5c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1c0,0,0,0.1,0,0.1l-0.9,2.1c0,0,0,0,0,0.1c0,0,0,0-0.1,0C12.1,22,12.1,22,12,22C12.1,22,12,22,12,22z"/><path id="XMLID_2107_" class="st3" d="M15.6,22C15.6,22,15.6,22,15.6,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C15.7,22,15.7,22,15.6,22z M14.7,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C14.9,20.8,14.8,20.8,14.7,20.8z"/></g></g><path id="XMLID_2104_" class="st3" d="M12.1,8.9c-0.1,0-0.2,0-0.2-0.1c0-0.1,0-0.1,0-0.2c0-0.1,0.1-0.1,0.1-0.1c0.3-0.1,0.5-0.3,0.6-0.6c0.1-0.2,0-0.3,0-0.5c-0.1-0.1-0.1-0.2-0.2-0.3c-0.1-0.1-0.1-0.2-0.2-0.3C12,6.7,12,6.6,12,6.5c0-0.1,0-0.2,0-0.3c0,0,0-0.1,0-0.1C12.2,5.5,12.5,5,13,4.8c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0.1c0,0.1,0,0.1,0,0.2c0,0.1-0.1,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1l0,0c0,0,0,0,0,0l0,0c0,0,0,0,0,0c-0.1,0-0.1,0.1-0.2,0.2c-0.1,0.1-0.2,0.2-0.2,0.4c0,0.1-0.1,0.2-0.1,0.3c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1l0,0l0,0c0,0,0,0,0,0.1c0,0,0.1,0.1,0.1,0.2c0.2,0.4,0.5,0.7,0.4,1.2c-0.1,0.4-0.4,0.8-0.8,1C12.2,8.9,12.1,8.9,12.1,8.9z"/><path id="XMLID_2103_" class="st3" d="M10.4,10.3c-0.7,0-1.4,0-1.9-0.1C7.3,10,7.1,9.7,7.1,9.5c0-0.4,0.6-0.6,0.8-0.7c0.4-0.1,0.9-0.2,1.5-0.3L9.5,9c-0.6,0.1-1,0.2-1.4,0.3c0,0,0,0,0,0L8,9.4C8,9.4,8,9.5,8,9.6l0.1,0c0,0,0,0,0,0c0.5,0.1,1.4,0.2,2.3,0.2c0.3,0,0.6,0,0.9,0c1.7-0.1,2.9-0.3,3.4-0.5l0.2,0.5c-0.7,0.3-2,0.5-3.6,0.6C11,10.3,10.7,10.3,10.4,10.3z"/><path id="XMLID_2102_" class="st3" d="M10.7,12c-1.5,0-2.1-0.3-2.3-0.5c-0.2-0.2-0.2-0.3-0.2-0.4c0-0.1,0-0.3,0.6-0.5L8.9,11c0,0-0.3,0.2-0.3,0.2l0.3,0.1c0.2,0.1,0.7,0.2,1.8,0.2c0.3,0,0.5,0,0.8,0c1-0.1,2.3-0.3,2.7-0.4l0.1,0.5c-0.4,0.1-1.7,0.3-2.8,0.4C11.2,12,10.9,12,10.7,12z"/><path id="XMLID_2101_" class="st3" d="M9.3,12.9L9.3,12.9c0,0.2,0.1,0.3,0.2,0.4c0.2,0.1,0.7,0.2,1.3,0.2c0.9,0,2.3-0.1,3-0.4l0.2,0.5c-0.8,0.4-2.2,0.5-3.2,0.5c-0.7,0-1.2-0.1-1.5-0.3c-0.3-0.2-0.5-0.5-0.5-0.8c0-0.2,0.2-0.4,0.3-0.5l0.2,0.4"/><path id="XMLID_2100_" class="st3" d="M11.1,15.9c-1.3,0-2.4-0.1-3.4-0.3c-1.9-0.4-1.9-0.8-1.9-1c0-0.2,0.1-0.3,0.2-0.4c0.3-0.3,1-0.5,1.8-0.5v0.5c-0.7,0-1.1,0.2-1.3,0.3l-0.2,0.1l0.2,0.1C6.6,14.8,7.1,15,8,15.1c0.9,0.2,2,0.2,3.1,0.2c0.2,0,0.4,0,0.7,0c3-0.1,4.5-0.7,5.3-1.3l0.3,0.4c-0.8,0.6-2.4,1.3-5.6,1.4C11.6,15.9,11.3,15.9,11.1,15.9z"/><path id="XMLID_2099_" class="st3" d="M11.6,17.1c-1.5,0-2.9-0.1-4.1-0.4l0.1-0.5c1.1,0.3,2.5,0.4,4,0.4c3.3,0,5.2-0.9,6.3-1.6l0.3,0.4C17.1,16.2,15.1,17.1,11.6,17.1z"/><path id="XMLID_2098_" class="st3" d="M15.3,11.6c0.2,0,0.5-0.1,0.7-0.2c0.5-0.2,1-0.6,1.2-0.9c0.1-0.2,0.4-0.6,0.2-1c-0.1-0.3-0.6-0.6-1.2-0.6c-0.1,0-0.3,0-0.4,0l-0.1-0.5c0.2,0,0.3,0,0.5,0c0.8,0,1.4,0.3,1.7,0.9c0.2,0.4,0.1,1-0.3,1.5c-0.3,0.5-0.8,0.9-1.5,1.1c-0.3,0.1-0.5,0.2-0.8,0.2L15.3,11.6z"/><path id="XMLID_2097_" class="st3" d="M11.6,7.9c-0.1,0-0.2-0.1-0.2-0.1c-0.3-0.4-0.7-0.9-0.8-1.5c-0.1-0.6,0-1.1,0.3-1.5c0.2-0.2,0.4-0.4,0.7-0.6C11.7,4,11.9,3.8,12,3.7c0.5-0.4,0.6-0.9,0.5-1.4c0-0.1,0-0.1,0-0.2C12.6,2,12.7,2,12.8,2c0.1,0,0.2,0.1,0.3,0.2c0.1,0.5,0,1.1-0.3,1.5c-0.2,0.3-0.5,0.6-0.9,0.8c-0.1,0.1-0.2,0.1-0.3,0.2C11.1,5.1,11,5.5,11,6c0.1,0.5,0.4,1,0.7,1.4l0,0.1c0,0,0,0.1,0,0.2c0,0.1-0.1,0.2-0.1,0.2C11.7,7.9,11.6,7.9,11.6,7.9z"/></g></g></svg>',
+    requirements: [
+        'اصول برنامه نویسی و طراحی شی گرا',
+        'مهارت در Angular JS، جاوا اسکریپت، MVC، فرم‌های وب Asp.net',
+        'مهارت بالا در چارچوب‌های دات نت و C#',
+        'دانش و مهارتSQL Server',
+        'آشنایی با مفاهیم  وب‌سرویس، WCF، SOA، WEP API',
+        'آشنایی با مفاهیم امنیت در تولید نرم‌افزار',
+        'تخصص در طراحی، توسعه، تست و برنامه‌های کاربردی استقرار',
+        'داشتن حداقل 3 سال سابقه کار مرتبط یک مزیت محسوب خواهد شد.',
+        'آشنایی با مفاهیم حوزه بانکی یک مزیت محسوب خواهد شد.'
+    ],
+    chores: [
+        'اصول برنامه نویسی و طراحی شی گرا'
+    ],
+    selected: false
+}, {
+    id: 4,
+    title: 'کارشناس کنترل کیفیت',
+    description: 'حفظ و بهبود نرم افزارهای موجود و تلاش در جهت توسعه ویژگی‌های جدید و مورد نیاز مشتری.',
+    icon: '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve"><style type="text/css">st0{}.st1{}.st2{}.st3{}.st4{opacity:0.4;}.st5{clip-path:url(#XMLID_462_);}.st6{clip-path:url(#XMLID_479_);}.st7{clip-path:url(#XMLID_717_);}.st8{}.st9{opacity:0.3;}.st10{}.st11{}.st12{opacity:0.7;}.st13{stroke:#114632;stroke-width:2;stroke-miterlimit:10;}.st14{opacity:0.5;}.st15{opacity:0.7;stroke:#114632;stroke-linejoin:bevel;stroke-miterlimit:10;}.st16{opacity:0.3;}.st17{opacity:0.7;}.st18{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st19{opacity:0.5;}.st20{opacity:0.7;stroke:#F7901E;stroke-linejoin:bevel;stroke-miterlimit:10;}.st21{}.st22{}.st23{stroke:#FFFFFF;stroke-miterlimit:10;}.st24{opacity:0.3;}.st25{stroke:#FFF9E7;stroke-width:2;stroke-miterlimit:10;}.st26{opacity:0.5;}.st27{opacity:0.7;stroke:#C8E0D7;stroke-linejoin:bevel;stroke-miterlimit:10;}.st28{clip-path:url(#XMLID_719_);}.st29{clip-path:url(#XMLID_723_);}.st30{}.st31{}.st32{stroke:#F7901E;stroke-width:2;stroke-miterlimit:10;}.st33{}.st34{stroke:#E0E0E0;stroke-miterlimit:10;}.st35{}.st36{}.st37{stroke:#E5E5E5;stroke-miterlimit:10;}.st38{display:none;stroke:#E5E5E5;stroke-miterlimit:10;}.st39{}.st40{}.st41{display:none;}.st42{stroke:#78C19D;stroke-miterlimit:10;}.st43{stroke:#F1F1F1;stroke-miterlimit:10;}.st44{stroke:#78C19D;stroke-miterlimit:10;}.st45{stroke:#78C19D;stroke-miterlimit:10;}.st46{}.st47{stroke:#B2B2B2;stroke-miterlimit:10;}.st48{stroke:#B2B2B2;stroke-miterlimit:10;}.st49{stroke:#78C19D;stroke-width:0.5;stroke-miterlimit:10;}.st50{clip-path:url(#XMLID_901_);}.st51{clip-path:url(#XMLID_902_);}.st52{}.st53{stroke:#F0EBDF;stroke-miterlimit:10;}.st54{stroke:#E8DBBA;stroke-miterlimit:10;}.st55{}.st56{opacity:0.75;}.st57{}.st58{stroke:#F5EEDC;stroke-miterlimit:10;}.st59{stroke:#F5EEDC;stroke-miterlimit:10;}.st60{opacity:0.1;}</style><g id="New_Symbol"></g><g id="XMLID_465_"><g id="XMLID_2096_"><g id="XMLID_2105_"><g id="XMLID_2106_"><path id="XMLID_2114_" class="st3" d="M6.2,21.4C6.2,21.4,6.2,21.3,6.2,21.4c0,0,0.1,0.1,0.1,0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0,0,0.1-0.1c0,0,0-0.1,0.1-0.1c0,0,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.2,0-0.3v-1.8c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1v1.8c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2,0,0.3c0,0.1,0,0.2-0.1,0.2c0,0.1-0.1,0.1-0.1,0.2c0,0.1-0.1,0.1-0.2,0.2c-0.1,0.1-0.1,0.1-0.2,0.1C7.1,21.9,7,22,6.9,22c-0.1,0-0.2,0-0.3,0c-0.1,0-0.1,0-0.2,0c0,0,0,0,0,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.2l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1l0,0c0,0,0.1,0,0.1,0C6.1,21.3,6.2,21.3,6.2,21.4"/><path id="XMLID_2111_" class="st3" d="M10.2,22C10.2,22,10.1,22,10.2,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C10.3,22,10.2,22,10.2,22z M9.3,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C9.4,20.8,9.3,20.8,9.3,20.8z"/><path id="XMLID_2110_" class="st3" d="M12,22C12,22,11.9,22,12,22c-0.1,0-0.1,0-0.1,0c0,0,0,0-0.1,0c0,0,0,0,0-0.1l-0.9-2.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1L12,21l0.7-1.5c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0.1c0,0,0,0.1,0.1,0.1c0,0,0,0.1,0,0.1c0,0,0,0.1,0,0.1l-0.9,2.1c0,0,0,0,0,0.1c0,0,0,0-0.1,0C12.1,22,12.1,22,12,22C12.1,22,12,22,12,22z"/><path id="XMLID_2107_" class="st3" d="M15.6,22C15.6,22,15.6,22,15.6,22c-0.1,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0-0.1,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.2,0-0.2,0c-0.1,0-0.1,0-0.2-0.1c-0.1,0-0.1-0.1-0.2-0.1c-0.1,0-0.1-0.1-0.1-0.1c0,0-0.1-0.1-0.1-0.2c0-0.1-0.1-0.1-0.1-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0-0.2c0-0.1,0-0.1,0.1-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0.1-0.1,0.1-0.1c0,0,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0v-0.1c0-0.1,0-0.1,0-0.2c0,0,0-0.1-0.1-0.1c0,0-0.1-0.1-0.2-0.1c-0.1,0-0.2,0-0.4,0c-0.1,0-0.1,0-0.2,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0l0,0c0,0-0.1,0-0.1-0.1c0,0,0-0.1-0.1-0.1l0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0,0l0,0c0,0,0-0.1,0.1-0.1c0,0,0.1,0,0.1-0.1c0,0,0.1,0,0.1-0.1c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.2,0,0.3,0c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0,0.2,0.1c0.1,0,0.1,0.1,0.2,0.1c0,0,0.1,0.1,0.1,0.2c0,0.1,0.1,0.1,0.1,0.2c0,0.1,0,0.1,0,0.2v1.5c0,0,0,0.1,0,0.1c0,0,0,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1C15.7,22,15.7,22,15.6,22z M14.7,20.8c-0.1,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0-0.1,0-0.1,0c0,0,0,0,0,0c0,0,0,0,0,0c0,0,0,0,0,0.1c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1c0,0,0,0,0,0.1c0,0,0,0,0,0c0,0,0,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0,0,0.1,0,0.1,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0.1,0,0.1,0,0.2,0c0,0,0.1,0,0.1,0c0,0,0,0,0,0c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0-0.1,0-0.1,0-0.1c0,0,0-0.1,0-0.1c0,0,0,0,0,0c0,0,0,0-0.1,0c0,0-0.1,0-0.2,0c-0.1,0-0.1,0-0.2,0C14.9,20.8,14.8,20.8,14.7,20.8z"/></g></g><path id="XMLID_2104_" class="st3" d="M12.1,8.9c-0.1,0-0.2,0-0.2-0.1c0-0.1,0-0.1,0-0.2c0-0.1,0.1-0.1,0.1-0.1c0.3-0.1,0.5-0.3,0.6-0.6c0.1-0.2,0-0.3,0-0.5c-0.1-0.1-0.1-0.2-0.2-0.3c-0.1-0.1-0.1-0.2-0.2-0.3C12,6.7,12,6.6,12,6.5c0-0.1,0-0.2,0-0.3c0,0,0-0.1,0-0.1C12.2,5.5,12.5,5,13,4.8c0,0,0.1,0,0.1,0c0.1,0,0.2,0,0.2,0.1c0,0.1,0,0.1,0,0.2c0,0.1-0.1,0.1-0.1,0.1c0,0-0.1,0-0.1,0.1l0,0c0,0,0,0,0,0l0,0c0,0,0,0,0,0c-0.1,0-0.1,0.1-0.2,0.2c-0.1,0.1-0.2,0.2-0.2,0.4c0,0.1-0.1,0.2-0.1,0.3c0,0,0,0,0,0.1c0,0,0,0.1,0,0.1l0,0l0,0c0,0,0,0,0,0.1c0,0,0.1,0.1,0.1,0.2c0.2,0.4,0.5,0.7,0.4,1.2c-0.1,0.4-0.4,0.8-0.8,1C12.2,8.9,12.1,8.9,12.1,8.9z"/><path id="XMLID_2103_" class="st3" d="M10.4,10.3c-0.7,0-1.4,0-1.9-0.1C7.3,10,7.1,9.7,7.1,9.5c0-0.4,0.6-0.6,0.8-0.7c0.4-0.1,0.9-0.2,1.5-0.3L9.5,9c-0.6,0.1-1,0.2-1.4,0.3c0,0,0,0,0,0L8,9.4C8,9.4,8,9.5,8,9.6l0.1,0c0,0,0,0,0,0c0.5,0.1,1.4,0.2,2.3,0.2c0.3,0,0.6,0,0.9,0c1.7-0.1,2.9-0.3,3.4-0.5l0.2,0.5c-0.7,0.3-2,0.5-3.6,0.6C11,10.3,10.7,10.3,10.4,10.3z"/><path id="XMLID_2102_" class="st3" d="M10.7,12c-1.5,0-2.1-0.3-2.3-0.5c-0.2-0.2-0.2-0.3-0.2-0.4c0-0.1,0-0.3,0.6-0.5L8.9,11c0,0-0.3,0.2-0.3,0.2l0.3,0.1c0.2,0.1,0.7,0.2,1.8,0.2c0.3,0,0.5,0,0.8,0c1-0.1,2.3-0.3,2.7-0.4l0.1,0.5c-0.4,0.1-1.7,0.3-2.8,0.4C11.2,12,10.9,12,10.7,12z"/><path id="XMLID_2101_" class="st3" d="M9.3,12.9L9.3,12.9c0,0.2,0.1,0.3,0.2,0.4c0.2,0.1,0.7,0.2,1.3,0.2c0.9,0,2.3-0.1,3-0.4l0.2,0.5c-0.8,0.4-2.2,0.5-3.2,0.5c-0.7,0-1.2-0.1-1.5-0.3c-0.3-0.2-0.5-0.5-0.5-0.8c0-0.2,0.2-0.4,0.3-0.5l0.2,0.4"/><path id="XMLID_2100_" class="st3" d="M11.1,15.9c-1.3,0-2.4-0.1-3.4-0.3c-1.9-0.4-1.9-0.8-1.9-1c0-0.2,0.1-0.3,0.2-0.4c0.3-0.3,1-0.5,1.8-0.5v0.5c-0.7,0-1.1,0.2-1.3,0.3l-0.2,0.1l0.2,0.1C6.6,14.8,7.1,15,8,15.1c0.9,0.2,2,0.2,3.1,0.2c0.2,0,0.4,0,0.7,0c3-0.1,4.5-0.7,5.3-1.3l0.3,0.4c-0.8,0.6-2.4,1.3-5.6,1.4C11.6,15.9,11.3,15.9,11.1,15.9z"/><path id="XMLID_2099_" class="st3" d="M11.6,17.1c-1.5,0-2.9-0.1-4.1-0.4l0.1-0.5c1.1,0.3,2.5,0.4,4,0.4c3.3,0,5.2-0.9,6.3-1.6l0.3,0.4C17.1,16.2,15.1,17.1,11.6,17.1z"/><path id="XMLID_2098_" class="st3" d="M15.3,11.6c0.2,0,0.5-0.1,0.7-0.2c0.5-0.2,1-0.6,1.2-0.9c0.1-0.2,0.4-0.6,0.2-1c-0.1-0.3-0.6-0.6-1.2-0.6c-0.1,0-0.3,0-0.4,0l-0.1-0.5c0.2,0,0.3,0,0.5,0c0.8,0,1.4,0.3,1.7,0.9c0.2,0.4,0.1,1-0.3,1.5c-0.3,0.5-0.8,0.9-1.5,1.1c-0.3,0.1-0.5,0.2-0.8,0.2L15.3,11.6z"/><path id="XMLID_2097_" class="st3" d="M11.6,7.9c-0.1,0-0.2-0.1-0.2-0.1c-0.3-0.4-0.7-0.9-0.8-1.5c-0.1-0.6,0-1.1,0.3-1.5c0.2-0.2,0.4-0.4,0.7-0.6C11.7,4,11.9,3.8,12,3.7c0.5-0.4,0.6-0.9,0.5-1.4c0-0.1,0-0.1,0-0.2C12.6,2,12.7,2,12.8,2c0.1,0,0.2,0.1,0.3,0.2c0.1,0.5,0,1.1-0.3,1.5c-0.2,0.3-0.5,0.6-0.9,0.8c-0.1,0.1-0.2,0.1-0.3,0.2C11.1,5.1,11,5.5,11,6c0.1,0.5,0.4,1,0.7,1.4l0,0.1c0,0,0,0.1,0,0.2c0,0.1-0.1,0.2-0.1,0.2C11.7,7.9,11.6,7.9,11.6,7.9z"/></g></g></svg>',
+    requirements: [
+        'اصول برنامه نویسی و طراحی شی گرا'
+    ],
+    chores: [
+        'اصول برنامه نویسی و طراحی شی گرا',
+        'مهارت در Angular JS، جاوا اسکریپت، MVC، فرم‌های وب Asp.net',
+        'مهارت بالا در چارچوب‌های دات نت و C#',
+        'دانش و مهارتSQL Server',
+        'آشنایی با مفاهیم  وب‌سرویس، WCF، SOA، WEP API',
+        'آشنایی با مفاهیم امنیت در تولید نرم‌افزار',
+        'تخصص در طراحی، توسعه، تست و برنامه‌های کاربردی استقرار',
+        'داشتن حداقل 3 سال سابقه کار مرتبط یک مزیت محسوب خواهد شد.',
+        'آشنایی با مفاهیم حوزه بانکی یک مزیت محسوب خواهد شد.'
+    ],
+    selected: false
+}];
+},{}],36:[function(require,module,exports){
+exports.headerMarginfix = {
+  display: 'inline-block',
+  marginTop: 30
+};
+
+exports.header = {
+  width: '100%',
+  height: 200,
+  backgroundImage: 'url(assets/img/apply/header.jpg)'
+};
+
+exports.title = {
+  fontSize: 20,
+  margin: '30px 30px 0',
+  color: 'white'
+};
+
+exports.breadcrumbs = {
+  fontSize: 16,
+  margin: '20px 30px 0'
+};
+
+exports.breadcrumbsLink = {
+  href: '#',
+  textDecoration: 'none',
+  color: 'white',
+  margin: '0 5px'
+};
+
+exports.breadcrumbsLinkActive = {
+  href: '#',
+  margin: '0 5px',
+  textDecoration: 'none',
+  color: '#B8F3D6'
+};
+
+exports.sectionTitle = {
+  fontSize: 20,
+  margin: '30px 30px',
+  color: '#78C29E'
+};
+
+exports.job = {
+  margin: '10px 30px',
+  border: '1px solid rgb(229, 229, 229)'
+};
+
+exports.jobHeader = {
+  backgroundColor: '#FAFAFA',
+  position: 'relative',
+  height: 43,
+  cursor: 'pointer'
+};
+
+exports.jobAdorner = {
+  position: 'absolute',
+  top: -1,
+  right: -10,
+  width: 43 + 2,
+  height: 43 + 2,
+  backgroundColor: '#78C19D'
+};
+
+exports.jobAdorner2 = {
+  borderTop: '10px solid #78C19D',
+  borderRight: 'transparent solid 11px',
+  boxSizing: 'border-box',
+  position: 'absolute',
+  top: 43 + 2 - 1,
+  right: -10,
+  width: 10,
+  height: 0
+};
+
+exports.jobTitle = {
+  color: '#78C29E',
+  lineHeight: 43,
+  height: 43,
+  overflow: 'hidden',
+  position: 'absolute',
+  right: 50,
+  width: 200
+};
+
+exports.jobDescription = {
+  color: '#9ACFB2',
+  lineHeight: 43,
+  height: 43,
+  overflow: 'hidden',
+  position: 'absolute',
+  right: 250,
+  left: 100
+};
+
+exports.form = {
+  backgroundColor: '#F2F2F2',
+  position: 'relative'
+};
+
+exports.formBackground = {
+  backgroundImage: 'url(assets/img/apply/formBg.png)',
+  position: 'absolute',
+  top: 50,
+  left: 200,
+  width: 300,
+  height: 300
+};
+
+exports.formInner = {
+  margin: '0 auto',
+  padding: '20px 30px'
+};
+
+exports.formTitle = {
+  fontSize: 20,
+  margin: '10px 0',
+  color: '#78C29E'
+};
+
+exports.formInput = {
+  outline: 'none',
+  margin: '5px 0',
+  padding: '3px 7px',
+  width: '100%',
+  maxWidth: 442,
+  height: 40,
+  lineHeight: 40 - 2 * 3,
+  borderRadius: 5,
+  border: '1px solid #AAA'
+};
+
+exports.formBirthdayLabel = {
+  display: 'inline-block',
+  color: '#959595',
+  margin: '5px 0',
+  marginRight: 15,
+  marginLeft: 5
+};
+
+exports.formBirthdayDropdown = {
+  outline: 'none',
+  margin: '5px 0',
+  padding: '3px 7px',
+  width: 90,
+  height: 40,
+  lineHeight: 40 - 2 * 3,
+  borderRadius: 5,
+  border: '1px solid #AAA'
+};
+
+exports.formResume = {
+  marginTop: 20
+};
+
+exports.formResumeButton = {
+  display: 'inline-block',
+  height: 30,
+  lineHeight: 30,
+  padding: '0 20px',
+  border: '1px solid #78C19D',
+  borderRadius: 50,
+  cursor: 'pointer',
+  transition: '0.2s',
+  color: '#78C19D',
+  backgroundColor: 'transparent'
+};
+
+exports.formResumeButtonHover = {
+  color: 'white',
+  backgroundColor: '#78C19D'
+};
+
+exports.formResumeLink = {
+  href: '#',
+  textDecoration: 'underline',
+  marginRight: 10,
+  transition: '0.2s',
+  color: '#9ACFB2'
+};
+
+exports.formResumeLinkHover = {
+  color: '#78C29E'
+};
+
+exports.footer = {
+  backgroundColor: '#1f1f1f',
+  padding: '20px 30px',
+  textAlign: 'center'
+};
+
+exports.footerText = {
+  fontSize: 14,
+  color: '#656565'
+};
+
+exports.footerSubtext = {
+  fontSize: 12,
+  color: '#656565',
+  margin: '3px 0'
+};
+
+exports.footerLogo = {
+  href: '#',
+  backgroundImage: 'url(assets/img/footerLogo.png)',
+  display: 'inline-block',
+  width: 30,
+  height: 30,
+  marginRight: 10
+};
+
+exports.footerLink = {
+  href: '#',
+  color: '#73BD89',
+  textDecoration: 'none'
+};
+
+
+},{}],37:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -4870,7 +5351,7 @@ module.exports = component('header', function(arg, title) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./style":35}],35:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./style":38}],38:[function(require,module,exports){
 exports.header = {
   position: 'relative',
   height: 208,
@@ -4920,7 +5401,7 @@ exports.breadcrumbsLinkActive = {
 };
 
 
-},{}],36:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -5030,10 +5511,12 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":41}],37:[function(require,module,exports){
-var applicantView, component, hrView, login, managerView;
+},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":44}],40:[function(require,module,exports){
+var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
+
+apply = require('./apply');
 
 login = require('./login');
 
@@ -5053,27 +5536,14 @@ module.exports = component('views', function(arg) {
     allowNull: true
   }, function(user) {
     empty(wrapper);
-    currentPage = (function() {
-      if (user) {
-        switch (user.type) {
-          case 'hr':
-            return hrView;
-          case 'manager':
-            return managerView;
-          case 'applicant':
-            return applicantView;
-        }
-      } else {
-        return login;
-      }
-    })();
+    currentPage = apply;
     return append(wrapper, E(currentPage));
   });
   return wrapper;
 });
 
 
-},{"../utils/component":14,"./applicantView":32,"./hrView":36,"./login":38,"./managerView":40}],38:[function(require,module,exports){
+},{"../utils/component":14,"./applicantView":32,"./apply":34,"./hrView":39,"./login":41,"./managerView":43}],41:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -5127,7 +5597,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./style":39}],39:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./style":42}],42:[function(require,module,exports){
 exports.bg = {
   src: 'img/bg-1.jpg',
   zIndex: -1,
@@ -5215,7 +5685,7 @@ exports.invalid = {
 };
 
 
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -5223,7 +5693,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":41}],41:[function(require,module,exports){
+},{"../tableView":44}],44:[function(require,module,exports){
 var collection, component, extend, header, ref, stateToPersian, style, toDate;
 
 component = require('../../utils/component');
@@ -5377,7 +5847,7 @@ module.exports = component('tableView', function(arg, arg1) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"../header":34,"./style":42}],42:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"../header":37,"./style":45}],45:[function(require,module,exports){
 exports.wrapper = {
   width: 1500,
   margin: '0 auto',
@@ -5452,7 +5922,7 @@ exports.tdPaperclip = {
 };
 
 
-},{}],43:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -5484,4 +5954,4 @@ service.getUser();
 page();
 
 
-},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[43]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[46]);
