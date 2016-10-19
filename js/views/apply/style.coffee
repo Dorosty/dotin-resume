@@ -157,9 +157,10 @@ exports.formResumeLinkHover =
 
 exports.submit =
   display: 'inline-block'
-  height: 50
-  lineHeight: 50
-  padding: '0 35px'
+  height: 45
+  lineHeight: 45
+  margin: '20px 180px 0'
+  padding: '0 30px'
   borderRadius: 50
   cursor: 'pointer'
   color: 'white'

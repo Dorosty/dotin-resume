@@ -4934,42 +4934,51 @@ module.exports = component('apply', function(arg) {
   }), E('a', style.breadcrumbsLinkActive, 'تقاضای استخدام')))), E(style.sectionTitle, 'انتخاب شغل های مورد تقاضا'), jobsPlaceholder = E(), E(style.form, E(style.formBackground), E(style.formInner, E(style.formTitle, 'مشخصات فردی'), [
     {
       key: 'name',
-      text: 'نام',
+      text: 'نام*',
       isPersian: true
     }, {
       key: 'surname',
-      text: 'نام خانوادگی',
+      text: 'نام خانوادگی*',
       isPersian: true
     }, {
+      key: 'ssid',
+      text: 'کد ملی*',
+      isNumber: true
+    }, {
       key: 'phoneNumber',
-      text: 'تلفن همراه',
+      text: 'تلفن همراه*',
       isNumber: true
     }, {
       key: 'email',
-      text: 'ایمیل'
+      text: 'ایمیل*'
     }
   ].map(function(arg1) {
-    var group, input, isNumber, isPersian, key, previousValue, text;
+    var group, input, isNumber, isPersian, key, previousValue, text, tooltip;
     key = arg1.key, text = arg1.text, isNumber = arg1.isNumber, isPersian = arg1.isPersian;
+    tooltip = void 0;
     group = E(null, input = E('input', extend({
       placeholder: text
     }, style.formInput)));
     if (isNumber || isPersian) {
       previousValue = '';
       onEvent(input, 'input', function() {
-        if ((!isNumber || !isNaN(toEnglish(input.value()))) && (!isPersian || !/^[آئا-ی]*$/.test(input.value()))) {
+        if ((!isNumber || !(isNaN(toEnglish(input.value())))) && (!isPersian || (/^[آئا-ی]*$/.test(input.value())))) {
+          $(input.fn.element).tooltip('destroy');
           previousValue = input.value();
-          setTimeout(function() {
-            return $(input.fn.element).tooltip('hide');
-          });
         } else {
-          $(input.fn.element).tooltip({
-            trigger: 'manual',
-            placement: 'bottom',
-            title: isNumber ? 'لطفا عدد وارد کنید.' : 'لطفا زبان کیبورد را به فارسی تغییر دهید.'
-          });
+          if (tooltip === 2) {
+            $(input.fn.element).tooltip('destroy');
+          }
+          tooltip = 1;
           setTimeout(function() {
-            return $(input.fn.element).tooltip('show');
+            $(input.fn.element).tooltip({
+              trigger: 'manual',
+              placement: 'bottom',
+              title: isNumber ? 'لطفا عدد وارد کنید.' : 'لطفا زبان کیبورد را به فارسی تغییر دهید.'
+            });
+            return setTimeout(function() {
+              return $(input.fn.element).tooltip('show');
+            });
           });
         }
         return setStyle(input, {
@@ -4978,7 +4987,25 @@ module.exports = component('apply', function(arg) {
       });
     }
     onEvent(input, 'blur', function() {
-      return $(input.fn.element).tooltip('hide');
+      if ((key === 'phoneNumber' && (toEnglish(input.value()).indexOf('09') !== 0 || input.value().length !== 11)) || (key === 'ssid' && input.value().length !== 10)) {
+        if (tooltip === 1) {
+          $(input.fn.element).tooltip('destroy');
+        }
+        tooltip = 2;
+        return setTimeout(function() {
+          $(input.fn.element).tooltip({
+            trigger: 'manual',
+            placement: 'left',
+            template: '<div class="tooltip" role="tooltip"> <div class="tooltip-arrow" style="border-left-color: red"></div> <div class="tooltip-inner" style="background-color: red"></div> </div>',
+            title: key === 'phoneNumber' ? 'شماره تلفن وارد شده معتبر نیست.' : 'کد ملی وارد شده معتبر نیست.'
+          });
+          return setTimeout(function() {
+            return $(input.fn.element).tooltip('show');
+          });
+        });
+      } else {
+        return $(input.fn.element).tooltip('destroy');
+      }
     });
     return group;
   }), E(null, text('تاریخ تولد'), E(style.formBirthdayLabel, 'روز'), E('select', style.formBirthdayDropdown, (function() {
@@ -4999,7 +5026,8 @@ module.exports = component('apply', function(arg) {
     var button;
     button = E(style.formResumeButton, E('i', {
       "class": 'fa fa-paperclip',
-      fontSize: 20
+      fontSize: 20,
+      marginLeft: 10
     }), text('بارگزاری رزومه'));
     onEvent(button, 'mouseover', function() {
       return setStyle(button, style.formResumeButtonHover);
@@ -5018,7 +5046,7 @@ module.exports = component('apply', function(arg) {
       return setStyle(link, style.formResumeLink);
     });
     return link;
-  })()))), E(style.footer, E(style.footerText, text('© ۱۳۹۵ '), E('a', style.footerLogo)), E(style.footerSubtext, text('تمامی حقوق مادی و معنوی این وبسایت متعلق به '), E('a', style.footerLink, 'شرکت داتیس آرین قشم (داتین)'), text(' است'))));
+  })()), E(style.submit, 'ارسال'))), E(style.footer, E(style.footerText, text('© ۱۳۹۵ '), E('a', style.footerLogo)), E(style.footerSubtext, text('تمامی حقوق مادی و معنوی این وبسایت متعلق به '), E('a', style.footerLink, 'شرکت داتیس آرین قشم (داتین)'), text(' است'))));
   jobs.forEach(function(arg1) {
     var chores, description, icon, requirements, title;
     title = arg1.title, description = arg1.description, icon = arg1.icon, requirements = arg1.requirements, chores = arg1.chores;
@@ -5295,6 +5323,19 @@ exports.formResumeLink = {
 
 exports.formResumeLinkHover = {
   color: '#78C29E'
+};
+
+exports.submit = {
+  display: 'inline-block',
+  height: 45,
+  lineHeight: 45,
+  margin: '20px 180px 0',
+  padding: '0 30px',
+  borderRadius: 50,
+  cursor: 'pointer',
+  color: 'white',
+  transition: '0.2s',
+  backgroundColor: 'gray'
 };
 
 exports.footer = {

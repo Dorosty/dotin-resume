@@ -28,38 +28,50 @@ module.exports = component 'apply', ({dom, events}) ->
       E style.formInner,
         E style.formTitle, 'مشخصات فردی'
         [
-          {key: 'name', text: 'نام', isPersian: true}
-          {key: 'surname', text: 'نام خانوادگی', isPersian: true}
-          {key: 'phoneNumber', text: 'تلفن همراه', isNumber: true}
-          {key: 'email', text: 'ایمیل'}
+          {key: 'name', text: 'نام*', isPersian: true}
+          {key: 'surname', text: 'نام خانوادگی*', isPersian: true}
+          {key: 'ssid', text: 'کد ملی*', isNumber: true}
+          {key: 'phoneNumber', text: 'تلفن همراه*', isNumber: true}
+          {key: 'email', text: 'ایمیل*'}
         ].map ({key, text, isNumber, isPersian}) ->
+          tooltip = undefined
           group = E null,
             input = E 'input', extend {placeholder: text}, style.formInput
           if isNumber or isPersian
             previousValue = ''
             onEvent input, 'input', ->
-              if (not isNumber or not isNaN toEnglish input.value()) and (not isPersian or not /^[آئا-ی]*$/.test input.value())
+              if (not isNumber or not (isNaN toEnglish input.value())) and (not isPersian or (/^[آئا-ی]*$/.test input.value()))
+                $(input.fn.element).tooltip 'destroy'
                 previousValue = input.value()
-                setTimeout ->
-                  $(input.fn.element).tooltip 'hide'
               else
-                $(input.fn.element).tooltip
-                  trigger: 'manual'
-                  placement: 'bottom'
-                  title: if isNumber then 'لطفا عدد وارد کنید.' else 'لطفا زبان کیبورد را به فارسی تغییر دهید.'
+                if tooltip is 2
+                  $(input.fn.element).tooltip 'destroy'
+                tooltip = 1
                 setTimeout ->
-                  $(input.fn.element).tooltip 'show'
+                  $(input.fn.element).tooltip
+                    trigger: 'manual'
+                    placement: 'bottom'
+                    title: if isNumber then 'لطفا عدد وارد کنید.' else 'لطفا زبان کیبورد را به فارسی تغییر دهید.'
+                  setTimeout -> $(input.fn.element).tooltip 'show'
               setStyle input, value: previousValue
           onEvent input, 'blur', ->
-            $(input.fn.element).tooltip 'hide'
-          # $(input.fn.element).tooltip
-          #   trigger: 'manual'
-          #   placement: 'left'
-          #   template: '<div class="tooltip" role="tooltip">
-          #     <div class="tooltip-arrow" style="border-left-color: red"></div>
-          #     <div class="tooltip-inner" style="background-color: red"></div>
-          #   </div>'
-          #   title: text
+            if (key is 'phoneNumber' and (toEnglish(input.value()).indexOf('09') isnt 0 or input.value().length isnt 11)) or (key is 'ssid' and input.value().length isnt 10)
+              if tooltip is 1
+                $(input.fn.element).tooltip 'destroy'
+              tooltip = 2
+              setTimeout ->
+                $(input.fn.element).tooltip
+                  trigger: 'manual'
+                  placement: 'left'
+                  template: '<div class="tooltip" role="tooltip">
+                    <div class="tooltip-arrow" style="border-left-color: red"></div>
+                    <div class="tooltip-inner" style="background-color: red"></div>
+                  </div>'
+                  title: if key is 'phoneNumber' then 'شماره تلفن وارد شده معتبر نیست.' else 'کد ملی وارد شده معتبر نیست.'
+                setTimeout ->
+                  $(input.fn.element).tooltip 'show'
+            else
+              $(input.fn.element).tooltip 'destroy'
           group
         E null,
           text 'تاریخ تولد'
@@ -85,6 +97,7 @@ module.exports = component 'apply', ({dom, events}) ->
             onEvent button, 'mouseout', ->
               setStyle button, style.formResumeButton
             button
+          do ->
             link = E 'a', style.formResumeLink, 'نمونه رزومه'
             onEvent link, 'mouseover', ->
               setStyle link, style.formResumeLinkHover
