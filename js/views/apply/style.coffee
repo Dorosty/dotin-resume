@@ -6,6 +6,7 @@ exports.header =
   width: '100%'
   height: 200
   backgroundImage: 'url(assets/img/apply/header.jpg)'
+  backgroundSize: 'cover'
 
 exports.title =
   fontSize: 20
