@@ -15,17 +15,17 @@ module.exports = component 'views', ({dom, state}) ->
     
     empty wrapper
 
-    # currentPage = if user
-    #   switch user.type
-    #     when 'hr'
-    #       hrView
-    #     when 'manager'
-    #       managerView
-    #     when 'applicant'
-    #       applicantView
-    # else
-    #   login
-    currentPage = apply
+    currentPage = if user
+      switch user.type
+        when 'hr'
+          hrView
+        when 'manager'
+          managerView
+        when 'applicant'
+          applicantView
+    else
+      login
+    # currentPage = apply
 
     append wrapper, E currentPage
 

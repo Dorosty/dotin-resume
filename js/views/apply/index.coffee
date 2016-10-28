@@ -91,7 +91,7 @@ module.exports = component 'apply', ({dom, events}) ->
           do ->
             button = E style.formResumeButton,
               E 'i', class: 'fa fa-paperclip', fontSize: 20, marginLeft: 10
-              text 'بارگزاری رزومه'
+              text 'بارگذاری رزومه'
             onEvent button, 'mouseover', ->
               setStyle button, style.formResumeButtonHover
             onEvent button, 'mouseout', ->

@@ -258,7 +258,7 @@ exports["do"] = function() {
 };
 
 
-},{"./singletons/alert":11,"./utils":18,"./utils/service":24}],3:[function(require,module,exports){
+},{"./singletons/alert":11,"./utils":18,"./utils/service":23}],3:[function(require,module,exports){
 var component;
 
 component = require('../utils/component');
@@ -786,7 +786,7 @@ module.exports = component('page', function(arg) {
 });
 
 
-},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":40}],10:[function(require,module,exports){
+},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":39}],10:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -2913,7 +2913,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":18,"./dom":16,"./events":17,"./log":19,"./service":24,"./state":28}],15:[function(require,module,exports){
+},{".":18,"./dom":16,"./events":17,"./log":19,"./service":23,"./state":27}],15:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -4083,39 +4083,6 @@ exports.service = {
 
 
 },{}],20:[function(require,module,exports){
-exports.emailIsValid = function(email) {
-  return /^.+@.+\..+$/.test(email);
-};
-
-exports.passwordIsValid = function(password) {
-  return password.length >= 6;
-};
-
-exports.stateToPersian = function(state) {
-  switch (state) {
-    case 0:
-      return 'ثبت شده';
-    case 1:
-      return 'تایید اولیه توسط مدیر';
-    case 2:
-      return 'مصاحبه تلفنی انجام شده';
-    case 3:
-      return 'اطلاعات تکمیل شده';
-    case 4:
-      return 'آزمون‌های شخصیت‌شناسی داده شده';
-    case 5:
-      return 'مصاحبه فنی برگزار شده';
-    case 6:
-      return 'کمیته جذب برگزار شده';
-    case 7:
-      return 'جذب شده';
-    case 8:
-      return 'بایگانی';
-  }
-};
-
-
-},{}],21:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -4160,8 +4127,9 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":10,"./mock":25}],22:[function(require,module,exports){
-var Q, cruds, eraseCookie, get, gets, post, posts, ref, ref1, state, stateChangingServices, uppercaseFirst;
+},{"../../q":10,"./mock":24}],21:[function(require,module,exports){
+var Q, cruds, eraseCookie, get, gets, post, posts, ref, ref1, state, stateChangingServices, uppercaseFirst,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Q = require('../../q');
 
@@ -4192,34 +4160,14 @@ posts.forEach(function(x) {
 cruds.forEach(function(arg) {
   var name, persianName, serviceName;
   name = arg.name, persianName = arg.persianName;
-  posts.push(serviceName = "update" + (uppercaseFirst(name)));
-  return exports[serviceName] = function(entity) {
-    return post(serviceName, entity).then(function() {
-      return state[name + "s"].on({
-        once: true
-      }, function(entities) {
-        entities = entities.filter(function(arg1) {
-          var id;
-          id = arg1.id;
-          return id !== entity.id;
-        });
-        entities.push(entity);
-        return state[name + "s"].set(entities);
-      });
-    });
-  };
-});
-
-cruds.forEach(function(arg) {
-  var name, persianName, serviceName;
-  name = arg.name, persianName = arg.persianName;
   posts.push(serviceName = "create" + (uppercaseFirst(name)));
   return exports[serviceName] = function(entity) {
     return post(serviceName, entity).then(function(id) {
       return state[name + "s"].on({
         once: true
       }, function(entities) {
-        extend(entity, {
+        entities = entities.slice();
+        entity = extend({}, entity, {
           id: id
         });
         entities.push(entity);
@@ -4232,20 +4180,41 @@ cruds.forEach(function(arg) {
 cruds.forEach(function(arg) {
   var name, persianName, serviceName;
   name = arg.name, persianName = arg.persianName;
-  posts.push(serviceName = "delete" + (uppercaseFirst(name)));
-  return exports[serviceName] = function(id) {
+  posts.push(serviceName = "update" + (uppercaseFirst(name)));
+  return exports[serviceName] = function(entity) {
+    return post(serviceName, entity).then(function() {
+      return state[name + "s"].on({
+        once: true
+      }, function(entities) {
+        var previousEntitiy;
+        entities = entities.slice();
+        previousEntitiy = entities.filter(function(arg1) {
+          var id;
+          id = arg1.id;
+          return id === entity.id;
+        })[0];
+        entities[entities.indexOf(previousEntitiy)] = extend({}, previousEntitiy, entity);
+        return state[name + "s"].set(entities);
+      });
+    });
+  };
+});
+
+cruds.forEach(function(arg) {
+  var name, persianName, serviceName;
+  name = arg.name, persianName = arg.persianName;
+  posts.push(serviceName = "delete" + (uppercaseFirst(name)) + "s");
+  return exports[serviceName] = function(ids) {
     return post(serviceName, {
-      id: id
+      ids: ids
     }).then(function() {
       return state[name + "s"].on({
         once: true
       }, function(entities) {
-        var deletedId;
-        deletedId = id;
         entities = entities.filter(function(arg1) {
           var id;
           id = arg1.id;
-          return id !== deletedId;
+          return !(indexOf.call(ids, id) >= 0);
         });
         return state[name + "s"].set(entities);
       });
@@ -4254,8 +4223,8 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":18,"../../q":10,"../cookies":15,"../state":28,"./getPost":23,"./names":26,"./stateChangingServices":27}],23:[function(require,module,exports){
-var ajax, ex, handle, state, stateChangingServices, states;
+},{"..":18,"../../q":10,"../cookies":15,"../state":27,"./getPost":22,"./names":25,"./stateChangingServices":26}],22:[function(require,module,exports){
+var ajax, eraseCookie, ex, handle, state, stateChangingServices, states;
 
 ajax = require('./ajax');
 
@@ -4264,6 +4233,8 @@ stateChangingServices = require('./stateChangingServices');
 ex = require('./ex');
 
 states = require('./names').states;
+
+eraseCookie = require('../cookies').eraseCookie;
 
 state = require('../state');
 
@@ -4274,19 +4245,29 @@ handle = function(isGet) {
       ref.running = true;
     }
     startedAt = +new Date();
-    return ajax(isGet, serviceName, params).then(function(response) {
+    return ajax(isGet, serviceName, params)["catch"](function(ex) {
+      var ref1, ref2;
+      if ((ref1 = stateChangingServices[serviceName]) != null) {
+        ref1.running = false;
+      }
+      if ((ref2 = stateChangingServices[serviceName]) != null) {
+        ref2.endedAt = +new Date();
+      }
+      throw ex;
+    }).then(function(response) {
+      var ref1, ref2;
+      if ((ref1 = stateChangingServices[serviceName]) != null) {
+        ref1.running = false;
+      }
+      if ((ref2 = stateChangingServices[serviceName]) != null) {
+        ref2.endedAt = +new Date();
+      }
       states.forEach(function(name) {
-        var dontSetState, ref1, ref2, responseValue;
-        if ((ref1 = stateChangingServices[serviceName]) != null) {
-          ref1.running = false;
-        }
-        if ((ref2 = stateChangingServices[serviceName]) != null) {
-          ref2.endedAt = +new Date();
-        }
+        var dontSetState, responseValue;
         dontSetState = Object.keys(stateChangingServices).some(function(_serviceName) {
           var service;
           service = stateChangingServices[_serviceName];
-          if (service.stateName === name) {
+          if (service.stateName === name || _serviceName === 'logout') {
             if (_serviceName === serviceName) {
               return false;
             } else if (service.running) {
@@ -4307,14 +4288,14 @@ handle = function(isGet) {
               return state[name].set(responseValue);
             });
           }
-          if (name === 'person' && response.loggedOut) {
+          if (name === 'user' && response.loggedOut) {
             return setTimeout(function() {
               return ex.logout(true);
             });
           }
         }
       });
-      delete response.person;
+      delete response.user;
       delete response.loggedOut;
       if (response.value != null) {
         response = response.value;
@@ -4329,7 +4310,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../state":28,"./ajax":21,"./ex":22,"./names":26,"./stateChangingServices":27}],24:[function(require,module,exports){
+},{"../cookies":15,"../state":27,"./ajax":20,"./ex":21,"./names":25,"./stateChangingServices":26}],23:[function(require,module,exports){
 var ex, gets, log, others, post, posts, ref;
 
 ex = require('./ex');
@@ -4375,7 +4356,7 @@ exports.autoPing = function() {
 };
 
 
-},{"../log":19,"./ex":22,"./getPost":23,"./names":26}],25:[function(require,module,exports){
+},{"../log":19,"./ex":21,"./getPost":22,"./names":25}],24:[function(require,module,exports){
 var Q, applications, user;
 
 Q = require('../../q');
@@ -4406,13 +4387,16 @@ applications = [
   }
 ];
 
-user = void 0;
+user = {
+  name: 'حامد حسینی‌نژاد',
+  type: 'hr'
+};
 
 exports.ping = function() {};
 
 exports.getUser = function() {
   return Q({
-    value: user
+    user: user
   });
 };
 
@@ -4467,7 +4451,7 @@ exports.addJob = function() {
 };
 
 
-},{"../../q":10}],26:[function(require,module,exports){
+},{"../../q":10}],25:[function(require,module,exports){
 exports.gets = [];
 
 exports.posts = ['getUser', 'login', 'logout', 'addJob'];
@@ -4484,7 +4468,7 @@ exports.others = [];
 exports.states = ['user', 'applications'];
 
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -4503,15 +4487,18 @@ module.exports = {
 cruds.forEach(function(arg) {
   var name;
   name = arg.name;
-  return ['create', 'update', 'delete'].forEach(function(method) {
-    return exports["" + method + (uppercaseFirst(name))] = {
-      stateName: name
+  ['create', 'update'].forEach(function(method) {
+    return module.exports["" + method + (uppercaseFirst(name))] = {
+      stateName: name + "s"
     };
   });
+  return module.exports["delete" + (uppercaseFirst(name)) + "s"] = {
+    stateName: name + "s"
+  };
 });
 
 
-},{"..":18,"./names":26}],28:[function(require,module,exports){
+},{"..":18,"./names":25}],27:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -4716,11 +4703,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":19,"./names":29}],29:[function(require,module,exports){
+},{"../log":19,"./names":28}],28:[function(require,module,exports){
 module.exports = ['user', 'applications'];
 
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var component, section;
 
 component = require('../../../utils/component');
@@ -4783,7 +4770,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../utils/component":14,"./section":31}],31:[function(require,module,exports){
+},{"../../../utils/component":14,"./section":30}],30:[function(require,module,exports){
 var component, remove;
 
 component = require('../../../utils/component');
@@ -4842,7 +4829,7 @@ module.exports = component('applicantFormSection', function(arg, arg1) {
 });
 
 
-},{"../../../utils":18,"../../../utils/component":14}],32:[function(require,module,exports){
+},{"../../../utils":18,"../../../utils/component":14}],31:[function(require,module,exports){
 var component, form, header, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -4896,7 +4883,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils/component":14,"../header":37,"./form":30,"./tests":33}],33:[function(require,module,exports){
+},{"../../utils/component":14,"../header":36,"./form":29,"./tests":32}],32:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -4909,7 +4896,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":14}],34:[function(require,module,exports){
+},{"../../../utils/component":14}],33:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -5028,7 +5015,7 @@ module.exports = component('apply', function(arg) {
       "class": 'fa fa-paperclip',
       fontSize: 20,
       marginLeft: 10
-    }), text('بارگزاری رزومه'));
+    }), text('بارگذاری رزومه'));
     onEvent(button, 'mouseover', function() {
       return setStyle(button, style.formResumeButtonHover);
     });
@@ -5058,7 +5045,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./jobs":35,"./style":36}],35:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./jobs":34,"./style":35}],34:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -5140,7 +5127,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -5372,7 +5359,7 @@ exports.footerLink = {
 };
 
 
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -5393,7 +5380,7 @@ module.exports = component('header', function(arg, title) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./style":38}],38:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./style":37}],37:[function(require,module,exports){
 exports.header = {
   position: 'relative',
   height: 208,
@@ -5443,7 +5430,7 @@ exports.breadcrumbsLinkActive = {
 };
 
 
-},{}],39:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -5553,7 +5540,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":44}],40:[function(require,module,exports){
+},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":43}],39:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -5578,14 +5565,27 @@ module.exports = component('views', function(arg) {
     allowNull: true
   }, function(user) {
     empty(wrapper);
-    currentPage = apply;
+    currentPage = (function() {
+      if (user) {
+        switch (user.type) {
+          case 'hr':
+            return hrView;
+          case 'manager':
+            return managerView;
+          case 'applicant':
+            return applicantView;
+        }
+      } else {
+        return login;
+      }
+    })();
     return append(wrapper, E(currentPage));
   });
   return wrapper;
 });
 
 
-},{"../utils/component":14,"./applicantView":32,"./apply":34,"./hrView":39,"./login":41,"./managerView":43}],41:[function(require,module,exports){
+},{"../utils/component":14,"./applicantView":31,"./apply":33,"./hrView":38,"./login":40,"./managerView":42}],40:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -5639,7 +5639,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./style":42}],42:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./style":41}],41:[function(require,module,exports){
 exports.bg = {
   src: 'img/bg-1.jpg',
   zIndex: -1,
@@ -5727,7 +5727,7 @@ exports.invalid = {
 };
 
 
-},{}],43:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -5735,236 +5735,33 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":44}],44:[function(require,module,exports){
-var collection, component, extend, header, ref, stateToPersian, style, toDate;
+},{"../tableView":43}],43:[function(require,module,exports){
+var component, style;
 
 component = require('../../utils/component');
 
 style = require('./style');
 
-header = require('../header');
-
-ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, collection = ref.collection;
-
-stateToPersian = require('../../utils/logic').stateToPersian;
-
-module.exports = component('tableView', function(arg, arg1) {
-  var E, _addJob, addApplication, addJob, append, applications, changeApplication, destroy, dom, events, handleApplications, onEvent, removeApplication, searchFirstName, searchInputs, searchJobs, searchLastName, setStyle, state, tbody, updateTable, view;
-  dom = arg.dom, events = arg.events, state = arg.state;
-  addJob = arg1.addJob;
-  E = dom.E, append = dom.append, destroy = dom.destroy, setStyle = dom.setStyle;
-  onEvent = events.onEvent;
-  view = E(null, E(header, 'انتخاب شغل‌های مورد تقاضا'), E(style.wrapper, E(style.title, 'انتخاب شغل‌های مورد تقاضا', E({
-    "class": 'row',
-    paddingRight: 30
-  }, _addJob = E({
-    "class": 'btn btn-default'
-  }, 'ثبت فرصت شغلی'))), E('table', style.table, E('thead', null, E('th', extend({
-    minWidth: 65
-  }, style.th)), E('th', style.th, E(style.thSpan, 'نام'), searchFirstName = E('input', {
-    placeholder: 'جستجو...',
-    "class": 'form-control'
-  })), E('th', style.th, E(style.thSpan, 'نام خانوادگی'), searchLastName = E('input', {
-    placeholder: 'جستجو...',
-    "class": 'form-control'
-  })), E('th', style.th, 'تاریخ تولد'), E('th', style.th, E(style.thSpan, 'مشاغل درخواستی'), searchJobs = E('input', {
-    placeholder: 'جستجو...',
-    "class": 'form-control'
-  })), E('th', style.th, 'تاریخ ثبت'), E('th', style.th, 'تلفن همراه'), E('th', style.th, 'ایمیل'), E('th', style.th, 'رزومه'), E('th', style.th, 'اطباعات تکمیل شده'), E('th', style.th, 'نتیجه آزمونها'), E('th', extend({
-    minWidth: 100
-  }, style.th), 'وضعیت')), tbody = E('tbody'))));
-  onEvent(_addJob, 'click', function() {
-    return addJob();
-  });
-  addApplication = function(application) {
-    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume, row;
-    append(tbody, row = E('tr', style.tr, E('td', style.td, img = E('img', extend({
-      src: application.picture || 'img/picicon.png'
-    }, style.tdPicture))), firstName = E('td', style.td, application.firstName), lastName = E('td', style.td, application.lastName), birthday = E('td', style.td, application.birthday), jobs = E('td', style.td, application.jobs), createdAt = E('td', style.td, toDate(application.createdAt)), phoneNumber = E('td', style.td, application.phoneNumber), email = E('td', extend({
-      englishText: application.email
-    }, style.td)), E('td', style.td, resume = E('a', {
-      href: application.resumeUrl
-    }, E('i', extend({
-      "class": 'fa fa-paperclip'
-    }, style.tdPaperclip)))), E('td', style.td, E('a', {
-      href: ''
-    }, E('i', extend({
-      "class": 'fa fa-paperclip'
-    }, style.tdPaperclip)))), E('td', style.td, E('a', {
-      href: ''
-    }, E('i', extend({
-      "class": 'fa fa-paperclip'
-    }, style.tdPaperclip)))), state = E('td', style.td, stateToPersian(application.state))));
-    return {
-      row: row,
-      img: img,
-      firstName: firstName,
-      lastName: lastName,
-      birthday: birthday,
-      jobs: jobs,
-      createdAt: createdAt,
-      phoneNumber: phoneNumber,
-      email: email,
-      resume: resume,
-      state: state
-    };
-  };
-  removeApplication = function(arg2) {
-    var row;
-    row = arg2.row;
-    return destroy(row);
-  };
-  changeApplication = function(application, x) {
-    var birthday, createdAt, email, firstName, img, jobs, lastName, phoneNumber, resume;
-    img = x.img, firstName = x.firstName, lastName = x.lastName, birthday = x.birthday, jobs = x.jobs, createdAt = x.createdAt, phoneNumber = x.phoneNumber, email = x.email, resume = x.resume, state = x.state;
-    setStyle(img, {
-      src: application.picture || 'img/picicon.png'
-    });
-    setStyle(firstName, {
-      text: application.firstName
-    });
-    setStyle(lastName, {
-      text: application.lastName
-    });
-    setStyle(birthday, {
-      text: application.birthday
-    });
-    setStyle(jobs, {
-      text: application.jobs
-    });
-    setStyle(createdAt, {
-      text: toDate(application.createdAt)
-    });
-    setStyle(phoneNumber, {
-      text: application.phoneNumber
-    });
-    setStyle(email, {
-      englishText: application.email
-    });
-    setStyle(resume, {
-      href: application.resumeUrl
-    });
-    setStyle(state, {
-      text: stateToPersian(application.state)
-    });
-    return x;
-  };
-  handleApplications = collection(addApplication, removeApplication, changeApplication);
-  searchInputs = {
-    'firstName': searchFirstName,
-    'lastName': searchLastName,
-    'jobs': searchJobs
-  };
-  updateTable = function() {
-    var filteredApplications;
-    filteredApplications = applications;
-    Object.keys(searchInputs).forEach(function(key) {
-      var value, words;
-      value = String(searchInputs[key].element.value);
-      if (value.trim() === '') {
-        return;
-      }
-      words = value.split(' ').map(function(word) {
-        return word.trim().toLowerCase();
-      }).filter(function(word) {
-        return word;
-      });
-      return filteredApplications = filteredApplications.filter(function(application) {
-        return words.some(function(word) {
-          return ~application[key].toLowerCase().indexOf(word);
-        });
-      });
-    });
-    return handleApplications(filteredApplications);
-  };
-  applications = void 0;
-  state.applications.on(function(_applications) {
-    applications = _applications;
-    return handleApplications(applications);
-  });
-  Object.keys(searchInputs).forEach(function(key) {
-    return onEvent(searchInputs[key], 'input', updateTable);
-  });
-  return view;
+module.exports = component('tableView', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(style.sidebar);
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"../header":37,"./style":45}],45:[function(require,module,exports){
-exports.wrapper = {
-  width: 1500,
-  margin: '0 auto',
-  overflow: 'hidden'
-};
-
-exports.title = {
-  fontSize: 25,
-  color: '#78C19D',
-  margin: '20px 0 50px'
-};
-
-exports.table = {
-  width: '100%',
-  borderSpacing: 0,
-  borderCollapse: 'collapse'
-};
-
-exports.th = {
-  padding: '0 5px 10px',
-  fontSize: 13,
-  fontWeight: 'normal',
-  height: 30,
-  lineHeight: 30,
-  color: '#5D5D5D',
-  borderTop: '1px solid #DDD',
-  borderLeft: '1px dashed #DDD',
-  borderRight: '1px dashed #DDD',
-  borderBottom: '1px solid #78C19D'
-};
-
-exports.thSpan = {
-  display: 'block',
-  width: '100%'
-};
-
-exports.tr = {
-  cursor: 'default',
-  borderBottom: '1px solid #EEE'
-};
-
-exports.trHover = {
-  backgroundColor: '#e5fbf0'
-};
-
-exports.td = {
-  padding: '0 5px',
-  fontSize: 13,
-  height: 30,
-  lineHeight: 30,
-  textAlign: 'center',
-  color: '#888',
-  borderLeft: '1px dashed #DDD',
-  borderLight: '1px dashed #DDD'
-};
-
-exports.tdPicture = {
-  width: 30,
-  height: 30,
-  borderRadius: 50,
-  border: '1px solid #78C19D',
-  display: 'inline-block',
-  position: 'relative',
-  top: 2
-};
-
-exports.tdPaperclip = {
-  fontSize: 25,
-  lineHeight: 40,
-  height: 40,
-  color: '#57B3A1'
+},{"../../utils/component":14,"./style":44}],44:[function(require,module,exports){
+exports.sidebar = {
+  backgroundColor: '#2b2e33',
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  right: 0,
+  width: 300
 };
 
 
-},{}],46:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -5996,4 +5793,4 @@ service.getUser();
 page();
 
 
-},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[46]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":23}]},{},[45]);

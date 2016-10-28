@@ -2,19 +2,24 @@ ajax = require './ajax'
 stateChangingServices = require './stateChangingServices'
 ex = require './ex'
 {states} = require './names'
+{eraseCookie} = require '../cookies'
 state = require '../state'
 
 handle = (isGet) -> (serviceName, params) ->
   stateChangingServices[serviceName]?.running = true
   startedAt = +new Date()
   ajax isGet, serviceName, params
+  .catch (ex) ->
+    stateChangingServices[serviceName]?.running = false
+    stateChangingServices[serviceName]?.endedAt = +new Date()
+    throw ex
   .then (response) ->
+    stateChangingServices[serviceName]?.running = false
+    stateChangingServices[serviceName]?.endedAt = +new Date()
     states.forEach (name) ->
-      stateChangingServices[serviceName]?.running = false
-      stateChangingServices[serviceName]?.endedAt = +new Date()
       dontSetState = Object.keys(stateChangingServices).some (_serviceName) ->
         service = stateChangingServices[_serviceName]
-        if service.stateName is name
+        if service.stateName is name or _serviceName is 'logout'
           if _serviceName is serviceName
             false
           else if service.running
@@ -30,10 +35,10 @@ handle = (isGet) -> (serviceName, params) ->
           responseValue = response[name]
           setTimeout ->
             state[name].set responseValue
-        if name is 'person' and response.loggedOut
+        if name is 'user' and response.loggedOut
           setTimeout ->
             ex.logout true
-    delete response.person
+    delete response.user
     delete response.loggedOut
     if response.value?
       response = response.value

@@ -1,30 +1,3 @@
-#### test
-
-  #   E class: 'row',
-  #     E marginTop: 20,
-  #       do ->
-  #         selectAll = E class: 'btn btn-default', marginLeft: 20, 'انتخاب همه سطرها'
-  #         onEvent selectAll, 'click', -> tableE.fn.selectAll()
-  #         selectAll
-  #       text 'سطرهای انتخاب شده: '
-  #       selectedResults = E display: 'inline-block'
-  #     tableE = E table,
-  #       headerNames: ['ستون اول', 'ستون دوم', 'ستون سوم', 'ستون چهارم']
-  #       itemKeys: ['a', 'b', 'c', 'd']
-  #       wrapperStyle: marginTop: 30
-  #       onSelectedItemsChanged: (selectedItems) ->
-  #         setStyle selectedResults, text: selectedItems.map(({id}) -> id).join ','
-  #       onDataGetter: (callback) ->
-  #         callback -> [
-  #           {id: 1, a: 'مقدار اول', b: 'مقدار اول', c: 'مقدار اول', d: 'مقدار اول'}
-  #           {id: 2, a: 'مقدار دوم', b: 'مقدار دوم', c: 'مقدار دوم', d: 'مقدار دوم'}
-  #           {id: 3, a: 'مقدار سوم', b: 'مقدار سوم', c: 'مقدار سوم', d: 'مقدار سوم'}
-  #           {id: 4, a: 'مقدار چهارم', b: 'مقدار چهارم', c: 'مقدار چهارم', d: 'مقدار چهارم'}
-  #           {id: 5, a: 'مقدار پنجم', b: 'مقدار پنجم', c: 'مقدار پنجم', d: 'مقدار پنجم'}
-  #           {id: 6, a: 'مقدار ششم', b: 'مقدار ششم', c: 'مقدار ششم', d: 'مقدار ششم'}
-  #         ]
-
-
 component = require '../utils/component'
 style = require './tableStyle'
 Q = require '../q'
@@ -41,7 +14,7 @@ module.exports = component 'table', ({dom, events, setOff, returnObject}, {notSt
   sort = getData = undefined
 
   table = E position: 'relative',
-    noData = E wrapperStyle, 'در حال بارگزاری...'
+    noData = E wrapperStyle, 'در حال بارگذاری...'
     hide yesData = E wrapperStyle,
       E 'table', class: 'table table-bordered ' + (unless notStriped then 'table-striped' else ''),
         E 'thead', null,

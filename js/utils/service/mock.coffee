@@ -24,12 +24,14 @@ applications = [{
   state: 1,
 }]
 
-user = undefined
+user =
+  name: 'حامد حسینی‌نژاد'
+  type: 'hr'  
 
 exports.ping = ->
 
 exports.getUser = ->
-  Q value: user
+  Q {user}
 
 exports.login = ({email}) ->
   Q.delay 1000 + 2000 * Math.floor Math.random()

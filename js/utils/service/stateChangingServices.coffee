@@ -6,5 +6,6 @@ module.exports =
   login:  stateName: 'user'
 
 cruds.forEach ({name}) ->
-  ['create', 'update', 'delete'].forEach (method) ->
-    exports["#{method}#{uppercaseFirst name}"] = stateName: name
+  ['create', 'update'].forEach (method) ->
+    module.exports["#{method}#{uppercaseFirst name}"] = stateName: "#{name}s"
+  module.exports["delete#{uppercaseFirst name}s"] = stateName: "#{name}s"
