@@ -1,6 +1,11 @@
 component = require '../../utils/component'
-style = require './style'
+sidebar = require './sidebar'
+search = require './search'
 
 module.exports = component 'tableView', ({dom}) ->
   {E} = dom
-  E style.sidebar
+
+  E 'span', null,
+    E sidebar
+    E marginRight: 350, marginTop: 50,
+      E search

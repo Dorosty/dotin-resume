@@ -5736,9 +5736,29 @@ module.exports = tableView;
 
 
 },{"../tableView":43}],43:[function(require,module,exports){
-var component, style;
+var component, search, sidebar;
 
 component = require('../../utils/component');
+
+sidebar = require('./sidebar');
+
+search = require('./search');
+
+module.exports = component('tableView', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E('span', null, E(sidebar), E({
+    marginRight: 350,
+    marginTop: 50
+  }, E(search)));
+});
+
+
+},{"../../utils/component":14,"./search":44,"./sidebar":46}],44:[function(require,module,exports){
+var component, style;
+
+component = require('../../../utils/component');
 
 style = require('./style');
 
@@ -5746,22 +5766,152 @@ module.exports = component('tableView', function(arg) {
   var E, dom;
   dom = arg.dom;
   E = dom.E;
-  return E(style.sidebar);
+  return E('span', null, E('input', style.searchbox), E(style.settings));
 });
 
 
-},{"../../utils/component":14,"./style":44}],44:[function(require,module,exports){
+},{"../../../utils/component":14,"./style":45}],45:[function(require,module,exports){
+exports.searchbox = {
+  placeholder: 'جستجوی رزومه مورد نظر شما',
+  border: '2px solid #bdd1e5',
+  outline: 'none',
+  width: 400,
+  borderRadius: 3,
+  padding: 7,
+  paddingLeft: 50,
+  height: 30,
+  lineHeight: 30,
+  backgroundColor: '#ecedee',
+  float: 'right'
+};
+
+exports.settings = {
+  "class": 'fa fa-cog',
+  display: 'inline-block',
+  width: 26,
+  height: 26,
+  fontSize: 20,
+  lineHeight: 20,
+  padding: '3px 4px',
+  marginRight: -28,
+  marginTop: 2,
+  borderRadius: '3px 0 0 3px',
+  backgroundColor: '#ddd',
+  color: '#505050',
+  float: 'right',
+  cursor: 'pointer'
+};
+
+
+},{}],46:[function(require,module,exports){
+var component, style;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('sidebar', function(arg) {
+  var E, dom, events, onEvent, onResize, profileImg, resize, setStyle, view;
+  dom = arg.dom, events = arg.events;
+  E = dom.E, setStyle = dom.setStyle;
+  onEvent = events.onEvent, onResize = events.onResize;
+  view = E(style.sidebar, E(style.profile, profileImg = E('img', {
+    src: 'assets/img/profile.jpg'
+  })), E(style.name, 'نام و نام خانوادگی'), E(style.title, 'سمت اداری'), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
+  resize = function() {
+    return setStyle(view, {
+      height: document.body.scrollHeight
+    });
+  };
+  onResize(resize);
+  setTimeout(resize);
+  onEvent(profileImg, 'load', function() {
+    return setStyle(profileImg, {
+      marginRight: -(profileImg.fn.element.offsetWidth - 200) / 2
+    });
+  });
+  return view;
+});
+
+
+},{"../../../utils/component":14,"./style":47}],47:[function(require,module,exports){
+var extend, icon;
+
+extend = require('../../../utils').extend;
+
 exports.sidebar = {
   backgroundColor: '#2b2e33',
   position: 'absolute',
   top: 0,
-  bottom: 0,
   right: 0,
   width: 300
 };
 
+exports.profile = {
+  overflow: 'hidden',
+  borderRadius: 100,
+  width: 200,
+  height: 200,
+  marginTop: 45,
+  marginRight: 45,
+  border: '5px solid #1c1e21'
+};
 
-},{}],45:[function(require,module,exports){
+exports.name = {
+  fontSize: 16,
+  textAlign: 'center',
+  color: 'white',
+  marginTop: 30
+};
+
+exports.title = {
+  fontSize: 16,
+  textAlign: 'center',
+  color: '#505d63',
+  marginTop: 10
+};
+
+icon = {
+  color: 'white',
+  float: 'right',
+  cursor: 'pointer',
+  margin: 20,
+  fontSize: 25
+};
+
+exports.settings = extend({}, icon, {
+  "class": 'fa fa-sliders',
+  marginRight: 110
+});
+
+exports.notifications = extend({}, icon, {
+  "class": 'fa fa-bell-o'
+});
+
+exports.divider = {
+  marginTop: 80,
+  height: 2,
+  backgroundColor: '#1c1e21'
+};
+
+exports.links = {
+  marginTop: 20
+};
+
+exports.link = {
+  cursor: 'pointer',
+  height: 80,
+  lineHeight: 80,
+  textAlign: 'center',
+  color: 'white'
+};
+
+exports.linkActive = extend({}, exports.link, {
+  backgroundColor: '#449e73'
+});
+
+
+},{"../../../utils":18}],48:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -5793,4 +5943,4 @@ service.getUser();
 page();
 
 
-},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":23}]},{},[45]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":23}]},{},[48]);
