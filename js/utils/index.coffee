@@ -45,7 +45,7 @@ exports.toDate = (timestamp) ->
   day = j.jd
   month = j.jm
   year = j.jy
-  String(year).substr(2) + '/' + month + '/' + day
+  "#{year}/#{month}/#{day}"
 
 exports.textIsInSearch = (text, search, notPersian, caseSensitive) ->
   unless notPersian

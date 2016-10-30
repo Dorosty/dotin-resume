@@ -258,7 +258,7 @@ exports["do"] = function() {
 };
 
 
-},{"./singletons/alert":11,"./utils":18,"./utils/service":23}],3:[function(require,module,exports){
+},{"./singletons/alert":11,"./utils":18,"./utils/service":24}],3:[function(require,module,exports){
 var component;
 
 component = require('../utils/component');
@@ -786,7 +786,7 @@ module.exports = component('page', function(arg) {
 });
 
 
-},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":39}],10:[function(require,module,exports){
+},{"./components/alert":3,"./components/modal":5,"./components/sheet":6,"./menu":7,"./singletons/alert":11,"./singletons/modal":12,"./singletons/sheet":13,"./utils/component":14,"./utils/dom":16,"./views":40}],10:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -2913,7 +2913,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":18,"./dom":16,"./events":17,"./log":19,"./service":23,"./state":27}],15:[function(require,module,exports){
+},{".":18,"./dom":16,"./events":17,"./log":19,"./service":24,"./state":28}],15:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -3157,7 +3157,9 @@ exports.instance = function(thisComponent) {
     element = component.fn.element;
     l = log.detatch(thisComponent, component);
     l();
-    element.parentNode.removeChild(element);
+    try {
+      element.parentNode.removeChild(element);
+    } catch (undefined) {}
     remove(component.fn.domParent.fn.childComponents, component);
     return l();
   };
@@ -3387,9 +3389,7 @@ exports.instance = function(thisComponent) {
       case 4:
         component = args[0], event = args[1], ignores = args[2], callback = args[3];
         if (!Array.isArray(ignores)) {
-          ignores = [ignores].filter(function(x) {
-            return x;
-          });
+          ignores = [ignores];
         }
     }
     if (Array.isArray(component)) {
@@ -3688,7 +3688,7 @@ exports.toDate = function(timestamp) {
   day = j.jd;
   month = j.jm;
   year = j.jy;
-  return String(year).substr(2) + '/' + month + '/' + day;
+  return year + "/" + month + "/" + day;
 };
 
 exports.textIsInSearch = function(text, search, notPersian, caseSensitive) {
@@ -4083,6 +4083,39 @@ exports.service = {
 
 
 },{}],20:[function(require,module,exports){
+exports.emailIsValid = function(email) {
+  return /^.+@.+\..+$/.test(email);
+};
+
+exports.passwordIsValid = function(password) {
+  return password.length >= 6;
+};
+
+exports.stateToPersian = function(state) {
+  switch (state) {
+    case 0:
+      return 'ثبت شده';
+    case 1:
+      return 'تایید اولیه توسط مدیر';
+    case 2:
+      return 'مصاحبه تلفنی انجام شده';
+    case 3:
+      return 'اطلاعات تکمیل شده';
+    case 4:
+      return 'آزمون‌های شخصیت‌شناسی داده شده';
+    case 5:
+      return 'مصاحبه فنی برگزار شده';
+    case 6:
+      return 'کمیته جذب برگزار شده';
+    case 7:
+      return 'جذب شده';
+    case 8:
+      return 'بایگانی';
+  }
+};
+
+
+},{}],21:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -4127,7 +4160,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":10,"./mock":24}],21:[function(require,module,exports){
+},{"../../q":10,"./mock":25}],22:[function(require,module,exports){
 var Q, cruds, eraseCookie, get, gets, post, posts, ref, ref1, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -4223,7 +4256,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":18,"../../q":10,"../cookies":15,"../state":27,"./getPost":22,"./names":25,"./stateChangingServices":26}],22:[function(require,module,exports){
+},{"..":18,"../../q":10,"../cookies":15,"../state":28,"./getPost":23,"./names":26,"./stateChangingServices":27}],23:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -4310,8 +4343,10 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":15,"../state":27,"./ajax":20,"./ex":21,"./names":25,"./stateChangingServices":26}],23:[function(require,module,exports){
-var ex, gets, log, others, post, posts, ref;
+},{"../cookies":15,"../state":28,"./ajax":21,"./ex":22,"./names":26,"./stateChangingServices":27}],24:[function(require,module,exports){
+var Q, ex, gets, log, others, post, posts, ref;
+
+Q = require('../../q');
 
 ex = require('./ex');
 
@@ -4349,31 +4384,34 @@ exports.getUser = function() {
 exports.autoPing = function() {
   var fn;
   return (fn = function() {
-    return post('ping').then(function() {
+    return Q.all([post('ping'), Q.delay(5000)]).fin(function() {
       return setTimeout(fn);
-    }).done();
+    });
   })();
 };
 
 
-},{"../log":19,"./ex":21,"./getPost":22,"./names":25}],24:[function(require,module,exports){
+},{"../../q":10,"../log":19,"./ex":22,"./getPost":23,"./names":26}],25:[function(require,module,exports){
 var Q, applications, user;
 
 Q = require('../../q');
 
 applications = [
   {
+    id: 0,
     firstName: 'علی',
     lastName: 'درستی',
     phoneNumber: '09121234567',
     email: 'dorosty@doin.ir',
     birthday: '1340/1/2',
-    jobs: 'Javascript developer',
+    jobs: 'Java developer - Javascript developer',
     resumeUrl: '',
     picture: null,
     createdAt: 1473132854116,
+    notes: [],
     state: 0
   }, {
+    id: 1,
     firstName: 'سعید',
     lastName: 'قیومیه',
     phoneNumber: '09121234567',
@@ -4383,16 +4421,22 @@ applications = [
     resumeUrl: '',
     picture: null,
     createdAt: 1373132854116,
+    notes: ['aaaaaaaaaaaa'],
     state: 1
   }
 ];
 
 user = {
+  picture: 'assets/img/profile.jpg',
   name: 'حامد حسینی‌نژاد',
   type: 'hr'
 };
 
-exports.ping = function() {};
+exports.ping = function() {
+  return Q({
+    applications: applications
+  });
+};
 
 exports.getUser = function() {
   return Q({
@@ -4451,7 +4495,7 @@ exports.addJob = function() {
 };
 
 
-},{"../../q":10}],25:[function(require,module,exports){
+},{"../../q":10}],26:[function(require,module,exports){
 exports.gets = [];
 
 exports.posts = ['getUser', 'login', 'logout', 'addJob'];
@@ -4468,7 +4512,7 @@ exports.others = [];
 exports.states = ['user', 'applications'];
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -4498,7 +4542,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":18,"./names":25}],27:[function(require,module,exports){
+},{"..":18,"./names":26}],28:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -4703,11 +4747,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":19,"./names":28}],28:[function(require,module,exports){
+},{"../log":19,"./names":29}],29:[function(require,module,exports){
 module.exports = ['user', 'applications'];
 
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var component, section;
 
 component = require('../../../utils/component');
@@ -4770,7 +4814,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../utils/component":14,"./section":30}],30:[function(require,module,exports){
+},{"../../../utils/component":14,"./section":31}],31:[function(require,module,exports){
 var component, remove;
 
 component = require('../../../utils/component');
@@ -4829,7 +4873,7 @@ module.exports = component('applicantFormSection', function(arg, arg1) {
 });
 
 
-},{"../../../utils":18,"../../../utils/component":14}],31:[function(require,module,exports){
+},{"../../../utils":18,"../../../utils/component":14}],32:[function(require,module,exports){
 var component, form, header, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -4883,7 +4927,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils/component":14,"../header":36,"./form":29,"./tests":32}],32:[function(require,module,exports){
+},{"../../utils/component":14,"../header":37,"./form":30,"./tests":33}],33:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -4896,7 +4940,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":14}],33:[function(require,module,exports){
+},{"../../../utils/component":14}],34:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -5045,7 +5089,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./jobs":34,"./style":35}],34:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./jobs":35,"./style":36}],35:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -5127,7 +5171,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -5359,7 +5403,7 @@ exports.footerLink = {
 };
 
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -5380,7 +5424,7 @@ module.exports = component('header', function(arg, title) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./style":37}],37:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./style":38}],38:[function(require,module,exports){
 exports.header = {
   position: 'relative',
   height: 208,
@@ -5430,7 +5474,7 @@ exports.breadcrumbsLinkActive = {
 };
 
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -5540,7 +5584,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":43}],39:[function(require,module,exports){
+},{"../../singletons/modal":12,"../../utils/component":14,"../../utils/dom":16,"../tableView":44}],40:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -5585,7 +5629,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":14,"./applicantView":31,"./apply":33,"./hrView":38,"./login":40,"./managerView":42}],40:[function(require,module,exports){
+},{"../utils/component":14,"./applicantView":32,"./apply":34,"./hrView":39,"./login":41,"./managerView":43}],41:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -5639,9 +5683,9 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"./style":41}],41:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"./style":42}],42:[function(require,module,exports){
 exports.bg = {
-  src: 'img/bg-1.jpg',
+  src: 'assets/img/login/bg.jpg',
   zIndex: -1,
   minHeight: '100%',
   minWidth: 1024,
@@ -5661,7 +5705,7 @@ exports.form = {
 };
 
 exports.logo = {
-  src: 'img/logo.png',
+  src: 'assets/img/logo.png',
   width: 100,
   marginTop: 100
 };
@@ -5727,7 +5771,7 @@ exports.invalid = {
 };
 
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -5735,75 +5779,130 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":43}],43:[function(require,module,exports){
-var component, search, sidebar;
+},{"../tableView":44}],44:[function(require,module,exports){
+var component, extend, ref, sidebar, stateToPersian, style, table, textIsInSearch, toDate;
 
 component = require('../../utils/component');
 
-sidebar = require('./sidebar');
-
-search = require('./search');
-
-module.exports = component('tableView', function(arg) {
-  var E, dom;
-  dom = arg.dom;
-  E = dom.E;
-  return E('span', null, E(sidebar), E({
-    marginRight: 350,
-    marginTop: 50
-  }, E(search)));
-});
-
-
-},{"../../utils/component":14,"./search":44,"./sidebar":46}],44:[function(require,module,exports){
-var component, style;
-
-component = require('../../../utils/component');
-
 style = require('./style');
 
+sidebar = require('./sidebar');
+
+table = require('./table');
+
+ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, textIsInSearch = ref.textIsInSearch;
+
+stateToPersian = require('../../utils/logic').stateToPersian;
+
 module.exports = component('tableView', function(arg) {
-  var E, dom;
-  dom = arg.dom;
-  E = dom.E;
-  return E('span', null, E('input', style.searchbox), E(style.settings));
+  var E, append, applications, dom, empty, events, onEvent, searchbox, setStyle, state, tableInstance, text, update, view;
+  dom = arg.dom, events = arg.events, state = arg.state;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
+  onEvent = events.onEvent;
+  view = E('span', null, E(sidebar), E({
+    marginRight: 350,
+    marginTop: 50
+  }, searchbox = E('input', style.searchbox), E(style.settings), E({
+    clear: 'both',
+    height: 20
+  }), tableInstance = E(table, {
+    properties: {
+      multiSelect: true
+    },
+    headers: [
+      {
+        width: 120,
+        name: 'نام',
+        getValue: function(arg1) {
+          var firstName, lastName;
+          firstName = arg1.firstName, lastName = arg1.lastName;
+          return firstName + " " + lastName;
+        },
+        styleTd: function(arg1, td) {
+          var firstName, lastName, picture;
+          firstName = arg1.firstName, lastName = arg1.lastName, picture = arg1.picture;
+          empty(td);
+          setStyle(td, {
+            text: ''
+          });
+          return append(td, [
+            E('img', extend({
+              src: picture || 'assets/img/profilePlaceholder.png'
+            }, style.profilePicture)), text(firstName + " " + lastName)
+          ]);
+        }
+      }, {
+        width: 120,
+        name: 'تاریخ ثبت',
+        getValue: function(arg1) {
+          var createdAt;
+          createdAt = arg1.createdAt;
+          return toDate(createdAt);
+        }
+      }, {
+        width: 300,
+        name: 'شغل‌های درخواستی',
+        key: 'jobs'
+      }, {
+        width: 150,
+        name: 'وضعیت',
+        getValue: function(arg1) {
+          var state;
+          state = arg1.state;
+          return stateToPersian(state);
+        }
+      }, {
+        width: 120,
+        name: 'یادداشت',
+        styleTd: function(arg1, td, offs) {
+          var notes;
+          notes = arg1.notes;
+          setStyle(td, style.iconTd);
+          empty(td);
+          return append(td, E(extend({}, style.icon, notes.length ? {
+            "class": 'fa fa-sticky-note',
+            color: '#449e73'
+          } : {
+            "class": 'fa fa-sticky-note-o',
+            color: '#5c5555'
+          })));
+        }
+      }, {
+        width: 120,
+        name: 'رزومه',
+        styleTd: function(arg1, td, offs) {
+          arg1;
+          setStyle(td, style.iconTd);
+          empty(td);
+          return append(td, E(extend({}, style.icon, {
+            "class": 'fa fa-download',
+            color: '#449e73'
+          })));
+        }
+      }
+    ],
+    handlers: {
+      select: function(application) {}
+    }
+  })));
+  applications = [];
+  update = function() {
+    return tableInstance.setData(applications.filter(function(arg1) {
+      var firstName, jobs, lastName;
+      firstName = arg1.firstName, lastName = arg1.lastName, jobs = arg1.jobs;
+      return textIsInSearch(firstName + " " + lastName, searchbox.value()) || textIsInSearch(jobs.toLowerCase(), searchbox.value());
+    }));
+  };
+  onEvent(searchbox, 'input', update);
+  state.applications.on(function(_applications) {
+    applications = _applications;
+    return update();
+  });
+  return view;
 });
 
 
-},{"../../../utils/component":14,"./style":45}],45:[function(require,module,exports){
-exports.searchbox = {
-  placeholder: 'جستجوی رزومه مورد نظر شما',
-  border: '2px solid #bdd1e5',
-  outline: 'none',
-  width: 400,
-  borderRadius: 3,
-  padding: 7,
-  paddingLeft: 50,
-  height: 30,
-  lineHeight: 30,
-  backgroundColor: '#ecedee',
-  float: 'right'
-};
-
-exports.settings = {
-  "class": 'fa fa-cog',
-  display: 'inline-block',
-  width: 26,
-  height: 26,
-  fontSize: 20,
-  lineHeight: 20,
-  padding: '3px 4px',
-  marginRight: -28,
-  marginTop: 2,
-  borderRadius: '3px 0 0 3px',
-  backgroundColor: '#ddd',
-  color: '#505050',
-  float: 'right',
-  cursor: 'pointer'
-};
-
-
-},{}],46:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"./sidebar":45,"./style":47,"./table":49}],45:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -5811,13 +5910,11 @@ component = require('../../../utils/component');
 style = require('./style');
 
 module.exports = component('sidebar', function(arg) {
-  var E, dom, events, onEvent, onResize, profileImg, resize, setStyle, view;
-  dom = arg.dom, events = arg.events;
+  var E, dom, events, name, onEvent, onResize, position, profileImg, resize, setStyle, state, view;
+  dom = arg.dom, state = arg.state, events = arg.events;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent, onResize = events.onResize;
-  view = E(style.sidebar, E(style.profile, profileImg = E('img', {
-    src: 'assets/img/profile.jpg'
-  })), E(style.name, 'نام و نام خانوادگی'), E(style.title, 'سمت اداری'), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
+  view = E(style.sidebar, E(style.profile, profileImg = E('img')), name = E(style.name), position = E(style.title), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
   resize = function() {
     return setStyle(view, {
       height: document.body.scrollHeight
@@ -5830,11 +5927,29 @@ module.exports = component('sidebar', function(arg) {
       marginRight: -(profileImg.fn.element.offsetWidth - 200) / 2
     });
   });
+  state.user.on(function(user) {
+    setStyle(profileImg, {
+      src: user.picture
+    });
+    setStyle(name, {
+      text: user.name
+    });
+    return setStyle(position, {
+      text: (function() {
+        switch (user.type) {
+          case 'hr':
+            return 'کارشناس واحد منابع انسانی';
+          case 'manager':
+            return user.position;
+        }
+      })()
+    });
+  });
   return view;
 });
 
 
-},{"../../../utils/component":14,"./style":47}],47:[function(require,module,exports){
+},{"../../../utils/component":14,"./style":46}],46:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -5911,7 +6026,440 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":18}],48:[function(require,module,exports){
+},{"../../../utils":18}],47:[function(require,module,exports){
+exports.searchbox = {
+  placeholder: 'جستجوی رزومه مورد نظر شما',
+  border: '1px solid #bdd1e5',
+  outline: 'none',
+  width: 400,
+  borderRadius: 3,
+  padding: 7,
+  paddingLeft: 50,
+  height: 30,
+  lineHeight: 30,
+  backgroundColor: '#ecedee',
+  float: 'right'
+};
+
+exports.settings = {
+  "class": 'fa fa-cog',
+  display: 'inline-block',
+  width: 28,
+  height: 28,
+  fontSize: 20,
+  lineHeight: 20,
+  padding: '3px 4px',
+  marginRight: -29,
+  marginTop: 1,
+  borderRadius: '3px 0 0 3px',
+  backgroundColor: '#ddd',
+  color: '#505050',
+  float: 'right',
+  cursor: 'pointer'
+};
+
+exports.profilePicture = {
+  width: 30,
+  height: 30,
+  marginLeft: 5
+};
+
+exports.iconTd = {};
+
+exports.icon = {
+  position: 'relative',
+  top: 3
+};
+
+
+},{}],48:[function(require,module,exports){
+var collection, compare, ref, style;
+
+style = require('./style');
+
+ref = require('../../../utils'), collection = ref.collection, compare = ref.compare;
+
+exports.create = function(arg) {
+  var E, append, components, destroy, dom, events, functions, handlers, headers, hide, onEvent, properties, setStyle, show, variables;
+  headers = arg.headers, properties = arg.properties, handlers = arg.handlers, variables = arg.variables, components = arg.components, dom = arg.dom, events = arg.events;
+  E = dom.E, destroy = dom.destroy, append = dom.append, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  onEvent = events.onEvent;
+  functions = {
+    update: function() {
+      var descriptors;
+      if (variables.descriptors) {
+        hide(components.noData);
+        show(components.yesData);
+        if (variables.sort) {
+          variables.descriptors = variables.descriptors.sort(function(arg1, arg2) {
+            var a, b, first, firstValue, header, ref1, ref2, result, second, secondValue;
+            a = arg1.entity;
+            b = arg2.entity;
+            header = variables.sort.header;
+            if (variables.sort.direction === 'up') {
+              ref1 = [a, b], first = ref1[0], second = ref1[1];
+            } else {
+              ref2 = [b, a], first = ref2[0], second = ref2[1];
+            }
+            if (header.getValue) {
+              firstValue = header.getValue(first);
+              secondValue = header.getValue(second);
+            } else {
+              firstValue = first[header.key];
+              secondValue = second[header.key];
+            }
+            result = compare(firstValue, secondValue);
+            if (result === 0 && variables.entityId) {
+              return compare(first[variables.entityId], second[variables.entityId]);
+            } else {
+              return result;
+            }
+          });
+        }
+      }
+      descriptors = variables.descriptors || [];
+      variables.selectionMode = descriptors.some(function(arg1) {
+        var selected;
+        selected = arg1.selected;
+        return selected;
+      });
+      descriptors.forEach(function(descriptor, index) {
+        return descriptor.index = index;
+      });
+      functions.handleRows(descriptors);
+      return handlers.update(descriptors);
+    },
+    setData: function(entities) {
+      if (!variables.descriptors) {
+        variables.descriptors = entities.map(function(entity) {
+          return {
+            entity: entity
+          };
+        });
+      } else {
+        variables.descriptors = entities.map(function(entity) {
+          var returnValue, shouldReturn;
+          returnValue = void 0;
+          shouldReturn = variables.descriptors.some(function(x) {
+            if (functions.isEqual(entity, x.entity)) {
+              returnValue = x;
+              return true;
+            }
+          });
+          if (shouldReturn) {
+            returnValue.entity = entity;
+            return returnValue;
+          } else {
+            return {
+              entity: entity
+            };
+          }
+        });
+      }
+      return functions.update();
+    },
+    setSelectedRows: function(callback) {
+      variables.descriptors.forEach(function(descriptor) {
+        return descriptor.selected = false;
+      });
+      callback(variables.descriptors).forEach(function(descriptor) {
+        return descriptor.selected = true;
+      });
+      return functions.update();
+    },
+    setSort: function(header) {
+      var sort;
+      headers.forEach(function(arg1) {
+        var arrowDown, arrowUp;
+        arrowUp = arg1.arrowUp, arrowDown = arg1.arrowDown;
+        setStyle(arrowUp, style.arrowUp);
+        return setStyle(arrowDown, style.arrowDown);
+      });
+      sort = variables.sort;
+      if ((sort != null ? sort.header : void 0) === header && sort.direction === 'up') {
+        setStyle(header.arrowDown, style.arrowActive);
+        sort.direction = 'down';
+      } else {
+        setStyle(header.arrowUp, style.arrowActive);
+        variables.sort = {
+          header: header,
+          direction: 'up'
+        };
+      }
+      return functions.update();
+    },
+    styleTd: function(header, arg1, td, row) {
+      var entity;
+      entity = arg1.entity;
+      if (header.key) {
+        setStyle(td, {
+          text: entity[header.key]
+        });
+      } else if (header.englishKey) {
+        setStyle(td, {
+          englishText: entity[header.englishKey]
+        });
+      } else if (header.getValue) {
+        setStyle(td, {
+          text: header.getValue(entity)
+        });
+      }
+      if (header.styleTd) {
+        header.styleTd(entity, td, row.offs, row);
+      }
+      return td;
+    },
+    setupRow: function(row, descriptor) {
+      var notClickableTds;
+      row.off = function() {
+        row.offs.forEach(function(x) {
+          return x();
+        });
+        return row.offs = [];
+      };
+      if (!functions.styleRow) {
+        setStyle(row.tr, descriptor.index % 2 ? style.row : style.rowOdd);
+      } else {
+        functions.styleRow(descriptor.entity, row.tr);
+      }
+      if (properties.multiSelect) {
+        setStyle(row.checkbox, style.checkbox);
+        if (descriptor.selected) {
+          setStyle(row.checkbox, style.checkboxSelected);
+        }
+        row.offs.push(onEvent(row.checkboxTd, 'click', function() {
+          descriptor.selected = !descriptor.selected;
+          return functions.update();
+        }));
+      }
+      if (handlers.select && !descriptor.unselectable) {
+        row.tds.forEach(function(td) {
+          return setStyle(td, {
+            cursor: 'pointer'
+          });
+        });
+        notClickableTds = row.tds.filter(function(_, i) {
+          return headers[i].notClickable;
+        });
+        if (properties.multiSelect) {
+          notClickableTds.push(row.checkboxTd);
+        }
+        row.offs.push(onEvent(row.tr, 'click', notClickableTds, function() {
+          return handlers.select(descriptor.entity);
+        }));
+      }
+      return row;
+    },
+    addRow: function(descriptor, i) {
+      var row;
+      row = {
+        offs: []
+      };
+      append(components.body, row.tr = E('tr', null, properties.multiSelect ? row.checkboxTd = E('td', {
+        cursor: 'pointer'
+      }, row.checkbox = E(style.checkbox)) : void 0, row.tds = headers.map(function(header) {
+        return functions.styleTd(header, descriptor, E('td', style.td), row, i);
+      })));
+      return functions.setupRow(row, descriptor);
+    },
+    changeRow: function(descriptor, row, i) {
+      row.off();
+      row.tds.forEach(function(td, index) {
+        return functions.styleTd(headers[index], descriptor, td, row, i);
+      });
+      return functions.setupRow(row, descriptor);
+    },
+    removeRow: function(row) {
+      row.off();
+      return destroy(row.tr);
+    }
+  };
+  functions.handleRows = collection(functions.addRow, functions.removeRow, functions.changeRow);
+  return functions;
+};
+
+
+},{"../../../utils":18,"./style":50}],49:[function(require,module,exports){
+var _functions, component, extend, style;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+_functions = require('./functions');
+
+extend = require('../../../utils').extend;
+
+module.exports = component('table', function(arg, arg1) {
+  var E, allSelected, components, dom, entityId, events, functions, handlers, headers, hide, isEqual, onEvent, prevHandleUpdate, properties, ref, ref1, returnObject, selectAll, selectAllTd, setStyle, show, sort, styleRow, styleSelectAll, table, text, variables;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  headers = arg1.headers, entityId = arg1.entityId, isEqual = arg1.isEqual, sort = arg1.sort, styleRow = arg1.styleRow, properties = (ref = arg1.properties) != null ? ref : {}, handlers = (ref1 = arg1.handlers) != null ? ref1 : {};
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  onEvent = events.onEvent;
+  if (entityId == null) {
+    entityId = 'id';
+  }
+  if (isEqual == null) {
+    isEqual = function(a, b) {
+      return a[entityId] === b[entityId];
+    };
+  }
+  variables = {
+    entityId: entityId,
+    headers: [],
+    descriptors: null,
+    sort: sort || {
+      header: headers[0],
+      direction: 'up'
+    }
+  };
+  components = {};
+  allSelected = false;
+  prevHandleUpdate = handlers.update;
+  styleSelectAll = function() {
+    setStyle(selectAll, style.checkbox);
+    if (allSelected) {
+      return setStyle(selectAll, style.checkboxSelected);
+    }
+  };
+  handlers.update = function(descriptors) {
+    if (typeof prevHandleUpdate === "function") {
+      prevHandleUpdate(descriptors);
+    }
+    allSelected = descriptors.every(function(arg2) {
+      var selected;
+      selected = arg2.selected;
+      return selected;
+    });
+    return styleSelectAll();
+  };
+  functions = _functions.create({
+    headers: headers,
+    properties: properties,
+    handlers: handlers,
+    variables: variables,
+    components: components,
+    dom: dom,
+    events: events
+  });
+  extend(functions, {
+    isEqual: isEqual,
+    styleRow: styleRow
+  });
+  table = E({
+    position: 'relative'
+  }, components.noData = E(null, 'در حال بارگذاری...'), hide(components.yesData = E(null, E('table', null, E('thead', null, E('tr', style.headerRow, properties.multiSelect ? selectAllTd = E('th', {
+    width: 20,
+    cursor: 'pointer'
+  }, selectAll = E(style.checkbox)) : void 0, headers.map(function(header) {
+    var th;
+    th = E('th', extend({
+      width: header.width,
+      cursor: header.key || header.getValue ? 'pointer' : 'default'
+    }, style.th), header.arrowUp = E(style.arrowUp), header.arrowDown = E(style.arrowDown), text(header.name));
+    if (header.key || header.getValue) {
+      onEvent(th, 'click', function() {
+        return functions.setSort(header);
+      });
+    }
+    return th;
+  }))), components.body = E('tbody', null)))));
+  onEvent(selectAllTd, 'click', function() {
+    functions.setSelectedRows(function(descriptors) {
+      if (allSelected) {
+        return [];
+      } else {
+        return descriptors;
+      }
+    });
+    return styleSelectAll();
+  });
+  variables.sort.direction = (function() {
+    switch (variables.sort.direction) {
+      case 'up':
+        return 'down';
+      case 'down':
+        return 'up';
+    }
+  })();
+  functions.setSort(variables.sort.header);
+  returnObject({
+    setData: functions.setData,
+    setSelectedRows: functions.setSelectedRows
+  });
+  return table;
+});
+
+
+},{"../../../utils":18,"../../../utils/component":14,"./functions":48,"./style":50}],50:[function(require,module,exports){
+var arrow, extend, row;
+
+extend = require('../../../utils').extend;
+
+arrow = {
+  color: '#ddd',
+  cursor: 'pointer',
+  position: 'absolute',
+  left: 5
+};
+
+exports.arrowUp = extend({}, arrow, {
+  "class": 'fa fa-caret-up',
+  top: 8
+});
+
+exports.arrowDown = extend({}, arrow, {
+  "class": 'fa fa-caret-down',
+  top: 17
+});
+
+exports.arrowActive = {
+  color: '#555'
+};
+
+exports.td = {
+  height: 30,
+  padding: 7,
+  color: '#5c5555'
+};
+
+exports.th = extend({}, exports.td, {
+  position: 'relative',
+  paddingLeft: 15
+});
+
+row = {
+  borderBottom: '1px solid #c1c1c1'
+};
+
+exports.headerRow = {
+  borderBottom: '3px solid #c1c1c1'
+};
+
+exports.row = extend({}, row);
+
+exports.rowOdd = extend({}, row, {
+  backgroundColor: '#f6f6f6'
+});
+
+exports.checkbox = {
+  "class": 'fa fa-check',
+  position: 'relative',
+  top: 3,
+  margin: 4,
+  width: 15,
+  height: 15,
+  borderRadius: 2,
+  backgroundColor: '#ddd',
+  color: '#ddd'
+};
+
+exports.checkboxSelected = {
+  color: '#555'
+};
+
+
+},{"../../../utils":18}],51:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -5940,7 +6488,9 @@ alertMessages["do"]();
 
 service.getUser();
 
+service.autoPing();
+
 page();
 
 
-},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":23}]},{},[48]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[51]);

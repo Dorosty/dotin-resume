@@ -1,5 +1,5 @@
 exports.bg =
-  src: 'img/bg-1.jpg'
+  src: 'assets/img/login/bg.jpg'
   zIndex: -1
   # Set rules to fill background
   minHeight: '100%'
@@ -20,7 +20,7 @@ exports.form =
   paddingBottom: 100
 
 exports.logo =
-  src: 'img/logo.png'
+  src: 'assets/img/logo.png'
   width: 100
   marginTop: 100
 

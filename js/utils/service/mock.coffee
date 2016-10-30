@@ -1,34 +1,42 @@
 Q = require '../../q'
 
 applications = [{
-  firstName: 'علی',
-  lastName: 'درستی',
-  phoneNumber: '09121234567',
-  email: 'dorosty@doin.ir',
-  birthday: '1340/1/2',
-  jobs: 'Javascript developer',
-  resumeUrl: '',
-  picture: null,
-  createdAt: 1473132854116,
-  state: 0,
+  id: 0
+  firstName: 'علی'
+  lastName: 'درستی'
+  phoneNumber: '09121234567'
+  email: 'dorosty@doin.ir'
+  birthday: '1340/1/2'
+  jobs: 'Java developer - Javascript developer'
+  resumeUrl: ''
+  picture: null
+  createdAt: 1473132854116
+  notes: []
+  state: 0
 }, {
-  firstName: 'سعید',
-  lastName: 'قیومیه',
-  phoneNumber: '09121234567',
-  email: 'ghayoomi@dotin.ir',
-  birthday: '1343/4/5',
-  jobs: 'UX designer',
-  resumeUrl: '',
-  picture: null,
-  createdAt: 1373132854116,
-  state: 1,
+  id: 1
+  firstName: 'سعید'
+  lastName: 'قیومیه'
+  phoneNumber: '09121234567'
+  email: 'ghayoomi@dotin.ir'
+  birthday: '1343/4/5'
+  jobs: 'UX designer'
+  resumeUrl: ''
+  picture: null
+  createdAt: 1373132854116
+  notes: ['aaaaaaaaaaaa']
+  state: 1
 }]
 
 user =
+  picture: 'assets/img/profile.jpg'
   name: 'حامد حسینی‌نژاد'
-  type: 'hr'  
+  type: 'hr'
+
+# user = undefined
 
 exports.ping = ->
+  Q {applications}
 
 exports.getUser = ->
   Q {user}
