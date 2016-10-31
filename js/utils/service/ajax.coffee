@@ -6,7 +6,7 @@ module.exports = (isGet, serviceName, params = {}) ->
   if mock[serviceName]
     return mock[serviceName] params
 
-  url = "/#{serviceName}"
+  url = "/webApi/#{serviceName}"
   if isGet
     url += '?' + Object.keys(params).map((param) -> "#{param}=#{params[param]}").join '&'
   Q.promise (resolve, reject) ->

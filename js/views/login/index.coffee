@@ -13,8 +13,8 @@ module.exports = component 'login', ({dom, events, service}) ->
       E 'img', style.logo
       E style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'
       E style.formInputs,
-        email = E 'input', extend {placeholder: 'ایمیل'}, style.input
-        password = E 'input', extend {placeholder: 'رمز عبور'}, style.input
+        email = E 'input', extend {placeholder: 'کد ملی'}, style.input
+        password = E 'input', extend {type: 'password', placeholder: 'رمز عبور'}, style.input
         E style.submitSection,
           submit = E 'button', style.submit, 'ورود'
           E 'label', style.rememberLabel,
@@ -36,9 +36,9 @@ module.exports = component 'login', ({dom, events, service}) ->
     hide invalid
     show spinner
     service.login
-      email: email.value()
+      identificationCode: email.value()
       password: password.value()
-      remember: !!remember.checked()
+      # remember: !!remember.checked()
     .catch ->
       show invalid
     .fin ->

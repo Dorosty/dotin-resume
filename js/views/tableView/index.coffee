@@ -33,7 +33,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
               empty td
               setStyle td, text: ''
               append td, [
-                E 'img', extend {src: picture or 'assets/img/profilePlaceholder.png'}, style.profilePicture
+                E 'img', extend {src: if picture then "webApi/image?address=#{picture}" else 'assets/img/profilePlaceholder.png'}, style.profilePicture
                 text "#{firstName} #{lastName}"
               ]
           }
@@ -47,7 +47,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'وضعیت'
-            getValue: ({state}) -> stateToPersian state
+            getValue: ({state}) -> ''#stateToPersian state
           }
           {
             name: 'یادداشت'
@@ -61,10 +61,10 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'رزومه'
-            styleTd: ({}, td, offs) ->
+            styleTd: ({resume}, td, offs) ->
               setStyle td, style.iconTd
               empty td
-              append td, E 'a', extend {href: '/' + resume}, style.icon, class: 'fa fa-download', color: '#449e73'
+              append td, E 'a', extend {href: '/webApi/resume?address=' + resume}, style.icon, class: 'fa fa-download', color: '#449e73'
           }
         ]
         handlers:

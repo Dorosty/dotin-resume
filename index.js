@@ -4130,7 +4130,7 @@ module.exports = function(isGet, serviceName, params) {
   if (mock[serviceName]) {
     return mock[serviceName](params);
   }
-  url = "/" + serviceName;
+  url = "/webApi/" + serviceName;
   if (isGet) {
     url += '?' + Object.keys(params).map(function(param) {
       return param + "=" + params[param];
@@ -4751,7 +4751,7 @@ exports.instance = function(thisComponent) {
 
 
 },{"../log":19,"./names":29}],29:[function(require,module,exports){
-module.exports = ['user', 'applications'];
+module.exports = ['user', 'applicants'];
 
 
 },{}],30:[function(require,module,exports){
@@ -5647,8 +5647,9 @@ module.exports = component('login', function(arg) {
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, enable = dom.enable, disable = dom.disable;
   onEvent = events.onEvent, onEnter = events.onEnter;
   component = E(null, E('img', style.bg), E(style.form, E('img', style.logo), E(style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'), E(style.formInputs, email = E('input', extend({
-    placeholder: 'ایمیل'
+    placeholder: 'کد ملی'
   }, style.input)), password = E('input', extend({
+    type: 'password',
     placeholder: 'رمز عبور'
   }, style.input)), E(style.submitSection, submit = E('button', style.submit, 'ورود'), E('label', style.rememberLabel, remember = E('input', extend({
     type: 'checkbox'
@@ -5667,9 +5668,8 @@ module.exports = component('login', function(arg) {
     hide(invalid);
     show(spinner);
     return service.login({
-      email: email.value(),
-      password: password.value(),
-      remember: !!remember.checked()
+      identificationCode: email.value(),
+      password: password.value()
     })["catch"](function() {
       return show(invalid);
     }).fin(function() {
@@ -5798,7 +5798,7 @@ ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, textIsIn
 stateToPersian = require('../../utils/logic').stateToPersian;
 
 module.exports = component('tableView', function(arg) {
-  var E, append, applications, dom, empty, events, onEvent, searchbox, setStyle, state, tableInstance, text, update, view;
+  var E, append, applicants, dom, empty, events, onEvent, searchbox, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
   onEvent = events.onEvent;
@@ -5835,7 +5835,7 @@ module.exports = component('tableView', function(arg) {
           });
           return append(td, [
             E('img', extend({
-              src: picture || 'assets/img/profilePlaceholder.png'
+              src: picture ? "webApi/image?address=" + picture : 'assets/img/profilePlaceholder.png'
             }, style.profilePicture)), text(firstName + " " + lastName)
           ]);
         }
@@ -5854,7 +5854,7 @@ module.exports = component('tableView', function(arg) {
         getValue: function(arg1) {
           var state;
           state = arg1.state;
-          return stateToPersian(state);
+          return '';
         }
       }, {
         name: 'یادداشت',
@@ -5863,7 +5863,7 @@ module.exports = component('tableView', function(arg) {
           notes = arg1.notes;
           setStyle(td, style.iconTd);
           empty(td);
-          return append(td, E(extend({}, style.icon, notes.length ? {
+          return append(td, E(extend({}, style.icon, false ? {
             "class": 'fa fa-sticky-note',
             color: '#449e73'
           } : {
@@ -5874,10 +5874,13 @@ module.exports = component('tableView', function(arg) {
       }, {
         name: 'رزومه',
         styleTd: function(arg1, td, offs) {
-          arg1;
+          var resume;
+          resume = arg1.resume;
           setStyle(td, style.iconTd);
           empty(td);
-          return append(td, E(extend({}, style.icon, {
+          return append(td, E('a', extend({
+            href: '/webApi/resume?address=' + resume
+          }, style.icon, {
             "class": 'fa fa-download',
             color: '#449e73'
           })));
@@ -5885,12 +5888,12 @@ module.exports = component('tableView', function(arg) {
       }
     ],
     handlers: {
-      select: function(application) {}
+      select: function(applicant) {}
     }
   })));
-  applications = [];
+  applicants = [];
   update = function() {
-    return tableInstance.setData(applications.filter(function(arg1) {
+    return tableInstance.setData(applicants.filter(function(arg1) {
       var firstName, jobs, lastName, state, value;
       firstName = arg1.firstName, lastName = arg1.lastName, jobs = arg1.jobs, state = arg1.state;
       value = searchbox.value();
@@ -5898,8 +5901,8 @@ module.exports = component('tableView', function(arg) {
     }));
   };
   onEvent(searchbox, 'input', update);
-  state.applications.on(function(_applications) {
-    applications = _applications;
+  state.applicants.on(function(_applicants) {
+    applicants = _applicants;
     return update();
   });
   return view;
@@ -5949,7 +5952,7 @@ module.exports = component('sidebar', function(arg) {
   });
   state.user.on(function(user) {
     setStyle(profileImg, {
-      src: user.picture
+      src: 'webApi/image?address=' + user.personalPic
     });
     setStyle(name, {
       text: user.name
@@ -6540,10 +6543,6 @@ addPageStyle("@font-face { font-family: iransans; src:url('assets/fonts/eot/IRAN
 document.title = 'سامانه جذب داتین';
 
 alertMessages["do"]();
-
-service.getUser();
-
-service.autoPing();
 
 page();
 
