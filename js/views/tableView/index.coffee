@@ -54,7 +54,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
             styleTd: ({notes}, td, offs) ->
               setStyle td, style.iconTd
               empty td
-              append td, E extend {}, style.icon, if notes.length
+              append td, E extend {}, style.icon, if false#notes.length
                   class: 'fa fa-sticky-note', color: '#449e73'
                 else
                   class: 'fa fa-sticky-note-o', color: '#5c5555'
@@ -64,22 +64,22 @@ module.exports = component 'tableView', ({dom, events, state}) ->
             styleTd: ({}, td, offs) ->
               setStyle td, style.iconTd
               empty td
-              append td, E extend {}, style.icon, class: 'fa fa-download', color: '#449e73'
+              append td, E 'a', extend {href: '/' + resume}, style.icon, class: 'fa fa-download', color: '#449e73'
           }
         ]
         handlers:
-          select: (application) ->
+          select: (applicant) ->
 
-  applications = []
+  applicants = []
   update = ->
-    tableInstance.setData applications.filter ({firstName, lastName, jobs, state}) ->
+    tableInstance.setData applicants.filter ({firstName, lastName, jobs, state}) ->
       value = searchbox.value()
       textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(jobs.toLowerCase(), value) or textIsInSearch(stateToPersian(state), value)
 
   onEvent searchbox, 'input', update
 
-  state.applications.on (_applications) ->
-    applications = _applications
+  state.applicants.on (_applicants) ->
+    applicants = _applicants
     update()
 
   view
