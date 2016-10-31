@@ -11,8 +11,14 @@ module.exports = component 'tableView', ({dom, events, state}) ->
 
   view = E 'span', null,
     E sidebar
-    E marginRight: 350, marginTop: 50,
-      searchbox = E 'input', style.searchbox
+    E style.contents,
+      searchbox = do ->
+        searchbox = E 'input', style.searchbox
+        onEvent searchbox, 'focus', ->
+          setStyle searchbox, style.searchboxFocus
+        onEvent searchbox, 'blur', ->
+          setStyle searchbox, style.searchbox
+        searchbox
       E style.settings
       E clear: 'both', height: 20
       tableInstance = E table,
@@ -20,7 +26,6 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           multiSelect: true
         headers: [
           {
-            width: 120
             name: 'نام'
             getValue: ({firstName, lastName}) ->
               "#{firstName} #{lastName}"
@@ -33,22 +38,18 @@ module.exports = component 'tableView', ({dom, events, state}) ->
               ]
           }
           {
-            width: 120
             name: 'تاریخ ثبت'            
             getValue: ({createdAt}) -> toDate createdAt
           }
           {
-            width: 300
             name: 'شغل‌های درخواستی'
             key: 'jobs'
           }
           {
-            width: 150
             name: 'وضعیت'
             getValue: ({state}) -> stateToPersian state
           }
           {
-            width: 120
             name: 'یادداشت'
             styleTd: ({notes}, td, offs) ->
               setStyle td, style.iconTd
@@ -59,7 +60,6 @@ module.exports = component 'tableView', ({dom, events, state}) ->
                   class: 'fa fa-sticky-note-o', color: '#5c5555'
           }
           {
-            width: 120
             name: 'رزومه'
             styleTd: ({}, td, offs) ->
               setStyle td, style.iconTd
@@ -72,8 +72,9 @@ module.exports = component 'tableView', ({dom, events, state}) ->
 
   applications = []
   update = ->
-    tableInstance.setData applications.filter ({firstName, lastName, jobs}) ->
-      textIsInSearch("#{firstName} #{lastName}", searchbox.value()) or textIsInSearch(jobs.toLowerCase(), searchbox.value())
+    tableInstance.setData applications.filter ({firstName, lastName, jobs, state}) ->
+      value = searchbox.value()
+      textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(jobs.toLowerCase(), value) or textIsInSearch(stateToPersian(state), value)
 
   onEvent searchbox, 'input', update
 

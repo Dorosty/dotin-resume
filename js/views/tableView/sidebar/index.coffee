@@ -25,7 +25,18 @@ module.exports = component 'sidebar', ({dom, state, events}) ->
   setTimeout resize
 
   onEvent profileImg, 'load', ->
-    setStyle profileImg, marginRight: -(profileImg.fn.element.offsetWidth - 200) / 2
+    {width, height} = profileImg.fn.element
+    marginRight = marginTop = 0
+    isPortriat = height > width
+    if isPortriat
+      height *= 150 / width
+      width = 150
+      marginTop = -(height - 150) / 2
+    else
+      width *= 150 / height
+      height = 150
+      marginRight = -(width - 150) / 2
+    setStyle profileImg, {width, height, marginTop, marginRight}
 
   state.user.on (user) ->
     setStyle profileImg, src: user.picture

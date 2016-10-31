@@ -1,3 +1,5 @@
+return
+
 Q = require '../../q'
 
 applications = [{
@@ -36,7 +38,7 @@ user =
 # user = undefined
 
 exports.ping = ->
-  Q {applications}
+  Q {user, applications}
 
 exports.getUser = ->
   Q {user}

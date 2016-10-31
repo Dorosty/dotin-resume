@@ -4394,6 +4394,8 @@ exports.autoPing = function() {
 },{"../../q":10,"../log":19,"./ex":22,"./getPost":23,"./names":26}],25:[function(require,module,exports){
 var Q, applications, user;
 
+return;
+
 Q = require('../../q');
 
 applications = [
@@ -4434,6 +4436,7 @@ user = {
 
 exports.ping = function() {
   return Q({
+    user: user,
     applications: applications
   });
 };
@@ -5799,10 +5802,16 @@ module.exports = component('tableView', function(arg) {
   dom = arg.dom, events = arg.events, state = arg.state;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
   onEvent = events.onEvent;
-  view = E('span', null, E(sidebar), E({
-    marginRight: 350,
-    marginTop: 50
-  }, searchbox = E('input', style.searchbox), E(style.settings), E({
+  view = E('span', null, E(sidebar), E(style.contents, searchbox = (function() {
+    searchbox = E('input', style.searchbox);
+    onEvent(searchbox, 'focus', function() {
+      return setStyle(searchbox, style.searchboxFocus);
+    });
+    onEvent(searchbox, 'blur', function() {
+      return setStyle(searchbox, style.searchbox);
+    });
+    return searchbox;
+  })(), E(style.settings), E({
     clear: 'both',
     height: 20
   }), tableInstance = E(table, {
@@ -5811,7 +5820,6 @@ module.exports = component('tableView', function(arg) {
     },
     headers: [
       {
-        width: 120,
         name: 'نام',
         getValue: function(arg1) {
           var firstName, lastName;
@@ -5832,7 +5840,6 @@ module.exports = component('tableView', function(arg) {
           ]);
         }
       }, {
-        width: 120,
         name: 'تاریخ ثبت',
         getValue: function(arg1) {
           var createdAt;
@@ -5840,11 +5847,9 @@ module.exports = component('tableView', function(arg) {
           return toDate(createdAt);
         }
       }, {
-        width: 300,
         name: 'شغل‌های درخواستی',
         key: 'jobs'
       }, {
-        width: 150,
         name: 'وضعیت',
         getValue: function(arg1) {
           var state;
@@ -5852,7 +5857,6 @@ module.exports = component('tableView', function(arg) {
           return stateToPersian(state);
         }
       }, {
-        width: 120,
         name: 'یادداشت',
         styleTd: function(arg1, td, offs) {
           var notes;
@@ -5868,7 +5872,6 @@ module.exports = component('tableView', function(arg) {
           })));
         }
       }, {
-        width: 120,
         name: 'رزومه',
         styleTd: function(arg1, td, offs) {
           arg1;
@@ -5888,9 +5891,10 @@ module.exports = component('tableView', function(arg) {
   applications = [];
   update = function() {
     return tableInstance.setData(applications.filter(function(arg1) {
-      var firstName, jobs, lastName;
-      firstName = arg1.firstName, lastName = arg1.lastName, jobs = arg1.jobs;
-      return textIsInSearch(firstName + " " + lastName, searchbox.value()) || textIsInSearch(jobs.toLowerCase(), searchbox.value());
+      var firstName, jobs, lastName, state, value;
+      firstName = arg1.firstName, lastName = arg1.lastName, jobs = arg1.jobs, state = arg1.state;
+      value = searchbox.value();
+      return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(jobs.toLowerCase(), value) || textIsInSearch(stateToPersian(state), value);
     }));
   };
   onEvent(searchbox, 'input', update);
@@ -5923,8 +5927,24 @@ module.exports = component('sidebar', function(arg) {
   onResize(resize);
   setTimeout(resize);
   onEvent(profileImg, 'load', function() {
+    var height, isPortriat, marginRight, marginTop, ref, width;
+    ref = profileImg.fn.element, width = ref.width, height = ref.height;
+    marginRight = marginTop = 0;
+    isPortriat = height > width;
+    if (isPortriat) {
+      height *= 150 / width;
+      width = 150;
+      marginTop = -(height - 150) / 2;
+    } else {
+      width *= 150 / height;
+      height = 150;
+      marginRight = -(width - 150) / 2;
+    }
     return setStyle(profileImg, {
-      marginRight: -(profileImg.fn.element.offsetWidth - 200) / 2
+      width: width,
+      height: height,
+      marginTop: marginTop,
+      marginRight: marginRight
     });
   });
   state.user.on(function(user) {
@@ -5959,28 +5979,28 @@ exports.sidebar = {
   position: 'absolute',
   top: 0,
   right: 0,
-  width: 300
+  width: 200
 };
 
 exports.profile = {
   overflow: 'hidden',
   borderRadius: 100,
-  width: 200,
-  height: 200,
-  marginTop: 45,
-  marginRight: 45,
+  width: 150,
+  height: 150,
+  marginTop: 20,
+  marginRight: 20,
   border: '5px solid #1c1e21'
 };
 
 exports.name = {
-  fontSize: 16,
+  fontSize: 14,
   textAlign: 'center',
   color: 'white',
   marginTop: 30
 };
 
 exports.title = {
-  fontSize: 16,
+  fontSize: 14,
   textAlign: 'center',
   color: '#505d63',
   marginTop: 10
@@ -5991,12 +6011,12 @@ icon = {
   float: 'right',
   cursor: 'pointer',
   margin: 20,
-  fontSize: 25
+  fontSize: 20
 };
 
 exports.settings = extend({}, icon, {
   "class": 'fa fa-sliders',
-  marginRight: 110
+  marginRight: 60
 });
 
 exports.notifications = extend({}, icon, {
@@ -6015,8 +6035,8 @@ exports.links = {
 
 exports.link = {
   cursor: 'pointer',
-  height: 80,
-  lineHeight: 80,
+  height: 65,
+  lineHeight: 65,
   textAlign: 'center',
   color: 'white'
 };
@@ -6027,6 +6047,12 @@ exports.linkActive = extend({}, exports.link, {
 
 
 },{"../../../utils":18}],47:[function(require,module,exports){
+exports.contents = {
+  marginRight: 250,
+  marginTop: 50,
+  marginLeft: 50
+};
+
 exports.searchbox = {
   placeholder: 'جستجوی رزومه مورد نظر شما',
   border: '1px solid #bdd1e5',
@@ -6037,8 +6063,15 @@ exports.searchbox = {
   paddingLeft: 50,
   height: 30,
   lineHeight: 30,
+  float: 'right',
+  transition: '0.2s',
   backgroundColor: '#ecedee',
-  float: 'right'
+  color: 'black'
+};
+
+exports.searchboxFocus = {
+  backgroundColor: '#c1c1c1',
+  color: '#555'
 };
 
 exports.settings = {
@@ -6048,12 +6081,12 @@ exports.settings = {
   height: 28,
   fontSize: 20,
   lineHeight: 20,
-  padding: '3px 4px',
+  padding: '4px 5px',
   marginRight: -29,
   marginTop: 1,
   borderRadius: '3px 0 0 3px',
   backgroundColor: '#ddd',
-  color: '#505050',
+  color: '#555',
   float: 'right',
   cursor: 'pointer'
 };
@@ -6066,10 +6099,7 @@ exports.profilePicture = {
 
 exports.iconTd = {};
 
-exports.icon = {
-  position: 'relative',
-  top: 3
-};
+exports.icon = {};
 
 
 },{}],48:[function(require,module,exports){
@@ -6210,21 +6240,24 @@ exports.create = function(arg) {
       return td;
     },
     setupRow: function(row, descriptor) {
-      var notClickableTds;
+      var notClickableTds, setDefaultStyle;
       row.off = function() {
         row.offs.forEach(function(x) {
           return x();
         });
         return row.offs = [];
       };
-      if (!functions.styleRow) {
-        setStyle(row.tr, descriptor.index % 2 ? style.row : style.rowOdd);
-      } else {
-        functions.styleRow(descriptor.entity, row.tr);
-      }
+      (setDefaultStyle = function() {
+        if (!functions.styleRow) {
+          return setStyle(row.tr, descriptor.index % 2 ? style.row : style.rowOdd);
+        } else {
+          return functions.styleRow(descriptor.entity, row.tr);
+        }
+      })();
       if (properties.multiSelect) {
         setStyle(row.checkbox, style.checkbox);
         if (descriptor.selected) {
+          setStyle(row.tr, style.rowSelected);
           setStyle(row.checkbox, style.checkboxSelected);
         }
         row.offs.push(onEvent(row.checkboxTd, 'click', function() {
@@ -6233,6 +6266,14 @@ exports.create = function(arg) {
         }));
       }
       if (handlers.select && !descriptor.unselectable) {
+        if (!descriptor.selected) {
+          row.offs.push(onEvent(row.tr, 'mousemove', function() {
+            return setStyle(row.tr, style.rowHover);
+          }));
+          row.offs.push(onEvent(row.tr, 'mouseout', function() {
+            return setDefaultStyle();
+          }));
+        }
         row.tds.forEach(function(td) {
           return setStyle(td, {
             cursor: 'pointer'
@@ -6326,7 +6367,7 @@ module.exports = component('table', function(arg, arg1) {
     if (typeof prevHandleUpdate === "function") {
       prevHandleUpdate(descriptors);
     }
-    allSelected = descriptors.every(function(arg2) {
+    allSelected = descriptors.length && descriptors.every(function(arg2) {
       var selected;
       selected = arg2.selected;
       return selected;
@@ -6348,13 +6389,14 @@ module.exports = component('table', function(arg, arg1) {
   });
   table = E({
     position: 'relative'
-  }, components.noData = E(null, 'در حال بارگذاری...'), hide(components.yesData = E(null, E('table', null, E('thead', null, E('tr', style.headerRow, properties.multiSelect ? selectAllTd = E('th', {
+  }, components.noData = E(null, 'در حال بارگذاری...'), hide(components.yesData = E(null, E('table', {
+    width: '100%'
+  }, E('thead', null, E('tr', style.headerRow, properties.multiSelect ? selectAllTd = E('th', {
     width: 20,
     cursor: 'pointer'
   }, selectAll = E(style.checkbox)) : void 0, headers.map(function(header) {
     var th;
     th = E('th', extend({
-      width: header.width,
       cursor: header.key || header.getValue ? 'pointer' : 'default'
     }, style.th), header.arrowUp = E(style.arrowUp), header.arrowDown = E(style.arrowDown), text(header.name));
     if (header.key || header.getValue) {
@@ -6363,7 +6405,7 @@ module.exports = component('table', function(arg, arg1) {
       });
     }
     return th;
-  }))), components.body = E('tbody', null)))));
+  }))), components.body = E('tbody', style.tbody)))));
   onEvent(selectAllTd, 'click', function() {
     functions.setSelectedRows(function(descriptors) {
       if (allSelected) {
@@ -6417,6 +6459,10 @@ exports.arrowActive = {
   color: '#555'
 };
 
+exports.tbody = {
+  borderBottom: '1px solid #c1c1c1'
+};
+
 exports.td = {
   height: 30,
   padding: 7,
@@ -6429,7 +6475,8 @@ exports.th = extend({}, exports.td, {
 });
 
 row = {
-  borderBottom: '1px solid #c1c1c1'
+  transition: '0.2s',
+  backgroundColor: 'white'
 };
 
 exports.headerRow = {
@@ -6442,20 +6489,28 @@ exports.rowOdd = extend({}, row, {
   backgroundColor: '#f6f6f6'
 });
 
+exports.rowHover = {
+  backgroundColor: '#e7e7e7'
+};
+
+exports.rowSelected = {
+  backgroundColor: '#d3e4dc'
+};
+
 exports.checkbox = {
   "class": 'fa fa-check',
-  position: 'relative',
-  top: 3,
   margin: 4,
   width: 15,
   height: 15,
   borderRadius: 2,
+  transition: '0.2s',
   backgroundColor: '#ddd',
   color: '#ddd'
 };
 
 exports.checkboxSelected = {
-  color: '#555'
+  backgroundColor: '#449e73',
+  color: 'white'
 };
 
 

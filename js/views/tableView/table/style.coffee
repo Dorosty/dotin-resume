@@ -17,6 +17,9 @@ exports.arrowDown = extend {}, arrow,
 exports.arrowActive =
   color: '#555'
 
+exports.tbody =
+  borderBottom: '1px solid #c1c1c1'  
+
 exports.td =
   height: 30
   padding: 7
@@ -26,8 +29,9 @@ exports.th = extend {}, exports.td,
   position: 'relative'
   paddingLeft: 15
 
-row = 
-  borderBottom: '1px solid #c1c1c1'
+row =
+  transition: '0.2s'
+  backgroundColor: 'white'
 
 exports.headerRow =
   borderBottom: '3px solid #c1c1c1'
@@ -37,16 +41,22 @@ exports.row = extend {}, row
 exports.rowOdd = extend {}, row,
   backgroundColor: '#f6f6f6'
 
+exports.rowHover =
+  backgroundColor: '#e7e7e7'
+
+exports.rowSelected =
+  backgroundColor: '#d3e4dc'
+
 exports.checkbox =
   class: 'fa fa-check'
-  position: 'relative'
-  top: 3
   margin: 4
   width: 15
   height: 15
   borderRadius: 2
+  transition: '0.2s'
   backgroundColor: '#ddd'
   color: '#ddd'
 
 exports.checkboxSelected =
-  color: '#555'
+  backgroundColor: '#449e73'
+  color: 'white'

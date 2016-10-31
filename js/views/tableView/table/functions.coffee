@@ -85,21 +85,28 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
       row.off = ->
         row.offs.forEach (x) -> x()
         row.offs = []
-      unless functions.styleRow
-        setStyle row.tr, if descriptor.index % 2
-          style.row
+      do setDefaultStyle = ->
+        unless functions.styleRow
+          setStyle row.tr, if descriptor.index % 2
+            style.row
+          else
+            style.rowOdd
         else
-          style.rowOdd
-      else
-        functions.styleRow descriptor.entity, row.tr
+          functions.styleRow descriptor.entity, row.tr
       if properties.multiSelect
         setStyle row.checkbox, style.checkbox
         if descriptor.selected
+          setStyle row.tr, style.rowSelected
           setStyle row.checkbox, style.checkboxSelected
         row.offs.push onEvent row.checkboxTd, 'click', ->
           descriptor.selected = !descriptor.selected
           functions.update()
       if handlers.select and not descriptor.unselectable
+        unless descriptor.selected
+          row.offs.push onEvent row.tr, 'mousemove', ->
+            setStyle row.tr, style.rowHover
+          row.offs.push onEvent row.tr, 'mouseout', ->
+            setDefaultStyle()
         row.tds.forEach (td) ->
           setStyle td, cursor: 'pointer'
         notClickableTds = row.tds.filter (_, i) -> headers[i].notClickable

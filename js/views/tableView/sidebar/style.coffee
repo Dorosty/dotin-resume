@@ -5,25 +5,25 @@ exports.sidebar =
   position: 'absolute'
   top: 0
   right: 0
-  width: 300
+  width: 200
 
 exports.profile =
   overflow: 'hidden'
   borderRadius: 100
-  width: 200
-  height: 200
-  marginTop: 45
-  marginRight: 45
+  width: 150
+  height: 150
+  marginTop: 20
+  marginRight: 20
   border: '5px solid #1c1e21'
 
 exports.name =
-  fontSize: 16
+  fontSize: 14
   textAlign: 'center'
   color: 'white'
   marginTop: 30
 
 exports.title =
-  fontSize: 16
+  fontSize: 14
   textAlign: 'center'
   color: '#505d63'
   marginTop: 10
@@ -33,11 +33,11 @@ icon =
   float: 'right'
   cursor: 'pointer'
   margin: 20
-  fontSize: 25
+  fontSize: 20
 
 exports.settings = extend {}, icon,
   class: 'fa fa-sliders'
-  marginRight: 110
+  marginRight: 60
 
 exports.notifications = extend {}, icon,
   class: 'fa fa-bell-o'
@@ -52,8 +52,8 @@ exports.links =
 
 exports.link =
   cursor: 'pointer'
-  height: 80
-  lineHeight: 80
+  height: 65
+  lineHeight: 65
   textAlign: 'center'
   color: 'white'
 
