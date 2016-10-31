@@ -30,21 +30,21 @@ module.exports = component 'tableView', ({dom, events, state}) ->
             name: 'نام'
             getValue: ({firstName, lastName}) ->
               "#{firstName} #{lastName}"
-            styleTd: ({firstName, lastName, picture}, td) ->
+            styleTd: ({firstName, lastName, personalPic}, td) ->
               empty td
               setStyle td, text: ''
               append td, [
-                E 'img', extend {src: if picture then "webApi/image?address=#{picture}" else 'assets/img/profilePlaceholder.png'}, style.profilePicture
+                E 'img', extend {src: if personalPic then "webApi/image?address=#{personalPic}" else 'assets/img/profilePlaceholder.png'}, style.profilePicture
                 text "#{firstName} #{lastName}"
               ]
           }
           {
             name: 'تاریخ ثبت'            
-            getValue: ({createdAt}) -> toDate createdAt
+            getValue: ({modificationTime}) -> toDate modificationTime
           }
           {
             name: 'شغل‌های درخواستی'
-            key: 'jobs'
+            key: 'selectedJobsString'
           }
           {
             name: 'وضعیت'
@@ -81,6 +81,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
 
   state.applicants.on (_applicants) ->
     applicants = _applicants
+    console.log applicants
     update()
 
   view

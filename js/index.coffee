@@ -30,15 +30,13 @@ addPageStyle "
     display: none;
   }
   .alert {
-    padding: 0;
-    margin-bottom: 0;
-    height: 0;
-    transition: all .15s linear
+    transition: all .15s linear;
+    opacity: 0;
+    visibility: hidden;
   }
   .alert.in {
-    padding: 15px;
-    margin-bottom: 20px;
-    height: auto;
+    opacity: 1;
+    visibility: visible;
   }
 "
 

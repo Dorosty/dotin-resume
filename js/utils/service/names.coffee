@@ -17,5 +17,5 @@ exports.others = [
 
 exports.states = [
   'user'
-  'applications'
+  'applicants'
 ]

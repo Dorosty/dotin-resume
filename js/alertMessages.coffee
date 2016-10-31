@@ -32,7 +32,7 @@ addMessage = service.extendModule (exports) ->
         throw e
 
 exports.do = ->
-  addMessage 'login', success: 'خوش آمدید.'
+  # addMessage 'login', success: 'خوش آمدید.'
   [
     {name:'person', persianName: 'شخص'}
   ].forEach ({name, persianName}) ->

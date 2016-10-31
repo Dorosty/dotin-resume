@@ -39,7 +39,7 @@ module.exports = component 'sidebar', ({dom, state, events}) ->
     setStyle profileImg, {width, height, marginTop, marginRight}
 
   state.user.on (user) ->
-    setStyle profileImg, src: 'webApi/image?address=' + user.personalPic
+    setStyle profileImg, src: '/webApi/image?address=' + user.personalPic
     setStyle name, text: user.name
     setStyle position, text: switch user.type
       when 'hr'

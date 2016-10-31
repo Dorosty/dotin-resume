@@ -234,9 +234,6 @@ addMessage = service.extendModule(function(exports) {
 });
 
 exports["do"] = function() {
-  addMessage('login', {
-    success: 'خوش آمدید.'
-  });
   return [
     {
       name: 'person',
@@ -4514,7 +4511,7 @@ exports.cruds = [
 
 exports.others = [];
 
-exports.states = ['user', 'applications'];
+exports.states = ['user', 'applicants'];
 
 
 },{}],27:[function(require,module,exports){
@@ -5619,7 +5616,7 @@ module.exports = component('views', function(arg) {
         switch (user.userType) {
           case 'hr':
             return hrView;
-          case 'manager':
+          case 1:
             return managerView;
           case 'applicant':
             return applicantView;
@@ -5830,28 +5827,28 @@ module.exports = component('tableView', function(arg) {
           return firstName + " " + lastName;
         },
         styleTd: function(arg1, td) {
-          var firstName, lastName, picture;
-          firstName = arg1.firstName, lastName = arg1.lastName, picture = arg1.picture;
+          var firstName, lastName, personalPic;
+          firstName = arg1.firstName, lastName = arg1.lastName, personalPic = arg1.personalPic;
           empty(td);
           setStyle(td, {
             text: ''
           });
           return append(td, [
             E('img', extend({
-              src: picture ? "webApi/image?address=" + picture : 'assets/img/profilePlaceholder.png'
+              src: personalPic ? "webApi/image?address=" + personalPic : 'assets/img/profilePlaceholder.png'
             }, style.profilePicture)), text(firstName + " " + lastName)
           ]);
         }
       }, {
         name: 'تاریخ ثبت',
         getValue: function(arg1) {
-          var createdAt;
-          createdAt = arg1.createdAt;
-          return toDate(createdAt);
+          var modificationTime;
+          modificationTime = arg1.modificationTime;
+          return toDate(modificationTime);
         }
       }, {
         name: 'شغل‌های درخواستی',
-        key: 'jobs'
+        key: 'selectedJobsString'
       }, {
         name: 'وضعیت',
         getValue: function(arg1) {
@@ -5906,6 +5903,7 @@ module.exports = component('tableView', function(arg) {
   onEvent(searchbox, 'input', update);
   state.applicants.on(function(_applicants) {
     applicants = _applicants;
+    console.log(applicants);
     return update();
   });
   return view;
@@ -5955,7 +5953,7 @@ module.exports = component('sidebar', function(arg) {
   });
   state.user.on(function(user) {
     setStyle(profileImg, {
-      src: 'webApi/image?address=' + user.personalPic
+      src: '/webApi/image?address=' + user.personalPic
     });
     setStyle(name, {
       text: user.name
@@ -6541,7 +6539,7 @@ addPageCSS('bootstrap.css');
 
 addPageCSS('bootstrap-rtl.css');
 
-addPageStyle("@font-face { font-family: iransans; src:url('assets/fonts/eot/IRANSansWeb.eot') format('eot'), url('assets/fonts/eot/IRANSansWeb_Bold.eot') format('eot'), url('assets/fonts/ttf/IRANSansWeb.ttf') format('truetype'), url('assets/fonts/ttf/IRANSansWeb_Bold.ttf') format('truetype'), url('assets/fonts/woff/IRANSansWeb.woff') format('woff'), url('assets/fonts/woff/IRANSansWeb_Bold.woff') format('woff'), url('assets/fonts/woff2/IRANSansWeb.woff2') format('woff2'), url('assets/fonts/woff2/IRANSansWeb_Bold.woff2') format('woff2'); } * { font-family: 'iransans', tahoma; direction: rtl; } .hidden { display: none; } .alert { padding: 0; margin-bottom: 0; height: 0; transition: all .15s linear } .alert.in { padding: 15px; margin-bottom: 20px; height: auto; }");
+addPageStyle("@font-face { font-family: iransans; src:url('assets/fonts/eot/IRANSansWeb.eot') format('eot'), url('assets/fonts/eot/IRANSansWeb_Bold.eot') format('eot'), url('assets/fonts/ttf/IRANSansWeb.ttf') format('truetype'), url('assets/fonts/ttf/IRANSansWeb_Bold.ttf') format('truetype'), url('assets/fonts/woff/IRANSansWeb.woff') format('woff'), url('assets/fonts/woff/IRANSansWeb_Bold.woff') format('woff'), url('assets/fonts/woff2/IRANSansWeb.woff2') format('woff2'), url('assets/fonts/woff2/IRANSansWeb_Bold.woff2') format('woff2'); } * { font-family: 'iransans', tahoma; direction: rtl; } .hidden { display: none; } .alert { transition: all .15s linear; opacity: 0; visibility: hidden; } .alert.in { opacity: 1; visibility: visible; }");
 
 document.title = 'سامانه جذب داتین';
 

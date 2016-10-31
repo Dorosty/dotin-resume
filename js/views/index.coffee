@@ -19,7 +19,7 @@ module.exports = component 'views', ({dom, state}) ->
       switch user.userType
         when 'hr'
           hrView
-        when 'manager'
+        when 1
           managerView
         when 'applicant'
           applicantView
