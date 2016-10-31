@@ -36,7 +36,7 @@ module.exports = component 'login', ({dom, events, service}) ->
     hide invalid
     show spinner
     service.login
-      identificationCode: +email.value()
+      identificationCode: email.value()
       password: password.value()
       # remember: !!remember.checked()
     .catch ->

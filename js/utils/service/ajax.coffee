@@ -22,5 +22,5 @@ module.exports = (isGet, serviceName, params = {}) ->
     if isGet
       xhr.send()
     else
-      xhr.setRequestHeader 'Content-Type', 'application/json'
-      xhr.send JSON.stringify params
+      xhr.setRequestHeader 'Content-Type', 'application/x-www-form-urlencoded'
+      xhr.send Object.keys(params).map((param) -> "#{param}=#{params[param]}").join '&'

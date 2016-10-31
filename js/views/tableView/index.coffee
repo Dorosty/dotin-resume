@@ -22,6 +22,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
       E style.settings
       E clear: 'both', height: 20
       tableInstance = E table,
+        entityId: 'userId'
         properties:
           multiSelect: true
         headers: [

@@ -16,7 +16,7 @@ module.exports = component 'views', ({dom, state}) ->
     empty wrapper
 
     currentPage = if user
-      switch user.type
+      switch user.userType
         when 'hr'
           hrView
         when 'manager'

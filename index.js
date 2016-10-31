@@ -4153,8 +4153,10 @@ module.exports = function(isGet, serviceName, params) {
     if (isGet) {
       return xhr.send();
     } else {
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      return xhr.send(JSON.stringify(params));
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      return xhr.send(Object.keys(params).map(function(param) {
+        return param + "=" + params[param];
+      }).join('&'));
     }
   });
 };
@@ -5614,7 +5616,7 @@ module.exports = component('views', function(arg) {
     empty(wrapper);
     currentPage = (function() {
       if (user) {
-        switch (user.type) {
+        switch (user.userType) {
           case 'hr':
             return hrView;
           case 'manager':
@@ -5815,6 +5817,7 @@ module.exports = component('tableView', function(arg) {
     clear: 'both',
     height: 20
   }), tableInstance = E(table, {
+    entityId: 'userId',
     properties: {
       multiSelect: true
     },
