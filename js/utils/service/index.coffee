@@ -1,7 +1,7 @@
 Q = require '../../q'
 ex = require './ex'
 {gets, posts, others} = require './names'
-{post} = require './getPost'
+{get, post} = require './getPost'
 log = require('../log').service
 
 exports.instance = (thisComponent) ->
@@ -22,10 +22,10 @@ exports.extendModule = (fn) ->
   fn ex
 
 exports.getUser = ->
-  post 'getUser'
+  get 'getUser'
 
 exports.autoPing = ->
   do fn = ->
-    Q.all [post('ping'), Q.delay 5000]
+    Q.all [get('ping').catch(->), Q.delay 5000]
     .fin ->
       setTimeout fn

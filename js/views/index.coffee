@@ -17,10 +17,10 @@ module.exports = component 'views', ({dom, state}) ->
 
     currentPage = if user
       switch user.userType
-        when 'hr'
-          hrView
         when 1
           managerView
+        when 2
+          hrView
         when 'applicant'
           applicantView
     else

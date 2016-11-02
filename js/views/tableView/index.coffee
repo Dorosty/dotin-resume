@@ -34,7 +34,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
               empty td
               setStyle td, text: ''
               append td, [
-                E 'img', extend {src: if personalPic then "webApi/image?address=#{personalPic}" else 'assets/img/profilePlaceholder.png'}, style.profilePicture
+                E 'img', extend {src: if personalPic then "/webApi/image?address=#{personalPic}" else 'assets/img/profilePlaceholder.png'}, style.profilePicture
                 text "#{firstName} #{lastName}"
               ]
           }
@@ -48,7 +48,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'وضعیت'
-            getValue: ({state}) -> ''#stateToPersian state
+            getValue: ({state}) -> 'ثبت شده'#stateToPersian state
           }
           {
             name: 'یادداشت'
@@ -73,15 +73,18 @@ module.exports = component 'tableView', ({dom, events, state}) ->
 
   applicants = []
   update = ->
-    tableInstance.setData applicants.filter ({firstName, lastName, jobs, state}) ->
+    tableInstance.setData applicants.filter ({firstName, lastName, selectedJobsString, state}) ->
       value = searchbox.value()
-      textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(jobs.toLowerCase(), value) or textIsInSearch(stateToPersian(state), value)
+      textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(selectedJobsString.toLowerCase(), value) # or textIsInSearch(stateToPersian(state), value)
 
   onEvent searchbox, 'input', update
 
   state.applicants.on (_applicants) ->
     applicants = _applicants
-    console.log applicants
+    applicants.forEach (applicant) ->
+      applicant.firstName ?= ''
+      applicant.lastName ?= ''
+      applicant.selectedJobsString ?= ''
     update()
 
   view

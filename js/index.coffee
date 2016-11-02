@@ -44,7 +44,7 @@ document.title = 'سامانه جذب داتین'
 
 alertMessages.do()
 
-# service.getUser()
-# service.autoPing()
+service.getUser()
+service.autoPing()
 
 page()

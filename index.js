@@ -4343,7 +4343,7 @@ exports.post = handle(false);
 
 
 },{"../cookies":15,"../state":28,"./ajax":21,"./ex":22,"./names":26,"./stateChangingServices":27}],24:[function(require,module,exports){
-var Q, ex, gets, log, others, post, posts, ref;
+var Q, ex, get, gets, log, others, post, posts, ref, ref1;
 
 Q = require('../../q');
 
@@ -4351,7 +4351,7 @@ ex = require('./ex');
 
 ref = require('./names'), gets = ref.gets, posts = ref.posts, others = ref.others;
 
-post = require('./getPost').post;
+ref1 = require('./getPost'), get = ref1.get, post = ref1.post;
 
 log = require('../log').service;
 
@@ -4377,13 +4377,13 @@ exports.extendModule = function(fn) {
 };
 
 exports.getUser = function() {
-  return post('getUser');
+  return get('getUser');
 };
 
 exports.autoPing = function() {
   var fn;
   return (fn = function() {
-    return Q.all([post('ping'), Q.delay(5000)]).fin(function() {
+    return Q.all([get('ping')["catch"](function() {}), Q.delay(5000)]).fin(function() {
       return setTimeout(fn);
     });
   })();
@@ -5614,10 +5614,10 @@ module.exports = component('views', function(arg) {
     currentPage = (function() {
       if (user) {
         switch (user.userType) {
-          case 'hr':
-            return hrView;
           case 1:
             return managerView;
+          case 2:
+            return hrView;
           case 'applicant':
             return applicantView;
         }
@@ -5835,7 +5835,7 @@ module.exports = component('tableView', function(arg) {
           });
           return append(td, [
             E('img', extend({
-              src: personalPic ? "webApi/image?address=" + personalPic : 'assets/img/profilePlaceholder.png'
+              src: personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/profilePlaceholder.png'
             }, style.profilePicture)), text(firstName + " " + lastName)
           ]);
         }
@@ -5854,7 +5854,7 @@ module.exports = component('tableView', function(arg) {
         getValue: function(arg1) {
           var state;
           state = arg1.state;
-          return '';
+          return 'ثبت شده';
         }
       }, {
         name: 'یادداشت',
@@ -5894,16 +5894,24 @@ module.exports = component('tableView', function(arg) {
   applicants = [];
   update = function() {
     return tableInstance.setData(applicants.filter(function(arg1) {
-      var firstName, jobs, lastName, state, value;
-      firstName = arg1.firstName, lastName = arg1.lastName, jobs = arg1.jobs, state = arg1.state;
+      var firstName, lastName, selectedJobsString, state, value;
+      firstName = arg1.firstName, lastName = arg1.lastName, selectedJobsString = arg1.selectedJobsString, state = arg1.state;
       value = searchbox.value();
-      return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(jobs.toLowerCase(), value) || textIsInSearch(stateToPersian(state), value);
+      return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(selectedJobsString.toLowerCase(), value);
     }));
   };
   onEvent(searchbox, 'input', update);
   state.applicants.on(function(_applicants) {
     applicants = _applicants;
-    console.log(applicants);
+    applicants.forEach(function(applicant) {
+      if (applicant.firstName == null) {
+        applicant.firstName = '';
+      }
+      if (applicant.lastName == null) {
+        applicant.lastName = '';
+      }
+      return applicant.selectedJobsString != null ? applicant.selectedJobsString : applicant.selectedJobsString = '';
+    });
     return update();
   });
   return view;
@@ -6544,6 +6552,10 @@ addPageStyle("@font-face { font-family: iransans; src:url('assets/fonts/eot/IRAN
 document.title = 'سامانه جذب داتین';
 
 alertMessages["do"]();
+
+service.getUser();
+
+service.autoPing();
 
 page();
 
