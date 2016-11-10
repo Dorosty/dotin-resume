@@ -2,7 +2,8 @@ component = require '../../utils/component'
 style = require './style'
 sidebar = require './sidebar'
 table = require './table'
-{extend, toDate, textIsInSearch} = require '../../utils'
+search = require './search'
+{extend, toDate} = require '../../utils'
 {stateToPersian} = require '../../utils/logic'
 
 module.exports = component 'tableView', ({dom, events, state}) ->
@@ -12,15 +13,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
   view = E 'span', null,
     E sidebar
     E style.contents,
-      searchbox = do ->
-        searchbox = E 'input', style.searchbox
-        onEvent searchbox, 'focus', ->
-          setStyle searchbox, style.searchboxFocus
-        onEvent searchbox, 'blur', ->
-          setStyle searchbox, style.searchbox
-        searchbox
-      E style.settings
-      E clear: 'both', height: 20
+      searchInstance = E search
       tableInstance = E table,
         entityId: 'userId'
         properties:
@@ -65,7 +58,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
             styleTd: ({resume}, td, offs) ->
               setStyle td, style.iconTd
               empty td
-              append td, E 'a', extend {href: '/webApi/resume?address=' + resume}, style.icon, class: 'fa fa-download', color: '#449e73'
+              append td, E 'a', extend {href: '/webApi/resume?address=' + resume}, style.icon, target: '_blank', class: 'fa fa-download', color: '#449e73'
           }
         ]
         handlers:
@@ -73,11 +66,9 @@ module.exports = component 'tableView', ({dom, events, state}) ->
 
   applicants = []
   update = ->
-    tableInstance.setData applicants.filter ({firstName, lastName, selectedJobsString, state}) ->
-      value = searchbox.value()
-      textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(selectedJobsString.toLowerCase(), value) # or textIsInSearch(stateToPersian(state), value)
+    tableInstance.setData applicants.filter searchInstance.isInSearch
 
-  onEvent searchbox, 'input', update
+  searchInstance.onChange update
 
   state.applicants.on (_applicants) ->
     applicants = _applicants

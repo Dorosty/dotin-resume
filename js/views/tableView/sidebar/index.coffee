@@ -20,7 +20,10 @@ module.exports = component 'sidebar', ({dom, state, events}) ->
       E style.link, 'بایگانی'
 
   resize = ->
-    setStyle view, height: document.body.scrollHeight
+    body = document.body
+    html = document.documentElement
+    height = Math.max body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight
+    setStyle view, {height}
   onResize resize
   setTimeout resize
 
@@ -42,9 +45,9 @@ module.exports = component 'sidebar', ({dom, state, events}) ->
     setStyle profileImg, src: '/webApi/image?address=' + user.personalPic
     setStyle name, text: user.name
     setStyle position, text: switch user.type
-      when 'hr'
-        'کارشناس واحد منابع انسانی'
-      when 'manager'
+      when 1
         user.position
+      when 2
+        'کارشناس واحد منابع انسانی'
 
   view

@@ -1,44 +1,46 @@
-return
+# return
 
 Q = require '../../q'
 
-applications = [{
-  id: 0
+applicants = [{
+  userId: 0
   firstName: 'علی'
   lastName: 'درستی'
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
-  jobs: 'Java developer - Javascript developer'
-  resumeUrl: ''
-  picture: null
+  selectedJobsString: 'Java developer - Javascript developer'
+  resume: null
+  personalPic: null
+  modificationTime: 1473132854116
   createdAt: 1473132854116
   notes: []
   state: 0
 }, {
-  id: 1
+  userId: 1
   firstName: 'سعید'
   lastName: 'قیومیه'
   phoneNumber: '09121234567'
   email: 'ghayoomi@dotin.ir'
   birthday: '1343/4/5'
-  jobs: 'UX designer'
-  resumeUrl: ''
-  picture: null
+  selectedJobsString: 'UX designer'
+  resume: null
+  personalPic: null
+  modificationTime: 1373132854116
   createdAt: 1373132854116
   notes: ['aaaaaaaaaaaa']
   state: 1
 }]
 
 user =
-  picture: 'assets/img/profile.jpg'
+  personalPic: null
   name: 'حامد حسینی‌نژاد'
-  type: 'hr'
+  userType: 2
 
 # user = undefined
 
 exports.ping = ->
-  Q {user, applications}
+  Q {user, applicants}
 
 exports.getUser = ->
   Q {user}
@@ -51,12 +53,12 @@ exports.login = ({email}) ->
         user: user =
           name: 'حامد حسینی‌نژاد'
           type: 'hr'
-        applications: applications
+        applicants: applicants
       when 'mohammadkhani@dotin.ir'
         user: user =
           name: 'روح‌الله محمد‌خانی'
           type: 'manager'
-        applications: applications
+        applicants: applicants
       when 'dorosty@dotin.ir'
         user: user =
           name: 'علی درستی'

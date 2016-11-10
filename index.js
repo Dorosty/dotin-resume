@@ -4391,36 +4391,36 @@ exports.autoPing = function() {
 
 
 },{"../../q":10,"../log":19,"./ex":22,"./getPost":23,"./names":26}],25:[function(require,module,exports){
-var Q, applications, user;
-
-return;
+var Q, applicants, user;
 
 Q = require('../../q');
 
-applications = [
+applicants = [
   {
-    id: 0,
+    userId: 0,
     firstName: 'علی',
     lastName: 'درستی',
     phoneNumber: '09121234567',
     email: 'dorosty@doin.ir',
     birthday: '1340/1/2',
-    jobs: 'Java developer - Javascript developer',
-    resumeUrl: '',
-    picture: null,
+    selectedJobsString: 'Java developer - Javascript developer',
+    resume: null,
+    personalPic: null,
+    modificationTime: 1473132854116,
     createdAt: 1473132854116,
     notes: [],
     state: 0
   }, {
-    id: 1,
+    userId: 1,
     firstName: 'سعید',
     lastName: 'قیومیه',
     phoneNumber: '09121234567',
     email: 'ghayoomi@dotin.ir',
     birthday: '1343/4/5',
-    jobs: 'UX designer',
-    resumeUrl: '',
-    picture: null,
+    selectedJobsString: 'UX designer',
+    resume: null,
+    personalPic: null,
+    modificationTime: 1373132854116,
     createdAt: 1373132854116,
     notes: ['aaaaaaaaaaaa'],
     state: 1
@@ -4428,15 +4428,15 @@ applications = [
 ];
 
 user = {
-  picture: 'assets/img/profile.jpg',
+  personalPic: null,
   name: 'حامد حسینی‌نژاد',
-  type: 'hr'
+  userType: 2
 };
 
 exports.ping = function() {
   return Q({
     user: user,
-    applications: applications
+    applicants: applicants
   });
 };
 
@@ -4457,7 +4457,7 @@ exports.login = function(arg) {
             name: 'حامد حسینی‌نژاد',
             type: 'hr'
           },
-          applications: applications
+          applicants: applicants
         };
       case 'mohammadkhani@dotin.ir':
         return {
@@ -4465,7 +4465,7 @@ exports.login = function(arg) {
             name: 'روح‌الله محمد‌خانی',
             type: 'manager'
           },
-          applications: applications
+          applicants: applicants
         };
       case 'dorosty@dotin.ir':
         return {
@@ -5782,7 +5782,7 @@ module.exports = tableView;
 
 
 },{"../tableView":44}],44:[function(require,module,exports){
-var component, extend, ref, sidebar, stateToPersian, style, table, textIsInSearch, toDate;
+var component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
 
 component = require('../../utils/component');
 
@@ -5792,28 +5792,18 @@ sidebar = require('./sidebar');
 
 table = require('./table');
 
-ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, textIsInSearch = ref.textIsInSearch;
+search = require('./search');
+
+ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 
 stateToPersian = require('../../utils/logic').stateToPersian;
 
 module.exports = component('tableView', function(arg) {
-  var E, append, applicants, dom, empty, events, onEvent, searchbox, setStyle, state, tableInstance, text, update, view;
+  var E, append, applicants, dom, empty, events, onEvent, searchInstance, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
   onEvent = events.onEvent;
-  view = E('span', null, E(sidebar), E(style.contents, searchbox = (function() {
-    searchbox = E('input', style.searchbox);
-    onEvent(searchbox, 'focus', function() {
-      return setStyle(searchbox, style.searchboxFocus);
-    });
-    onEvent(searchbox, 'blur', function() {
-      return setStyle(searchbox, style.searchbox);
-    });
-    return searchbox;
-  })(), E(style.settings), E({
-    clear: 'both',
-    height: 20
-  }), tableInstance = E(table, {
+  view = E('span', null, E(sidebar), E(style.contents, searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
       multiSelect: true
@@ -5881,6 +5871,7 @@ module.exports = component('tableView', function(arg) {
           return append(td, E('a', extend({
             href: '/webApi/resume?address=' + resume
           }, style.icon, {
+            target: '_blank',
             "class": 'fa fa-download',
             color: '#449e73'
           })));
@@ -5893,14 +5884,9 @@ module.exports = component('tableView', function(arg) {
   })));
   applicants = [];
   update = function() {
-    return tableInstance.setData(applicants.filter(function(arg1) {
-      var firstName, lastName, selectedJobsString, state, value;
-      firstName = arg1.firstName, lastName = arg1.lastName, selectedJobsString = arg1.selectedJobsString, state = arg1.state;
-      value = searchbox.value();
-      return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(selectedJobsString.toLowerCase(), value);
-    }));
+    return tableInstance.setData(applicants.filter(searchInstance.isInSearch));
   };
-  onEvent(searchbox, 'input', update);
+  searchInstance.onChange(update);
   state.applicants.on(function(_applicants) {
     applicants = _applicants;
     applicants.forEach(function(applicant) {
@@ -5918,7 +5904,196 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"./sidebar":45,"./style":47,"./table":49}],45:[function(require,module,exports){
+},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"./search":45,"./sidebar":47,"./style":49,"./table":51}],45:[function(require,module,exports){
+var component, extend, stateToPersian, style, textIsInSearch;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+textIsInSearch = require('../../../utils').textIsInSearch;
+
+stateToPersian = require('../../../utils/logic').stateToPersian;
+
+extend = require('../../../utils').extend;
+
+module.exports = component('search', function(arg) {
+  var E, arrow, arrowBorder, disable, dom, enable, events, isActive, onChangeListener, onEvent, panel, returnObject, searchbox, setStyle, settings, view;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E, setStyle = dom.setStyle, enable = dom.enable, disable = dom.disable;
+  onEvent = events.onEvent;
+  onChangeListener = void 0;
+  view = E('span', null, searchbox = E('input', style.searchbox), settings = E(style.settings), E(style.divider), panel = E(style.panel, arrowBorder = E(style.arrowBorder), arrow = E(style.arrow), E({
+    margin: 20
+  }, E('input', extend({}, style.searchbox, {
+    float: 'none',
+    backgroundColor: 'white',
+    border: '1px solid #ddd',
+    width: 200
+  }))), E({
+    margin: 20
+  }, E('input', extend({}, style.searchbox, {
+    float: 'none',
+    backgroundColor: 'white',
+    border: '1px solid #ddd',
+    width: 200
+  }))), E({
+    margin: 20
+  }, E('input', extend({}, style.searchbox, {
+    float: 'none',
+    backgroundColor: 'white',
+    border: '1px solid #ddd',
+    width: 200
+  })))));
+  onEvent(searchbox, 'focus', function() {
+    return setStyle(searchbox, style.searchboxFocus);
+  });
+  onEvent(searchbox, 'blur', function() {
+    return setStyle(searchbox, style.searchbox);
+  });
+  onEvent(searchbox, 'input', function() {
+    return typeof onChangeListener === "function" ? onChangeListener() : void 0;
+  });
+  isActive = false;
+  onEvent(settings, 'click', function() {
+    if (isActive) {
+      setStyle(settings, style.settings);
+      setStyle(panel, style.panel);
+      setStyle(arrow, style.arrow);
+      setStyle(arrowBorder, style.arrowBorder);
+      enable(searchbox);
+    } else {
+      setStyle(settings, style.settingsActive);
+      setStyle(panel, style.panelActive);
+      setStyle(arrow, style.arrowActive);
+      setStyle(arrowBorder, style.arrowActive);
+      disable(searchbox);
+      setTimeout((function() {
+        return setStyle(panel, {
+          height: 'auto'
+        });
+      }), 200);
+      setStyle(searchbox, {
+        value: ''
+      });
+    }
+    if (typeof onChangeListener === "function") {
+      onChangeListener();
+    }
+    return isActive = !isActive;
+  });
+  returnObject({
+    isInSearch: function(arg1) {
+      var firstName, lastName, selectedJobsString, state, value;
+      firstName = arg1.firstName, lastName = arg1.lastName, selectedJobsString = arg1.selectedJobsString, state = arg1.state;
+      value = searchbox.value();
+      return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(selectedJobsString.toLowerCase(), value);
+    },
+    onChange: function(listener) {
+      return onChangeListener = listener;
+    }
+  });
+  return view;
+});
+
+
+},{"../../../utils":18,"../../../utils/component":14,"../../../utils/logic":20,"./style":46}],46:[function(require,module,exports){
+var extend;
+
+extend = require('../../../utils').extend;
+
+exports.searchbox = {
+  placeholder: 'جستجوی رزومه مورد نظر شما',
+  border: '1px solid #bdd1e5',
+  outline: 'none',
+  width: 400,
+  borderRadius: 3,
+  padding: 7,
+  paddingLeft: 50,
+  height: 30,
+  lineHeight: 30,
+  float: 'right',
+  transition: '0.2s',
+  backgroundColor: '#ecedee',
+  color: 'black'
+};
+
+exports.searchboxFocus = {
+  backgroundColor: '#c1c1c1',
+  color: '#555'
+};
+
+exports.settings = {
+  "class": 'fa fa-cog',
+  display: 'inline-block',
+  width: 28,
+  height: 28,
+  fontSize: 20,
+  lineHeight: 20,
+  padding: '4px 5px',
+  marginRight: -29,
+  marginTop: 1,
+  borderRadius: '3px 0 0 3px',
+  color: '#555',
+  float: 'right',
+  cursor: 'pointer',
+  transition: '0.2s',
+  backgroundColor: '#ddd'
+};
+
+exports.settingsActive = {
+  backgroundColor: '#c1c1c1'
+};
+
+exports.divider = {
+  clear: 'both',
+  height: 20
+};
+
+exports.panel = {
+  marginBottom: 20,
+  width: '100%',
+  backgroundColor: '#f6f6f6',
+  border: '1px solid #ccc',
+  color: '#555',
+  position: 'relative',
+  transition: '0.2s',
+  opacity: 0,
+  height: 0
+};
+
+exports.panelActive = {
+  opacity: 1,
+  height: 200
+};
+
+exports.arrow = {
+  position: 'absolute',
+  width: 0,
+  height: 0,
+  borderStyle: 'solid',
+  borderColor: 'transparent',
+  right: 375,
+  top: -13,
+  borderWidth: '0 13px 13px',
+  borderBottomColor: '#f6f6f6',
+  transition: '0.2s',
+  opacity: 0
+};
+
+exports.arrowBorder = extend({}, exports.arrow, {
+  right: 374,
+  top: -14,
+  borderWidth: '0 14px 14px',
+  borderBottomColor: '#ccc'
+});
+
+exports.arrowActive = {
+  opacity: 1
+};
+
+
+},{"../../../utils":18}],47:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -5932,8 +6107,12 @@ module.exports = component('sidebar', function(arg) {
   onEvent = events.onEvent, onResize = events.onResize;
   view = E(style.sidebar, E(style.profile, profileImg = E('img')), name = E(style.name), position = E(style.title), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
   resize = function() {
+    var body, height, html;
+    body = document.body;
+    html = document.documentElement;
+    height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
     return setStyle(view, {
-      height: document.body.scrollHeight
+      height: height
     });
   };
   onResize(resize);
@@ -5969,10 +6148,10 @@ module.exports = component('sidebar', function(arg) {
     return setStyle(position, {
       text: (function() {
         switch (user.type) {
-          case 'hr':
-            return 'کارشناس واحد منابع انسانی';
-          case 'manager':
+          case 1:
             return user.position;
+          case 2:
+            return 'کارشناس واحد منابع انسانی';
         }
       })()
     });
@@ -5981,7 +6160,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":14,"./style":46}],46:[function(require,module,exports){
+},{"../../../utils/component":14,"./style":48}],48:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -6058,54 +6237,17 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":18}],47:[function(require,module,exports){
+},{"../../../utils":18}],49:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
   marginLeft: 50
 };
 
-exports.searchbox = {
-  placeholder: 'جستجوی رزومه مورد نظر شما',
-  border: '1px solid #bdd1e5',
-  outline: 'none',
-  width: 400,
-  borderRadius: 3,
-  padding: 7,
-  paddingLeft: 50,
-  height: 30,
-  lineHeight: 30,
-  float: 'right',
-  transition: '0.2s',
-  backgroundColor: '#ecedee',
-  color: 'black'
-};
-
-exports.searchboxFocus = {
-  backgroundColor: '#c1c1c1',
-  color: '#555'
-};
-
-exports.settings = {
-  "class": 'fa fa-cog',
-  display: 'inline-block',
-  width: 28,
-  height: 28,
-  fontSize: 20,
-  lineHeight: 20,
-  padding: '4px 5px',
-  marginRight: -29,
-  marginTop: 1,
-  borderRadius: '3px 0 0 3px',
-  backgroundColor: '#ddd',
-  color: '#555',
-  float: 'right',
-  cursor: 'pointer'
-};
-
 exports.profilePicture = {
   width: 30,
   height: 30,
+  borderRadius: 100,
   marginLeft: 5
 };
 
@@ -6114,7 +6256,7 @@ exports.iconTd = {};
 exports.icon = {};
 
 
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -6332,7 +6474,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":18,"./style":50}],49:[function(require,module,exports){
+},{"../../../utils":18,"./style":52}],51:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -6445,7 +6587,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":18,"../../../utils/component":14,"./functions":48,"./style":50}],50:[function(require,module,exports){
+},{"../../../utils":18,"../../../utils/component":14,"./functions":50,"./style":52}],52:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -6492,7 +6634,7 @@ row = {
 };
 
 exports.headerRow = {
-  borderBottom: '3px solid #c1c1c1'
+  borderBottom: '2px solid #c1c1c1'
 };
 
 exports.row = extend({}, row);
@@ -6526,7 +6668,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":18}],51:[function(require,module,exports){
+},{"../../../utils":18}],53:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -6560,4 +6702,4 @@ service.autoPing();
 page();
 
 
-},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[51]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[53]);

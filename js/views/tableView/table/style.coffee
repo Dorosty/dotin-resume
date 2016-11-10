@@ -34,7 +34,7 @@ row =
   backgroundColor: 'white'
 
 exports.headerRow =
-  borderBottom: '3px solid #c1c1c1'
+  borderBottom: '2px solid #c1c1c1'
 
 exports.row = extend {}, row
 
