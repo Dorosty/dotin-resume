@@ -1,13 +1,13 @@
 component = require '../../../utils/component'
 style = require './style'
+criterion = require './criterion'
+###############
 {textIsInSearch} = require '../../../utils'
 {stateToPersian} = require '../../../utils/logic'
 ###############
-{extend} = require '../../../utils'
-###############
 
 module.exports = component 'search', ({dom, events, returnObject}) ->
-  {E, setStyle, enable, disable} = dom
+  {E, empty, append, setStyle, enable, disable} = dom
   {onEvent} = events
 
   onChangeListener = undefined
@@ -19,12 +19,9 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
     panel = E style.panel,
       arrowBorder = E style.arrowBorder
       arrow = E style.arrow
-      E margin: 20,
-        E 'input', extend {}, style.searchbox, float: 'none', backgroundColor: 'white', border: '1px solid #ddd', width: 200
-      E margin: 20,
-        E 'input', extend {}, style.searchbox, float: 'none', backgroundColor: 'white', border: '1px solid #ddd', width: 200
-      E margin: 20,
-        E 'input', extend {}, style.searchbox, float: 'none', backgroundColor: 'white', border: '1px solid #ddd', width: 200
+      criteriaPlaceholder = E()
+      add = E style.add
+      submit = E style.submit, 'جستجو'
 
   onEvent searchbox, 'focus', ->
     setStyle searchbox, style.searchboxFocus
@@ -33,22 +30,39 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
 
   onEvent searchbox, 'input', -> onChangeListener?()
 
+  onEvent add, 'mouseover', ->
+    setStyle add, style.buttonHover
+  onEvent add, 'mouseout', ->
+    setStyle add, style.add
+  onEvent add, 'click', ->
+    append criteriaPlaceholder, newCriterion = E criterion
+    criteria.push newCriterion
+    setStyle panel, height: 60 + (50 * criteria.length)
+
+  onEvent submit, 'mouseover', ->
+    setStyle submit, style.buttonHover
+  onEvent submit, 'mouseout', ->
+    setStyle submit, style.submit
+
+  criteria = []
   isActive = false
   onEvent settings, 'click', ->
     if isActive
-      setStyle settings, style.settings
       setStyle panel, style.panel
+      setStyle settings, style.settings
       setStyle arrow, style.arrow
       setStyle arrowBorder, style.arrowBorder
       enable searchbox
     else
+      setStyle panel, style.panelActive
       setStyle settings, style.settingsActive
       setStyle panel, style.panelActive
       setStyle arrow, style.arrowActive
       setStyle arrowBorder, style.arrowActive
       disable searchbox
-      setTimeout (-> setStyle panel, height: 'auto'), 200
       setStyle searchbox, value: ''
+      empty criteriaPlaceholder
+      append criteriaPlaceholder, criteria = [E criterion]
     onChangeListener?()
     isActive = not isActive
 

@@ -4,7 +4,6 @@ exports.gets = [
 exports.posts = [
   'getUser'
   'login'
-  'logout'
   'addJob'
 ]
 
@@ -13,6 +12,7 @@ exports.cruds = [
 ]
 
 exports.others = [
+  'logout'
 ]
 
 exports.states = [

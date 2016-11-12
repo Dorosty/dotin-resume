@@ -28,6 +28,13 @@ exports.td =
 exports.th = extend {}, exports.td,
   position: 'relative'
   paddingLeft: 15
+  transition: '0.2s'
+
+exports.thHover =
+  backgroundColor: '#ececec'
+
+exports.thOut =
+  backgroundColor: 'white'
 
 row =
   transition: '0.2s'

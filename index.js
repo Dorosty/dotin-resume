@@ -4177,6 +4177,23 @@ eraseCookie = require('../cookies').eraseCookie;
 
 uppercaseFirst = require('..').uppercaseFirst;
 
+exports.logout = function(automatic) {
+  if (automatic == null) {
+    automatic = false;
+  }
+  ['user'].forEach(function(x) {
+    return state[x].set(null);
+  });
+  ['applicants'].forEach(function(stateName) {
+    return state[stateName].set([]);
+  });
+  eraseCookie('JSESSIONID');
+  if (automatic !== true) {
+    stateChangingServices.logout.endedAt = +new Date();
+  }
+  return Q();
+};
+
 gets.forEach(function(x) {
   return exports[x] = function(params) {
     return get(x, params);
@@ -4500,7 +4517,7 @@ exports.addJob = function() {
 },{"../../q":10}],26:[function(require,module,exports){
 exports.gets = [];
 
-exports.posts = ['getUser', 'login', 'logout', 'addJob'];
+exports.posts = ['getUser', 'login', 'addJob'];
 
 exports.cruds = [
   {
@@ -4509,7 +4526,7 @@ exports.cruds = [
   }
 ];
 
-exports.others = [];
+exports.others = ['logout'];
 
 exports.states = ['user', 'applicants'];
 
@@ -5825,7 +5842,7 @@ module.exports = component('tableView', function(arg) {
           });
           return append(td, [
             E('img', extend({
-              src: personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/profilePlaceholder.png'
+              src: personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/default-avatar-small.png'
             }, style.profilePicture)), text(firstName + " " + lastName)
           ]);
         }
@@ -5848,6 +5865,7 @@ module.exports = component('tableView', function(arg) {
         }
       }, {
         name: 'یادداشت',
+        width: 100,
         styleTd: function(arg1, td, offs) {
           var notes;
           notes = arg1.notes;
@@ -5863,6 +5881,7 @@ module.exports = component('tableView', function(arg) {
         }
       }, {
         name: 'رزومه',
+        width: 100,
         styleTd: function(arg1, td, offs) {
           var resume;
           resume = arg1.resume;
@@ -5904,47 +5923,56 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"./search":45,"./sidebar":47,"./style":49,"./table":51}],45:[function(require,module,exports){
-var component, extend, stateToPersian, style, textIsInSearch;
+},{"../../utils":18,"../../utils/component":14,"../../utils/logic":20,"./search":47,"./sidebar":49,"./style":51,"./table":53}],45:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('search', function(arg) {
+  var E, dom, events, returnObject;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E;
+  return E({
+    margin: 20
+  }, E('input', style.input));
+});
+
+
+},{"../../../../utils/component":14,"./style":46}],46:[function(require,module,exports){
+exports.input = {
+  border: '1px solid #ddd',
+  outline: 'none',
+  width: 200,
+  borderRadius: 3,
+  padding: 7,
+  paddingLeft: 50,
+  height: 30,
+  lineHeight: 30
+};
+
+
+},{}],47:[function(require,module,exports){
+var component, criterion, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
 
 style = require('./style');
 
+criterion = require('./criterion');
+
 textIsInSearch = require('../../../utils').textIsInSearch;
 
 stateToPersian = require('../../../utils/logic').stateToPersian;
 
-extend = require('../../../utils').extend;
-
 module.exports = component('search', function(arg) {
-  var E, arrow, arrowBorder, disable, dom, enable, events, isActive, onChangeListener, onEvent, panel, returnObject, searchbox, setStyle, settings, view;
+  var E, add, append, arrow, arrowBorder, criteria, criteriaPlaceholder, disable, dom, empty, enable, events, isActive, onChangeListener, onEvent, panel, returnObject, searchbox, setStyle, settings, submit, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  E = dom.E, setStyle = dom.setStyle, enable = dom.enable, disable = dom.disable;
+  E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle, enable = dom.enable, disable = dom.disable;
   onEvent = events.onEvent;
   onChangeListener = void 0;
-  view = E('span', null, searchbox = E('input', style.searchbox), settings = E(style.settings), E(style.divider), panel = E(style.panel, arrowBorder = E(style.arrowBorder), arrow = E(style.arrow), E({
-    margin: 20
-  }, E('input', extend({}, style.searchbox, {
-    float: 'none',
-    backgroundColor: 'white',
-    border: '1px solid #ddd',
-    width: 200
-  }))), E({
-    margin: 20
-  }, E('input', extend({}, style.searchbox, {
-    float: 'none',
-    backgroundColor: 'white',
-    border: '1px solid #ddd',
-    width: 200
-  }))), E({
-    margin: 20
-  }, E('input', extend({}, style.searchbox, {
-    float: 'none',
-    backgroundColor: 'white',
-    border: '1px solid #ddd',
-    width: 200
-  })))));
+  view = E('span', null, searchbox = E('input', style.searchbox), settings = E(style.settings), E(style.divider), panel = E(style.panel, arrowBorder = E(style.arrowBorder), arrow = E(style.arrow), criteriaPlaceholder = E(), add = E(style.add), submit = E(style.submit, 'جستجو')));
   onEvent(searchbox, 'focus', function() {
     return setStyle(searchbox, style.searchboxFocus);
   });
@@ -5954,28 +5982,47 @@ module.exports = component('search', function(arg) {
   onEvent(searchbox, 'input', function() {
     return typeof onChangeListener === "function" ? onChangeListener() : void 0;
   });
+  onEvent(add, 'mouseover', function() {
+    return setStyle(add, style.buttonHover);
+  });
+  onEvent(add, 'mouseout', function() {
+    return setStyle(add, style.add);
+  });
+  onEvent(add, 'click', function() {
+    var newCriterion;
+    append(criteriaPlaceholder, newCriterion = E(criterion));
+    criteria.push(newCriterion);
+    return setStyle(panel, {
+      height: 60 + (50 * criteria.length)
+    });
+  });
+  onEvent(submit, 'mouseover', function() {
+    return setStyle(submit, style.buttonHover);
+  });
+  onEvent(submit, 'mouseout', function() {
+    return setStyle(submit, style.submit);
+  });
+  criteria = [];
   isActive = false;
   onEvent(settings, 'click', function() {
     if (isActive) {
-      setStyle(settings, style.settings);
       setStyle(panel, style.panel);
+      setStyle(settings, style.settings);
       setStyle(arrow, style.arrow);
       setStyle(arrowBorder, style.arrowBorder);
       enable(searchbox);
     } else {
+      setStyle(panel, style.panelActive);
       setStyle(settings, style.settingsActive);
       setStyle(panel, style.panelActive);
       setStyle(arrow, style.arrowActive);
       setStyle(arrowBorder, style.arrowActive);
       disable(searchbox);
-      setTimeout((function() {
-        return setStyle(panel, {
-          height: 'auto'
-        });
-      }), 200);
       setStyle(searchbox, {
         value: ''
       });
+      empty(criteriaPlaceholder);
+      append(criteriaPlaceholder, criteria = [E(criterion)]);
     }
     if (typeof onChangeListener === "function") {
       onChangeListener();
@@ -5997,7 +6044,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":18,"../../../utils/component":14,"../../../utils/logic":20,"./style":46}],46:[function(require,module,exports){
+},{"../../../utils":18,"../../../utils/component":14,"../../../utils/logic":20,"./criterion":45,"./style":48}],48:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -6064,7 +6111,7 @@ exports.panel = {
 
 exports.panelActive = {
   opacity: 1,
-  height: 200
+  height: 110
 };
 
 exports.arrow = {
@@ -6092,8 +6139,43 @@ exports.arrowActive = {
   opacity: 1
 };
 
+exports.add = {
+  "class": 'fa fa-plus',
+  position: 'absolute',
+  bottom: 10,
+  right: 20,
+  borderRadius: 3,
+  width: 30,
+  height: 30,
+  lineHeight: 30,
+  cursor: 'pointer',
+  textAlign: 'center',
+  color: 'white',
+  transition: '0.2s',
+  backgroundColor: '#449e73'
+};
 
-},{"../../../utils":18}],47:[function(require,module,exports){
+exports.submit = {
+  position: 'absolute',
+  bottom: 10,
+  left: 10,
+  width: 150,
+  borderRadius: 3,
+  height: 30,
+  lineHeight: 30,
+  cursor: 'pointer',
+  textAlign: 'center',
+  color: 'white',
+  transition: '0.2s',
+  backgroundColor: '#449e73'
+};
+
+exports.buttonHover = {
+  backgroundColor: '#55af84'
+};
+
+
+},{"../../../utils":18}],49:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -6101,11 +6183,11 @@ component = require('../../../utils/component');
 style = require('./style');
 
 module.exports = component('sidebar', function(arg) {
-  var E, dom, events, name, onEvent, onResize, position, profileImg, resize, setStyle, state, view;
-  dom = arg.dom, state = arg.state, events = arg.events;
+  var E, dom, events, logout, name, onEvent, onResize, position, profileImg, resize, service, setStyle, state, view;
+  dom = arg.dom, state = arg.state, events = arg.events, service = arg.service;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent, onResize = events.onResize;
-  view = E(style.sidebar, E(style.profile, profileImg = E('img')), name = E(style.name), position = E(style.title), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
+  view = E(style.sidebar, E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(style.logout), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
   resize = function() {
     var body, height, html;
     body = document.body;
@@ -6118,29 +6200,34 @@ module.exports = component('sidebar', function(arg) {
   onResize(resize);
   setTimeout(resize);
   onEvent(profileImg, 'load', function() {
-    var height, isPortriat, marginRight, marginTop, ref, width;
+    var height, isPortriat, ref, right, top, width;
     ref = profileImg.fn.element, width = ref.width, height = ref.height;
-    marginRight = marginTop = 0;
+    right = top = 0;
     isPortriat = height > width;
     if (isPortriat) {
       height *= 150 / width;
       width = 150;
-      marginTop = -(height - 150) / 2;
+      top = -(height - 150) / 2;
     } else {
       width *= 150 / height;
       height = 150;
-      marginRight = -(width - 150) / 2;
+      right = -(width - 150) / 2;
     }
+    top -= 5;
+    right -= 5;
     return setStyle(profileImg, {
       width: width,
       height: height,
-      marginTop: marginTop,
-      marginRight: marginRight
+      top: top,
+      right: right
     });
+  });
+  onEvent(logout, 'click', function() {
+    return service.logout();
   });
   state.user.on(function(user) {
     setStyle(profileImg, {
-      src: '/webApi/image?address=' + user.personalPic
+      src: user.personalPic ? '/webApi/image?address=' + user.personalPic : 'assets/img/default-avatar.png'
     });
     setStyle(name, {
       text: user.name
@@ -6160,7 +6247,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":14,"./style":48}],48:[function(require,module,exports){
+},{"../../../utils/component":14,"./style":50}],50:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -6180,7 +6267,12 @@ exports.profile = {
   height: 150,
   marginTop: 20,
   marginRight: 20,
-  border: '5px solid #1c1e21'
+  border: '5px solid #1c1e21',
+  position: 'relative'
+};
+
+exports.profileImg = {
+  position: 'absolute'
 };
 
 exports.name = {
@@ -6205,9 +6297,13 @@ icon = {
   fontSize: 20
 };
 
+exports.logout = extend({}, icon, {
+  "class": 'fa fa-power-off',
+  marginRight: 30
+});
+
 exports.settings = extend({}, icon, {
-  "class": 'fa fa-sliders',
-  marginRight: 60
+  "class": 'fa fa-sliders'
 });
 
 exports.notifications = extend({}, icon, {
@@ -6237,7 +6333,7 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":18}],49:[function(require,module,exports){
+},{"../../../utils":18}],51:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -6256,7 +6352,7 @@ exports.iconTd = {};
 exports.icon = {};
 
 
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -6356,8 +6452,12 @@ exports.create = function(arg) {
       headers.forEach(function(arg1) {
         var arrowDown, arrowUp;
         arrowUp = arg1.arrowUp, arrowDown = arg1.arrowDown;
-        setStyle(arrowUp, style.arrowUp);
-        return setStyle(arrowDown, style.arrowDown);
+        if (arrowUp) {
+          setStyle(arrowUp, style.arrowUp);
+        }
+        if (arrowDown) {
+          return setStyle(arrowDown, style.arrowDown);
+        }
       });
       sort = variables.sort;
       if ((sort != null ? sort.header : void 0) === header && sort.direction === 'up') {
@@ -6474,7 +6574,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":18,"./style":52}],51:[function(require,module,exports){
+},{"../../../utils":18,"./style":54}],53:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -6552,12 +6652,23 @@ module.exports = component('table', function(arg, arg1) {
     var th;
     th = E('th', extend({
       cursor: header.key || header.getValue ? 'pointer' : 'default'
-    }, style.th), header.arrowUp = E(style.arrowUp), header.arrowDown = E(style.arrowDown), text(header.name));
+    }, style.th), header.key || header.getValue ? [header.arrowUp = E(style.arrowUp), header.arrowDown = E(style.arrowDown)] : void 0, text(header.name));
+    if (header.width) {
+      setStyle(th, {
+        width: header.width
+      });
+    }
     if (header.key || header.getValue) {
       onEvent(th, 'click', function() {
         return functions.setSort(header);
       });
     }
+    onEvent(th, 'mouseover', function() {
+      return setStyle(th, style.thHover);
+    });
+    onEvent(th, 'mouseout', function() {
+      return setStyle(th, style.thOut);
+    });
     return th;
   }))), components.body = E('tbody', style.tbody)))));
   onEvent(selectAllTd, 'click', function() {
@@ -6587,7 +6698,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":18,"../../../utils/component":14,"./functions":50,"./style":52}],52:[function(require,module,exports){
+},{"../../../utils":18,"../../../utils/component":14,"./functions":52,"./style":54}],54:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -6625,8 +6736,17 @@ exports.td = {
 
 exports.th = extend({}, exports.td, {
   position: 'relative',
-  paddingLeft: 15
+  paddingLeft: 15,
+  transition: '0.2s'
 });
+
+exports.thHover = {
+  backgroundColor: '#ececec'
+};
+
+exports.thOut = {
+  backgroundColor: 'white'
+};
 
 row = {
   transition: '0.2s',
@@ -6668,7 +6788,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":18}],53:[function(require,module,exports){
+},{"../../../utils":18}],55:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -6702,4 +6822,4 @@ service.autoPing();
 page();
 
 
-},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[53]);
+},{"./alertMessages":2,"./page":9,"./q":10,"./utils/dom":16,"./utils/service":24}]},{},[55]);

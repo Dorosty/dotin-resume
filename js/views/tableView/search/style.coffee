@@ -44,6 +44,7 @@ exports.divider =
   height: 20
 
 exports.panel =
+  # overflow: 'hidden'
   marginBottom: 20
   width: '100%'
   backgroundColor: '#f6f6f6'
@@ -56,7 +57,7 @@ exports.panel =
 
 exports.panelActive =
   opacity: 1
-  height: 200
+  height: 110
 
 exports.arrow =
   position: 'absolute'
@@ -79,3 +80,38 @@ exports.arrowBorder = extend {}, exports.arrow,
 
 exports.arrowActive =
   opacity: 1
+
+exports.add =
+  class: 'fa fa-plus'
+  position: 'absolute'
+  bottom: 10
+  right: 20
+  borderRadius: 3
+  width: 30
+  height: 30
+  lineHeight: 30
+  cursor: 'pointer'
+  textAlign: 'center'
+  color: 'white'
+  transition: '0.2s'
+  backgroundColor: '#449e73'
+
+exports.submit =
+  position: 'absolute'
+  bottom: 10
+  left: 10
+  width: 150
+  borderRadius: 3
+  height: 30
+  lineHeight: 30
+  cursor: 'pointer'
+  textAlign: 'center'
+  color: 'white'
+  transition: '0.2s'
+  backgroundColor: '#449e73'
+
+exports.buttonHover =
+  backgroundColor: '#55af84'
+
+# exports.buttonDisabled =
+#   backgroundColor: 'gray'

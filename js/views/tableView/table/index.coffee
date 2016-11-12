@@ -48,12 +48,21 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
                 selectAll = E style.checkbox
             headers.map (header) ->
               th = E 'th', extend({cursor: if header.key or header.getValue then 'pointer' else 'default'}, style.th),
-                header.arrowUp = E style.arrowUp
-                header.arrowDown = E style.arrowDown
+                if header.key or header.getValue
+                  [
+                    header.arrowUp = E style.arrowUp
+                    header.arrowDown = E style.arrowDown
+                  ]
                 text header.name
+              if header.width
+                setStyle th, width: header.width
               if header.key or header.getValue
                 onEvent th, 'click', ->
                   functions.setSort header
+              onEvent th, 'mouseover', ->
+                setStyle th, style.thHover
+              onEvent th, 'mouseout', ->
+                setStyle th, style.thOut
               th
         components.body = E 'tbody', style.tbody
 

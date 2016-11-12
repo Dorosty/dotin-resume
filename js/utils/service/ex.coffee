@@ -6,6 +6,20 @@ stateChangingServices = require './stateChangingServices'
 {eraseCookie} = require '../cookies'
 {uppercaseFirst} = require '..'
 
+exports.logout = (automatic = false) ->
+  [
+    'user'
+  ].forEach (x) -> state[x].set null
+  [
+    'applicants'
+  ].forEach (stateName) ->
+    state[stateName].set []
+  
+  eraseCookie 'JSESSIONID'
+  unless automatic is true
+    stateChangingServices.logout.endedAt = +new Date()
+  Q()
+
 gets.forEach (x) ->
   exports[x] = (params) ->
     get x, params

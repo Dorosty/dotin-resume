@@ -27,7 +27,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
               empty td
               setStyle td, text: ''
               append td, [
-                E 'img', extend {src: if personalPic then "/webApi/image?address=#{personalPic}" else 'assets/img/profilePlaceholder.png'}, style.profilePicture
+                E 'img', extend {src: if personalPic then "/webApi/image?address=#{personalPic}" else 'assets/img/default-avatar-small.png'}, style.profilePicture
                 text "#{firstName} #{lastName}"
               ]
           }
@@ -45,6 +45,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'یادداشت'
+            width: 100
             styleTd: ({notes}, td, offs) ->
               setStyle td, style.iconTd
               empty td
@@ -55,6 +56,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'رزومه'
+            width: 100
             styleTd: ({resume}, td, offs) ->
               setStyle td, style.iconTd
               empty td

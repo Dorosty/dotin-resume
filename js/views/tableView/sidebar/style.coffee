@@ -15,6 +15,10 @@ exports.profile =
   marginTop: 20
   marginRight: 20
   border: '5px solid #1c1e21'
+  position: 'relative'
+
+exports.profileImg =
+  position: 'absolute'
 
 exports.name =
   fontSize: 14
@@ -35,9 +39,12 @@ icon =
   margin: 20
   fontSize: 20
 
+exports.logout = extend {}, icon,
+  class: 'fa fa-power-off'
+  marginRight: 30
+
 exports.settings = extend {}, icon,
   class: 'fa fa-sliders'
-  marginRight: 60
 
 exports.notifications = extend {}, icon,
   class: 'fa fa-bell-o'

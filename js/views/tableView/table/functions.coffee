@@ -58,9 +58,11 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
       functions.update()
 
     setSort: (header) ->
-      headers.forEach ({arrowUp, arrowDown}) -> 
-        setStyle arrowUp, style.arrowUp
-        setStyle arrowDown, style.arrowDown
+      headers.forEach ({arrowUp, arrowDown}) ->
+        if arrowUp
+          setStyle arrowUp, style.arrowUp
+        if arrowDown
+          setStyle arrowDown, style.arrowDown
       sort = variables.sort
       if sort?.header is header and sort.direction is 'up'
         setStyle header.arrowDown, style.arrowActive
