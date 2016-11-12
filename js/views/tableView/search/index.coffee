@@ -1,10 +1,8 @@
 component = require '../../../utils/component'
 style = require './style'
 criterion = require './criterion'
-###############
 {textIsInSearch} = require '../../../utils'
 {stateToPersian} = require '../../../utils/logic'
-###############
 
 module.exports = component 'search', ({dom, events, returnObject}) ->
   {E, empty, append, setStyle, enable, disable} = dom
@@ -68,8 +66,10 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
 
   returnObject
     isInSearch: ({firstName, lastName, selectedJobsString, state}) ->
-      value = searchbox.value()
-      textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(selectedJobsString.toLowerCase(), value) # or textIsInSearch(stateToPersian(state), value)
+      if isActive
+      else
+        value = searchbox.value()
+        textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(selectedJobsString.toLowerCase(), value) # or textIsInSearch(stateToPersian(state), value)
     onChange: (listener) -> onChangeListener = listener
 
   view

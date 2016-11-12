@@ -6,3 +6,4 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
 
   E margin: 20,
     E 'input', style.input
+    E style.remove

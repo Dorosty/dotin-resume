@@ -7,3 +7,7 @@ exports.input =
   paddingLeft: 50
   height: 30
   lineHeight: 30
+
+exports.remove =
+  class: 'fa fa-minus-circle'
+  color: '#d71d24'
