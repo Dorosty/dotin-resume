@@ -11,3 +11,10 @@ exports.input =
 exports.remove =
   class: 'fa fa-minus-circle'
   color: '#d71d24'
+  cursor: 'pointer'
+  width: 20
+  height: 20
+  fontSize: 20
+  marginRight: 10
+  position: 'relative'
+  top: 5

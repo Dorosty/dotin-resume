@@ -1,7 +1,7 @@
 component = require '../../../utils/component'
 style = require './style'
 criterion = require './criterion'
-{textIsInSearch} = require '../../../utils'
+{remove, textIsInSearch} = require '../../../utils'
 {stateToPersian} = require '../../../utils/logic'
 
 module.exports = component 'search', ({dom, events, returnObject}) ->
@@ -21,6 +21,20 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
       add = E style.add
       submit = E style.submit, 'جستجو'
 
+  addCriterion = ->
+    append criteriaPlaceholder, newCriterion = E criterion
+    criteria.push newCriterion
+    do rearrange = ->
+      setStyle panel, height: 60 + (50 * criteria.length)
+      if criteria.length is 1
+        criteria[0].setRemoveEnabled false
+      else
+        criteria.forEach ({setRemoveEnabled}) -> setRemoveEnabled true
+    newCriterion.onChange -> onChangeListener?()
+    newCriterion.onRemove ->
+      remove criteria, newCriterion
+      rearrange()
+
   onEvent searchbox, 'focus', ->
     setStyle searchbox, style.searchboxFocus
   onEvent searchbox, 'blur', ->
@@ -32,10 +46,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
     setStyle add, style.buttonHover
   onEvent add, 'mouseout', ->
     setStyle add, style.add
-  onEvent add, 'click', ->
-    append criteriaPlaceholder, newCriterion = E criterion
-    criteria.push newCriterion
-    setStyle panel, height: 60 + (50 * criteria.length)
+  onEvent add, 'click', addCriterion
 
   onEvent submit, 'mouseover', ->
     setStyle submit, style.buttonHover
@@ -58,16 +69,18 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
       setStyle arrow, style.arrowActive
       setStyle arrowBorder, style.arrowActive
       disable searchbox
-      setStyle searchbox, value: ''
       empty criteriaPlaceholder
-      append criteriaPlaceholder, criteria = [E criterion]
-    onChangeListener?()
+      criteria = []
+      addCriterion()
     isActive = not isActive
+    onChangeListener?()
 
   returnObject
-    isInSearch: ({firstName, lastName, selectedJobsString, state}) ->
+    isInSearch: (applicant) ->
       if isActive
+        criteria.every ({isInSearch}) -> isInSearch applicant
       else
+        {firstName, lastName, selectedJobsString, state} = applicant
         value = searchbox.value()
         textIsInSearch("#{firstName} #{lastName}", value) or textIsInSearch(selectedJobsString.toLowerCase(), value) # or textIsInSearch(stateToPersian(state), value)
     onChange: (listener) -> onChangeListener = listener

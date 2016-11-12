@@ -136,7 +136,7 @@ exports.instance = (thisComponent) ->
     l()
     try
       element.parentNode.removeChild element
-    remove component.fn.domParent.fn.childComponents, component
+      remove component.fn.domParent.fn.childComponents, component
     l()
 
   exports.destroy = (component) ->

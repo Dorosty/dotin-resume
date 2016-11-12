@@ -3156,8 +3156,8 @@ exports.instance = function(thisComponent) {
     l();
     try {
       element.parentNode.removeChild(element);
+      remove(component.fn.domParent.fn.childComponents, component);
     } catch (undefined) {}
-    remove(component.fn.domParent.fn.childComponents, component);
     return l();
   };
   exports.destroy = function(component) {
@@ -5931,12 +5931,40 @@ component = require('../../../../utils/component');
 style = require('./style');
 
 module.exports = component('search', function(arg) {
-  var E, dom, events, returnObject;
+  var E, changeListener, destroy, dom, events, hide, input, onEvent, remove, removeListener, returnObject, show, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  E = dom.E;
-  return E({
+  E = dom.E, destroy = dom.destroy, show = dom.show, hide = dom.hide;
+  onEvent = events.onEvent;
+  view = E({
     margin: 20
-  }, E('input', style.input));
+  }, input = E('input', style.input), remove = E(style.remove));
+  changeListener = removeListener = void 0;
+  onEvent(input, 'input', function() {
+    return typeof changeListener === "function" ? changeListener() : void 0;
+  });
+  onEvent(remove, 'click', function() {
+    destroy(view);
+    return typeof removeListener === "function" ? removeListener() : void 0;
+  });
+  returnObject({
+    onChange: function(listener) {
+      return changeListener = listener;
+    },
+    onRemove: function(listener) {
+      return removeListener = listener;
+    },
+    setRemoveEnabled: function(enabled) {
+      if (enabled) {
+        return show(remove);
+      } else {
+        return hide(remove);
+      }
+    },
+    isInSearch: function(entity) {
+      return true;
+    }
+  });
+  return view;
 });
 
 
@@ -5952,9 +5980,21 @@ exports.input = {
   lineHeight: 30
 };
 
+exports.remove = {
+  "class": 'fa fa-minus-circle',
+  color: '#d71d24',
+  cursor: 'pointer',
+  width: 20,
+  height: 20,
+  fontSize: 20,
+  marginRight: 10,
+  position: 'relative',
+  top: 5
+};
+
 
 },{}],47:[function(require,module,exports){
-var component, criterion, stateToPersian, style, textIsInSearch;
+var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
 
@@ -5962,17 +6002,43 @@ style = require('./style');
 
 criterion = require('./criterion');
 
-textIsInSearch = require('../../../utils').textIsInSearch;
+ref = require('../../../utils'), remove = ref.remove, textIsInSearch = ref.textIsInSearch;
 
 stateToPersian = require('../../../utils/logic').stateToPersian;
 
 module.exports = component('search', function(arg) {
-  var E, add, append, arrow, arrowBorder, criteria, criteriaPlaceholder, disable, dom, empty, enable, events, isActive, onChangeListener, onEvent, panel, returnObject, searchbox, setStyle, settings, submit, view;
+  var E, add, addCriterion, append, arrow, arrowBorder, criteria, criteriaPlaceholder, disable, dom, empty, enable, events, isActive, onChangeListener, onEvent, panel, returnObject, searchbox, setStyle, settings, submit, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle, enable = dom.enable, disable = dom.disable;
   onEvent = events.onEvent;
   onChangeListener = void 0;
   view = E('span', null, searchbox = E('input', style.searchbox), settings = E(style.settings), E(style.divider), panel = E(style.panel, arrowBorder = E(style.arrowBorder), arrow = E(style.arrow), criteriaPlaceholder = E(), add = E(style.add), submit = E(style.submit, 'جستجو')));
+  addCriterion = function() {
+    var newCriterion, rearrange;
+    append(criteriaPlaceholder, newCriterion = E(criterion));
+    criteria.push(newCriterion);
+    (rearrange = function() {
+      setStyle(panel, {
+        height: 60 + (50 * criteria.length)
+      });
+      if (criteria.length === 1) {
+        return criteria[0].setRemoveEnabled(false);
+      } else {
+        return criteria.forEach(function(arg1) {
+          var setRemoveEnabled;
+          setRemoveEnabled = arg1.setRemoveEnabled;
+          return setRemoveEnabled(true);
+        });
+      }
+    })();
+    newCriterion.onChange(function() {
+      return typeof onChangeListener === "function" ? onChangeListener() : void 0;
+    });
+    return newCriterion.onRemove(function() {
+      remove(criteria, newCriterion);
+      return rearrange();
+    });
+  };
   onEvent(searchbox, 'focus', function() {
     return setStyle(searchbox, style.searchboxFocus);
   });
@@ -5988,14 +6054,7 @@ module.exports = component('search', function(arg) {
   onEvent(add, 'mouseout', function() {
     return setStyle(add, style.add);
   });
-  onEvent(add, 'click', function() {
-    var newCriterion;
-    append(criteriaPlaceholder, newCriterion = E(criterion));
-    criteria.push(newCriterion);
-    return setStyle(panel, {
-      height: 60 + (50 * criteria.length)
-    });
-  });
+  onEvent(add, 'click', addCriterion);
   onEvent(submit, 'mouseover', function() {
     return setStyle(submit, style.buttonHover);
   });
@@ -6018,23 +6077,27 @@ module.exports = component('search', function(arg) {
       setStyle(arrow, style.arrowActive);
       setStyle(arrowBorder, style.arrowActive);
       disable(searchbox);
-      setStyle(searchbox, {
-        value: ''
-      });
       empty(criteriaPlaceholder);
-      append(criteriaPlaceholder, criteria = [E(criterion)]);
+      criteria = [];
+      addCriterion();
     }
-    if (typeof onChangeListener === "function") {
-      onChangeListener();
-    }
-    return isActive = !isActive;
+    isActive = !isActive;
+    return typeof onChangeListener === "function" ? onChangeListener() : void 0;
   });
   returnObject({
-    isInSearch: function(arg1) {
+    isInSearch: function(applicant) {
       var firstName, lastName, selectedJobsString, state, value;
-      firstName = arg1.firstName, lastName = arg1.lastName, selectedJobsString = arg1.selectedJobsString, state = arg1.state;
-      value = searchbox.value();
-      return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(selectedJobsString.toLowerCase(), value);
+      if (isActive) {
+        return criteria.every(function(arg1) {
+          var isInSearch;
+          isInSearch = arg1.isInSearch;
+          return isInSearch(applicant);
+        });
+      } else {
+        firstName = applicant.firstName, lastName = applicant.lastName, selectedJobsString = applicant.selectedJobsString, state = applicant.state;
+        value = searchbox.value();
+        return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(selectedJobsString.toLowerCase(), value);
+      }
     },
     onChange: function(listener) {
       return onChangeListener = listener;
