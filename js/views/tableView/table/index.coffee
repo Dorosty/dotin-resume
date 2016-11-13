@@ -59,13 +59,17 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
               if header.key or header.getValue
                 onEvent th, 'click', ->
                   functions.setSort header
-              onEvent th, 'mouseover', ->
-                setStyle th, style.thHover
-              onEvent th, 'mouseout', ->
-                setStyle th, style.thOut
+                onEvent th, 'mouseover', ->
+                  setStyle th, style.thHover
+                onEvent th, 'mouseout', ->
+                  setStyle th, style.thOut
               th
         components.body = E 'tbody', style.tbody
 
+  # onEvent selectAllTd, 'mouseover', ->
+  #   setStyle selectAllTd, style.thHover
+  # onEvent selectAllTd, 'mouseout', ->
+  #   setStyle selectAllTd, style.thOut
   onEvent selectAllTd, 'click', ->
     functions.setSelectedRows (descriptors) -> if allSelected then [] else descriptors
     styleSelectAll()

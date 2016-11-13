@@ -34,6 +34,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
     newCriterion.onRemove ->
       remove criteria, newCriterion
       rearrange()
+      onChangeListener?()
 
   onEvent searchbox, 'focus', ->
     setStyle searchbox, style.searchboxFocus

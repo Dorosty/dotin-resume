@@ -26,7 +26,7 @@ exports.toEnglish = (value) ->
   '۰۱۲۳۴۵۶۷۸۹'.split ''
   .forEach (digit, i) ->
     value = value.replace (new RegExp digit, 'g'), i
-  value.replace '/', '.'
+  value#.replace '/', '.'
 
 exports.toPersian = (value) ->
   value ?= ''
@@ -46,6 +46,12 @@ exports.toDate = (timestamp) ->
   month = j.jm
   year = j.jy
   "#{year}/#{month}/#{day}"
+
+exports.toTimestamp = (dateString) ->
+  dateString = exports.toEnglish dateString
+  [year, month, day] = dateString.split '/'
+  g = jalaali.toGregorian +year, +month, +day
+  +new Date g.gy, g.gm - 1, g.gd
 
 exports.textIsInSearch = (text, search, notPersian, caseSensitive) ->
   unless notPersian

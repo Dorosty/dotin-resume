@@ -1,10 +1,11 @@
 {extend} = require '../../../utils'
 
 arrow =
-  color: '#ddd'
   cursor: 'pointer'
   position: 'absolute'
   left: 5
+  transition: '0.2s'
+  color: '#ddd'
 
 exports.arrowUp = extend {}, arrow,
   class: 'fa fa-caret-up'

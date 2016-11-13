@@ -1,12 +1,25 @@
-exports.input = 
+{extend} = require '../../../../utils'
+
+exports.inputPlaceholder =
+  display: 'inline-block'
+  width: 200
+
+exports.input =
+  width: 200
   border: '1px solid #ddd'
   outline: 'none'
-  width: 200
   borderRadius: 3
   padding: 7
-  paddingLeft: 50
+  paddingLeft: 30
   height: 30
   lineHeight: 30
+
+exports.placeholderInput = extend {}, exports.input,
+  width: '100%'
+
+exports.rest =
+  display: 'inline-block'
+  marginRight: 10
 
 exports.remove =
   class: 'fa fa-minus-circle'
