@@ -55,8 +55,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
         _dateInput = E dateInput
         setStyle _dateInput, style.inputPlaceholder
         setStyle _dateInput.input, style.placeholderInput
-        onEvent dateDropdown.input, ['input', 'pInput'], -> changeListener?()
-        _dateInput.onChange -> changeListener?()
+        onEvent [dateDropdown.input, _dateInput.input], ['input', 'pInput'], -> changeListener?()
         isInSearch = ({modificationTime}) ->
           unless /^13[0-9][0-9]\/([1-9]|1[0-2])\/([1-9]|[1-2][0-9]|3[0-1])/.test toEnglish _dateInput.input.value()
             return true

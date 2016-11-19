@@ -1,10 +1,11 @@
 component = require '../../utils/component'
 style = require './style'
-{extend} = require '../../utils'
+numberInput = require '../../components/restrictedInput/number'
+{extend, toEnglish} = require '../../utils'
 
 module.exports = component 'login', ({dom, events, service}) ->
 
-  {E, text, setStyle, show, hide, enable, disable} = dom
+  {E, empty, append, text, setStyle, show, hide, enable, disable} = dom
   {onEvent, onEnter} = events
 
   component = E null,
@@ -15,6 +16,7 @@ module.exports = component 'login', ({dom, events, service}) ->
       E style.formInputs,
         email = E 'input', extend {placeholder: 'کد ملی'}, style.input
         password = E 'input', extend {type: 'password', placeholder: 'رمز عبور'}, style.input
+        captchaPlaceholder = E style.captchaSection
         E style.submitSection,
           submit = E 'button', style.submit, 'ورود'
           E 'label', style.rememberLabel,
@@ -31,7 +33,23 @@ module.exports = component 'login', ({dom, events, service}) ->
     onEvent input, 'blur', ->
       setStyle input, style.input
 
+  captchaInput = undefined
+  service.getCaptcha().then (captcha) ->
+    [firstPart, lastPart] = captcha.split 'x'
+    firstPart += ' '
+    lastPart = ' ' + lastPart
+    empty captchaPlaceholder
+    append captchaPlaceholder, [
+      E 'span', null, firstPart
+      captchaInput = E numberInput, true
+      E 'span', null, lastPart
+    ]
+    onEnter captchaInput, doSubmit
+    setStyle captchaInput, style.captchaInput
+
   doSubmit = ->
+    return unless captchaInput
+
     disable [email, password, submit, remember]
     hide invalid
     show spinner
@@ -39,6 +57,7 @@ module.exports = component 'login', ({dom, events, service}) ->
       identificationCode: email.value()
       password: password.value()
       # remember: !!remember.checked()
+      captcha: toEnglish captchaInput.value()
     .catch ->
       show invalid
     .fin ->

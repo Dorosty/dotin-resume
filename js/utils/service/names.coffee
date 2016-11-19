@@ -1,8 +1,9 @@
 exports.gets = [
+  'getCaptcha'
+  'getUser'
 ]
 
 exports.posts = [
-  'getUser'
   'login'
   'addJob'
 ]

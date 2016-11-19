@@ -45,7 +45,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'یادداشت'
-            width: 100
+            width: 50
             styleTd: ({notes}, td, offs) ->
               setStyle td, style.iconTd
               empty td
@@ -56,7 +56,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'رزومه'
-            width: 100
+            width: 50
             styleTd: ({resume}, td, offs) ->
               setStyle td, style.iconTd
               empty td

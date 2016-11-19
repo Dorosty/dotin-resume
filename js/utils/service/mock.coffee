@@ -37,7 +37,7 @@ user =
   name: 'حامد حسینی‌نژاد'
   userType: 2
 
-# user = undefined
+user = undefined
 
 exports.ping = ->
   Q {user, applicants}
@@ -73,3 +73,7 @@ exports.logout = ({email, password}) ->
 exports.addJob = ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then -> {}
+
+exports.getCaptcha = ->
+  Q.delay 1000 + 2000 * Math.floor Math.random()
+  .then -> '12*x=48'

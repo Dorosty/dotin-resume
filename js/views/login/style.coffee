@@ -53,6 +53,13 @@ exports.submit =
   border: 0
   cursor: 'pointer'
 
+exports.captchaSection =
+  direction: 'ltr'
+
+exports.captchaInput =
+  width: 30
+  direction: 'ltr'
+
 exports.submitSection =
   textAlign: 'right'
   paddingRight: 50
