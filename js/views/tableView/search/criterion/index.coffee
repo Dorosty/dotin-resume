@@ -63,9 +63,9 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
           time = toTimestamp _dateInput.input.value()
           switch dateDropdown.value()
             when 0
-              modificationTime > time
+              modificationTime >= time
             when 1
-              modificationTime < time
+              modificationTime <= time
             when 2
               modificationTime is time
         [

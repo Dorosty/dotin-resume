@@ -35,9 +35,9 @@ applicants = [{
 user =
   personalPic: null
   name: 'حامد حسینی‌نژاد'
-  userType: 2
+  userType: 0
 
-user = undefined
+# user = undefined
 
 exports.ping = ->
   Q {user, applicants}

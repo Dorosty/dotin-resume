@@ -96,22 +96,5 @@ exports.add =
   transition: '0.2s'
   backgroundColor: '#449e73'
 
-exports.submit =
-  position: 'absolute'
-  bottom: 10
-  left: 10
-  width: 150
-  borderRadius: 3
-  height: 30
-  lineHeight: 30
-  cursor: 'pointer'
-  textAlign: 'center'
-  color: 'white'
-  transition: '0.2s'
-  backgroundColor: '#449e73'
-
-exports.buttonHover =
+exports.addHover =
   backgroundColor: '#55af84'
-
-# exports.buttonDisabled =
-#   backgroundColor: 'gray'

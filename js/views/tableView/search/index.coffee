@@ -19,7 +19,6 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
       arrow = E style.arrow
       criteriaPlaceholder = E()
       add = E style.add
-      submit = E style.submit, 'جستجو'
 
   addCriterion = ->
     append criteriaPlaceholder, newCriterion = E criterion
@@ -44,15 +43,10 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
   onEvent searchbox, 'input', -> onChangeListener?()
 
   onEvent add, 'mouseover', ->
-    setStyle add, style.buttonHover
+    setStyle add, style.addHover
   onEvent add, 'mouseout', ->
     setStyle add, style.add
   onEvent add, 'click', addCriterion
-
-  onEvent submit, 'mouseover', ->
-    setStyle submit, style.buttonHover
-  onEvent submit, 'mouseout', ->
-    setStyle submit, style.submit
 
   criteria = []
   isActive = false
