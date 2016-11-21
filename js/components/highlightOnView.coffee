@@ -12,7 +12,7 @@ module.exports = component 'highlightOnView', ({dom, events, returnObject}) ->
   onEvent w, 'scroll', ->
     y = w.fn.element.scrollY
     i = Math.floor elements.length / 2
-    do check = (i) ->
+    loop
       element = elements[i]
       return unless element
       {offsetTop, offsetHeight} = element
@@ -20,8 +20,10 @@ module.exports = component 'highlightOnView', ({dom, events, returnObject}) ->
       bottom = offsetTop + offsetHeight
       if top <= y <= bottom
         setStyle element[i], opacity: 0.5
-      else if top > y
       else if y > bottom
+        break if i is elements.length - 1
+        i = Math.floor (i + elements.length) / 2
+      else # y < top
 
   returnObject
     subscribe: (element) ->
