@@ -30,7 +30,7 @@ exports.create = ({components, variables, dom}) ->
             functions.setInputValue ''
         itemsList.set functions.getFilteredItems()
 
-    
+
     showEmpty: (showEmpty) ->
       variables.showEmpty = showEmpty
       functions.update variables.items

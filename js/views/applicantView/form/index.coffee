@@ -1,8 +1,11 @@
 component = require '../../../utils/component'
 section = require './section'
+highlightOnView = require '../../../components/highlightOnView'
 
 module.exports = component 'applicantForm', ({dom}) ->
   {E} = dom
+
+  h = E highlightOnView
 
   E null,
     E class: 'alert alert-info in', fontSize: 12,
@@ -20,21 +23,21 @@ module.exports = component 'applicantForm', ({dom}) ->
           E 'input', class: 'form-control', placeholder: 'xxx'
 
 
-    E section,
+    h.subscribe E section,
       title: 'سوابق تحصیلی'
       getContents: ->
         E class: 'row',
           E class: 'form-group col-md-3',
             E 'input', class: 'form-control', placeholder: 'aaa'
 
-    E section,
+    h.subscribe E section,
       title: 'آخرین سوابق سازمانی / پروژه های انجام شده'
       getContents: ->
         E class: 'row',
           E class: 'form-group col-md-3',
             E 'input', class: 'form-control', placeholder: 'bbb'
 
-    E section,
+    h.subscribe E section,
       title: 'دوره‌های آموزشی و مهارت‌ها'
       getContents: ->
         E class: 'row',

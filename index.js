@@ -739,12 +739,73 @@ component = require('../utils/component');
 window = require('../utils/dom').window;
 
 module.exports = component('highlightOnView', function(arg) {
-  var E, dom, events, onEvent;
-  dom = arg.dom, events = arg.events;
-  E = dom.E;
+  var E, dom, elements, events, onEvent, prevInnerHeight, prevScrollY, returnObject, setStyle, w;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
-  return onEvent(E(window), ['load', 'scroll'], function() {
-    return console.log(E(window).fn.element.scrollY);
+  w = E(window);
+  elements = [];
+  prevScrollY = prevInnerHeight = void 0;
+  return returnObject({
+    subscribe: function(element) {
+      elements.push(element);
+      elements = elements.sort(function(arg1, arg2) {
+        var a, b;
+        a = arg1.offsetTop;
+        b = arg2.offsetTop;
+        return a - b;
+      });
+      if (elements.length === 1) {
+        onEvent(w, ['scroll', 'resize'], function() {
+          var a, b, i, innerHeight, pa, pb, pi, ref, scrollY, state, viewState, wBottom, wTop;
+          ref = w.fn.element, scrollY = ref.scrollY, innerHeight = ref.innerHeight;
+          if (scrollY === prevScrollY && innerHeight === prevInnerHeight) {
+            return;
+          }
+          prevScrollY = scrollY;
+          prevInnerHeight = innerHeight;
+          wTop = scrollY;
+          wBottom = scrollY + innerHeight;
+          viewState = function(element) {
+            var bottom, offsetHeight, offsetTop, ref1, top;
+            ref1 = element.fn.element, offsetTop = ref1.offsetTop, offsetHeight = ref1.offsetHeight;
+            top = offsetTop;
+            bottom = offsetTop + offsetHeight;
+            if (bottom <= wTop) {
+              return -1;
+            }
+            if (top >= wBottom) {
+              return 1;
+            }
+            return 0;
+          };
+          a = 0;
+          b = elements.length - 1;
+          pa = pb = pi = void 0;
+          while (a <= b) {
+            i = Math.floor((a + b) / 2);
+            state = viewState(element = elements[i]);
+            if (state === -1) {
+              a = i + 1;
+            } else if (state === 1) {
+              b = i - 1;
+            } else {
+              if (i === 0 || viewState(elements[i - 1]) !== 0) {
+                break;
+              }
+              b = i;
+            }
+          }
+          setStyle(elements, {
+            opacity: 0.5
+          });
+          return setStyle(element, {
+            opacity: 1
+          });
+        });
+      }
+      return element;
+    }
   });
 });
 
@@ -5282,16 +5343,19 @@ module.exports = ['user', 'applicants'];
 
 
 },{}],41:[function(require,module,exports){
-var component, section;
+var component, highlightOnView, section;
 
 component = require('../../../utils/component');
 
 section = require('./section');
 
+highlightOnView = require('../../../components/highlightOnView');
+
 module.exports = component('applicantForm', function(arg) {
-  var E, dom;
+  var E, dom, h;
   dom = arg.dom;
   E = dom.E;
+  h = E(highlightOnView);
   return E(null, E({
     "class": 'alert alert-info in',
     fontSize: 12
@@ -5304,7 +5368,7 @@ module.exports = component('applicantForm', function(arg) {
   }, E('input', {
     "class": 'form-control',
     placeholder: 'xxx'
-  })))), E(section, {
+  })))), h.subscribe(E(section, {
     title: 'سوابق تحصیلی',
     getContents: function() {
       return E({
@@ -5316,7 +5380,7 @@ module.exports = component('applicantForm', function(arg) {
         placeholder: 'aaa'
       })));
     }
-  }), E(section, {
+  })), h.subscribe(E(section, {
     title: 'آخرین سوابق سازمانی / پروژه های انجام شده',
     getContents: function() {
       return E({
@@ -5328,7 +5392,7 @@ module.exports = component('applicantForm', function(arg) {
         placeholder: 'bbb'
       })));
     }
-  }), E(section, {
+  })), h.subscribe(E(section, {
     title: 'دوره‌های آموزشی و مهارت‌ها',
     getContents: function() {
       return E({
@@ -5340,11 +5404,11 @@ module.exports = component('applicantForm', function(arg) {
         placeholder: 'ccc'
       })));
     }
-  }));
+  })));
 });
 
 
-},{"../../../utils/component":25,"./section":42}],42:[function(require,module,exports){
+},{"../../../components/highlightOnView":12,"../../../utils/component":25,"./section":42}],42:[function(require,module,exports){
 var component, remove;
 
 component = require('../../../utils/component');
@@ -5404,7 +5468,7 @@ module.exports = component('applicantFormSection', function(arg, arg1) {
 
 
 },{"../../../utils":29,"../../../utils/component":25}],43:[function(require,module,exports){
-var component, form, header, highlightOnView, tabContents, tabNames, tests;
+var component, form, header, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
 
@@ -5413,8 +5477,6 @@ header = require('../header');
 form = require('./form');
 
 tests = require('./tests');
-
-highlightOnView = require('../../components/highlightOnView');
 
 tabNames = ['تکمیل اطلاعات', 'آزمون‌های شخصیت‌شناسی'];
 
@@ -5425,7 +5487,6 @@ module.exports = component('applicantView', function(arg) {
   dom = arg.dom, events = arg.events;
   E = dom.E, addClass = dom.addClass, removeClass = dom.removeClass, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
-  E(highlightOnView);
   content = void 0;
   currentTabIndex = 0;
   view = E(null, E(header, 'حساب کاربری'), contents = E({
@@ -5460,7 +5521,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../components/highlightOnView":12,"../../utils/component":25,"../header":48,"./form":41,"./tests":44}],44:[function(require,module,exports){
+},{"../../utils/component":25,"../header":48,"./form":41,"./tests":44}],44:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');

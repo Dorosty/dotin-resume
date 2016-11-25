@@ -2,7 +2,6 @@ component = require '../../utils/component'
 header = require '../header'
 form = require './form'
 tests = require './tests'
-highlightOnView = require '../../components/highlightOnView'
 
 tabNames = [
   'تکمیل اطلاعات',
@@ -17,8 +16,6 @@ tabContents = [
 module.exports = component 'applicantView', ({dom, events}) ->
   {E, addClass, removeClass, append, destroy} = dom
   {onEvent} = events
-
-  E highlightOnView
 
   content = undefined
   currentTabIndex = 0
