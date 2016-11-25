@@ -1,7 +1,7 @@
 component = require '../utils/component'
 {window} = require '../utils/dom'
 
-module.exports = component 'highlightOnView', ({dom, events, returnObject}) ->
+module.exports = component 'scrollViewer', ({dom, events, returnObject}) ->
   {E, setStyle} = dom
   {onEvent} = events
 
@@ -35,7 +35,7 @@ module.exports = component 'highlightOnView', ({dom, events, returnObject}) ->
             if top >= wBottom
               return 1
             return 0
-            
+
           a = 0
           b = elements.length - 1
           pa = pb = pi = undefined

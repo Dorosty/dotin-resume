@@ -732,85 +732,6 @@ exports.arrow = {
 
 
 },{}],12:[function(require,module,exports){
-var component, window;
-
-component = require('../utils/component');
-
-window = require('../utils/dom').window;
-
-module.exports = component('highlightOnView', function(arg) {
-  var E, dom, elements, events, onEvent, prevInnerHeight, prevScrollY, returnObject, setStyle, w;
-  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  E = dom.E, setStyle = dom.setStyle;
-  onEvent = events.onEvent;
-  w = E(window);
-  elements = [];
-  prevScrollY = prevInnerHeight = void 0;
-  return returnObject({
-    subscribe: function(element) {
-      elements.push(element);
-      elements = elements.sort(function(arg1, arg2) {
-        var a, b;
-        a = arg1.offsetTop;
-        b = arg2.offsetTop;
-        return a - b;
-      });
-      if (elements.length === 1) {
-        onEvent(w, ['scroll', 'resize'], function() {
-          var a, b, i, innerHeight, pa, pb, pi, ref, scrollY, state, viewState, wBottom, wTop;
-          ref = w.fn.element, scrollY = ref.scrollY, innerHeight = ref.innerHeight;
-          if (scrollY === prevScrollY && innerHeight === prevInnerHeight) {
-            return;
-          }
-          prevScrollY = scrollY;
-          prevInnerHeight = innerHeight;
-          wTop = scrollY;
-          wBottom = scrollY + innerHeight;
-          viewState = function(element) {
-            var bottom, offsetHeight, offsetTop, ref1, top;
-            ref1 = element.fn.element, offsetTop = ref1.offsetTop, offsetHeight = ref1.offsetHeight;
-            top = offsetTop;
-            bottom = offsetTop + offsetHeight;
-            if (bottom <= wTop) {
-              return -1;
-            }
-            if (top >= wBottom) {
-              return 1;
-            }
-            return 0;
-          };
-          a = 0;
-          b = elements.length - 1;
-          pa = pb = pi = void 0;
-          while (a <= b) {
-            i = Math.floor((a + b) / 2);
-            state = viewState(element = elements[i]);
-            if (state === -1) {
-              a = i + 1;
-            } else if (state === 1) {
-              b = i - 1;
-            } else {
-              if (i === 0 || viewState(elements[i - 1]) !== 0) {
-                break;
-              }
-              b = i;
-            }
-          }
-          setStyle(elements, {
-            opacity: 0.5
-          });
-          return setStyle(element, {
-            opacity: 1
-          });
-        });
-      }
-      return element;
-    }
-  });
-});
-
-
-},{"../utils/component":25,"../utils/dom":27}],13:[function(require,module,exports){
 exports.create = function(arg) {
   var addClass, append, components, disable, dom, empty, enable, functions, hide, removeClass, setStyle, show, variables;
   variables = arg.variables, components = arg.components, dom = arg.dom;
@@ -873,7 +794,7 @@ exports.create = function(arg) {
 };
 
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var Q, _functions, component;
 
 component = require('../../utils/component');
@@ -947,7 +868,7 @@ module.exports = component('modal', function(arg) {
 });
 
 
-},{"../../q":21,"../../utils/component":25,"./functions":13}],15:[function(require,module,exports){
+},{"../../q":21,"../../utils/component":25,"./functions":12}],14:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -977,7 +898,7 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":29,"../../utils/component":25}],16:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25}],15:[function(require,module,exports){
 var component, restrictedInput;
 
 component = require('../../utils/component');
@@ -991,7 +912,86 @@ module.exports = component('numberInput', function(arg, isInteger) {
 });
 
 
-},{".":15,"../../utils/component":25}],17:[function(require,module,exports){
+},{".":14,"../../utils/component":25}],16:[function(require,module,exports){
+var component, window;
+
+component = require('../utils/component');
+
+window = require('../utils/dom').window;
+
+module.exports = component('scrollViewer', function(arg) {
+  var E, dom, elements, events, onEvent, prevInnerHeight, prevScrollY, returnObject, setStyle, w;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  E = dom.E, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  w = E(window);
+  elements = [];
+  prevScrollY = prevInnerHeight = void 0;
+  return returnObject({
+    subscribe: function(element) {
+      elements.push(element);
+      elements = elements.sort(function(arg1, arg2) {
+        var a, b;
+        a = arg1.offsetTop;
+        b = arg2.offsetTop;
+        return a - b;
+      });
+      if (elements.length === 1) {
+        onEvent(w, ['scroll', 'resize'], function() {
+          var a, b, i, innerHeight, pa, pb, pi, ref, scrollY, state, viewState, wBottom, wTop;
+          ref = w.fn.element, scrollY = ref.scrollY, innerHeight = ref.innerHeight;
+          if (scrollY === prevScrollY && innerHeight === prevInnerHeight) {
+            return;
+          }
+          prevScrollY = scrollY;
+          prevInnerHeight = innerHeight;
+          wTop = scrollY;
+          wBottom = scrollY + innerHeight;
+          viewState = function(element) {
+            var bottom, offsetHeight, offsetTop, ref1, top;
+            ref1 = element.fn.element, offsetTop = ref1.offsetTop, offsetHeight = ref1.offsetHeight;
+            top = offsetTop;
+            bottom = offsetTop + offsetHeight;
+            if (bottom <= wTop) {
+              return -1;
+            }
+            if (top >= wBottom) {
+              return 1;
+            }
+            return 0;
+          };
+          a = 0;
+          b = elements.length - 1;
+          pa = pb = pi = void 0;
+          while (a <= b) {
+            i = Math.floor((a + b) / 2);
+            state = viewState(element = elements[i]);
+            if (state === -1) {
+              a = i + 1;
+            } else if (state === 1) {
+              b = i - 1;
+            } else {
+              if (i === 0 || viewState(elements[i - 1]) !== 0) {
+                break;
+              }
+              b = i;
+            }
+          }
+          setStyle(elements, {
+            opacity: 0.5
+          });
+          return setStyle(element, {
+            opacity: 1
+          });
+        });
+      }
+      return element;
+    }
+  });
+});
+
+
+},{"../utils/component":25,"../utils/dom":27}],17:[function(require,module,exports){
 var Q, component, generateId, modal;
 
 component = require('../utils/component');
@@ -1341,7 +1341,7 @@ module.exports = component('page', function(arg) {
 });
 
 
-},{"./components/alert":3,"./components/modal":14,"./components/sheet":17,"./menu":18,"./singletons/alert":22,"./singletons/modal":23,"./singletons/sheet":24,"./utils/component":25,"./utils/dom":27,"./views":51}],21:[function(require,module,exports){
+},{"./components/alert":3,"./components/modal":13,"./components/sheet":17,"./menu":18,"./singletons/alert":22,"./singletons/modal":23,"./singletons/sheet":24,"./utils/component":25,"./utils/dom":27,"./views":51}],21:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -5343,19 +5343,19 @@ module.exports = ['user', 'applicants'];
 
 
 },{}],41:[function(require,module,exports){
-var component, highlightOnView, section;
+var component, scrollViewer, section;
 
 component = require('../../../utils/component');
 
 section = require('./section');
 
-highlightOnView = require('../../../components/highlightOnView');
+scrollViewer = require('../../../components/scrollViewer');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, dom, h;
+  var E, dom, s;
   dom = arg.dom;
   E = dom.E;
-  h = E(highlightOnView);
+  s = E(scrollViewer);
   return E(null, E({
     "class": 'alert alert-info in',
     fontSize: 12
@@ -5368,7 +5368,7 @@ module.exports = component('applicantForm', function(arg) {
   }, E('input', {
     "class": 'form-control',
     placeholder: 'xxx'
-  })))), h.subscribe(E(section, {
+  })))), s.subscribe(E(section, {
     title: 'سوابق تحصیلی',
     getContents: function() {
       return E({
@@ -5380,7 +5380,7 @@ module.exports = component('applicantForm', function(arg) {
         placeholder: 'aaa'
       })));
     }
-  })), h.subscribe(E(section, {
+  })), s.subscribe(E(section, {
     title: 'آخرین سوابق سازمانی / پروژه های انجام شده',
     getContents: function() {
       return E({
@@ -5392,7 +5392,7 @@ module.exports = component('applicantForm', function(arg) {
         placeholder: 'bbb'
       })));
     }
-  })), h.subscribe(E(section, {
+  })), s.subscribe(E(section, {
     title: 'دوره‌های آموزشی و مهارت‌ها',
     getContents: function() {
       return E({
@@ -5408,7 +5408,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/highlightOnView":12,"../../../utils/component":25,"./section":42}],42:[function(require,module,exports){
+},{"../../../components/scrollViewer":16,"../../../utils/component":25,"./section":42}],42:[function(require,module,exports){
 var component, remove;
 
 component = require('../../../utils/component');
@@ -5423,7 +5423,8 @@ module.exports = component('applicantFormSection', function(arg, arg1) {
   onEvent = events.onEvent;
   view = E({
     "class": 'row',
-    margin: '50px 0'
+    margin: '50px 0',
+    transition: '0.2s'
   }, E('h5', null, title), contents = E(), add = E({
     "class": 'btn btn-sm btn-primary'
   }, E({
@@ -6294,7 +6295,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":16,"../../utils":29,"../../utils/component":25,"./style":53}],53:[function(require,module,exports){
+},{"../../components/restrictedInput/number":15,"../../utils":29,"../../utils/component":25,"./style":53}],53:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,

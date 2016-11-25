@@ -5,7 +5,7 @@ module.exports = component 'applicantFormSection', ({dom, events}, {title, getCo
   {E, text, show, hide, append, destroy} = dom
   {onEvent} = events
 
-  view = E class: 'row', margin: '50px 0',
+  view = E class: 'row', margin: '50px 0', transition: '0.2s',
     E 'h5', null, title
     contents = E()
     add = E class: 'btn btn-sm btn-primary',
