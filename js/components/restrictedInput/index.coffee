@@ -1,7 +1,7 @@
 component = require '../../utils/component'
 {toEnglish} = require '../../utils'
 
-module.exports = component 'restrictedInput', ({dom, events}, regex) ->  
+module.exports = component 'restrictedInput', ({dom, events, returnObject}, regex) ->  
   {E, setStyle} = dom
   {onEvent} = events
 
@@ -17,4 +17,7 @@ module.exports = component 'restrictedInput', ({dom, events}, regex) ->
       value = prevValue
     setStyle input, {value}
   
+  returnObject
+    value: -> input.value()
+
   input

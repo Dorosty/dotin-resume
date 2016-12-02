@@ -29,6 +29,11 @@ addPageStyle "
   .hidden {
     display: none;
   }
+
+  input::selection {
+    background: #ddd;
+  }
+
   .alert {
     transition: all .15s linear;
     opacity: 0;
@@ -44,7 +49,8 @@ document.title = 'سامانه جذب داتین'
 
 alertMessages.do()
 
-service.getUser()
 service.autoPing()
 
-page()
+service.getUser()
+.then ->
+  page()

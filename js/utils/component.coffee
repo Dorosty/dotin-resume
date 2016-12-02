@@ -19,6 +19,8 @@ module.exports = (componentName, create) -> (args...) ->
   service = _service.instance component
   returnObject = (returnObject) ->
     extend component, returnObject
+  setOff = (offf) ->
+    component.fn.off = offf
   others =
     loading: (stateNames, yesData, noData) ->
       unless Array.isArray stateNames
@@ -28,7 +30,7 @@ module.exports = (componentName, create) -> (args...) ->
         dom.hide noData
         dom.show yesData
 
-  c = create {dom, events, state, service, returnObject, others}, args...
+  c = create {dom, events, state, service, returnObject, setOff, others}, args...
 
   if c?.fn?.element
     component.fn.element = c.fn.element

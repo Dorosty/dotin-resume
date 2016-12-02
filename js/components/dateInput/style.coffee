@@ -2,7 +2,7 @@ exports.view =
   position: 'relative'
 
 exports.input =
-  value: '----/--/--'
+  placeholder: '----/--/--'
   direction: 'ltr'
 
 exports.calendar =

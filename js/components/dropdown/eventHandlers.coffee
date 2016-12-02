@@ -1,20 +1,40 @@
-{toPersian} = require '../../utils'
+style = require './style'
 
 exports.do = ({components, variables, functions, dom, events}) ->
   {input, arrow, itemsList} = components
   {setStyle} = dom
   {onEvent, onEnter} = events
 
+  onEvent [input, arrow], 'mouseover', ->
+    setStyle arrow, style.arrowHover
+
+  onEvent [input, arrow], 'mouseout', ->
+    setStyle arrow, style.arrow
+
   onEvent arrow, 'click', ->
     input.focus()
 
-  onEvent input, 'focus', ->
+  onEvent input, ['click', 'focus'], ->
     input.select()
-
-  onEvent input, 'focus', ->
     variables.manuallySelected = true
     itemsList.set variables.allItems
     itemsList.show()
+
+  onEvent input, 'blur', ->
+    setTimeout -> setTimeout -> setTimeout -> setTimeout -> setTimeout ->
+      itemsList.hide()
+
+  onEvent input, 'keydown', (e) ->
+    code = e.keyCode or e.which
+    switch code
+      when 40
+        itemsList.goDown()
+      when 38
+        itemsList.goUp()
+
+  onEnter input, ->
+    itemsList.select()
+    input.blur()
 
   prevInputValue = ''
   onEvent input, 'input', ->
@@ -27,20 +47,3 @@ exports.do = ({components, variables, functions, dom, events}) ->
       setStyle input, englishValue: prevInputValue
     itemsList.set functions.getFilteredItems()
     itemsList.show()
-
-  onEvent input, 'blur', ->
-    if itemsList.value()?
-      variables.selectedId = String functions.getId itemsList.value()
-    functions.updateDropdown()
-    itemsList.hide()
-
-  onEvent input, 'keydown', (e) ->
-    code = e.keyCode or e.which
-    switch code
-      when 40
-        itemsList.goDown()
-      when 38
-        itemsList.goUp()
-
-  onEnter input, ->
-    input.blur()

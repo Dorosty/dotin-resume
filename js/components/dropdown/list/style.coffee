@@ -23,4 +23,4 @@ exports.item =
   backgroundColor: 'transparent'
 
 exports.highlightedItem =
-  backgroundColor: '#8CF'
+  backgroundColor: '#ddd'

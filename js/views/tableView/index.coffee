@@ -32,12 +32,12 @@ module.exports = component 'tableView', ({dom, events, state}) ->
               ]
           }
           {
-            name: 'تاریخ ثبت'            
+            name: 'تاریخ ثبت'
             getValue: ({modificationTime}) -> toDate modificationTime
           }
           {
             name: 'شغل‌های درخواستی'
-            key: 'selectedJobsString'
+            getValue: ({selectedJobs}) -> selectedJobs.join ' - '
           }
           {
             name: 'وضعیت'
@@ -74,10 +74,11 @@ module.exports = component 'tableView', ({dom, events, state}) ->
 
   state.applicants.on (_applicants) ->
     applicants = _applicants
+    #################################
     applicants.forEach (applicant) ->
       applicant.firstName ?= ''
       applicant.lastName ?= ''
-      applicant.selectedJobsString ?= ''
+    #################################
     update()
 
   view

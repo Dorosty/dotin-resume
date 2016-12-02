@@ -53,6 +53,22 @@ exports.toTimestamp = (dateString) ->
   g = jalaali.toGregorian +year, +month, +day
   +new Date g.gy, g.gm - 1, g.gd
 
+exports.monthToString = (month) ->
+  [
+    'فروردین'
+    'اردیبهشت'
+    'خرداد'
+    'تیر'
+    'مرداد'
+    'شهریور'
+    'مهر'
+    'آبان'
+    'آذر'
+    'دی'
+    'بهمن'
+    'اسفند'
+  ][month - 1]
+
 exports.textIsInSearch = (text, search, notPersian, caseSensitive) ->
   unless notPersian
     text = exports.toPersian text

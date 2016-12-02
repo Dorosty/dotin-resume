@@ -44,7 +44,6 @@ exports.divider =
   height: 20
 
 exports.panel =
-  # overflow: 'hidden'
   marginBottom: 20
   width: '100%'
   backgroundColor: '#f6f6f6'
@@ -58,6 +57,10 @@ exports.panel =
 exports.panelActive =
   opacity: 1
   height: 110
+
+exports.pannelInner =
+  overflow: 'hidden'
+  height: '100%'
 
 exports.arrow =
   position: 'absolute'

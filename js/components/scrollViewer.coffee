@@ -54,3 +54,5 @@ module.exports = component 'scrollViewer', ({dom, events, returnObject}) ->
           setStyle element, opacity: 1
 
       element
+
+  E null

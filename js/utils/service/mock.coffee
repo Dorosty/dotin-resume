@@ -9,11 +9,10 @@ applicants = [{
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
-  selectedJobsString: 'Java developer - Javascript developer'
+  selectedJobs: ['Java developer', 'Javascript developer']
   resume: null
   personalPic: null
   modificationTime: 1473132854116
-  createdAt: 1473132854116
   notes: []
   state: 0
 }, {
@@ -23,19 +22,28 @@ applicants = [{
   phoneNumber: '09121234567'
   email: 'ghayoomi@dotin.ir'
   birthday: '1343/4/5'
-  selectedJobsString: 'UX designer'
+  selectedJobs: ['UX designer']
   resume: null
   personalPic: null
   modificationTime: 1373132854116
-  createdAt: 1373132854116
   notes: ['aaaaaaaaaaaa']
   state: 1
 }]
 
 user =
+  ssid: '0016503368'
   personalPic: null
   name: 'حامد حسینی‌نژاد'
   userType: 0
+  phoneNumber: '09121234567'
+  email: 'dorosty@doin.ir'
+  birthday: '1340/1/2'
+  personalPic: null
+  modificationTime: 1473132854116
+  notes: []
+  selectedJobs: ['Java developer', 'Javascript developer']
+  resume: null
+  state: 0
 
 # user = undefined
 

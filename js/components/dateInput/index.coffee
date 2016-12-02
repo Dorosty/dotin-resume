@@ -28,10 +28,8 @@ module.exports = component 'restrictedInput', ({dom, events, returnObject}) ->
       value = prevValue
     setStyle input, {value}
 
-  onEvent input, 'focus', ->
-    input.select()
-
   returnObject
     input: input
+    value: -> input.value()
   
   view

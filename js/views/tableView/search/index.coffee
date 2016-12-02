@@ -17,8 +17,9 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
     panel = E style.panel,
       arrowBorder = E style.arrowBorder
       arrow = E style.arrow
-      criteriaPlaceholder = E()
-      add = E style.add
+      E style.pannelInner,
+        criteriaPlaceholder = E()
+        add = E style.add
 
   addCriterion = ->
     append criteriaPlaceholder, newCriterion = E criterion
@@ -60,7 +61,6 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
     else
       setStyle panel, style.panelActive
       setStyle settings, style.settingsActive
-      setStyle panel, style.panelActive
       setStyle arrow, style.arrowActive
       setStyle arrowBorder, style.arrowActive
       disable searchbox

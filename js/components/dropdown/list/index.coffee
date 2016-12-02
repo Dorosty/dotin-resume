@@ -1,52 +1,60 @@
 component = require '../../../utils/component'
 style = require './style'
 
-module.exports = component 'dropdownList', ({dom, events, returnObject}, {getTitle, sortCompare}) ->
+module.exports = component 'dropdownList', ({dom, events, returnObject}, {functions}) ->
   {E, empty, append, setStyle} = dom
-  {onMouseover} = events
+  {onEvent} = events
 
   list = E style.list
 
-  entities = items = visible = index = undefined
+  entities = items = highlightIndex = selectedIndex = undefined
   highlightCurrentItem = ->
     unless items?.length
       return
     setStyle items, style.item
-    setStyle items[index], style.highlightedItem
+    setStyle items[highlightIndex], style.highlightedItem
+
+  show = ->
+    setStyle list, style.visibleList
+  hide = ->
+    setStyle list, style.list
+
+  select = ->
+    selectedIndex = highlightIndex
+    functions.select entities[selectedIndex]
+    hide()
 
   returnObject
     set: (_entities) ->
-      index = 0
+      highlightIndex = selectedIndex = 0
       empty list
       entities = _entities.sort (a, b) ->
-        sortCompare getTitle(a), getTitle(b)
+        functions.sortCompare functions.getTitle(a), functions.getTitle(b)
       append list, items = entities.map (entity, i) ->
-        item = E englishText: getTitle entity
-        onMouseover item, ->
-          unless visible
-            return
-          index = i
+        item = E englishText: functions.getTitle entity
+        onEvent item, 'mouseover', ->
+          highlightIndex = i
           highlightCurrentItem()
+        onEvent item, 'mouseout', ->
+          setStyle item, style.item
+        onEvent item, 'click', select
         item
       highlightCurrentItem()
+    value: ->
+      if entities? and selectedIndex?
+        entities[selectedIndex]
     goUp: ->
-      index--
-      if index < 0
-        index = 0
+      highlightIndex--
+      if highlightIndex < 0
+        highlightIndex = 0
       highlightCurrentItem()
     goDown: ->
-      index++
-      if index >= entities.length
-        index = entities.length - 1
+      highlightIndex++
+      if highlightIndex >= entities.length
+        highlightIndex = entities.length - 1
       highlightCurrentItem()
-    value: ->
-      if entities? and index?
-        entities[index]
-    show: ->
-      setStyle list, style.visibleList
-      visible = true
-    hide: ->
-      setStyle list, style.list
-      visible = false
-      
+    select: select
+    show: show
+    hide: hide
+
   list
