@@ -4,4 +4,4 @@ style = require './style'
 module.exports = component 'applicantFormOthers', ({dom}, setData) ->
   {E} = dom
 
-  E null, 'others'
+  E null, 'به زودی...'
