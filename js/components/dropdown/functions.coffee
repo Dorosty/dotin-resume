@@ -13,7 +13,7 @@ exports.create = ({components, variables, dom, args}) ->
       if x is -1
         -1
       else
-        getId x
+        String getId x
 
     getTitle: (x) ->
       if x is -1
@@ -30,11 +30,11 @@ exports.create = ({components, variables, dom, args}) ->
         setStyle input, value: value
 
     getFilteredItems: ->
-      variables.allItems.filter (item) -> item isnt -1 and textIsInSearch functions.getTitle(item), input.value()
+      variables.allItems.filter (item) -> (item is -1 and !input.value().trim()) or textIsInSearch functions.getTitle(item), input.value()
 
     updateDropdown: (force) ->
       if force or document.activeElement isnt input.fn.element
-        if variables.selectedId?
+        if variables.selectedId? && ~variables.selectedId
           selectedItem = variables.allItems.filter((i) -> String(functions.getId(i)) is String variables.selectedId)[0]
           if selectedItem?
             functions.setInputValue functions.getTitle selectedItem
@@ -51,7 +51,7 @@ exports.create = ({components, variables, dom, args}) ->
         itemsList.set functions.getFilteredItems()
 
     select: (item) ->
-      variables.selectedId = String functions.getId item
+      variables.selectedId = functions.getId item
       itemsList.hide()
       functions.updateDropdown true
 

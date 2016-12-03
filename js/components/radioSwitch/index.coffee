@@ -11,7 +11,7 @@ module.exports = component 'radioSwitch', ({dom, events, returnObject}, {getTitl
 
   view = E()
 
-  entities = options = undefined
+  entities = options = changeListener = undefined
   selectedId = -1
   idsToOptions = {}
 
@@ -28,8 +28,10 @@ module.exports = component 'radioSwitch', ({dom, events, returnObject}, {getTitl
         else
           E style.option, getTitle entity
         onEvent option, 'click', ->
+          selectedId = String getId entity
           setStyle options, style.option
           setStyle option, style.optionActive
+          changeListener?()
         idsToOptions[String getId entity] = option
         option
     clear: ->
@@ -39,7 +41,9 @@ module.exports = component 'radioSwitch', ({dom, events, returnObject}, {getTitl
       setStyle options, style.option
       setStyle idsToOptions[selectedId], style.optionActive
     value: ->
-      if setSelectedId is -1
+      if selectedId is -1
         return -1
       entities.filter((entity) -> selectedId is String getId entity)[0]
+    onChange: (listener) ->
+      changeListener = listener
   view

@@ -1,30 +1,58 @@
 component = require '../../../../../utils/component'
 style = require './style'
+{extend, remove} = require '../../../../../utils'
 
-module.exports = component 'personalInfoMultivalue', ({dom, events}, input) ->
+module.exports = component 'personalInfoMultivalue', ({dom, events, returnObject}, input) ->
   {E, setStyle, append, destroy} = dom
   {onEvent} = events
 
+  changeListener = undefined
+  isAdding = false
+  data = []
   items = []
 
   view = E style.view,
     itemsPlaceholder = E()
-    add = E style.add
-    input
-    submit = E style.submit
+    E style.addIconDiv,
+      add = E style.add
+    addPanel = E style.addPanel,
+      input
+      submit = E style.submit
 
   setStyle input, style.input
 
+  setViewHeight = ->
+    setStyle view, height: (items.length + 1) * 30 #+ 27
+
   onEvent add, 'click', ->
-    setStyle [input, submit], style.visible
+    isAdding = true
+    setStyle add, style.addHidden
+    setStyle addPanel, style.addPanelActive
+    setViewHeight()
 
   onEvent submit, 'click', ->
+    isAdding = false
+    setStyle add, style.add
+    setStyle addPanel, style.addPanel
     newItem = E style.item,
-      E style.itemText, input.value()
-      remove = E style.remove
+      E extend {englishText: input.value()}, style.itemText
+      removeItem = E style.remove
     append itemsPlaceholder, newItem
+    data.push input.value()
     items.push newItem
-    onEvent remove, 'click', ->
+    setViewHeight()
+    setStyle input, value: ''
+    changeListener?()
+    onEvent removeItem, 'click', ->
       destroy newItem
+      data.splice items.indexOf(newItem), 1
+      remove items, newItem
+      setViewHeight()
+      changeListener?()
+
+  returnObject
+    onChange: (listener) ->
+      changeListener = listener
+    value: -> data
 
   view

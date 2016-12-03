@@ -2,7 +2,7 @@ component = require '../../../../utils/component'
 style = require './style'
 {extend, toDate, monthToString} = require '../../../../utils'
 
-module.exports = component 'applicantForm', ({dom, state}) ->
+module.exports = component 'applicantFormOverview', ({dom, state}) ->
   {E, setStyle, append, empty} = dom
   view = E null,
     E style.section,

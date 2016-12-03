@@ -5,9 +5,9 @@ exports.view =
   margin: '0 auto'
 
 exports.logout =
-  position: 'absolute'
-  top: 20
-  left: 100
+  float: 'left'
+  position: 'relative'
+  left: 20
   cursor: 'pointer'
   color: '#5c5555'
 

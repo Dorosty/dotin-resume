@@ -1,10 +1,4 @@
 {extend} = require '../../../../utils'
-
-exports.header =
-  color: '#449e73'
-  fontSize: 18
-  marginBottom: 10
-
 exports.clearfix =
   clear: 'both'
 
@@ -61,3 +55,17 @@ exports.valid =
 exports.invalid =
   color: '#c00'
   borderColor: '#c00'
+
+exports.bigLabel =
+  fontSize: 12
+  lineHeight: 30
+  fontWeight: 'bold'
+  transition: '0.2s'
+  color: '#5c5555'
+
+exports.address = extend {}, exports.input,
+  width: '60%'
+  margin: '5px 0 5px 1%'
+
+exports.phoneNumber = extend {}, exports.input,
+  width: '20%'
