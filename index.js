@@ -5517,10 +5517,6 @@ module.exports = component('applicantForm', function(arg) {
     setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها')
   }), E(style.header, 'مهارت زبان انگلیسی'), E(english, {
     setData: setData('مهارت زبان انگلیسی')
-  }), E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), E(reputation, {
-    setData: setData('آخرین سوابق سازمانی و پروژه‌ای')
-  }), E(style.header, 'سایر اطلاعات'), E(others, {
-    setData: setData('سایر اطلاعات')
   }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), hide(submit = E(style.submit, 'ثبت نهایی اطلاعات')));
   accept.onChange(function() {
     if (accept.value()) {
