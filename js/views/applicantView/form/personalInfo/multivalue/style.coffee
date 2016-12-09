@@ -7,16 +7,21 @@ exports.view =
   paddingTop: 7
 
 exports.item =
-  width: '57%'
+  width: 174
   float: 'left'
   position: 'relative'
   height: 30
 
-exports.itemText = {}
+exports.itemText =
+  overflow: 'hidden'
+  position: 'absolute'
+  width: '100%'
+  left: 26
 
 exports.input =
   position: 'absolute'
-  width: '80%'
+  left: 26
+  width: 174
   bottom: 0
 
 icon =
@@ -24,18 +29,15 @@ icon =
   width: 20
   height: 20
   fontSize: 20
+  position: 'absolute'
+  left: 0
 
 exports.add = extend {}, icon,
   class: 'fa fa-plus-circle'
   color: '#449e73'
-  position: 'absolute'
-  top: null
   bottom: 5
-  left: 0
 
 exports.remove = extend {}, icon,
   class: 'fa fa-minus-circle'
   color: '#d71d24'
-  position: 'absolute'
   top: 0
-  left: 0

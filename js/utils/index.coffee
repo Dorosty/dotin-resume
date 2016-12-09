@@ -1,3 +1,5 @@
+exports.emailIsValid = (email) -> /^.+@.+\..+$/.test email
+
 exports.defer = (times) -> (f) ->
   do x = ->
     setTimeout ->

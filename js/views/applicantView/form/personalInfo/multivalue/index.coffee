@@ -10,35 +10,42 @@ module.exports = component 'personalInfoMultivalue', ({dom, events, returnObject
   data = []
   items = []
 
+  setStyle input, style.input
+
   view = E style.view,
     itemsPlaceholder = E()
-    addPanel = E style.addPanel,
-      input
-      add = E style.add
-
-  setStyle input, style.input
+    input
+    add = E style.add
 
   setViewHeight = ->
     setStyle view, height: (items.length + 1) * 30
 
-  onEvent add, 'click', ->
-    append itemsPlaceholder, newItem = E style.item,
-      E extend {englishText: input.value()}, style.itemText
+  addItem = (text) ->
+    newItem = E style.item,
+      E extend {englishText: text}, style.itemText
       removeItem = E style.remove
-    data.push input.value()
+    append itemsPlaceholder, newItem
+    data.push text
     items.push newItem
     setViewHeight()
     setStyle input, value: ''
-    changeListeners.forEach (x) -> x()
     onEvent removeItem, 'click', ->
       destroy newItem
       data.splice items.indexOf(newItem), 1
       remove items, newItem
       setViewHeight()
-      changeListeners.forEach (x) -> x()
+      changeListeners.forEach (x) -> x(false)
+
+  onEvent add, 'click', ->
+    unless changeListeners.every((x) -> x(true) isnt false)
+      return
+    addItem input.value()
 
   returnObject
+    input: input
     onChange: (listener) -> changeListeners.push listener
     value: -> data
+    add: addItem
+
 
   view

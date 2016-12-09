@@ -11,7 +11,7 @@ reputation = require './reputation'
 others = require './others'
 
 module.exports = component 'applicantForm', ({dom}) ->
-  {E, show, hide} = dom
+  {E, setStyle} = dom
 
   data = {}
   setData = (category) -> (key, value) ->
@@ -24,6 +24,7 @@ module.exports = component 'applicantForm', ({dom}) ->
         delete data[category]
 
   submit = E style.submit, 'ثبت نهایی اطلاعات'
+  submitDisabled = true
 
   errors = {}
   setError = (category) -> (key, value) ->
@@ -34,11 +35,12 @@ module.exports = component 'applicantForm', ({dom}) ->
       delete errors[category][key]
       unless Object.keys(errors[category]).length
         delete errors[category]
-    console.log errors
     if Object.keys(errors).length
-      hide submit
+      setStyle submit, style.submitDisabled
+      submitDisabled = true
     else
-      show submit
+      setStyle submit, style.submit
+      submitDisabled = false
 
   view = E null,
     E overview

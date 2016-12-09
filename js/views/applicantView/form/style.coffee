@@ -17,3 +17,6 @@ exports.submit =
   float: 'left'
   padding: '5px 15px'
   cursor: 'pointer'
+
+exports.submitDisabled =
+  backgroundColor: 'gray'

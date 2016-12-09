@@ -255,7 +255,7 @@ exports["do"] = function() {
 };
 
 
-},{"./singletons/alert":22,"./utils":28,"./utils/service":34}],3:[function(require,module,exports){
+},{"./singletons/alert":23,"./utils":29,"./utils/service":35}],3:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -293,7 +293,7 @@ module.exports = component('checkbox', function(arg, text) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24,"./style":4}],4:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"./style":4}],4:[function(require,module,exports){
 exports.view = {
   cursor: 'pointer'
 };
@@ -376,7 +376,7 @@ module.exports = component('dateInput', function(arg) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24,"./style":6}],6:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"./style":6}],6:[function(require,module,exports){
 exports.view = {
   position: 'relative'
 };
@@ -527,7 +527,7 @@ module.exports = component('dropdown', function(arg, arg1) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24,"./list":8,"./style":10}],8:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"./list":8,"./style":10}],8:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -612,7 +612,7 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":24,"./style":9}],9:[function(require,module,exports){
+},{"../../../utils/component":25,"./style":9}],9:[function(require,module,exports){
 exports.list = {
   cursor: 'pointer',
   position: 'absolute',
@@ -731,7 +731,7 @@ module.exports = component('radioSwitch', function(arg, arg1) {
 });
 
 
-},{"../../utils/component":24,"./style":12}],12:[function(require,module,exports){
+},{"../../utils/component":25,"./style":12}],12:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -763,7 +763,30 @@ exports.optionActive = {
 };
 
 
-},{"../../utils":28}],13:[function(require,module,exports){
+},{"../../utils":29}],13:[function(require,module,exports){
+var component, emailIsValid;
+
+component = require('../../utils/component');
+
+emailIsValid = require('../../utils').emailIsValid;
+
+module.exports = component('emailInput', function(arg) {
+  var dom, input, returnObject;
+  dom = arg.dom, returnObject = arg.returnObject;
+  input = dom.E('input');
+  returnObject({
+    value: function() {
+      return input.value();
+    },
+    valid: function() {
+      return emailIsValid(input.value());
+    }
+  });
+  return input;
+});
+
+
+},{"../../utils":29,"../../utils/component":25}],14:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -788,7 +811,7 @@ module.exports = component('gradeInput', function(arg) {
 });
 
 
-},{".":14,"../../utils":28,"../../utils/component":24}],14:[function(require,module,exports){
+},{".":15,"../../utils":29,"../../utils/component":25}],15:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -823,7 +846,7 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24}],15:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25}],16:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -848,7 +871,7 @@ module.exports = component('numberInput', function(arg, isFraction) {
 });
 
 
-},{".":14,"../../utils":28,"../../utils/component":24}],16:[function(require,module,exports){
+},{".":15,"../../utils":29,"../../utils/component":25}],17:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -873,7 +896,7 @@ module.exports = component('phoneNumberInput', function(arg) {
 });
 
 
-},{".":14,"../../utils":28,"../../utils/component":24}],17:[function(require,module,exports){
+},{".":15,"../../utils":29,"../../utils/component":25}],18:[function(require,module,exports){
 var component, window;
 
 component = require('../utils/component');
@@ -953,7 +976,7 @@ module.exports = component('scrollViewer', function(arg) {
 });
 
 
-},{"../utils/component":24,"../utils/dom":26}],18:[function(require,module,exports){
+},{"../utils/component":25,"../utils/dom":27}],19:[function(require,module,exports){
 var body, component, defer, extend, ref, style;
 
 component = require('../../utils/component');
@@ -1003,7 +1026,7 @@ module.exports = function(element, text) {
 };
 
 
-},{"../../utils":28,"../../utils/component":24,"../../utils/dom":26,"./style":19}],19:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"../../utils/dom":27,"./style":20}],20:[function(require,module,exports){
 exports.tooltip = {
   position: 'absolute',
   textAlign: 'center',
@@ -1037,7 +1060,7 @@ exports.arrow = {
 };
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var body, component, views;
 
 component = require('./utils/component');
@@ -1071,7 +1094,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":24,"./utils/dom":26,"./views":65}],21:[function(require,module,exports){
+},{"./utils/component":25,"./utils/dom":27,"./views":66}],22:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3123,15 +3146,15 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":1}],22:[function(require,module,exports){
+},{"_process":1}],23:[function(require,module,exports){
 exports.set = function(x) {
   return exports.instance = x;
 };
 
 
-},{}],23:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],24:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"dup":23}],25:[function(require,module,exports){
 var _dom, _events, _service, _state, extend, log,
   slice = [].slice;
 
@@ -3200,7 +3223,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":28,"./dom":26,"./events":27,"./log":29,"./service":34,"./state":38}],25:[function(require,module,exports){
+},{".":29,"./dom":27,"./events":28,"./log":30,"./service":35,"./state":39}],26:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -3241,7 +3264,7 @@ module.exports = {
 };
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -3642,7 +3665,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":28,"./log":29}],27:[function(require,module,exports){
+},{".":29,"./log":30}],28:[function(require,module,exports){
 var body, isIn, log, ref, remove, window,
   slice = [].slice;
 
@@ -3906,8 +3929,12 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":28,"./dom":26,"./log":29}],28:[function(require,module,exports){
+},{".":29,"./dom":27,"./log":30}],29:[function(require,module,exports){
 var slice = [].slice;
+
+exports.emailIsValid = function(email) {
+  return /^.+@.+\..+$/.test(email);
+};
 
 exports.defer = function(times) {
   return function(f) {
@@ -4084,7 +4111,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -4397,11 +4424,7 @@ exports.service = {
 };
 
 
-},{}],30:[function(require,module,exports){
-exports.emailIsValid = function(email) {
-  return /^.+@.+\..+$/.test(email);
-};
-
+},{}],31:[function(require,module,exports){
 exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
@@ -4430,7 +4453,7 @@ exports.stateToPersian = function(state) {
 };
 
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -4477,7 +4500,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":21,"./mock":35}],32:[function(require,module,exports){
+},{"../../q":22,"./mock":36}],33:[function(require,module,exports){
 var Q, cruds, eraseCookie, get, gets, post, posts, ref, ref1, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -4590,7 +4613,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":28,"../../q":21,"../cookies":25,"../state":38,"./getPost":33,"./names":36,"./stateChangingServices":37}],33:[function(require,module,exports){
+},{"..":29,"../../q":22,"../cookies":26,"../state":39,"./getPost":34,"./names":37,"./stateChangingServices":38}],34:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -4677,7 +4700,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":25,"../state":38,"./ajax":31,"./ex":32,"./names":36,"./stateChangingServices":37}],34:[function(require,module,exports){
+},{"../cookies":26,"../state":39,"./ajax":32,"./ex":33,"./names":37,"./stateChangingServices":38}],35:[function(require,module,exports){
 var Q, ex, get, gets, log, others, post, posts, ref, ref1;
 
 Q = require('../../q');
@@ -4725,7 +4748,7 @@ exports.autoPing = function() {
 };
 
 
-},{"../../q":21,"../log":29,"./ex":32,"./getPost":33,"./names":36}],35:[function(require,module,exports){
+},{"../../q":22,"../log":30,"./ex":33,"./getPost":34,"./names":37}],36:[function(require,module,exports){
 var Q, applicants, user;
 
 Q = require('../../q');
@@ -4846,7 +4869,7 @@ exports.getCaptcha = function() {
 };
 
 
-},{"../../q":21}],36:[function(require,module,exports){
+},{"../../q":22}],37:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
 exports.posts = ['login', 'addJob', 'submitProfileData'];
@@ -4863,7 +4886,7 @@ exports.others = ['logout'];
 exports.states = ['user', 'applicants'];
 
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -4893,7 +4916,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":28,"./names":36}],38:[function(require,module,exports){
+},{"..":29,"./names":37}],39:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -5098,11 +5121,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":29,"./names":39}],39:[function(require,module,exports){
+},{"../log":30,"./names":40}],40:[function(require,module,exports){
 module.exports = ['user', 'applicants'];
 
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var checkbox, component, dropdown, extend, gradeInput, numberInput, ref, remove, style;
 
 component = require('../../../../utils/component');
@@ -5192,7 +5215,7 @@ module.exports = component('applicantFormEducation', function(arg, setData) {
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dropdown":7,"../../../../components/restrictedInput/grade":13,"../../../../components/restrictedInput/number":15,"../../../../utils":28,"../../../../utils/component":24,"./style":41}],41:[function(require,module,exports){
+},{"../../../../components/checkbox":3,"../../../../components/dropdown":7,"../../../../components/restrictedInput/grade":14,"../../../../components/restrictedInput/number":16,"../../../../utils":29,"../../../../utils/component":25,"./style":42}],42:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -5267,7 +5290,7 @@ exports.clearfix = {
 };
 
 
-},{"../../../../utils":28}],42:[function(require,module,exports){
+},{"../../../../utils":29}],43:[function(require,module,exports){
 var component, dropdown, extend, style;
 
 component = require('../../../../utils/component');
@@ -5305,7 +5328,7 @@ module.exports = component('applicantFormEnglish', function(arg, setData) {
 });
 
 
-},{"../../../../components/dropdown":7,"../../../../utils":28,"../../../../utils/component":24,"./style":43}],43:[function(require,module,exports){
+},{"../../../../components/dropdown":7,"../../../../utils":29,"../../../../utils/component":25,"./style":44}],44:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -5347,7 +5370,7 @@ exports.input = {
 };
 
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var checkbox, component, education, english, others, overview, personalInfo, reputation, scrollViewer, style, talents;
 
 component = require('../../../utils/component');
@@ -5373,9 +5396,9 @@ reputation = require('./reputation');
 others = require('./others');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, data, dom, errors, hide, scroll, setData, setError, show, submit, view;
+  var E, accept, data, dom, errors, scroll, setData, setError, setStyle, submit, submitDisabled, view;
   dom = arg.dom;
-  E = dom.E, show = dom.show, hide = dom.hide;
+  E = dom.E, setStyle = dom.setStyle;
   data = {};
   setData = function(category) {
     return function(key, value) {
@@ -5393,6 +5416,7 @@ module.exports = component('applicantForm', function(arg) {
     };
   };
   submit = E(style.submit, 'ثبت نهایی اطلاعات');
+  submitDisabled = true;
   errors = {};
   setError = function(category) {
     return function(key, value) {
@@ -5407,11 +5431,12 @@ module.exports = component('applicantForm', function(arg) {
           delete errors[category];
         }
       }
-      console.log(errors);
       if (Object.keys(errors).length) {
-        return hide(submit);
+        setStyle(submit, style.submitDisabled);
+        return submitDisabled = true;
       } else {
-        return show(submit);
+        setStyle(submit, style.submit);
+        return submitDisabled = false;
       }
     };
   };
@@ -5431,7 +5456,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":3,"../../../components/scrollViewer":17,"../../../utils/component":24,"./education":40,"./english":42,"./others":45,"./overview":47,"./personalInfo":49,"./reputation":53,"./style":55,"./talents":56}],45:[function(require,module,exports){
+},{"../../../components/checkbox":3,"../../../components/scrollViewer":18,"../../../utils/component":25,"./education":41,"./english":43,"./others":46,"./overview":48,"./personalInfo":50,"./reputation":54,"./style":56,"./talents":57}],46:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -5446,11 +5471,11 @@ module.exports = component('applicantFormOthers', function(arg, setData) {
 });
 
 
-},{"../../../../utils/component":24,"./style":46}],46:[function(require,module,exports){
+},{"../../../../utils/component":25,"./style":47}],47:[function(require,module,exports){
 
 
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -5500,7 +5525,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":28,"../../../../utils/component":24,"./style":48}],48:[function(require,module,exports){
+},{"../../../../utils":29,"../../../../utils/component":25,"./style":49}],49:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -5563,8 +5588,8 @@ exports.resumeLink = {
 };
 
 
-},{}],49:[function(require,module,exports){
-var checkbox, component, dateInput, defer, dropdown, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, tooltip;
+},{}],50:[function(require,module,exports){
+var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, tooltip;
 
 component = require('../../../../utils/component');
 
@@ -5580,6 +5605,8 @@ dropdown = require('../../../../components/dropdown');
 
 numberInput = require('../../../../components/restrictedInput/number');
 
+emailInput = require('../../../../components/restrictedInput/email');
+
 phoneNumberInput = require('../../../../components/restrictedInput/phoneNumber');
 
 checkbox = require('../../../../components/checkbox');
@@ -5589,8 +5616,8 @@ multivalue = require('./multivalue');
 ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, defer = ref.defer;
 
 module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
-  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideMoaf, hideTooltips, labelArrays, onEvent, phone, phone2, setData, setError, setOff, setStyle, show, textArrays, view;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
+  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideMoaf, hideTooltips, labelArrays, onEvent, phone, phone2, setData, setError, setOff, setStyle, show, state, textArrays, view;
+  dom = arg.dom, events = arg.events, state = arg.state, setOff = arg.setOff;
   setData = arg1.setData, setError = arg1.setError;
   E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
@@ -5682,20 +5709,95 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     };
   })(f));
   addTextField(1, 'نام معرف', true);
-  fieldCollections[2]['ایمیل'] = f = E(multivalue, E('input', style.input));
-  f.onChange((function(f) {
-    return function() {
-      return setData('ایمیل', f.value());
-    };
-  })(f));
+  f = E(emailInput);
+  setStyle(f, style.input);
+  fieldCollections[2]['ایمیل'] = f = E(multivalue, f);
+  state.user.on({
+    once: true
+  }, function(user) {
+    return f.add(user.email);
+  });
+  (function(f) {
+    return setTimeout(function() {
+      var error, hideTooltip, input, label;
+      label = labelArrays[2][0];
+      input = f.input;
+      error = hideTooltip = void 0;
+      onEvent(input, 'focus', function() {
+        var h;
+        if (error) {
+          h = tooltip(input, error);
+          return hideTooltips.push(hideTooltip = function() {
+            h();
+            return remove(hideTooltips, hideTooltip);
+          });
+        }
+      });
+      onEvent(input, ['input', 'pInput'], function() {
+        setStyle([label, input], style.valid);
+        error = null;
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+      });
+      return f.onChange(function(adding) {
+        if (!adding) {
+          return;
+        }
+        if (!input.value()) {
+          error = 'تکمیل این فیلد الزامیست.';
+          setStyle([input, label], style.invalid);
+          return false;
+        }
+        if (!input.valid()) {
+          error = 'مقدار وارد شده قابل قبول نیست.';
+          setStyle([input, label], style.invalid);
+          return false;
+        }
+        return setData('ایمیل', f.value());
+      });
+    });
+  })(f);
   f = E(phoneNumberInput);
   setStyle(f, style.input);
   fieldCollections[2]['تلفن همراه'] = f = E(multivalue, f);
-  f.onChange((function(f) {
-    return function() {
-      return setData('تلفن همراه', f.value());
-    };
-  })(f));
+  (function(f) {
+    return setTimeout(function() {
+      var error, hideTooltip, input, label;
+      label = labelArrays[2][1];
+      input = f.input;
+      error = hideTooltip = void 0;
+      onEvent(input, 'focus', function() {
+        var h;
+        if (error) {
+          h = tooltip(input, error);
+          return hideTooltips.push(hideTooltip = function() {
+            h();
+            return remove(hideTooltips, hideTooltip);
+          });
+        }
+      });
+      onEvent(input, ['input', 'pInput'], function() {
+        setStyle([label, input], style.valid);
+        error = null;
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+      });
+      return f.onChange(function(adding) {
+        if (!adding) {
+          return;
+        }
+        if (!input.value()) {
+          error = 'تکمیل این فیلد الزامیست.';
+          setStyle([input, label], style.invalid);
+          return false;
+        }
+        if (!input.valid()) {
+          error = 'مقدار وارد شده قابل قبول نیست.';
+          setStyle([input, label], style.invalid);
+          return false;
+        }
+        return setData('تلفن همراه', f.value());
+      });
+    });
+  })(f);
   textArrays = [];
   groupArrays = [];
   labelArrays = [];
@@ -5767,11 +5869,13 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       if (i === 1 && (j === 3 || j === 6)) {
         return;
       }
-      hideTooltip = void 0;
+      if (i === 2) {
+        return;
+      }
       text = textArray[j];
       label = labelArray[j];
       input = field.input || field;
-      error = void 0;
+      error = hideTooltip = void 0;
       if (!((i === 1 && (j === 1 || j === 2)) || (i === 3 && (j === 2 || j === 3)))) {
         setError(text, 'تکمیل این فیلد الزامیست.');
       }
@@ -5843,7 +5947,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/radioSwitch":11,"../../../../components/restrictedInput/number":15,"../../../../components/restrictedInput/phoneNumber":16,"../../../../components/tooltip":18,"../../../../utils":28,"../../../../utils/component":24,"./multivalue":50,"./style":52}],50:[function(require,module,exports){
+},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/radioSwitch":11,"../../../../components/restrictedInput/email":13,"../../../../components/restrictedInput/number":16,"../../../../components/restrictedInput/phoneNumber":17,"../../../../components/tooltip":19,"../../../../utils":29,"../../../../utils/component":25,"./multivalue":51,"./style":53}],51:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -5853,33 +5957,31 @@ style = require('./style');
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('personalInfoMultivalue', function(arg, input) {
-  var E, add, addPanel, append, changeListeners, data, destroy, dom, events, items, itemsPlaceholder, onEvent, returnObject, setStyle, setViewHeight, view;
+  var E, add, addItem, append, changeListeners, data, destroy, dom, events, items, itemsPlaceholder, onEvent, returnObject, setStyle, setViewHeight, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
   changeListeners = [];
   data = [];
   items = [];
-  view = E(style.view, itemsPlaceholder = E(), addPanel = E(style.addPanel, input, add = E(style.add)));
   setStyle(input, style.input);
+  view = E(style.view, itemsPlaceholder = E(), input, add = E(style.add));
   setViewHeight = function() {
     return setStyle(view, {
       height: (items.length + 1) * 30
     });
   };
-  onEvent(add, 'click', function() {
+  addItem = function(text) {
     var newItem, removeItem;
-    append(itemsPlaceholder, newItem = E(style.item, E(extend({
-      englishText: input.value()
-    }, style.itemText)), removeItem = E(style.remove)));
-    data.push(input.value());
+    newItem = E(style.item, E(extend({
+      englishText: text
+    }, style.itemText)), removeItem = E(style.remove));
+    append(itemsPlaceholder, newItem);
+    data.push(text);
     items.push(newItem);
     setViewHeight();
     setStyle(input, {
       value: ''
-    });
-    changeListeners.forEach(function(x) {
-      return x();
     });
     return onEvent(removeItem, 'click', function() {
       destroy(newItem);
@@ -5887,23 +5989,33 @@ module.exports = component('personalInfoMultivalue', function(arg, input) {
       remove(items, newItem);
       setViewHeight();
       return changeListeners.forEach(function(x) {
-        return x();
+        return x(false);
       });
     });
+  };
+  onEvent(add, 'click', function() {
+    if (!changeListeners.every(function(x) {
+      return x(true) !== false;
+    })) {
+      return;
+    }
+    return addItem(input.value());
   });
   returnObject({
+    input: input,
     onChange: function(listener) {
       return changeListeners.push(listener);
     },
     value: function() {
       return data;
-    }
+    },
+    add: addItem
   });
   return view;
 });
 
 
-},{"../../../../../utils":28,"../../../../../utils/component":24,"./style":51}],51:[function(require,module,exports){
+},{"../../../../../utils":29,"../../../../../utils/component":25,"./style":52}],52:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -5916,22 +6028,23 @@ exports.view = {
 };
 
 exports.item = {
-  width: '57%',
+  width: 174,
   float: 'left',
   position: 'relative',
   height: 30
 };
 
-exports.itemText = {};
-
-exports.addIconDiv = {
-  width: '57%',
-  float: 'left'
+exports.itemText = {
+  overflow: 'hidden',
+  position: 'absolute',
+  width: '100%',
+  left: 26
 };
 
 exports.input = {
   position: 'absolute',
-  width: '80%',
+  left: 26,
+  width: 174,
   bottom: 0
 };
 
@@ -5939,29 +6052,25 @@ icon = {
   cursor: 'pointer',
   width: 20,
   height: 20,
-  fontSize: 20
+  fontSize: 20,
+  position: 'absolute',
+  left: 0
 };
 
 exports.add = extend({}, icon, {
   "class": 'fa fa-plus-circle',
   color: '#449e73',
-  marginRight: 10,
-  position: 'absolute',
-  top: null,
-  bottom: 5,
-  left: 0
+  bottom: 5
 });
 
 exports.remove = extend({}, icon, {
   "class": 'fa fa-minus-circle',
   color: '#d71d24',
-  position: 'absolute',
-  top: 0,
-  left: 0
+  top: 0
 });
 
 
-},{"../../../../../utils":28}],52:[function(require,module,exports){
+},{"../../../../../utils":29}],53:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -6052,7 +6161,7 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":28}],53:[function(require,module,exports){
+},{"../../../../utils":29}],54:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -6067,9 +6176,9 @@ module.exports = component('applicantFormReputation', function(arg, setData) {
 });
 
 
-},{"../../../../utils/component":24,"./style":54}],54:[function(require,module,exports){
-arguments[4][46][0].apply(exports,arguments)
-},{"dup":46}],55:[function(require,module,exports){
+},{"../../../../utils/component":25,"./style":55}],55:[function(require,module,exports){
+arguments[4][47][0].apply(exports,arguments)
+},{"dup":47}],56:[function(require,module,exports){
 exports.header = {
   color: '#449e73',
   fontSize: 18,
@@ -6093,8 +6202,12 @@ exports.submit = {
   cursor: 'pointer'
 };
 
+exports.submitDisabled = {
+  backgroundColor: 'gray'
+};
 
-},{}],56:[function(require,module,exports){
+
+},{}],57:[function(require,module,exports){
 var component, dropdown, numberInput, remove, style;
 
 component = require('../../../../utils/component');
@@ -6194,7 +6307,7 @@ module.exports = component('applicantFormTalents', function(arg, setData) {
 });
 
 
-},{"../../../../components/dropdown":7,"../../../../components/restrictedInput/number":15,"../../../../utils":28,"../../../../utils/component":24,"./style":57}],57:[function(require,module,exports){
+},{"../../../../components/dropdown":7,"../../../../components/restrictedInput/number":16,"../../../../utils":29,"../../../../utils/component":25,"./style":58}],58:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -6274,7 +6387,7 @@ exports.clearfix = {
 };
 
 
-},{"../../../../utils":28}],58:[function(require,module,exports){
+},{"../../../../utils":29}],59:[function(require,module,exports){
 var component, extend, form, style, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -6344,7 +6457,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24,"./form":44,"./style":59,"./tests":60}],59:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"./form":45,"./style":60,"./tests":61}],60:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -6457,7 +6570,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":28}],60:[function(require,module,exports){
+},{"../../utils":29}],61:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -6470,7 +6583,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":24}],61:[function(require,module,exports){
+},{"../../../utils/component":25}],62:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -6619,7 +6732,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24,"./jobs":62,"./style":63}],62:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"./jobs":63,"./style":64}],63:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -6701,7 +6814,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -6933,7 +7046,7 @@ exports.footerLink = {
 };
 
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -7043,7 +7156,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":23,"../../utils/component":24,"../../utils/dom":26,"../tableView":69}],65:[function(require,module,exports){
+},{"../../singletons/modal":24,"../../utils/component":25,"../../utils/dom":27,"../tableView":70}],66:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -7088,7 +7201,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":24,"./applicantView":58,"./apply":61,"./hrView":64,"./login":66,"./managerView":68}],66:[function(require,module,exports){
+},{"../utils/component":25,"./applicantView":59,"./apply":62,"./hrView":65,"./login":67,"./managerView":69}],67:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -7159,7 +7272,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":15,"../../utils":28,"../../utils/component":24,"./style":67}],67:[function(require,module,exports){
+},{"../../components/restrictedInput/number":16,"../../utils":29,"../../utils/component":25,"./style":68}],68:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -7256,7 +7369,7 @@ exports.invalid = {
 };
 
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -7264,7 +7377,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":69}],69:[function(require,module,exports){
+},{"../tableView":70}],70:[function(require,module,exports){
 var component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
 
 component = require('../../utils/component');
@@ -7390,7 +7503,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../utils":28,"../../utils/component":24,"../../utils/logic":30,"./search":72,"./sidebar":74,"./style":76,"./table":78}],70:[function(require,module,exports){
+},{"../../utils":29,"../../utils/component":25,"../../utils/logic":31,"./search":73,"./sidebar":75,"./style":77,"./table":79}],71:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -7596,7 +7709,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../utils":28,"../../../../utils/component":24,"./style":71}],71:[function(require,module,exports){
+},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../utils":29,"../../../../utils/component":25,"./style":72}],72:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -7639,7 +7752,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":28}],72:[function(require,module,exports){
+},{"../../../../utils":29}],73:[function(require,module,exports){
 var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -7747,7 +7860,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":28,"../../../utils/component":24,"../../../utils/logic":30,"./criterion":70,"./style":73}],73:[function(require,module,exports){
+},{"../../../utils":29,"../../../utils/component":25,"../../../utils/logic":31,"./criterion":71,"./style":74}],74:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -7868,7 +7981,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":28}],74:[function(require,module,exports){
+},{"../../../utils":29}],75:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -7940,7 +8053,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":24,"./style":75}],75:[function(require,module,exports){
+},{"../../../utils/component":25,"./style":76}],76:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -8026,7 +8139,7 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":28}],76:[function(require,module,exports){
+},{"../../../utils":29}],77:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -8045,7 +8158,7 @@ exports.iconTd = {};
 exports.icon = {};
 
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -8267,7 +8380,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":28,"./style":79}],78:[function(require,module,exports){
+},{"../../../utils":29,"./style":80}],79:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -8391,7 +8504,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":28,"../../../utils/component":24,"./functions":77,"./style":79}],79:[function(require,module,exports){
+},{"../../../utils":29,"../../../utils/component":25,"./functions":78,"./style":80}],80:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -8482,7 +8595,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":28}],80:[function(require,module,exports){
+},{"../../../utils":29}],81:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -8516,4 +8629,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./alertMessages":2,"./page":20,"./q":21,"./utils/dom":26,"./utils/service":34}]},{},[80]);
+},{"./alertMessages":2,"./page":21,"./q":22,"./utils/dom":27,"./utils/service":35}]},{},[81]);
