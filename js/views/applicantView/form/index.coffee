@@ -48,15 +48,15 @@ module.exports = component 'applicantForm', ({dom}) ->
     E style.header, 'مشخصات فردی'
     E personalInfo, setData: setData('مشخصات فردی'), setError: setError('مشخصات فردی')
     # E style.header, 'سوابق تحصیلی'
-    # E education, setData: setData 'سوابق تحصیلی'
+    # E education, setData: setData('سوابق تحصیلی'), setError: setError('سوابق تحصیلی')
     # E style.header, 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'
-    # E talents, setData: setData 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'
+    # E talents, setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), setError: setError('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها')
     # E style.header, 'مهارت زبان انگلیسی'
-    # E english, setData: setData 'مهارت زبان انگلیسی'
+    # E english, setData: setData('مهارت زبان انگلیسی'), setError: setError('مهارت زبان انگلیسی')
     # E style.header, 'آخرین سوابق سازمانی و پروژه‌ای'
-    # E reputation, setData: setData 'آخرین سوابق سازمانی و پروژه‌ای'
+    # E reputation, setData: setData('آخرین سوابق سازمانی و پروژه‌ای'), setError: setError('آخرین سوابق سازمانی و پروژه‌ای')
     # E style.header, 'سایر اطلاعات'
-    # E others, setData: setData 'سایر اطلاعات'
+    # E others, setData: setData('سایر اطلاعات'), setError: setError('سایر اطلاعات')
     E style.checkboxWrapper,
       accept = E checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.'
     submit
