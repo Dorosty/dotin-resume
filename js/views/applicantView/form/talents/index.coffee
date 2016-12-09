@@ -55,7 +55,7 @@ module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
             removeRow
       append body, lastLine
     onEvent add, 'click', ->
-      rows.push [i0, i1, i2].map (i) -> if ~i.value() then i.value() else ''
+      rows.push [i0, i1, i2].map (i) -> i.value()
       update()
       setStyle [i0, i1.input, i2.input], value: ''
 
@@ -104,7 +104,7 @@ module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
             removeRow
       append body, lastLine
     onEvent add, 'click', ->
-      rows.push [i0, i1, i2].map (i) -> if ~i.value() then i.value() else ''
+      rows.push [i0, i1, i2].map (i) -> i.value()
       update()
       setStyle [i0, i1, i2], value: ''
 
@@ -114,7 +114,7 @@ module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
     table0
     table1
     E style.column,
-      E style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشه گذرانده شده:'
+      E style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده:'
       E 'textarea', style.textarea
     E style.column,
       E style.label, 'آثار علمی و عضویت در انجمن‌ها:'

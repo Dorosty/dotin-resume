@@ -1,34 +1,91 @@
 component = require '../../utils/component'
 style = require './style'
 list = require './list'
-_functions = require './functions'
-_eventHandlers = require './eventHandlers'
-{extend} = require '../../utils'
+{toPersian, textIsInSearch, defer} = require '../../utils'
 
-module.exports = component 'dropdown', ({dom, events, returnObject}, args = {}) ->
+module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, getTitle, english, items}) ->
   {E, setStyle} = dom
+  {onEvent, onEnter} = events
 
-  variables =
-    english: args.english
-    items: []
-    allItems: []
-    showEmpty: false
-    selectedId: null
-    manuallySelected: false
-  
-  components = {}
-  functions = {}
+  getId ?= (x) -> x
+  getTitle ?= (x) -> x
+  getTitle = do (getTitle) -> (x) ->
+    if english
+      getTitle x
+    else
+      toPersian getTitle x
 
-  components.dropdown = E style.dropdown,
-    components.input = E 'input', style.input
-    components.arrow = E 'i', style.arrow
-    components.itemsList = E list, {functions}
+  selectedId = null
+  changeListeners = []
+  filteredItems = []
 
-  extend functions, _functions.create {variables, components, dom, args}
+  setInputValue = (value) ->
+    if english
+      setStyle input, englishValue: value
+    else
+      setStyle input, value: value
 
-  _eventHandlers.do {components, variables, functions, dom, events}
+  getFilteredItems = ->
+    items.filter (item) -> textIsInSearch getTitle(item), input.value()
 
-  {reset, undirty, setSelectedId, showEmpty, update, value} = functions
-  returnObject {reset, undirty, setSelectedId, showEmpty, update, value, input: components.input}
+  onSelect = (item) ->
+    selectedId = getId item
+    setInputValue getTitle item
+    itemsList.hide()
+    itemsList.update getFilteredItems()
+    changeListeners.forEach (x) -> x()
 
-  components.dropdown
+  dropdown = E style.dropdown,
+    input = E 'input', style.input
+    arrow = E 'i', style.arrow
+    itemsList = E list, {getTitle, onSelect}
+
+  onEvent [input, arrow], 'mouseover', ->
+    setStyle arrow, style.arrowHover
+
+  onEvent [input, arrow], 'mouseout', ->
+    setStyle arrow, style.arrow
+
+  onEvent arrow, 'click', ->
+    input.focus()
+
+  onEvent input, 'focus', ->
+    input.select()
+    itemsList.update items
+    itemsList.show()
+
+  onEvent input, 'blur', ->
+    defer(5) ->
+      itemsList.hide()
+
+  onEvent input, 'keydown', (e) ->
+    code = e.keyCode or e.which
+    switch code
+      when 40
+        e.preventDefault()
+        itemsList.goDown()
+      when 38
+        e.preventDefault()
+        itemsList.goUp()
+
+  onEnter input, ->
+    itemsList.select()
+    input.blur()
+
+  prevInputValue = ''
+  onEvent input, 'input', ->
+    unless english
+      setStyle input, value: input.value()
+    if getFilteredItems().length
+      prevInputValue = input.value()
+    else
+      setStyle input, englishValue: prevInputValue
+    itemsList.update getFilteredItems(), true
+    itemsList.show()
+
+  returnObject
+    onChange: (listener) -> changeListeners.push listener
+    value: itemsList.value
+    input: input
+
+  dropdown

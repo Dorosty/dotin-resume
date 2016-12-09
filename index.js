@@ -255,7 +255,7 @@ exports["do"] = function() {
 };
 
 
-},{"./singletons/alert":24,"./utils":30,"./utils/service":36}],3:[function(require,module,exports){
+},{"./singletons/alert":22,"./utils":28,"./utils/service":34}],3:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -293,7 +293,7 @@ module.exports = component('checkbox', function(arg, text) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./style":4}],4:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"./style":4}],4:[function(require,module,exports){
 exports.view = {
   cursor: 'pointer'
 };
@@ -333,7 +333,7 @@ style = require('./style');
 
 toEnglish = require('../../utils').toEnglish;
 
-module.exports = component('restrictedInput', function(arg) {
+module.exports = component('dateInput', function(arg) {
   var E, dom, events, input, onEvent, prevValue, returnObject, setStyle, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   E = dom.E, setStyle = dom.setStyle;
@@ -367,13 +367,16 @@ module.exports = component('restrictedInput', function(arg) {
     input: input,
     value: function() {
       return input.value();
+    },
+    valid: function() {
+      return /^13[0-9][0-9]\/([1-9]|1[0-2])\/([1-9]|[1-2][0-9]|3[0-1])$/.test(toEnglish(input.value()));
     }
   });
   return view;
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./style":6}],6:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"./style":6}],6:[function(require,module,exports){
 exports.view = {
   position: 'relative'
 };
@@ -394,16 +397,73 @@ exports.calendar = {
 
 
 },{}],7:[function(require,module,exports){
-var style;
+var component, defer, list, ref, style, textIsInSearch, toPersian;
+
+component = require('../../utils/component');
 
 style = require('./style');
 
-exports["do"] = function(arg) {
-  var arrow, components, dom, events, functions, input, itemsList, onEnter, onEvent, prevInputValue, setStyle, variables;
-  components = arg.components, variables = arg.variables, functions = arg.functions, dom = arg.dom, events = arg.events;
-  input = components.input, arrow = components.arrow, itemsList = components.itemsList;
-  setStyle = dom.setStyle;
+list = require('./list');
+
+ref = require('../../utils'), toPersian = ref.toPersian, textIsInSearch = ref.textIsInSearch, defer = ref.defer;
+
+module.exports = component('dropdown', function(arg, arg1) {
+  var E, arrow, changeListeners, dom, dropdown, english, events, filteredItems, getFilteredItems, getId, getTitle, input, items, itemsList, onEnter, onEvent, onSelect, prevInputValue, returnObject, selectedId, setInputValue, setStyle;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  getId = arg1.getId, getTitle = arg1.getTitle, english = arg1.english, items = arg1.items;
+  E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent, onEnter = events.onEnter;
+  if (getId == null) {
+    getId = function(x) {
+      return x;
+    };
+  }
+  if (getTitle == null) {
+    getTitle = function(x) {
+      return x;
+    };
+  }
+  getTitle = (function(getTitle) {
+    return function(x) {
+      if (english) {
+        return getTitle(x);
+      } else {
+        return toPersian(getTitle(x));
+      }
+    };
+  })(getTitle);
+  selectedId = null;
+  changeListeners = [];
+  filteredItems = [];
+  setInputValue = function(value) {
+    if (english) {
+      return setStyle(input, {
+        englishValue: value
+      });
+    } else {
+      return setStyle(input, {
+        value: value
+      });
+    }
+  };
+  getFilteredItems = function() {
+    return items.filter(function(item) {
+      return textIsInSearch(getTitle(item), input.value());
+    });
+  };
+  onSelect = function(item) {
+    selectedId = getId(item);
+    setInputValue(getTitle(item));
+    itemsList.hide();
+    itemsList.update(getFilteredItems());
+    return changeListeners.forEach(function(x) {
+      return x();
+    });
+  };
+  dropdown = E(style.dropdown, input = E('input', style.input), arrow = E('i', style.arrow), itemsList = E(list, {
+    getTitle: getTitle,
+    onSelect: onSelect
+  }));
   onEvent([input, arrow], 'mouseover', function() {
     return setStyle(arrow, style.arrowHover);
   });
@@ -413,23 +473,14 @@ exports["do"] = function(arg) {
   onEvent(arrow, 'click', function() {
     return input.focus();
   });
-  onEvent(input, ['click', 'focus'], function() {
+  onEvent(input, 'focus', function() {
     input.select();
-    variables.manuallySelected = true;
-    itemsList.set(variables.allItems);
+    itemsList.update(items);
     return itemsList.show();
   });
   onEvent(input, 'blur', function() {
-    return setTimeout(function() {
-      return setTimeout(function() {
-        return setTimeout(function() {
-          return setTimeout(function() {
-            return setTimeout(function() {
-              return itemsList.hide();
-            });
-          });
-        });
-      });
+    return defer(5)(function() {
+      return itemsList.hide();
     });
   });
   onEvent(input, 'keydown', function(e) {
@@ -437,8 +488,10 @@ exports["do"] = function(arg) {
     code = e.keyCode || e.which;
     switch (code) {
       case 40:
+        e.preventDefault();
         return itemsList.goDown();
       case 38:
+        e.preventDefault();
         return itemsList.goUp();
     }
   });
@@ -447,206 +500,34 @@ exports["do"] = function(arg) {
     return input.blur();
   });
   prevInputValue = '';
-  return onEvent(input, 'input', function() {
-    variables.manuallySelected = true;
-    if (!variables.english) {
+  onEvent(input, 'input', function() {
+    if (!english) {
       setStyle(input, {
         value: input.value()
       });
     }
-    if (functions.getFilteredItems().length) {
+    if (getFilteredItems().length) {
       prevInputValue = input.value();
     } else {
       setStyle(input, {
         englishValue: prevInputValue
       });
     }
-    itemsList.set(functions.getFilteredItems());
+    itemsList.update(getFilteredItems(), true);
     return itemsList.show();
   });
-};
-
-
-},{"./style":12}],8:[function(require,module,exports){
-var ref, textIsInSearch, toPersian;
-
-ref = require('../../utils'), toPersian = ref.toPersian, textIsInSearch = ref.textIsInSearch;
-
-exports.create = function(arg) {
-  var args, components, dom, functions, getId, getTitle, input, itemsList, ref1, ref2, ref3, setStyle, sortCompare, variables;
-  components = arg.components, variables = arg.variables, dom = arg.dom, args = arg.args;
-  input = components.input, itemsList = components.itemsList;
-  setStyle = dom.setStyle;
-  getId = (ref1 = args.getId) != null ? ref1 : (function(x) {
-    return x;
-  }), getTitle = (ref2 = args.getTitle) != null ? ref2 : (function(x) {
-    return x;
-  }), sortCompare = (ref3 = args.sortCompare) != null ? ref3 : (function(a, b) {
-    return a;
-  });
-  return functions = {
-    sortCompare: sortCompare,
-    getId: function(x) {
-      if (x === -1) {
-        return -1;
-      } else {
-        return String(getId(x));
-      }
-    },
-    getTitle: function(x) {
-      if (x === -1) {
-        return '';
-      } else if (variables.english) {
-        return getTitle(x);
-      } else {
-        return toPersian(getTitle(x));
-      }
-    },
-    setInputValue: function(value) {
-      if (variables.english) {
-        return setStyle(input, {
-          englishValue: value
-        });
-      } else {
-        return setStyle(input, {
-          value: value
-        });
-      }
-    },
-    getFilteredItems: function() {
-      return variables.allItems.filter(function(item) {
-        return (item === -1 && !input.value().trim()) || textIsInSearch(functions.getTitle(item), input.value());
-      });
-    },
-    updateDropdown: function(force) {
-      var filteredItems, selectedItem;
-      if (force || document.activeElement !== input.fn.element) {
-        if ((variables.selectedId != null) && ~variables.selectedId) {
-          selectedItem = variables.allItems.filter(function(i) {
-            return String(functions.getId(i)) === String(variables.selectedId);
-          })[0];
-          if (selectedItem != null) {
-            functions.setInputValue(functions.getTitle(selectedItem));
-          } else {
-            functions.setInputValue('');
-          }
-        } else if (variables.showEmpty) {
-          functions.setInputValue('');
-        } else {
-          filteredItems = functions.getFilteredItems();
-          if (filteredItems.length) {
-            functions.setInputValue(functions.getTitle(filteredItems[0]));
-          } else {
-            functions.setInputValue('');
-          }
-        }
-        return itemsList.set(functions.getFilteredItems());
-      }
-    },
-    select: function(item) {
-      variables.selectedId = functions.getId(item);
-      itemsList.hide();
-      return functions.updateDropdown(true);
-    },
-    showEmpty: function(showEmpty) {
-      variables.showEmpty = showEmpty;
-      return functions.update(variables.items);
-    },
-    update: function(items) {
-      variables.items = items;
-      if (variables.showEmpty) {
-        variables.allItems = [-1].concat(items);
-      } else {
-        variables.allItems = items;
-      }
-      return functions.updateDropdown();
-    },
-    reset: function() {
-      variables.selectedId = null;
-      variables.manuallySelected = false;
-      functions.setInputValue('');
-      return functions.updateDropdown();
-    },
-    setSelectedId: function(id) {
-      if (!variables.manuallySelected) {
-        variables.selectedId = String(id);
-        return functions.updateDropdown();
-      }
-    },
-    undirty: function() {
-      return variables.manuallySelected = false;
-    },
-    value: function() {
-      var ref4;
-      return (ref4 = itemsList.value()) != null ? ref4 : -1;
-    }
-  };
-};
-
-
-},{"../../utils":30}],9:[function(require,module,exports){
-var _eventHandlers, _functions, component, extend, list, style;
-
-component = require('../../utils/component');
-
-style = require('./style');
-
-list = require('./list');
-
-_functions = require('./functions');
-
-_eventHandlers = require('./eventHandlers');
-
-extend = require('../../utils').extend;
-
-module.exports = component('dropdown', function(arg, args) {
-  var E, components, dom, events, functions, reset, returnObject, setSelectedId, setStyle, showEmpty, undirty, update, value, variables;
-  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  if (args == null) {
-    args = {};
-  }
-  E = dom.E, setStyle = dom.setStyle;
-  variables = {
-    english: args.english,
-    items: [],
-    allItems: [],
-    showEmpty: false,
-    selectedId: null,
-    manuallySelected: false
-  };
-  components = {};
-  functions = {};
-  components.dropdown = E(style.dropdown, components.input = E('input', style.input), components.arrow = E('i', style.arrow), components.itemsList = E(list, {
-    functions: functions
-  }));
-  extend(functions, _functions.create({
-    variables: variables,
-    components: components,
-    dom: dom,
-    args: args
-  }));
-  _eventHandlers["do"]({
-    components: components,
-    variables: variables,
-    functions: functions,
-    dom: dom,
-    events: events
-  });
-  reset = functions.reset, undirty = functions.undirty, setSelectedId = functions.setSelectedId, showEmpty = functions.showEmpty, update = functions.update, value = functions.value;
   returnObject({
-    reset: reset,
-    undirty: undirty,
-    setSelectedId: setSelectedId,
-    showEmpty: showEmpty,
-    update: update,
-    value: value,
-    input: components.input
+    onChange: function(listener) {
+      return changeListeners.push(listener);
+    },
+    value: itemsList.value,
+    input: input
   });
-  return components.dropdown;
+  return dropdown;
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./eventHandlers":7,"./functions":8,"./list":10,"./style":12}],10:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"./list":8,"./style":10}],8:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -654,19 +535,21 @@ component = require('../../../utils/component');
 style = require('./style');
 
 module.exports = component('dropdownList', function(arg, arg1) {
-  var E, append, dom, empty, entities, events, functions, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, returnObject, select, selectedIndex, setStyle, show;
+  var E, append, dom, empty, entities, events, getTitle, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  functions = arg1.functions;
+  onSelect = arg1.onSelect, getTitle = arg1.getTitle;
   E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle;
   onEvent = events.onEvent;
   list = E(style.list);
-  entities = items = highlightIndex = selectedIndex = void 0;
+  entities = items = highlightIndex = value = void 0;
   highlightCurrentItem = function() {
     if (!(items != null ? items.length : void 0)) {
       return;
     }
     setStyle(items, style.item);
-    return setStyle(items[highlightIndex], style.highlightedItem);
+    if (highlightIndex != null) {
+      return setStyle(items[highlightIndex], style.highlightedItem);
+    }
   };
   show = function() {
     return setStyle(list, style.visibleList);
@@ -675,23 +558,27 @@ module.exports = component('dropdownList', function(arg, arg1) {
     return setStyle(list, style.list);
   };
   select = function() {
-    selectedIndex = highlightIndex;
-    functions.select(entities[selectedIndex]);
+    value = entities[highlightIndex];
+    onSelect(value);
     return hide();
   };
   returnObject({
-    set: function(_entities) {
-      highlightIndex = selectedIndex = 0;
+    value: function() {
+      return value;
+    },
+    update: function(_entities, reset) {
+      if (reset) {
+        value = null;
+      }
+      highlightIndex = 0;
       empty(list);
-      entities = _entities.sort(function(a, b) {
-        return functions.sortCompare(functions.getTitle(a), functions.getTitle(b));
-      });
+      entities = _entities;
       append(list, items = entities.map(function(entity, i) {
         var item;
         item = E({
-          englishText: functions.getTitle(entity)
+          englishText: getTitle(entity)
         });
-        onEvent(item, 'mouseover', function() {
+        onEvent(item, 'mousemove', function() {
           highlightIndex = i;
           return highlightCurrentItem();
         });
@@ -702,11 +589,6 @@ module.exports = component('dropdownList', function(arg, arg1) {
         return item;
       }));
       return highlightCurrentItem();
-    },
-    value: function() {
-      if ((entities != null) && (selectedIndex != null)) {
-        return entities[selectedIndex];
-      }
     },
     goUp: function() {
       highlightIndex--;
@@ -730,7 +612,7 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":26,"./style":11}],11:[function(require,module,exports){
+},{"../../../utils/component":24,"./style":9}],9:[function(require,module,exports){
 exports.list = {
   cursor: 'pointer',
   position: 'absolute',
@@ -753,8 +635,10 @@ exports.visibleList = {
 };
 
 exports.item = {
+  fontSize: 12,
   height: 30,
-  padding: 5,
+  lineHeight: 30,
+  padding: '0 5px',
   backgroundColor: 'transparent'
 };
 
@@ -763,7 +647,7 @@ exports.highlightedItem = {
 };
 
 
-},{}],12:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 exports.dropdown = {
   position: 'relative'
 };
@@ -795,19 +679,17 @@ exports.arrowHover = {
 };
 
 
-},{}],13:[function(require,module,exports){
-var component, extend, style;
+},{}],11:[function(require,module,exports){
+var component, style;
 
 component = require('../../utils/component');
 
 style = require('./style');
 
-extend = require('../../utils').extend;
-
 module.exports = component('radioSwitch', function(arg, arg1) {
-  var E, append, changeListener, dom, empty, entities, events, getId, getTitle, idsToOptions, onEvent, options, returnObject, selectedId, setStyle, view;
+  var E, append, changeListeners, dom, empty, events, getTitle, items, onEvent, options, returnObject, selectedIndex, selectedItem, setStyle, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  getTitle = arg1.getTitle, getId = arg1.getId;
+  items = arg1.items, getTitle = arg1.getTitle, selectedIndex = arg1.selectedIndex;
   E = dom.E, append = dom.append, empty = dom.empty, setStyle = dom.setStyle;
   onEvent = events.onEvent;
   if (getTitle == null) {
@@ -815,58 +697,41 @@ module.exports = component('radioSwitch', function(arg, arg1) {
       return x;
     };
   }
-  if (getId == null) {
-    getId = function(x) {
-      return x;
-    };
+  if (selectedIndex == null) {
+    selectedIndex = 0;
   }
-  view = E();
-  entities = options = changeListener = void 0;
-  selectedId = -1;
-  idsToOptions = {};
-  returnObject({
-    update: function(_entities) {
-      entities = _entities;
-      idsToOptions = {};
-      empty(view);
-      return append(view, options = entities.map(function(entity, i) {
-        var option;
-        option = i === 0 ? E(extend({}, style.rightOption, style.optionActive), getTitle(entity)) : i === entities.length - 1 ? E(style.leftOption, getTitle(entity)) : E(style.option, getTitle(entity));
-        onEvent(option, 'click', function() {
-          selectedId = String(getId(entity));
-          setStyle(options, style.option);
-          setStyle(option, style.optionActive);
-          return typeof changeListener === "function" ? changeListener() : void 0;
-        });
-        idsToOptions[String(getId(entity))] = option;
-        return option;
-      }));
-    },
-    clear: function() {
-      return setStyle(options, style.option);
-    },
-    setSelectedId: function(id) {
-      selectedId = String(id);
+  options = void 0;
+  changeListeners = [];
+  selectedItem = items[selectedIndex];
+  view = E(null, options = items.map(function(item, i) {
+    var option;
+    option = i === 0 ? E(style.rightOption, getTitle(item)) : i === items.length - 1 ? E(style.leftOption, getTitle(item)) : E(style.option, getTitle(item));
+    if (i === selectedIndex) {
+      setStyle(option, style.optionActive);
+    }
+    onEvent(option, 'click', function() {
+      selectedItem = item;
       setStyle(options, style.option);
-      return setStyle(idsToOptions[selectedId], style.optionActive);
-    },
+      setStyle(option, style.optionActive);
+      return changeListeners.forEach(function(x) {
+        return x();
+      });
+    });
+    return option;
+  }));
+  returnObject({
     value: function() {
-      if (selectedId === -1) {
-        return -1;
-      }
-      return entities.filter(function(entity) {
-        return selectedId === String(getId(entity));
-      })[0];
+      return selectedItem;
     },
     onChange: function(listener) {
-      return changeListener = listener;
+      return changeListeners.push(listener);
     }
   });
   return view;
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./style":14}],14:[function(require,module,exports){
+},{"../../utils/component":24,"./style":12}],12:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -878,8 +743,9 @@ exports.option = {
   cursor: 'pointer',
   padding: '0 10px',
   marginLeft: -1,
+  fontSize: 12,
   height: 30,
-  lineHeight: 28,
+  lineHeight: 30,
   transition: '0.2s',
   backgroundColor: 'white'
 };
@@ -897,12 +763,14 @@ exports.optionActive = {
 };
 
 
-},{"../../utils":30}],15:[function(require,module,exports){
-var component, restrictedInput;
+},{"../../utils":28}],13:[function(require,module,exports){
+var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
 
 restrictedInput = require('.');
+
+toEnglish = require('../../utils').toEnglish;
 
 module.exports = component('gradeInput', function(arg) {
   var dom, input, returnObject;
@@ -911,13 +779,16 @@ module.exports = component('gradeInput', function(arg) {
   returnObject({
     value: function() {
       return input.value();
+    },
+    valid: function() {
+      return /^([0-9]|[0-9]\.[0-9][0-9]?|1[0-9]|1[0-9]\.[0-9][0-9]?|20|20\.00?)?$/.test(toEnglish(input.value()));
     }
   });
   return input;
 });
 
 
-},{".":16,"../../utils/component":26}],16:[function(require,module,exports){
+},{".":14,"../../utils":28,"../../utils/component":24}],14:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -952,12 +823,14 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26}],17:[function(require,module,exports){
-var component, restrictedInput;
+},{"../../utils":28,"../../utils/component":24}],15:[function(require,module,exports){
+var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
 
 restrictedInput = require('.');
+
+toEnglish = require('../../utils').toEnglish;
 
 module.exports = component('numberInput', function(arg, isFraction) {
   var dom, input, returnObject;
@@ -966,18 +839,23 @@ module.exports = component('numberInput', function(arg, isFraction) {
   returnObject({
     value: function() {
       return input.value();
+    },
+    valid: function() {
+      return (isFraction ? /^([0-9]+|[0-9]*\.[0-9]+)$/ : /^[0-9]+$/).test(toEnglish(input.value()));
     }
   });
   return input;
 });
 
 
-},{".":16,"../../utils/component":26}],18:[function(require,module,exports){
-var component, restrictedInput;
+},{".":14,"../../utils":28,"../../utils/component":24}],16:[function(require,module,exports){
+var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
 
 restrictedInput = require('.');
+
+toEnglish = require('../../utils').toEnglish;
 
 module.exports = component('phoneNumberInput', function(arg) {
   var dom, input, returnObject;
@@ -986,13 +864,16 @@ module.exports = component('phoneNumberInput', function(arg) {
   returnObject({
     value: function() {
       return input.value();
+    },
+    valid: function() {
+      return /^09[0-9]{9}$/.test(toEnglish(input.value()));
     }
   });
   return input;
 });
 
 
-},{".":16,"../../utils/component":26}],19:[function(require,module,exports){
+},{".":14,"../../utils":28,"../../utils/component":24}],17:[function(require,module,exports){
 var component, window;
 
 component = require('../utils/component');
@@ -1072,14 +953,14 @@ module.exports = component('scrollViewer', function(arg) {
 });
 
 
-},{"../utils/component":26,"../utils/dom":28}],20:[function(require,module,exports){
-var body, component, extend, style;
+},{"../utils/component":24,"../utils/dom":26}],18:[function(require,module,exports){
+var body, component, defer, extend, ref, style;
 
 component = require('../../utils/component');
 
 style = require('./style');
 
-extend = require('../../utils').extend;
+ref = require('../../utils'), extend = ref.extend, defer = ref.defer;
 
 body = require('../../utils/dom').body;
 
@@ -1090,34 +971,26 @@ module.exports = function(element, text) {
     var E, append, destroy, dom, setStyle;
     dom = arg.dom;
     E = dom.E, append = dom.append, destroy = dom.destroy, setStyle = dom.setStyle;
-    setTimeout(function() {
-      return setTimeout(function() {
-        return setTimeout(function() {
-          return setTimeout(function() {
-            return setTimeout(function() {
-              var height, left, top, width;
-              element = element.fn.element;
-              width = element.offsetWidth, height = element.offsetHeight;
-              top = left = 0;
-              while (true) {
-                top += element.offsetTop || 0;
-                left += element.offsetLeft || 0;
-                element = element.offsetParent;
-                if (!element) {
-                  break;
-                }
-              }
-              append(E(body), tooltip = E(extend({
-                top: top + height + 7,
-                left: left + (width - 150) / 2
-              }, style.tooltip), E(style.arrow), dom.text(text)));
-              return setTimeout(function() {
-                return setStyle(tooltip, style.tooltipActive);
-              });
-            });
-          });
-        });
-      });
+    defer(5)(function() {
+      var height, left, top, width;
+      element = element.fn.element;
+      width = element.offsetWidth, height = element.offsetHeight;
+      top = left = 0;
+      while (true) {
+        top += element.offsetTop || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+        if (!element) {
+          break;
+        }
+      }
+      append(E(body), tooltip = E(extend({
+        top: top - height - 7,
+        left: left + (width - 150) / 2
+      }, style.tooltip), E(style.arrow), dom.text(text)));
+      return setTimeout((function() {
+        return setStyle(tooltip, style.tooltipActive);
+      }), 10);
     });
     return destroyFn = function() {
       setStyle(tooltip, style.tooltip);
@@ -1130,7 +1003,7 @@ module.exports = function(element, text) {
 };
 
 
-},{"../../utils":30,"../../utils/component":26,"../../utils/dom":28,"./style":21}],21:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"../../utils/dom":26,"./style":19}],19:[function(require,module,exports){
 exports.tooltip = {
   position: 'absolute',
   textAlign: 'center',
@@ -1157,14 +1030,14 @@ exports.arrow = {
   height: 0,
   borderStyle: 'solid',
   borderColor: 'transparent',
-  top: -7,
+  bottom: -7,
   right: (150 - 7) / 2,
-  borderWidth: '0 7px 7px',
-  borderBottomColor: '#c00'
+  borderWidth: '7px 7px 0',
+  borderTopColor: '#c00'
 };
 
 
-},{}],22:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var body, component, views;
 
 component = require('./utils/component');
@@ -1198,7 +1071,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":26,"./utils/dom":28,"./views":67}],23:[function(require,module,exports){
+},{"./utils/component":24,"./utils/dom":26,"./views":65}],21:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3250,15 +3123,15 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":1}],24:[function(require,module,exports){
+},{"_process":1}],22:[function(require,module,exports){
 exports.set = function(x) {
   return exports.instance = x;
 };
 
 
-},{}],25:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24}],26:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
+arguments[4][22][0].apply(exports,arguments)
+},{"dup":22}],24:[function(require,module,exports){
 var _dom, _events, _service, _state, extend, log,
   slice = [].slice;
 
@@ -3327,7 +3200,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":30,"./dom":28,"./events":29,"./log":31,"./service":36,"./state":40}],27:[function(require,module,exports){
+},{".":28,"./dom":26,"./events":27,"./log":29,"./service":34,"./state":38}],25:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -3368,7 +3241,7 @@ module.exports = {
 };
 
 
-},{}],28:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -3769,7 +3642,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":30,"./log":31}],29:[function(require,module,exports){
+},{".":28,"./log":29}],27:[function(require,module,exports){
 var body, isIn, log, ref, remove, window,
   slice = [].slice;
 
@@ -4033,8 +3906,24 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":30,"./dom":28,"./log":31}],30:[function(require,module,exports){
+},{".":28,"./dom":26,"./log":29}],28:[function(require,module,exports){
 var slice = [].slice;
+
+exports.defer = function(times) {
+  return function(f) {
+    var x;
+    return (x = function() {
+      return setTimeout(function() {
+        times--;
+        if (times) {
+          return f();
+        } else {
+          return x();
+        }
+      });
+    })();
+  };
+};
 
 exports.compare = function(a, b) {
   if (a > b) {
@@ -4195,7 +4084,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],31:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -4508,7 +4397,7 @@ exports.service = {
 };
 
 
-},{}],32:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 exports.emailIsValid = function(email) {
   return /^.+@.+\..+$/.test(email);
 };
@@ -4541,7 +4430,7 @@ exports.stateToPersian = function(state) {
 };
 
 
-},{}],33:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -4588,7 +4477,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":23,"./mock":37}],34:[function(require,module,exports){
+},{"../../q":21,"./mock":35}],32:[function(require,module,exports){
 var Q, cruds, eraseCookie, get, gets, post, posts, ref, ref1, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -4701,7 +4590,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":30,"../../q":23,"../cookies":27,"../state":40,"./getPost":35,"./names":38,"./stateChangingServices":39}],35:[function(require,module,exports){
+},{"..":28,"../../q":21,"../cookies":25,"../state":38,"./getPost":33,"./names":36,"./stateChangingServices":37}],33:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -4788,7 +4677,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":27,"../state":40,"./ajax":33,"./ex":34,"./names":38,"./stateChangingServices":39}],36:[function(require,module,exports){
+},{"../cookies":25,"../state":38,"./ajax":31,"./ex":32,"./names":36,"./stateChangingServices":37}],34:[function(require,module,exports){
 var Q, ex, get, gets, log, others, post, posts, ref, ref1;
 
 Q = require('../../q');
@@ -4836,7 +4725,7 @@ exports.autoPing = function() {
 };
 
 
-},{"../../q":23,"../log":31,"./ex":34,"./getPost":35,"./names":38}],37:[function(require,module,exports){
+},{"../../q":21,"../log":29,"./ex":32,"./getPost":33,"./names":36}],35:[function(require,module,exports){
 var Q, applicants, user;
 
 Q = require('../../q');
@@ -4957,7 +4846,7 @@ exports.getCaptcha = function() {
 };
 
 
-},{"../../q":23}],38:[function(require,module,exports){
+},{"../../q":21}],36:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
 exports.posts = ['login', 'addJob', 'submitProfileData'];
@@ -4974,7 +4863,7 @@ exports.others = ['logout'];
 exports.states = ['user', 'applicants'];
 
 
-},{}],39:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -5004,7 +4893,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":30,"./names":38}],40:[function(require,module,exports){
+},{"..":28,"./names":36}],38:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -5209,11 +5098,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":31,"./names":41}],41:[function(require,module,exports){
+},{"../log":29,"./names":39}],39:[function(require,module,exports){
 module.exports = ['user', 'applicants'];
 
 
-},{}],42:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 var checkbox, component, dropdown, extend, gradeInput, numberInput, ref, remove, style;
 
 component = require('../../../../utils/component');
@@ -5280,11 +5169,7 @@ module.exports = component('applicantFormEducation', function(arg, setData) {
     };
     onEvent(add, 'click', function() {
       rows.push([i0, i1, i2, i3, i4, i5, i6].map(function(i) {
-        if (~i.value()) {
-          return i.value();
-        } else {
-          return '';
-        }
+        return i.value();
       }));
       update();
       return setStyle([i0.input, i1, i2, i3, i4, i5, i6], {
@@ -5307,7 +5192,7 @@ module.exports = component('applicantFormEducation', function(arg, setData) {
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dropdown":9,"../../../../components/restrictedInput/grade":15,"../../../../components/restrictedInput/number":17,"../../../../utils":30,"../../../../utils/component":26,"./style":43}],43:[function(require,module,exports){
+},{"../../../../components/checkbox":3,"../../../../components/dropdown":7,"../../../../components/restrictedInput/grade":13,"../../../../components/restrictedInput/number":15,"../../../../utils":28,"../../../../utils/component":24,"./style":41}],41:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -5382,7 +5267,7 @@ exports.clearfix = {
 };
 
 
-},{"../../../../utils":30}],44:[function(require,module,exports){
+},{"../../../../utils":28}],42:[function(require,module,exports){
 var component, dropdown, extend, style;
 
 component = require('../../../../utils/component');
@@ -5420,7 +5305,7 @@ module.exports = component('applicantFormEnglish', function(arg, setData) {
 });
 
 
-},{"../../../../components/dropdown":9,"../../../../utils":30,"../../../../utils/component":26,"./style":45}],45:[function(require,module,exports){
+},{"../../../../components/dropdown":7,"../../../../utils":28,"../../../../utils/component":24,"./style":43}],43:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -5462,7 +5347,7 @@ exports.input = {
 };
 
 
-},{}],46:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var checkbox, component, education, english, others, overview, personalInfo, reputation, scrollViewer, style, talents;
 
 component = require('../../../utils/component');
@@ -5488,48 +5373,65 @@ reputation = require('./reputation');
 others = require('./others');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, data, dom, hide, scroll, setData, show, submit, view;
+  var E, accept, data, dom, errors, hide, scroll, setData, setError, show, submit, view;
   dom = arg.dom;
   E = dom.E, show = dom.show, hide = dom.hide;
-  data = {
-    'مشخصات فردی': {
-      'جنسیت': 0,
-      'وضعیت تاهل': 2
-    }
-  };
+  data = {};
   setData = function(category) {
     return function(key, value) {
-      if (data[category] == null) {
-        data[category] = {};
-      }
       if (value != null) {
+        if (data[category] == null) {
+          data[category] = {};
+        }
         return data[category][key] = value;
       } else {
-        return delete data[category][key];
+        delete data[category][key];
+        if (!Object.keys(data[category]).length) {
+          return delete data[category];
+        }
+      }
+    };
+  };
+  submit = E(style.submit, 'ثبت نهایی اطلاعات');
+  errors = {};
+  setError = function(category) {
+    return function(key, value) {
+      if (value != null) {
+        if (errors[category] == null) {
+          errors[category] = {};
+        }
+        errors[category][key] = value;
+      } else {
+        delete errors[category][key];
+        if (!Object.keys(errors[category]).length) {
+          delete errors[category];
+        }
+      }
+      console.log(errors);
+      if (Object.keys(errors).length) {
+        return hide(submit);
+      } else {
+        return show(submit);
       }
     };
   };
   view = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
-    setData: setData('مشخصات فردی')
-  }), E(style.header, 'سوابق تحصیلی'), E(education, {
-    setData: setData('سوابق تحصیلی')
-  }), E(style.header, 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), E(talents, {
-    setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها')
-  }), E(style.header, 'مهارت زبان انگلیسی'), E(english, {
-    setData: setData('مهارت زبان انگلیسی')
-  }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), hide(submit = E(style.submit, 'ثبت نهایی اطلاعات')));
+    setData: setData('مشخصات فردی'),
+    setError: setError('مشخصات فردی')
+  }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit);
+  setError('ac')('cept', true);
   accept.onChange(function() {
     if (accept.value()) {
-      return show(submit);
+      return setError('ac')('cept', null);
     } else {
-      return hide(submit);
+      return setError('ac')('cept', true);
     }
   });
   return view;
 });
 
 
-},{"../../../components/checkbox":3,"../../../components/scrollViewer":19,"../../../utils/component":26,"./education":42,"./english":44,"./others":47,"./overview":49,"./personalInfo":51,"./reputation":55,"./style":57,"./talents":58}],47:[function(require,module,exports){
+},{"../../../components/checkbox":3,"../../../components/scrollViewer":17,"../../../utils/component":24,"./education":40,"./english":42,"./others":45,"./overview":47,"./personalInfo":49,"./reputation":53,"./style":55,"./talents":56}],45:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -5544,11 +5446,11 @@ module.exports = component('applicantFormOthers', function(arg, setData) {
 });
 
 
-},{"../../../../utils/component":26,"./style":48}],48:[function(require,module,exports){
+},{"../../../../utils/component":24,"./style":46}],46:[function(require,module,exports){
 
 
 
-},{}],49:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -5598,7 +5500,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":30,"../../../../utils/component":26,"./style":50}],50:[function(require,module,exports){
+},{"../../../../utils":28,"../../../../utils/component":24,"./style":48}],48:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -5661,8 +5563,8 @@ exports.resumeLink = {
 };
 
 
-},{}],51:[function(require,module,exports){
-var checkbox, component, dateInput, dropdown, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, tooltip;
+},{}],49:[function(require,module,exports){
+var checkbox, component, dateInput, defer, dropdown, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, tooltip;
 
 component = require('../../../../utils/component');
 
@@ -5684,47 +5586,43 @@ checkbox = require('../../../../components/checkbox');
 
 multivalue = require('./multivalue');
 
-ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove;
+ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, defer = ref.defer;
 
 module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
-  var E, addTextField, address2, checkbox2, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideMoaf, hideTooltips, labelArrays, onEvent, phone2, setData, setOff, setStyle, show, view;
+  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideMoaf, hideTooltips, labelArrays, onEvent, phone, phone2, setData, setError, setOff, setStyle, show, textArrays, view;
   dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData;
+  setData = arg1.setData, setError = arg1.setError;
   E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
   fieldCollections = [0, 1, 2].map(function() {
     return {};
   });
-  addTextField = function(column, label, extraStyle) {
+  addTextField = function(column, label, isOptional) {
     var f;
-    if (extraStyle == null) {
-      extraStyle = {};
-    }
-    fieldCollections[column][label] = f = E('input', extend(extraStyle, style.input));
-    return onEvent(f, ['input', 'pInput'], (function(f) {
+    fieldCollections[column][label] = f = E('input', style.input);
+    return onEvent(f, 'input', (function(f) {
       return function() {
         return setData(label, f.value());
       };
     })(f));
   };
   fieldCollections[0]['جنسیت'] = f = E(radioSwitch, {
-    getTitle: function(x) {
-      switch (x) {
-        case 0:
-          return 'مرد';
-        case 1:
-          return 'زن';
-      }
-    }
+    items: ['مرد', 'زن']
   });
-  f.update([0, 1]);
+  setData('جنسیت', f.value());
   f.onChange((function(f) {
     return function() {
       return setData('جنسیت', f.value());
     };
   })(f));
   addTextField(0, 'نام پدر');
-  addTextField(0, 'شماره شناسنامه');
+  fieldCollections[0]['شماره شناسنامه'] = f = E(numberInput);
+  setStyle(f, style.input);
+  onEvent(f, ['input', 'pInput'], (function(f) {
+    return function() {
+      return setData('شماره شناسنامه', f.value());
+    };
+  })(f));
   addTextField(0, 'محل تولد');
   addTextField(0, 'محل صدور');
   addTextField(0, 'ملیت');
@@ -5739,60 +5637,31 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     };
   })(f));
   fieldCollections[1]['وضعیت نظام وظیفه'] = f = E(dropdown, {
-    getTitle: function(x) {
-      switch (x) {
-        case 0:
-          return 'اتمام';
-        case 1:
-          return 'مشمول';
-        case 2:
-          return 'معاف';
-      }
-    }
+    items: ['انجام شده', 'در حال انجام', 'معاف']
   });
-  f.update([0, 1, 2]);
-  f.showEmpty(true);
   setStyle(f, style.dropdownPlaceholder);
   setStyle(f.input, style.specialInput);
-  onEvent(f.input, ['input', 'pInput'], (function(f) {
+  f.onChange((function(f) {
     return function() {
       return setData('وضعیت نظام وظیفه', f.value());
     };
   })(f));
   fieldCollections[1]['نوع معافیت'] = f = E(dropdown, {
-    getTitle: function(x) {
-      switch (x) {
-        case 0:
-          return 'پزشکی';
-        case 1:
-          return 'سایر';
-      }
-    }
+    items: ['خرید خدمت', 'معافیت تخصیلی', 'معافیت کفالت', 'معافیت پزشکی']
   });
-  f.update([0, 1]);
-  f.showEmpty(true);
   setStyle(f, style.dropdownPlaceholder);
   setStyle(f.input, style.specialInput);
-  onEvent(f.input, ['input', 'pInput'], (function(f) {
+  f.onChange((function(f) {
     return function() {
       return setData('نوع معافیت', f.value());
     };
   })(f));
   addTextField(1, 'دلیل معافیت');
   fieldCollections[1]['وضعیت تاهل'] = f = E(radioSwitch, {
-    getTitle: function(x) {
-      switch (x) {
-        case 0:
-          return 'مجرد';
-        case 1:
-          return 'متاهل';
-        case 2:
-          return 'سایر';
-      }
-    }
+    items: ['مجرد', 'متاهل', 'سایر'],
+    selectedIndex: 2
   });
-  f.update([0, 1, 2]);
-  f.setSelectedId(2);
+  setData('وضعیت تاهل', f.value());
   f.onChange((function(f) {
     return function() {
       return setData('وضعیت تاهل', f.value());
@@ -5805,16 +5674,14 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       return setData('تعداد فرزندان', f.value());
     };
   })(f));
-  fieldCollections[1]['تعداد افراد تحت تکلف'] = f = E(numberInput);
+  fieldCollections[1]['تعداد افراد تحت تکفل'] = f = E(numberInput);
   setStyle(f, style.numberInput);
   onEvent(f, ['input', 'pInput'], (function(f) {
     return function() {
-      return setData('تعداد افراد تحت تکلف', f.value());
+      return setData('تعداد افراد تحت تکفل', f.value());
     };
   })(f));
-  addTextField(1, 'نام معرف', {
-    placeholder: 'اختیاری'
-  });
+  addTextField(1, 'نام معرف', true);
   fieldCollections[2]['ایمیل'] = f = E(multivalue, E('input', style.input));
   f.onChange((function(f) {
     return function() {
@@ -5829,105 +5696,154 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       return setData('تلفن همراه', f.value());
     };
   })(f));
+  textArrays = [];
   groupArrays = [];
   labelArrays = [];
   fieldArrays = [];
   fieldCollections.forEach(function(fieldCollection) {
-    var fieldArray, groupArray, labelArray;
+    var fieldArray, groupArray, labelArray, textArray;
+    textArrays.push(textArray = []);
     groupArrays.push(groupArray = []);
     labelArrays.push(labelArray = []);
     fieldArrays.push(fieldArray = []);
     return Object.keys(fieldCollection).forEach(function(labelText) {
       var field, group, label;
       group = E(style.group, label = E(style.label, labelText + ':'), field = fieldCollection[labelText], E(style.clearfix));
+      textArray.push(labelText);
       groupArray.push(group);
       labelArray.push(label);
       return fieldArray.push(field);
     });
   });
+  addresses = [
+    E({
+      margin: '20px 0'
+    }, addressLabel = E(style.bigLabel, 'مشخصات محل سکونت دائم:'), address = E('input', extend({
+      placeholder: 'آدرس پستی'
+    }, style.address)), phone = E(numberInput)), E({
+      margin: '20px 0'
+    }, address2Checkbox = E(checkbox, 'محل سکونت فعلی‌ام با محل سکونت دائم فوق متفاوت است.'), hide(address2 = E('input', extend({
+      placeholder: 'آدرس پستی محل سکونت'
+    }, style.address))), hide(phone2 = E(numberInput)))
+  ];
+  setStyle(phone, extend({
+    placeholder: 'تلفن تماس - 0218558555'
+  }, style.phoneNumber));
+  setStyle(phone2, extend({
+    placeholder: 'تلفن تماس محل سکونت'
+  }, style.phoneNumber));
+  textArrays.push(['آدرس', 'تلفن ثابت', 'آدرس 2', 'تلفن ثابت 2']);
+  labelArrays.push([E(), E(), E(), E()]);
+  fieldArrays.push([address, phone, address2, phone2]);
+  address2Checkbox.onChange(function() {
+    if (address2Checkbox.value()) {
+      show([address2, phone2]);
+      setData('آدرس 2', address2.value());
+      setData('تلفن ثابت 2', phone2.value());
+      if (!address2.value()) {
+        setError('آدرس 2', 'تکمیل این فیلد الزامیست.');
+      }
+      if (!phone2.value()) {
+        return setError('تلفن ثابت 2', 'تکمیل این فیلد الزامیست.');
+      }
+    } else {
+      hide([address2, phone2]);
+      setData('آدرس 2', null);
+      setData('تلفن ثابت 2', null);
+      setError('آدرس 2', null);
+      return setError('تلفن ثابت 2', null);
+    }
+  });
   hideTooltips = [];
   fieldArrays.forEach(function(fieldArray, i) {
-    var labelArray;
+    var labelArray, textArray;
+    textArray = textArrays[i];
     labelArray = labelArrays[i];
     return fieldArray.forEach(function(field, j) {
-      var hideTooltip, input, label, timeout;
-      if (i === 1 && j === 6) {
+      var error, hideTooltip, input, label, text;
+      if (i === 0 && j === 0) {
         return;
       }
-      if (field.input) {
-        input = field.input;
-      } else {
-        input = field;
+      if (i === 1 && (j === 3 || j === 6)) {
+        return;
       }
-      hideTooltip = timeout = void 0;
+      hideTooltip = void 0;
+      text = textArray[j];
       label = labelArray[j];
-      onEvent(input, ['focus', 'input', 'pInput'], function() {
-        setStyle([label, input], style.valid);
-        if (timeout && !((field.value() == null) || field.value() === -1 || (typeof (field.value()) === 'string' && !field.value().trim()))) {
-          return clearTimeout(timeout);
-        } else {
-          return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+      input = field.input || field;
+      error = void 0;
+      if (!((i === 1 && (j === 1 || j === 2)) || (i === 3 && (j === 2 || j === 3)))) {
+        setError(text, 'تکمیل این فیلد الزامیست.');
+      }
+      onEvent(input, 'focus', function() {
+        var h;
+        if (error) {
+          h = tooltip(input, error);
+          return hideTooltips.push(hideTooltip = function() {
+            h();
+            return remove(hideTooltips, hideTooltip);
+          });
         }
+      });
+      onEvent(input, ['input', 'pInput'], function() {
+        setStyle([label, input], style.valid);
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
       });
       return onEvent(input, 'blur', function() {
-        if ((field.value() == null) || field.value() === -1 || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          return timeout = setTimeout((function() {
-            var h;
+        return setTimeout((function() {
+          if (typeof hideTooltip === "function") {
+            hideTooltip();
+          }
+          if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
             setStyle([label, input], style.invalid);
-            h = tooltip(input, 'تکمیل این فیلد الزامیست...');
-            return hideTooltips.push(hideTooltip = function() {
-              h();
-              return remove(hideTooltips, hideTooltip);
-            });
-          }), 100);
-        }
+            return setError(text, error = 'تکمیل این فیلد الزامیست.');
+          } else if ((field.valid != null) && !field.valid()) {
+            setStyle([label, input], style.invalid);
+            return setError(text, error = 'مقدار وارد شده قابل قبول نیست.');
+          } else {
+            return setError(text, error = null);
+          }
+        }), 100);
       });
     });
-  });
-  (hideMoaf = function() {
-    hide(groupArrays[1][1]);
-    return hide(groupArrays[1][2]);
-  })();
-  onEvent(fieldCollections[1]['وضعیت نظام وظیفه'].input, ['input', 'pInput'], function() {
-    if (fieldCollections[1]['وضعیت نظام وظیفه'].value() === 2) {
-      show(groupArrays[1][1]);
-      return show(groupArrays[1][2]);
-    } else {
-      return hideMoaf();
-    }
   });
   setOff(function() {
     return hideTooltips.forEach(function(hideTooltip) {
       return hideTooltip();
     });
   });
-  view = E(null, groupArrays.map(function(groupArray) {
-    return E(style.column, groupArray);
-  }), E(style.clearfix), E({
-    margin: '20px 0'
-  }, E(style.bigLabel, 'مشخصات محل سکونت دائم:'), E('input', extend({
-    placeholder: 'آدرس پستی'
-  }, style.address)), E('input', extend({
-    placeholder: 'تلفن تماس - 0218558555'
-  }, style.phoneNumber))), E({
-    margin: '20px 0'
-  }, checkbox2 = E(checkbox, 'محل سکونت فعلی‌ام با محل سکونت دائم فوق متفاوت است.'), hide(address2 = E('input', extend({
-    placeholder: 'آدرس پستی محل سکونت'
-  }, style.address))), hide(phone2 = E('input', extend({
-    placeholder: 'تلفن تماس محل سکونت'
-  }, style.phoneNumber)))));
-  checkbox2.onChange(function() {
-    if (checkbox2.value()) {
-      return show([address2, phone2]);
+  (hideMoaf = function() {
+    hide(groupArrays[1][1]);
+    hide(groupArrays[1][2]);
+    setData('نوع معافیت', null);
+    setData('دلیل معافیت', null);
+    setError('نوع معافیت', null);
+    return setError('دلیل معافیت', null);
+  })();
+  fieldCollections[1]['وضعیت نظام وظیفه'].onChange(function() {
+    if (fieldCollections[1]['وضعیت نظام وظیفه'].value() === 'معاف') {
+      show(groupArrays[1][1]);
+      show(groupArrays[1][2]);
+      setData('نوع معافیت', fieldCollections[1]['نوع معافیت'].value());
+      setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
+      if (!fieldCollections[1]['نوع معافیت'].value()) {
+        setError('نوع معافیت', 'تکمیل این فیلد الزامیست.');
+      }
+      if (!fieldCollections[1]['دلیل معافیت'].value()) {
+        return setError('دلیل معافیت', 'تکمیل این فیلد الزامیست.');
+      }
     } else {
-      return hide([address2, phone2]);
+      return hideMoaf();
     }
   });
+  view = E(null, groupArrays.map(function(groupArray) {
+    return E(style.column, groupArray);
+  }), E(style.clearfix), addresses);
   return view;
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":9,"../../../../components/radioSwitch":13,"../../../../components/restrictedInput/number":17,"../../../../components/restrictedInput/phoneNumber":18,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./multivalue":52,"./style":54}],52:[function(require,module,exports){
+},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/radioSwitch":11,"../../../../components/restrictedInput/number":15,"../../../../components/restrictedInput/phoneNumber":16,"../../../../components/tooltip":18,"../../../../utils":28,"../../../../utils/component":24,"./multivalue":50,"./style":52}],50:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -5937,15 +5853,14 @@ style = require('./style');
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('personalInfoMultivalue', function(arg, input) {
-  var E, add, addPanel, append, changeListener, data, destroy, dom, events, isAdding, items, itemsPlaceholder, onEvent, returnObject, setStyle, setViewHeight, submit, view;
+  var E, add, addPanel, append, changeListeners, data, destroy, dom, events, items, itemsPlaceholder, onEvent, returnObject, setStyle, setViewHeight, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
-  changeListener = void 0;
-  isAdding = false;
+  changeListeners = [];
   data = [];
   items = [];
-  view = E(style.view, itemsPlaceholder = E(), E(style.addIconDiv, add = E(style.add)), addPanel = E(style.addPanel, input, submit = E(style.submit)));
+  view = E(style.view, itemsPlaceholder = E(), addPanel = E(style.addPanel, input, add = E(style.add)));
   setStyle(input, style.input);
   setViewHeight = function() {
     return setStyle(view, {
@@ -5953,40 +5868,32 @@ module.exports = component('personalInfoMultivalue', function(arg, input) {
     });
   };
   onEvent(add, 'click', function() {
-    isAdding = true;
-    setStyle(add, style.addHidden);
-    setStyle(addPanel, style.addPanelActive);
-    return setViewHeight();
-  });
-  onEvent(submit, 'click', function() {
     var newItem, removeItem;
-    isAdding = false;
-    setStyle(add, style.add);
-    setStyle(addPanel, style.addPanel);
-    newItem = E(style.item, E(extend({
+    append(itemsPlaceholder, newItem = E(style.item, E(extend({
       englishText: input.value()
-    }, style.itemText)), removeItem = E(style.remove));
-    append(itemsPlaceholder, newItem);
+    }, style.itemText)), removeItem = E(style.remove)));
     data.push(input.value());
     items.push(newItem);
     setViewHeight();
     setStyle(input, {
       value: ''
     });
-    if (typeof changeListener === "function") {
-      changeListener();
-    }
+    changeListeners.forEach(function(x) {
+      return x();
+    });
     return onEvent(removeItem, 'click', function() {
       destroy(newItem);
       data.splice(items.indexOf(newItem), 1);
       remove(items, newItem);
       setViewHeight();
-      return typeof changeListener === "function" ? changeListener() : void 0;
+      return changeListeners.forEach(function(x) {
+        return x();
+      });
     });
   });
   returnObject({
     onChange: function(listener) {
-      return changeListener = listener;
+      return changeListeners.push(listener);
     },
     value: function() {
       return data;
@@ -5996,15 +5903,10 @@ module.exports = component('personalInfoMultivalue', function(arg, input) {
 });
 
 
-},{"../../../../../utils":30,"../../../../../utils/component":26,"./style":53}],53:[function(require,module,exports){
+},{"../../../../../utils":28,"../../../../../utils/component":24,"./style":51}],51:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
-
-exports.visible = {
-  opacity: 1,
-  visibility: 'visible'
-};
 
 exports.view = {
   position: 'relative',
@@ -6027,23 +5929,6 @@ exports.addIconDiv = {
   float: 'left'
 };
 
-exports.addPanel = {
-  position: 'absolute',
-  width: '57%',
-  left: 0,
-  bottom: 0,
-  transition: '0.2s',
-  height: 0,
-  opacity: 0,
-  visibility: 'hidden'
-};
-
-exports.addPanelActive = {
-  height: 38,
-  opacity: 1,
-  visibility: 'visible'
-};
-
 exports.input = {
   position: 'absolute',
   width: '80%',
@@ -6059,20 +5944,6 @@ icon = {
 
 exports.add = extend({}, icon, {
   "class": 'fa fa-plus-circle',
-  color: '#449e73',
-  flaot: 'left',
-  transition: '0.2s',
-  opacity: 1,
-  visibility: 'visible'
-});
-
-exports.addHidden = {
-  opacity: 0,
-  visibility: 'hidden'
-};
-
-exports.submit = extend({}, icon, {
-  "class": 'fa fa-check-circle',
   color: '#449e73',
   marginRight: 10,
   position: 'absolute',
@@ -6090,7 +5961,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":30}],54:[function(require,module,exports){
+},{"../../../../../utils":28}],52:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -6181,7 +6052,7 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":30}],55:[function(require,module,exports){
+},{"../../../../utils":28}],53:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -6196,9 +6067,9 @@ module.exports = component('applicantFormReputation', function(arg, setData) {
 });
 
 
-},{"../../../../utils/component":26,"./style":56}],56:[function(require,module,exports){
-arguments[4][48][0].apply(exports,arguments)
-},{"dup":48}],57:[function(require,module,exports){
+},{"../../../../utils/component":24,"./style":54}],54:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"dup":46}],55:[function(require,module,exports){
 exports.header = {
   color: '#449e73',
   fontSize: 18,
@@ -6223,7 +6094,7 @@ exports.submit = {
 };
 
 
-},{}],58:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 var component, dropdown, numberInput, remove, style;
 
 component = require('../../../../utils/component');
@@ -6273,11 +6144,7 @@ module.exports = component('applicantFormTalents', function(arg, setData) {
     };
     onEvent(add, 'click', function() {
       rows.push([i0, i1, i2].map(function(i) {
-        if (~i.value()) {
-          return i.value();
-        } else {
-          return '';
-        }
+        return i.value();
       }));
       update();
       return setStyle([i0, i1.input, i2.input], {
@@ -6314,11 +6181,7 @@ module.exports = component('applicantFormTalents', function(arg, setData) {
     };
     onEvent(add, 'click', function() {
       rows.push([i0, i1, i2].map(function(i) {
-        if (~i.value()) {
-          return i.value();
-        } else {
-          return '';
-        }
+        return i.value();
       }));
       update();
       return setStyle([i0, i1, i2], {
@@ -6327,11 +6190,11 @@ module.exports = component('applicantFormTalents', function(arg, setData) {
     });
     return view;
   })();
-  return E(null, table0, table1, E(style.column, E(style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشه گذرانده شده:'), E('textarea', style.textarea)), E(style.column, E(style.label, 'آثار علمی و عضویت در انجمن‌ها:'), E('textarea', style.textarea)), E(style.clearfix));
+  return E(null, table0, table1, E(style.column, E(style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده:'), E('textarea', style.textarea)), E(style.column, E(style.label, 'آثار علمی و عضویت در انجمن‌ها:'), E('textarea', style.textarea)), E(style.clearfix));
 });
 
 
-},{"../../../../components/dropdown":9,"../../../../components/restrictedInput/number":17,"../../../../utils":30,"../../../../utils/component":26,"./style":59}],59:[function(require,module,exports){
+},{"../../../../components/dropdown":7,"../../../../components/restrictedInput/number":15,"../../../../utils":28,"../../../../utils/component":24,"./style":57}],57:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -6411,7 +6274,7 @@ exports.clearfix = {
 };
 
 
-},{"../../../../utils":30}],60:[function(require,module,exports){
+},{"../../../../utils":28}],58:[function(require,module,exports){
 var component, extend, form, style, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -6481,7 +6344,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./form":46,"./style":61,"./tests":62}],61:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"./form":44,"./style":59,"./tests":60}],59:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -6594,7 +6457,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":30}],62:[function(require,module,exports){
+},{"../../utils":28}],60:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -6607,7 +6470,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":26}],63:[function(require,module,exports){
+},{"../../../utils/component":24}],61:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -6756,7 +6619,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./jobs":64,"./style":65}],64:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"./jobs":62,"./style":63}],62:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -6838,7 +6701,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],65:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -7070,7 +6933,7 @@ exports.footerLink = {
 };
 
 
-},{}],66:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -7180,7 +7043,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":25,"../../utils/component":26,"../../utils/dom":28,"../tableView":71}],67:[function(require,module,exports){
+},{"../../singletons/modal":23,"../../utils/component":24,"../../utils/dom":26,"../tableView":69}],65:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -7225,7 +7088,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":26,"./applicantView":60,"./apply":63,"./hrView":66,"./login":68,"./managerView":70}],68:[function(require,module,exports){
+},{"../utils/component":24,"./applicantView":58,"./apply":61,"./hrView":64,"./login":66,"./managerView":68}],66:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -7296,7 +7159,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":17,"../../utils":30,"../../utils/component":26,"./style":69}],69:[function(require,module,exports){
+},{"../../components/restrictedInput/number":15,"../../utils":28,"../../utils/component":24,"./style":67}],67:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -7393,7 +7256,7 @@ exports.invalid = {
 };
 
 
-},{}],70:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -7401,7 +7264,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":71}],71:[function(require,module,exports){
+},{"../tableView":69}],69:[function(require,module,exports){
 var component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
 
 component = require('../../utils/component');
@@ -7527,7 +7390,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"../../utils/logic":32,"./search":74,"./sidebar":76,"./style":78,"./table":80}],72:[function(require,module,exports){
+},{"../../utils":28,"../../utils/component":24,"../../utils/logic":30,"./search":72,"./sidebar":74,"./style":76,"./table":78}],70:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -7733,7 +7596,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":5,"../../../../components/dropdown":9,"../../../../utils":30,"../../../../utils/component":26,"./style":73}],73:[function(require,module,exports){
+},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../utils":28,"../../../../utils/component":24,"./style":71}],71:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -7776,7 +7639,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":30}],74:[function(require,module,exports){
+},{"../../../../utils":28}],72:[function(require,module,exports){
 var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -7884,7 +7747,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":30,"../../../utils/component":26,"../../../utils/logic":32,"./criterion":72,"./style":75}],75:[function(require,module,exports){
+},{"../../../utils":28,"../../../utils/component":24,"../../../utils/logic":30,"./criterion":70,"./style":73}],73:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -8005,7 +7868,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":30}],76:[function(require,module,exports){
+},{"../../../utils":28}],74:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -8077,7 +7940,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":26,"./style":77}],77:[function(require,module,exports){
+},{"../../../utils/component":24,"./style":75}],75:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -8163,7 +8026,7 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":30}],78:[function(require,module,exports){
+},{"../../../utils":28}],76:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -8182,7 +8045,7 @@ exports.iconTd = {};
 exports.icon = {};
 
 
-},{}],79:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -8404,7 +8267,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":30,"./style":81}],80:[function(require,module,exports){
+},{"../../../utils":28,"./style":79}],78:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -8528,7 +8391,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":30,"../../../utils/component":26,"./functions":79,"./style":81}],81:[function(require,module,exports){
+},{"../../../utils":28,"../../../utils/component":24,"./functions":77,"./style":79}],79:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -8619,7 +8482,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":30}],82:[function(require,module,exports){
+},{"../../../utils":28}],80:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -8653,4 +8516,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./alertMessages":2,"./page":22,"./q":23,"./utils/dom":28,"./utils/service":36}]},{},[82]);
+},{"./alertMessages":2,"./page":20,"./q":21,"./utils/dom":26,"./utils/service":34}]},{},[80]);

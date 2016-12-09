@@ -1,49 +1,35 @@
 component = require '../../utils/component'
 style = require './style'
-{extend} = require '../../utils'
 
-module.exports = component 'radioSwitch', ({dom, events, returnObject}, {getTitle, getId}) ->
+module.exports = component 'radioSwitch', ({dom, events, returnObject}, {items, getTitle, selectedIndex}) ->
   {E, append, empty, setStyle} = dom
   {onEvent} = events
 
   getTitle ?= (x) -> x
-  getId ?= (x) -> x
+  selectedIndex ?= 0
 
-  view = E()
+  options = undefined
+  changeListeners = []
+  selectedItem = items[selectedIndex]
 
-  entities = options = changeListener = undefined
-  selectedId = -1
-  idsToOptions = {}
+  view = E null,
+    options = items.map (item, i) ->
+      option = if i is 0
+        E style.rightOption, getTitle item
+      else if i is items.length - 1
+        E style.leftOption, getTitle item
+      else
+        E style.option, getTitle item
+      if i is selectedIndex
+        setStyle option, style.optionActive
+      onEvent option, 'click', ->
+        selectedItem = item
+        setStyle options, style.option
+        setStyle option, style.optionActive
+        changeListeners.forEach (x) -> x()
+      option
 
   returnObject
-    update: (_entities) ->
-      entities = _entities
-      idsToOptions = {}
-      empty view
-      append view, options = entities.map (entity, i) ->
-        option = if i is 0
-          E extend({}, style.rightOption, style.optionActive), getTitle entity
-        else if i is entities.length - 1
-          E style.leftOption, getTitle entity
-        else
-          E style.option, getTitle entity
-        onEvent option, 'click', ->
-          selectedId = String getId entity
-          setStyle options, style.option
-          setStyle option, style.optionActive
-          changeListener?()
-        idsToOptions[String getId entity] = option
-        option
-    clear: ->
-      setStyle options, style.option
-    setSelectedId: (id) ->
-      selectedId = String id      
-      setStyle options, style.option
-      setStyle idsToOptions[selectedId], style.optionActive
-    value: ->
-      if selectedId is -1
-        return -1
-      entities.filter((entity) -> selectedId is String getId entity)[0]
-    onChange: (listener) ->
-      changeListener = listener
+    value: -> selectedItem
+    onChange: (listener) -> changeListeners.push listener
   view

@@ -1,14 +1,13 @@
 component = require '../../utils/component'
 style = require './style'
-{extend} = require '../../utils'
+{extend, defer} = require '../../utils'
 {body} = require '../../utils/dom'
 
 module.exports = (element, text) ->
   destroyFn = tooltip = undefined
   do component 'tooltip', ({dom}) ->
     {E, append, destroy, setStyle} = dom
-    setTimeout -> setTimeout -> setTimeout -> setTimeout -> setTimeout ->
-
+    defer(5) ->
       element = element.fn.element
       {offsetWidth: width, offsetHeight: height} = element
       top = left = 0
@@ -18,11 +17,10 @@ module.exports = (element, text) ->
         element = element.offsetParent
         break unless element
 
-      append E(body), tooltip = E extend({top: top + height + 7, left: left + (width - 150) / 2}, style.tooltip),
+      append E(body), tooltip = E extend({top: top - height - 7, left: left + (width - 150) / 2}, style.tooltip),
         E style.arrow
         dom.text text
-      setTimeout ->
-        setStyle tooltip, style.tooltipActive
+      setTimeout (-> setStyle tooltip, style.tooltipActive), 10
     destroyFn = ->
       setStyle tooltip, style.tooltip
       setTimeout (-> destroy tooltip), 500

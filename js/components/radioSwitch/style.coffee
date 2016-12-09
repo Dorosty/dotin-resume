@@ -7,8 +7,9 @@ exports.option =
   cursor: 'pointer'
   padding: '0 10px'
   marginLeft: -1
+  fontSize: 12
   height: 30
-  lineHeight: 28
+  lineHeight: 30
   transition: '0.2s'
   backgroundColor: 'white'
 

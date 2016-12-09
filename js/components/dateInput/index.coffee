@@ -2,7 +2,7 @@ component = require '../../utils/component'
 style = require './style'
 {toEnglish} = require '../../utils'
 
-module.exports = component 'restrictedInput', ({dom, events, returnObject}) ->  
+module.exports = component 'dateInput', ({dom, events, returnObject}) ->  
   {E, setStyle} = dom
   {onEvent} = events
 
@@ -31,5 +31,6 @@ module.exports = component 'restrictedInput', ({dom, events, returnObject}) ->
   returnObject
     input: input
     value: -> input.value()
+    valid: -> /^13[0-9][0-9]\/([1-9]|1[0-2])\/([1-9]|[1-2][0-9]|3[0-1])$/.test toEnglish input.value()
   
   view

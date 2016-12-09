@@ -22,7 +22,7 @@ exports.arrow =
   height: 0
   borderStyle: 'solid'
   borderColor: 'transparent'
-  top: -7
+  bottom: -7
   right: (150 - 7) / 2
-  borderWidth: '0 7px 7px'
-  borderBottomColor: '#c00'
+  borderWidth: '7px 7px 0'
+  borderTopColor: '#c00'

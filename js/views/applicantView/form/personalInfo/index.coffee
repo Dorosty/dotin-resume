@@ -8,31 +8,31 @@ numberInput = require '../../../../components/restrictedInput/number'
 phoneNumberInput = require '../../../../components/restrictedInput/phoneNumber'
 checkbox = require '../../../../components/checkbox'
 multivalue = require './multivalue'
-{extend, remove} = require '../../../../utils'
+{extend, remove, defer} = require '../../../../utils'
 
-module.exports = component 'applicantFormPersonalInfo', ({dom, events, setOff}, {setData}) ->
+module.exports = component 'applicantFormPersonalInfo', ({dom, events, setOff}, {setData, setError}) ->
   {E, setStyle, show, hide} = dom
   {onEvent} = events
 
   fieldCollections = [0 .. 2].map -> {}
 
-  addTextField = (column, label, extraStyle = {}) ->
-    fieldCollections[column][label] = f = E 'input', extend extraStyle, style.input
-    onEvent f, ['input', 'pInput'], do (f) -> ->
+  addTextField = (column, label, isOptional) ->
+    fieldCollections[column][label] = f = E 'input', style.input
+    onEvent f, 'input', do (f) -> ->
       setData label, f.value()
 
-  fieldCollections[0]['جنسیت'] = f = E radioSwitch, getTitle: (x) ->
-    switch x
-      when 0
-        'مرد'
-      when 1
-        'زن'
-  f.update [0 .. 1]
+  fieldCollections[0]['جنسیت'] = f = E radioSwitch, items: ['مرد', 'زن']
+  setData 'جنسیت', f.value()
   f.onChange do (f) -> ->
     setData 'جنسیت', f.value()
 
   addTextField 0, 'نام پدر'
-  addTextField 0, 'شماره شناسنامه'
+
+  fieldCollections[0]['شماره شناسنامه'] = f = E numberInput
+  setStyle f, style.input
+  onEvent f, ['input', 'pInput'], do (f) -> ->
+    setData 'شماره شناسنامه', f.value()
+
   addTextField 0, 'محل تولد'
   addTextField 0, 'محل صدور'
   addTextField 0, 'ملیت'
@@ -45,46 +45,22 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, setOff}, 
   onEvent f, ['input', 'pInput'], do (f) -> ->
     setData 'تاریخ تولد', f.value()
 
-  fieldCollections[1]['وضعیت نظام وظیفه'] = f = E dropdown, getTitle: (x) ->
-    switch x
-      when 0
-        'اتمام'
-      when 1
-        'مشمول'
-      when 2
-        'معاف'
-  f.update [0 .. 2]
-  f.showEmpty true
+  fieldCollections[1]['وضعیت نظام وظیفه'] = f = E dropdown, items: ['انجام شده', 'در حال انجام', 'معاف']
   setStyle f, style.dropdownPlaceholder
   setStyle f.input, style.specialInput
-  onEvent f.input, ['input', 'pInput'], do (f) -> ->
+  f.onChange do (f) -> ->
     setData 'وضعیت نظام وظیفه', f.value()
 
-  fieldCollections[1]['نوع معافیت'] = f = E dropdown, getTitle: (x) ->
-    switch x
-      when 0
-        'پزشکی'
-      when 1
-        'سایر'
-  f.update [0 .. 1]
-  f.showEmpty true
+  fieldCollections[1]['نوع معافیت'] = f = E dropdown, items: ['خرید خدمت', 'معافیت تخصیلی', 'معافیت کفالت', 'معافیت پزشکی']
   setStyle f, style.dropdownPlaceholder
   setStyle f.input, style.specialInput
-  onEvent f.input, ['input', 'pInput'], do (f) -> ->
+  f.onChange do (f) -> ->
     setData 'نوع معافیت', f.value()
 
   addTextField 1, 'دلیل معافیت'
 
-  fieldCollections[1]['وضعیت تاهل'] = f = E radioSwitch, getTitle: (x) ->
-    switch x
-      when 0
-        'مجرد'
-      when 1
-        'متاهل'
-      when 2
-        'سایر'
-  f.update [0 .. 2]
-  f.setSelectedId 2
+  fieldCollections[1]['وضعیت تاهل'] = f = E radioSwitch, items: ['مجرد', 'متاهل', 'سایر'], selectedIndex: 2
+  setData 'وضعیت تاهل', f.value()
   f.onChange do (f) -> ->
     setData 'وضعیت تاهل', f.value()
 
@@ -93,12 +69,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, setOff}, 
   onEvent f, ['input', 'pInput'], do (f) -> ->
     setData 'تعداد فرزندان', f.value()
 
-  fieldCollections[1]['تعداد افراد تحت تکلف'] = f = E numberInput
+  fieldCollections[1]['تعداد افراد تحت تکفل'] = f = E numberInput
   setStyle f, style.numberInput
   onEvent f, ['input', 'pInput'], do (f) -> ->
-    setData 'تعداد افراد تحت تکلف', f.value()
+    setData 'تعداد افراد تحت تکفل', f.value()
 
-  addTextField 1, 'نام معرف', placeholder: 'اختیاری'
+  addTextField 1, 'نام معرف', true
 
   fieldCollections[2]['ایمیل'] = f = E multivalue, E 'input', style.input
   f.onChange do (f) -> ->
@@ -110,10 +86,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, setOff}, 
   f.onChange do (f) -> ->
     setData 'تلفن همراه', f.value()
 
+  textArrays = []
   groupArrays = []
   labelArrays = []
   fieldArrays = []
   fieldCollections.forEach (fieldCollection) ->
+    textArrays.push textArray = []
     groupArrays.push groupArray = []
     labelArrays.push labelArray = []
     fieldArrays.push fieldArray = []
@@ -122,69 +100,110 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, setOff}, 
         label = E style.label, labelText + ':'
         field = fieldCollection[labelText]
         E style.clearfix
+      textArray.push labelText
       groupArray.push group
       labelArray.push label
       fieldArray.push field
 
+  addresses = [
+    E margin: '20px 0',
+      addressLabel = E style.bigLabel, 'مشخصات محل سکونت دائم:'
+      address = E 'input', extend {placeholder: 'آدرس پستی'}, style.address
+      phone = E numberInput
+    E margin: '20px 0',
+      address2Checkbox = E checkbox, 'محل سکونت فعلی‌ام با محل سکونت دائم فوق متفاوت است.'
+      hide address2 = E 'input', extend {placeholder: 'آدرس پستی محل سکونت'}, style.address
+      hide phone2 = E numberInput
+  ]
+
+  setStyle phone, extend {placeholder: 'تلفن تماس - 0218558555'}, style.phoneNumber
+  setStyle phone2, extend {placeholder: 'تلفن تماس محل سکونت'}, style.phoneNumber
+
+  textArrays.push ['آدرس', 'تلفن ثابت', 'آدرس 2', 'تلفن ثابت 2']
+  labelArrays.push [E(), E(), E(), E()]
+  fieldArrays.push [address, phone, address2, phone2]
+
+  address2Checkbox.onChange ->
+    if address2Checkbox.value()
+      show [address2, phone2]
+      setData 'آدرس 2', address2.value()
+      setData 'تلفن ثابت 2', phone2.value()
+      unless address2.value()
+        setError 'آدرس 2', 'تکمیل این فیلد الزامیست.'
+      unless phone2.value()
+        setError 'تلفن ثابت 2', 'تکمیل این فیلد الزامیست.'
+    else
+      hide [address2, phone2]
+      setData 'آدرس 2', null
+      setData 'تلفن ثابت 2', null
+      setError 'آدرس 2', null
+      setError 'تلفن ثابت 2', null
+
   hideTooltips = []
   fieldArrays.forEach (fieldArray, i) ->
+    textArray = textArrays[i]
     labelArray = labelArrays[i]
     fieldArray.forEach (field, j) ->
-      if i is 1 and j is 6
+      if i is 0 && j is 0
         return
-      if field.input
-        input = field.input
-      else
-        input = field
-      hideTooltip = timeout = undefined
+      if i is 1 && j in [3, 6]
+        return
+      hideTooltip = undefined
+      text = textArray[j]
       label = labelArray[j]
-      onEvent input, ['focus', 'input', 'pInput'], ->
+      input = field.input || field
+      error = undefined
+      unless (i is 1 && j in [1, 2]) || (i is 3 && j in [2, 3])
+        setError text, 'تکمیل این فیلد الزامیست.'
+      onEvent input, 'focus', ->
+        if error
+          h = tooltip input, error
+          hideTooltips.push hideTooltip = ->
+            h()
+            remove hideTooltips, hideTooltip
+      onEvent input, ['input', 'pInput'], ->
         setStyle [label, input], style.valid
-        if timeout and !(!field.value()? || field.value() is -1 || (typeof(field.value()) is 'string' && !field.value().trim()))
-          clearTimeout timeout
-        else
-          hideTooltip?()
+        hideTooltip?()
       onEvent input, 'blur', ->
-        if !field.value()? || field.value() is -1 || (typeof(field.value()) is 'string' && !field.value().trim())
-          timeout = setTimeout (->
+        setTimeout (->
+          hideTooltip?()
+          if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
             setStyle [label, input], style.invalid
-            h = tooltip input, 'تکمیل این فیلد الزامیست...'
-            hideTooltips.push hideTooltip = ->
-              h()
-              remove hideTooltips, hideTooltip
-          ), 100
+            setError text, error = 'تکمیل این فیلد الزامیست.'
+          else if field.valid? && !field.valid()
+            setStyle [label, input], style.invalid
+            setError text, error = 'مقدار وارد شده قابل قبول نیست.'
+          else
+            setError text, error = null
+        ), 100
+  setOff ->
+    hideTooltips.forEach (hideTooltip) -> hideTooltip()
 
   do hideMoaf = ->
     hide groupArrays[1][1]
     hide groupArrays[1][2]
-  onEvent fieldCollections[1]['وضعیت نظام وظیفه'].input, ['input', 'pInput'], ->
-    if fieldCollections[1]['وضعیت نظام وظیفه'].value() is 2
+    setData 'نوع معافیت', null
+    setData 'دلیل معافیت', null
+    setError 'نوع معافیت', null
+    setError 'دلیل معافیت', null
+  fieldCollections[1]['وضعیت نظام وظیفه'].onChange ->
+    if fieldCollections[1]['وضعیت نظام وظیفه'].value() is 'معاف'
       show groupArrays[1][1]
       show groupArrays[1][2]
+      setData 'نوع معافیت', fieldCollections[1]['نوع معافیت'].value()
+      setData 'دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value()
+      unless fieldCollections[1]['نوع معافیت'].value()
+        setError 'نوع معافیت', 'تکمیل این فیلد الزامیست.'
+      unless fieldCollections[1]['دلیل معافیت'].value()
+        setError 'دلیل معافیت', 'تکمیل این فیلد الزامیست.'
     else
       hideMoaf()
-
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
 
   view = E null,
     groupArrays.map (groupArray) ->
       E style.column,
         groupArray
     E style.clearfix
-    E margin: '20px 0',
-      E style.bigLabel, 'مشخصات محل سکونت دائم:'
-      E 'input', extend {placeholder: 'آدرس پستی'}, style.address
-      E 'input', extend {placeholder: 'تلفن تماس - 0218558555'}, style.phoneNumber
-    E margin: '20px 0',
-      checkbox2 = E checkbox, 'محل سکونت فعلی‌ام با محل سکونت دائم فوق متفاوت است.'
-      hide address2 = E 'input', extend {placeholder: 'آدرس پستی محل سکونت'}, style.address
-      hide phone2 = E 'input', extend {placeholder: 'تلفن تماس محل سکونت'}, style.phoneNumber
-
-  checkbox2.onChange ->
-    if checkbox2.value()
-      show [address2, phone2]
-    else
-      hide [address2, phone2]
+    addresses
 
   view

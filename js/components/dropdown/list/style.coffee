@@ -18,8 +18,10 @@ exports.visibleList =
   visibility: 'visible'
 
 exports.item =
+  fontSize: 12
   height: 30
-  padding: 5
+  lineHeight: 30
+  padding: '0 5px'
   backgroundColor: 'transparent'
 
 exports.highlightedItem =

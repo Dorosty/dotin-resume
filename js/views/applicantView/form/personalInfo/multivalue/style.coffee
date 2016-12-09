@@ -1,9 +1,5 @@
 {extend} = require '../../../../../utils'
 
-exports.visible =
-  opacity: 1
-  visibility: 'visible'
-
 exports.view =
   position: 'relative'
   transition: '0.2s'
@@ -22,21 +18,6 @@ exports.addIconDiv =
   width: '57%'
   float: 'left'
 
-exports.addPanel =
-  position: 'absolute'
-  width: '57%'
-  left: 0
-  bottom: 0
-  transition: '0.2s'
-  height: 0
-  opacity: 0
-  visibility: 'hidden'
-
-exports.addPanelActive =
-  height: 38
-  opacity: 1
-  visibility: 'visible'
-
 exports.input =
   position: 'absolute'
   width: '80%'
@@ -50,18 +31,6 @@ icon =
 
 exports.add = extend {}, icon,
   class: 'fa fa-plus-circle'
-  color: '#449e73'
-  flaot: 'left'
-  transition: '0.2s'
-  opacity: 1
-  visibility: 'visible'
-
-exports.addHidden =
-  opacity: 0
-  visibility: 'hidden'
-
-exports.submit = extend {}, icon,
-  class: 'fa fa-check-circle'
   color: '#449e73'
   marginRight: 10
   position: 'absolute'

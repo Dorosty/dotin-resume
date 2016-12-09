@@ -81,7 +81,7 @@ module.exports = component 'applicantFormEducation', ({dom, events}, setData) ->
             removeRow
       append body, lastLine
     onEvent add, 'click', ->
-      rows.push [i0, i1, i2, i3, i4, i5, i6].map (i) -> if ~i.value() then i.value() else ''
+      rows.push [i0, i1, i2, i3, i4, i5, i6].map (i) -> i.value()
       update()
       setStyle [i0.input, i1, i2, i3, i4, i5, i6], value: ''
 

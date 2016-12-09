@@ -1,18 +1,19 @@
 component = require '../../../utils/component'
 style = require './style'
 
-module.exports = component 'dropdownList', ({dom, events, returnObject}, {functions}) ->
+module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSelect, getTitle}) ->
   {E, empty, append, setStyle} = dom
   {onEvent} = events
 
   list = E style.list
 
-  entities = items = highlightIndex = selectedIndex = undefined
+  entities = items = highlightIndex = value = undefined
   highlightCurrentItem = ->
     unless items?.length
       return
     setStyle items, style.item
-    setStyle items[highlightIndex], style.highlightedItem
+    if highlightIndex?
+      setStyle items[highlightIndex], style.highlightedItem
 
   show = ->
     setStyle list, style.visibleList
@@ -20,19 +21,21 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {functi
     setStyle list, style.list
 
   select = ->
-    selectedIndex = highlightIndex
-    functions.select entities[selectedIndex]
+    value = entities[highlightIndex]
+    onSelect value
     hide()
 
   returnObject
-    set: (_entities) ->
-      highlightIndex = selectedIndex = 0
+    value: -> value
+    update: (_entities, reset) ->
+      if reset
+        value = null
+      highlightIndex = 0
       empty list
-      entities = _entities.sort (a, b) ->
-        functions.sortCompare functions.getTitle(a), functions.getTitle(b)
+      entities = _entities
       append list, items = entities.map (entity, i) ->
-        item = E englishText: functions.getTitle entity
-        onEvent item, 'mouseover', ->
+        item = E englishText: getTitle entity
+        onEvent item, 'mousemove', ->
           highlightIndex = i
           highlightCurrentItem()
         onEvent item, 'mouseout', ->
@@ -40,9 +43,6 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {functi
         onEvent item, 'click', select
         item
       highlightCurrentItem()
-    value: ->
-      if entities? and selectedIndex?
-        entities[selectedIndex]
     goUp: ->
       highlightIndex--
       if highlightIndex < 0

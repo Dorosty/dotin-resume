@@ -1,3 +1,12 @@
+exports.defer = (times) -> (f) ->
+  do x = ->
+    setTimeout ->
+      times--
+      if times
+        f()
+      else
+        x()
+
 exports.compare = (a, b) ->
   if a > b
     1
