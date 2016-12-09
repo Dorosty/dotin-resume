@@ -14,10 +14,6 @@ exports.item =
 
 exports.itemText = {}
 
-exports.addIconDiv =
-  width: '57%'
-  float: 'left'
-
 exports.input =
   position: 'absolute'
   width: '80%'
@@ -32,7 +28,6 @@ icon =
 exports.add = extend {}, icon,
   class: 'fa fa-plus-circle'
   color: '#449e73'
-  marginRight: 10
   position: 'absolute'
   top: null
   bottom: 5
