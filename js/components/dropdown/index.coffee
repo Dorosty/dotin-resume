@@ -3,7 +3,7 @@ style = require './style'
 list = require './list'
 {toPersian, textIsInSearch, defer} = require '../../utils'
 
-module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, getTitle, english, items}) ->
+module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex}) ->
   {E, setStyle} = dom
   {onEvent, onEnter} = events
 
@@ -15,7 +15,6 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     else
       toPersian getTitle x
 
-  selectedId = null
   changeListeners = []
   filteredItems = []
 
@@ -29,7 +28,6 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     items.filter (item) -> textIsInSearch getTitle(item), input.value()
 
   onSelect = (item) ->
-    selectedId = getId item
     setInputValue getTitle item
     itemsList.hide()
     itemsList.update getFilteredItems()
@@ -39,6 +37,13 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     input = E 'input', style.input
     arrow = E 'i', style.arrow
     itemsList = E list, {getTitle, onSelect}
+
+  clear = ->
+    setInputValue items[selectedIndex]
+    itemsList.update getFilteredItems()
+    itemsList.set items[selectedIndex]
+  if selectedIndex
+    clear()
 
   onEvent [input, arrow], 'mouseover', ->
     setStyle arrow, style.arrowHover
@@ -87,5 +92,11 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     onChange: (listener) -> changeListeners.push listener
     value: itemsList.value
     input: input
+    clear: ->
+      if selectedIndex
+        clear()
+      else
+        setStyle input, value: ''
+        itemsList.update getFilteredItems(), true
 
   dropdown

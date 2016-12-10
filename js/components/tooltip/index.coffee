@@ -9,7 +9,7 @@ module.exports = (element, text) ->
     {E, append, destroy, setStyle} = dom
     defer(5) ->
       element = element.fn.element
-      {offsetWidth: width, offsetHeight: height} = element
+      {offsetWidth: width} = element
       top = left = 0
       loop
         top += element.offsetTop || 0
@@ -17,7 +17,7 @@ module.exports = (element, text) ->
         element = element.offsetParent
         break unless element
 
-      append E(body), tooltip = E extend({top: top - height - 7, left: left + (width - 150) / 2}, style.tooltip),
+      append E(body), tooltip = E extend({top: top - 37, left: left + (width - 150) / 2}, style.tooltip),
         E style.arrow
         dom.text text
       setTimeout (-> setStyle tooltip, style.tooltipActive), 10

@@ -12,12 +12,12 @@ multivalue = require './multivalue'
 {extend, remove, defer} = require '../../../../utils'
 
 module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, setOff}, {setData, setError}) ->
-  {E, setStyle, show, hide} = dom
+  {E, text, setStyle, show, hide} = dom
   {onEvent} = events
 
   fieldCollections = [0 .. 2].map -> {}
 
-  addTextField = (column, label, isOptional) ->
+  addTextField = (column, label) ->
     fieldCollections[column][label] = f = E 'input', style.input
     onEvent f, 'input', do (f) -> ->
       setData label, f.value()
@@ -75,13 +75,14 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
   onEvent f, ['input', 'pInput'], do (f) -> ->
     setData 'تعداد افراد تحت تکفل', f.value()
 
-  addTextField 1, 'نام معرف', true
+  addTextField 1, 'نام معرف'
 
   f = E emailInput
   setStyle f, style.input
   fieldCollections[2]['ایمیل'] = f = E multivalue, f
   state.user.on once: true, (user) ->
     f.add user.email
+    setData 'ایمیل', [user.email]
   do (f) -> setTimeout ->
     label = labelArrays[2][0]
     input = f.input
@@ -97,6 +98,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       error = null
       hideTooltip?()
     f.onChange (adding) ->
+      if !adding && f.value().length is 1
+        setData 'ایمیل', null
+        setError 'ایمیل', 'تکمیل این فیلد الزامیست.'
+      else
+        setData 'ایمیل', f.value()
+        setError 'ایمیل', null
       unless adding
         return
       if !input.value()
@@ -107,11 +114,11 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
         error = 'مقدار وارد شده قابل قبول نیست.'
         setStyle [input, label], style.invalid
         return false
-      setData 'ایمیل', f.value()
 
   f = E phoneNumberInput
   setStyle f, style.input
   fieldCollections[2]['تلفن همراه'] = f = E multivalue, f
+  setError 'تلفن همراه', 'تکمیل این فیلد الزامیست.'
   do (f) -> setTimeout ->
     label = labelArrays[2][1]
     input = f.input
@@ -127,6 +134,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       error = null
       hideTooltip?()
     f.onChange (adding) ->
+      if !adding && f.value().length is 1
+        setData 'تلفن همراه', null
+        setError 'تلفن همراه', 'تکمیل این فیلد الزامیست.'
+      else
+        setData 'تلفن همراه', f.value()
+        setError 'تلفن همراه', null
       unless adding
         return
       if !input.value()
@@ -137,20 +150,23 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
         error = 'مقدار وارد شده قابل قبول نیست.'
         setStyle [input, label], style.invalid
         return false
-      setData 'تلفن همراه', f.value()
 
   textArrays = []
   groupArrays = []
   labelArrays = []
   fieldArrays = []
-  fieldCollections.forEach (fieldCollection) ->
+  fieldCollections.forEach (fieldCollection, i) ->
     textArrays.push textArray = []
     groupArrays.push groupArray = []
     labelArrays.push labelArray = []
     fieldArrays.push fieldArray = []
-    Object.keys(fieldCollection).forEach (labelText) ->
+    Object.keys(fieldCollection).forEach (labelText, j) ->
       group = E style.group,
-        label = E style.label, labelText + ':'
+        label = E style.label,
+          text labelText
+          if i is 1 && j is 6
+            E style.optional, '(اختیاری)'
+          text ':'
         field = fieldCollection[labelText]
         E style.clearfix
       textArray.push labelText
@@ -169,7 +185,7 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       hide phone2 = E numberInput
   ]
 
-  setStyle phone, extend {placeholder: 'تلفن تماس - 0218558555'}, style.phoneNumber
+  setStyle phone, extend {placeholder: 'تلفن تماس - 02185585558'}, style.phoneNumber
   setStyle phone2, extend {placeholder: 'تلفن تماس محل سکونت'}, style.phoneNumber
 
   textArrays.push ['آدرس', 'تلفن ثابت', 'آدرس 2', 'تلفن ثابت 2']
@@ -203,12 +219,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
         return
       if i is 2
         return
-      text = textArray[j]
+      labelText = textArray[j]
       label = labelArray[j]
       input = field.input || field
       error = hideTooltip = undefined
       unless (i is 1 && j in [1, 2]) || (i is 3 && j in [2, 3])
-        setError text, 'تکمیل این فیلد الزامیست.'
+        setError labelText, 'تکمیل این فیلد الزامیست.'
       onEvent input, 'focus', ->
         if error
           h = tooltip input, error
@@ -223,12 +239,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
           hideTooltip?()
           if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
             setStyle [label, input], style.invalid
-            setError text, error = 'تکمیل این فیلد الزامیست.'
+            setError labelText, error = 'تکمیل این فیلد الزامیست.'
           else if field.valid? && !field.valid()
             setStyle [label, input], style.invalid
-            setError text, error = 'مقدار وارد شده قابل قبول نیست.'
+            setError labelText, error = 'مقدار وارد شده قابل قبول نیست.'
           else
-            setError text, error = null
+            setError labelText, error = null
         ), 100
   setOff ->
     hideTooltips.forEach (hideTooltip) -> hideTooltip()

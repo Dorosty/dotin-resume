@@ -30,11 +30,11 @@ module.exports = component 'personalInfoMultivalue', ({dom, events, returnObject
     setViewHeight()
     setStyle input, value: ''
     onEvent removeItem, 'click', ->
+      changeListeners.forEach (x) -> x false
       destroy newItem
       data.splice items.indexOf(newItem), 1
       remove items, newItem
       setViewHeight()
-      changeListeners.forEach (x) -> x(false)
 
   onEvent add, 'click', ->
     unless changeListeners.every((x) -> x(true) isnt false)

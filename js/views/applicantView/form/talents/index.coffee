@@ -1,21 +1,24 @@
 component = require '../../../../utils/component'
 style = require './style'
+tooltip = require '../../../../components/tooltip'
 dropdown = require '../../../../components/dropdown'
-numberInput = require '../../../../components/restrictedInput/number'
+yearInput = require '../../../../components/restrictedInput/year'
 {remove} = require '../../../../utils'
 
-module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
+module.exports = component 'applicantFormTalents', ({dom, events, setOff}, {setData}) ->
   {E, setStyle, empty, append} = dom
   {onEvent} = events
+
+  hideTooltips = []
+  setOff ->
+    hideTooltips.forEach (hideTooltip) -> hideTooltip()
 
   table0 = do ->
 
     rows = []
 
     dropdowns = [0 .. 1].map ->
-      f = E dropdown
-      f.update ['کم', 'متوسط', 'زیاد']
-      f.showEmpty true
+      f = E dropdown, items: ['کم', 'متوسط', 'زیاد']
       setStyle f.input, style.input
       f
 
@@ -54,7 +57,37 @@ module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
               update()
             removeRow
       append body, lastLine
+      setData 'جدول', rows
+
+    onAdds = []
+    [i0, i1, i2].forEach (field, i) ->
+      error = hideTooltip = undefined
+      input = field.input || field
+      onEvent input, 'focus', ->
+        if error
+          h = tooltip input, error
+          hideTooltips.push hideTooltip = ->
+            h()
+            remove hideTooltips, hideTooltip
+      onEvent input, ['input', 'pInput'], ->
+        setStyle input, style.valid
+        hideTooltip?()
+      onAdds.push ->
+        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
+          setStyle input, style.invalid
+          error = 'تکمیل این فیلد الزامیست.'
+        else if field.valid? && !field.valid()
+          setStyle input, style.invalid
+          error = 'مقدار وارد شده قابل قبول نیست.'
+      onEvent input, 'blur', ->
+        hideTooltip?()
+        error = null
+
     onEvent add, 'click', ->
+      canAdd = [i0, i1, i2].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
+      unless canAdd
+        onAdds.forEach (x) -> x()
+        return
       rows.push [i0, i1, i2].map (i) -> i.value()
       update()
       setStyle [i0, i1.input, i2.input], value: ''
@@ -72,7 +105,7 @@ module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
         i1 = E 'input', style.input
       E 'td', style.td,
         i2 = do ->
-          i2 = E numberInput
+          i2 = E yearInput
           setStyle i2, style.input
           i2
       E 'td', style.td,
@@ -103,20 +136,84 @@ module.exports = component 'applicantFormTalents', ({dom, events}, setData) ->
               update()
             removeRow
       append body, lastLine
+      setData 'جدول 2', rows
+
+    onAdds = []
+    [i0, i1, i2].forEach (field, i) ->
+      error = hideTooltip = undefined
+      input = field.input || field
+      onEvent input, 'focus', ->
+        if error
+          h = tooltip input, error
+          hideTooltips.push hideTooltip = ->
+            h()
+            remove hideTooltips, hideTooltip
+      onEvent input, ['input', 'pInput'], ->
+        setStyle input, style.valid
+        hideTooltip?()
+      onAdds.push ->
+        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
+          setStyle input, style.invalid
+          error = 'تکمیل این فیلد الزامیست.'
+        else if field.valid? && !field.valid()
+          setStyle input, style.invalid
+          error = 'مقدار وارد شده قابل قبول نیست.'
+      onEvent input, 'blur', ->
+        hideTooltip?()
+        error = null
+
     onEvent add, 'click', ->
+      canAdd = [i0, i1, i2].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
+      unless canAdd
+        onAdds.forEach (x) -> x()
+        return
       rows.push [i0, i1, i2].map (i) -> i.value()
       update()
       setStyle [i0, i1, i2], value: ''
 
     view
 
-  E null,
+  view = E null,
     table0
     table1
     E style.column,
-      E style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده:'
-      E 'textarea', style.textarea
+      label0 = E style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده:'
+      textarea0 = E 'textarea', style.textarea
     E style.column,
-      E style.label, 'آثار علمی و عضویت در انجمن‌ها:'
-      E 'textarea', style.textarea
+      label1 = E style.label, 'آثار علمی و عضویت در انجمن‌ها:'
+      textarea1 = E 'textarea', style.textarea
     E style.clearfix
+
+  [{
+    text: 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'
+    label: label0
+    field: textarea0
+  }, {
+    text: 'آثار علمی و عضویت در انجمن‌ها'
+    label: label1
+    field: textarea1
+  }].forEach ({text, label, field}) ->
+    onEvent field, 'input', ->
+      setData text, field.value()
+
+    error = hideTooltip = undefined
+    onEvent field, 'focus', ->
+      if error
+        h = tooltip field, error
+        hideTooltips.push hideTooltip = ->
+          h()
+          remove hideTooltips, hideTooltip
+    onEvent field, ['input', 'pInput'], ->
+      setStyle [label, field], style.valid
+      hideTooltip?()
+    onEvent field, 'blur', ->
+      setTimeout (->
+        hideTooltip?()
+        if !field.value().trim()
+          setStyle [label, field], style.invalid
+          error = 'تکمیل این فیلد الزامیست.'
+        else
+          error = null
+      ), 100
+
+  view

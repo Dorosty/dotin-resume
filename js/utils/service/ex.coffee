@@ -4,7 +4,7 @@ stateChangingServices = require './stateChangingServices'
 {gets, posts, cruds} = require './names'
 {get, post} = require './getPost'
 {eraseCookie} = require '../cookies'
-{uppercaseFirst} = require '..'
+{extend, uppercaseFirst} = require '..'
 
 exports.logout = (automatic = false) ->
   [
@@ -19,6 +19,12 @@ exports.logout = (automatic = false) ->
   unless automatic is true
     stateChangingServices.logout.endedAt = +new Date()
   Q()
+
+exports.submitProfileData = (userId, data) ->
+  post 'submitProfileData', {userId, data}
+  .then ->
+    state.user.on once: true, (user) ->
+      state.user.set extend {}, user, applicantData: data
 
 gets.forEach (x) ->
   exports[x] = (params) ->

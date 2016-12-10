@@ -1,6 +1,7 @@
 # return
 
 Q = require '../../q'
+{extend} = require '../../utils'
 
 applicants = [{
   userId: 0
@@ -85,3 +86,8 @@ exports.addJob = ->
 exports.getCaptcha = ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then -> '12*x=48'
+
+exports.submitProfileData = ({userId, data}) ->
+  Q.delay 1000 + 2000 * Math.floor Math.random()
+  .then ->
+    user = extend {}, user, applicantData: data

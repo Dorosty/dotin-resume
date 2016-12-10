@@ -8,10 +8,10 @@ exports.instance = (thisComponent) ->
   exports = {}
 
   gets.concat(posts).concat(others).forEach (x) ->
-    exports[x] = (params) ->
+    exports[x] = (params...) ->
       l = log.get thisComponent, x, params
       l()
-      ex[x] params
+      ex[x] params...
       .then (data) ->
         l data
         data

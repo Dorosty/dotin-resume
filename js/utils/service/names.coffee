@@ -6,7 +6,6 @@ exports.gets = [
 exports.posts = [
   'login'
   'addJob'
-  'submitProfileData'
 ]
 
 exports.cruds = [  
@@ -15,6 +14,7 @@ exports.cruds = [
 
 exports.others = [
   'logout'
+  'submitProfileData'
 ]
 
 exports.states = [

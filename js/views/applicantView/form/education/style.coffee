@@ -1,5 +1,16 @@
 {extend} = require '../../../../utils'
 
+exports.clearfix =
+  clear: 'both'
+  
+exports.valid =
+  color: '#5c5555'
+  borderColor: '#ccc'
+
+exports.invalid =
+  color: '#c00'
+  borderColor: '#c00'
+
 exports.th =
   padding: '10px 10px 0'
   color: '#5c5555'
@@ -56,6 +67,3 @@ exports.textarea =
   transition: '0.2s'
   border: '1px solid #ccc'
   color: '#5c5555'
-
-exports.clearfix =
-  clear: 'both'

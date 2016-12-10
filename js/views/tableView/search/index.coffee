@@ -17,8 +17,8 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
     panel = E style.panel,
       arrowBorder = E style.arrowBorder
       arrow = E style.arrow
+      criteriaPlaceholder = E()
       E style.pannelInner,
-        criteriaPlaceholder = E()
         add = E style.add
 
   addCriterion = ->

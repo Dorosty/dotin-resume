@@ -8,9 +8,11 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
   {E, setStyle, append, empty, destroy, show, hide} = dom
   {onEvent} = events
 
-  changeListener = removeListener = isInSearch = undefined
+  changeListener = removeListener = undefined
 
-  typeDropdown = E dropdown, getTitle: (x) ->
+  isInSearch = -> true
+
+  typeDropdown = E dropdown, items: [0 .. 4], getTitle: (x) ->
     switch x
       when 0
         'نام'
@@ -24,14 +26,13 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
         'یادداشت'
   setStyle typeDropdown, style.inputPlaceholder
   setStyle typeDropdown.input, style.placeholderInput
-  typeDropdown.update [0 .. 4]
 
   view = E margin: 20,
     typeDropdown
     rest = E style.rest
     remove = E style.remove
 
-  onEvent typeDropdown.input, ['input', 'pInput'], ->
+  typeDropdown.onChange ->
     empty rest
     append rest, switch typeDropdown.value()
       when 0 then do ->
@@ -41,7 +42,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
           not nameInput.value() or textIsInSearch "#{firstName} #{lastName}", nameInput.value()
         nameInput
       when 1 then do ->
-        dateDropdown = E dropdown, getTitle: (x) ->
+        dateDropdown = E dropdown, items: [0 .. 2], getTitle: (x) ->
           switch x
             when 0
               'بعد از'
@@ -51,13 +52,15 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
               'برابر'
         setStyle dateDropdown, style.inputPlaceholder
         setStyle dateDropdown.input, style.placeholderInput
-        dateDropdown.update [0 .. 2]
         _dateInput = E dateInput
         setStyle _dateInput, style.inputPlaceholder
         setStyle _dateInput.input, style.placeholderInput
-        onEvent [dateDropdown.input, _dateInput.input], ['input', 'pInput'], -> changeListener?()
+        dateDropdown.onChange -> changeListener?()
+        onEvent _dateInput.input, ['input', 'pInput'], -> changeListener?()
         isInSearch = ({modificationTime}) ->
-          unless /^13[0-9][0-9]\/([1-9]|1[0-2])\/([1-9]|[1-2][0-9]|3[0-1])/.test toEnglish _dateInput.value()
+          unless _dateInput.valid()
+            return true
+          unless dateDropdown.value()?
             return true
           modificationTime = toTimestamp toDate modificationTime
           time = toTimestamp _dateInput.value()
@@ -80,7 +83,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
           not jobsInput.value() or textIsInSearch selectedJobsString.toLowerCase(), jobsInput.value()
         jobsInput
       when 3 then do ->
-        stateDropdown = E dropdown, getTitle: (x) ->
+        stateDropdown = E dropdown, items: [0 .. 2], getTitle: (x) ->
           switch x
             when 0
               'ثبت شده'
@@ -90,9 +93,10 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
               'غیره'
         setStyle stateDropdown, style.inputPlaceholder
         setStyle stateDropdown.input, style.placeholderInput
-        stateDropdown.update [0 .. 2]
-        onEvent stateDropdown.input, ['input', 'pInput'], -> changeListener?()
+        stateDropdown.onChange -> changeListener?()
         isInSearch = ->
+          unless stateDropdown.value()?
+            return true
           switch stateDropdown.value()
             when 0
               true
@@ -100,7 +104,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
               false
         stateDropdown
       when 4 then do ->
-        notesDropdown = E dropdown, getTitle: (x) ->
+        notesDropdown = E dropdown, items: [0 .. 1], getTitle: (x) ->
           switch x
             when 0
               'دارد'
@@ -108,9 +112,10 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
               'ندارد'
         setStyle notesDropdown, style.inputPlaceholder
         setStyle notesDropdown.input, style.placeholderInput
-        notesDropdown.update [0 .. 1]
-        onEvent notesDropdown.input, ['input', 'pInput'], -> changeListener?()
+        notesDropdown.onChange -> changeListener?()
         isInSearch = ->
+          unless notesDropdown.value()?
+            return true
           switch notesDropdown.value()
             when 0
               true

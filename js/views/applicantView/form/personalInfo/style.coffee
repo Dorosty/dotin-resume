@@ -2,6 +2,14 @@
 exports.clearfix =
   clear: 'both'
 
+exports.valid =
+  color: '#5c5555'
+  borderColor: '#ccc'
+
+exports.invalid =
+  color: '#c00'
+  borderColor: '#c00'
+
 exports.column =
   float: 'right'
   width: '33%'
@@ -19,6 +27,14 @@ exports.label =
   textAlign: 'left'
   transition: '0.2s'
   color: '#5c5555'
+
+exports.optional =
+  display: 'inline-block'
+  marginRight: 5
+  fontSize: 12
+  color: '#ccc'
+  height: 30
+  lineHeight: 30
 
 exports.input =
   fontSize: 12
@@ -47,14 +63,6 @@ exports.specialInput = extend {}, exports.input,
 exports.numberInput = extend {}, exports.input,
   width: '15%'
   direction: 'ltr'
-
-exports.valid =
-  color: '#5c5555'
-  borderColor: '#ccc'
-
-exports.invalid =
-  color: '#c00'
-  borderColor: '#c00'
 
 exports.bigLabel =
   fontSize: 12

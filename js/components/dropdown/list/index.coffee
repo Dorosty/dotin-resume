@@ -27,6 +27,7 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
 
   returnObject
     value: -> value
+    set: (x) -> value = x
     update: (_entities, reset) ->
       if reset
         value = null

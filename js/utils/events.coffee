@@ -99,10 +99,19 @@ exports.instance = (thisComponent) ->
       l 1, e
       callback e
       l 1, e
+    lastHeight = undefined
+    clearInterval = setInterval ->
+      height = body().fn.element.clientHeight
+      unless height is lastHeight
+        l 1, 'height'
+        callback()
+        l 1, 'height'
+      lastHeight = height
     l 0
     ->
       l 2
       unbind()
+      clearInterval()
       l 2
 
   exports.onMouseover = (component, callback) ->
