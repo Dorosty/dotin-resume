@@ -17,7 +17,7 @@ module.exports = component 'views', ({dom, state}) ->
 
     currentPage = if user
       switch user.userType
-        when 0
+        when 3
           applicantView
         when 1
           managerView

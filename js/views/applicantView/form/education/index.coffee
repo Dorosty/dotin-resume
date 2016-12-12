@@ -63,7 +63,7 @@ module.exports = component 'applicantFormEducation', ({dom, events, setOff}, {se
       body = E 'tbody', null,
         lastLine
 
-    update = ->    
+    do update = ->    
       empty body
       append body, rows.map (row) ->
         [v0, v1, v2, v3, v4, v5, v6] = row
@@ -89,11 +89,9 @@ module.exports = component 'applicantFormEducation', ({dom, events, setOff}, {se
         setError 'جدول', 'تکمیل این فیلد الزامیست.'
 
     onAdds = []
-    texts = ['مقطع', 'رشته تحصیلی', 'نام دانشگاه و شهر محل تحصیل', 'سال ورود', 'سال اخذ مدرک', 'معدل', 'عنوان پایان‌نامه']
     [i0, i1, i2, i3, i4, i5, i6].forEach (field, i) ->
       error = hideTooltip = undefined
       input = field.input || field
-      text = texts[i]
       onEvent input, 'focus', ->
         if error
           h = tooltip input, error
@@ -106,13 +104,13 @@ module.exports = component 'applicantFormEducation', ({dom, events, setOff}, {se
       onAdds.push ->
         if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
           setStyle input, style.invalid
-          setError text, error = 'تکمیل این فیلد الزامیست.'
+          error = 'تکمیل این فیلد الزامیست.'
         else if field.valid? && !field.valid()
           setStyle input, style.invalid
-          setError text, error = 'مقدار وارد شده قابل قبول نیست.'
+          error = 'مقدار وارد شده قابل قبول نیست.'
       onEvent input, 'blur', ->
         hideTooltip?()
-        setError text, error = null
+        error = null
 
     onEvent add, 'click', ->
       canAdd = [i0, i1, i2, i3, i4, i5, i6].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))

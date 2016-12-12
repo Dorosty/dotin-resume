@@ -10,7 +10,7 @@ applicants = [{
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
-  selectedJobs: ['Java developer', 'Javascript developer']
+  selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
   resume: null
   personalPic: null
   modificationTime: 1473132854116
@@ -23,7 +23,7 @@ applicants = [{
   phoneNumber: '09121234567'
   email: 'ghayoomi@dotin.ir'
   birthday: '1343/4/5'
-  selectedJobs: ['UX designer']
+  selectedJobs: [{jobName: 'UX designer'}]
   resume: null
   personalPic: null
   modificationTime: 1373132854116
@@ -34,15 +34,16 @@ applicants = [{
 user =
   ssid: '0016503368'
   personalPic: null
-  name: 'حامد حسینی‌نژاد'
-  userType: 0
+  firstName: 'علی'
+  lastName: 'درستی'
+  userType: 3
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
   personalPic: null
   modificationTime: 1473132854116
   notes: []
-  selectedJobs: ['Java developer', 'Javascript developer']
+  selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
   resume: null
   state: 0
 
@@ -77,7 +78,9 @@ exports.login = ({email}) ->
 
 exports.logout = ({email, password}) ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
-  .then -> loggedOut: true
+  .then ->
+    user = undefined
+    loggedOut: true
 
 exports.addJob = ->
   Q.delay 1000 + 2000 * Math.floor Math.random()

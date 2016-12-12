@@ -14,6 +14,7 @@ handle = (isGet) -> (serviceName, params) ->
     stateChangingServices[serviceName]?.endedAt = +new Date()
     throw ex
   .then (response) ->
+    response ?= {}
     stateChangingServices[serviceName]?.running = false
     stateChangingServices[serviceName]?.endedAt = +new Date()
     states.forEach (name) ->

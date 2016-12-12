@@ -91,9 +91,13 @@ module.exports = component 'applicantForm', ({dom, events, state, service}) ->
       if confirm 'پس از ثبت نهایی اطلاعات، این صفحه قابل ویرایش نخواهد‌بود.\nآیا از صحت اطلاعات وارد شده اطمینان دارید؟'
         setStyle cover, style.coverVisible
         setStyle submit, text: 'در حال ثبت...'
+        setStyle submit, style.submitDisabled
+        submitDisabled = true
         state.user.on once: true, (user) ->
           service.submitProfileData user.userId, data
           .fin ->
+            setStyle submit, style.submitDisabled
+            submitDisabled = true
             setStyle cover, style.cover
             setStyle submit, text: 'ثبت نهایی اطلاعات'
     ), 200
@@ -103,7 +107,7 @@ module.exports = component 'applicantForm', ({dom, events, state, service}) ->
       hide yesData
       show noData
       #####################
-      setStyle noData, englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify user.profileData
+      setStyle noData, englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.applicantData, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
       #####################
 
   view

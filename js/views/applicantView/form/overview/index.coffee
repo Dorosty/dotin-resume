@@ -31,14 +31,14 @@ module.exports = component 'applicantFormOverview', ({dom, state}) ->
     birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join ' '
 
     setStyle profileImg, src: if user.personalPic then "/webApi/image?address=#{personalPic}" else 'assets/img/default-avatar-small.png'
-    setStyle name, text: user.name
+    setStyle name, text: "#{user.firstName} #{user.lastName}"
     setStyle birthday, text: 'متولد ' + birthdayString
     setStyle ssid, text: 'کد ملی: ' + user.ssid
     setStyle createdAt, text: 'تاریخ ثبت: ' + toDate user.modificationTime
 
     empty jobs
-    append jobs, user.selectedJobs.map (job) ->
-      E style.job, job
+    append jobs, user.selectedJobs.map ({jobName}) ->
+      E style.job, jobName
 
     setStyle resumeLink, href: '/webApi/resume?address=' + user.resume
 

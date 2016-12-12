@@ -1139,7 +1139,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":26,"./utils/dom":28,"./views":67}],23:[function(require,module,exports){
+},{"./utils/component":26,"./utils/dom":28,"./views":78}],23:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -4718,6 +4718,9 @@ handle = function(isGet) {
       throw ex;
     }).then(function(response) {
       var ref1, ref2;
+      if (response == null) {
+        response = {};
+      }
       if ((ref1 = stateChangingServices[serviceName]) != null) {
         ref1.running = false;
       }
@@ -4837,7 +4840,13 @@ applicants = [
     phoneNumber: '09121234567',
     email: 'dorosty@doin.ir',
     birthday: '1340/1/2',
-    selectedJobs: ['Java developer', 'Javascript developer'],
+    selectedJobs: [
+      {
+        jobName: 'Java developer'
+      }, {
+        jobName: 'Javascript developer'
+      }
+    ],
     resume: null,
     personalPic: null,
     modificationTime: 1473132854116,
@@ -4850,7 +4859,11 @@ applicants = [
     phoneNumber: '09121234567',
     email: 'ghayoomi@dotin.ir',
     birthday: '1343/4/5',
-    selectedJobs: ['UX designer'],
+    selectedJobs: [
+      {
+        jobName: 'UX designer'
+      }
+    ],
     resume: null,
     personalPic: null,
     modificationTime: 1373132854116,
@@ -4862,15 +4875,22 @@ applicants = [
 user = {
   ssid: '0016503368',
   personalPic: null,
-  name: 'حامد حسینی‌نژاد',
-  userType: 0,
+  firstName: 'علی',
+  lastName: 'درستی',
+  userType: 3,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
   personalPic: null,
   modificationTime: 1473132854116,
   notes: [],
-  selectedJobs: ['Java developer', 'Javascript developer'],
+  selectedJobs: [
+    {
+      jobName: 'Java developer'
+    }, {
+      jobName: 'Javascript developer'
+    }
+  ],
   resume: null,
   state: 0
 };
@@ -4926,6 +4946,7 @@ exports.logout = function(arg) {
   var email, password;
   email = arg.email, password = arg.password;
   return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+    user = void 0;
     return {
       loggedOut: true
     };
@@ -5243,7 +5264,7 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
     });
   });
   table = (function() {
-    var add, body, f, i0, i1, i2, i3, i4, i5, i6, lastLine, onAdds, rows, texts, update, view;
+    var add, body, f, i0, i1, i2, i3, i4, i5, i6, lastLine, onAdds, rows, update, view;
     rows = [];
     i0 = f = E(dropdown, {
       items: ['دیپلم', 'لیسانس', 'فوق لیسانس']
@@ -5267,7 +5288,7 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
       width: 150
     }))), E('td', style.td, add = E(style.add)));
     view = E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'), E('th', style.th))), body = E('tbody', null, lastLine));
-    update = function() {
+    (update = function() {
       empty(body);
       append(body, rows.map(function(row) {
         var v0, v1, v2, v3, v4, v5, v6;
@@ -5289,14 +5310,12 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
       } else {
         return setError('جدول', 'تکمیل این فیلد الزامیست.');
       }
-    };
+    })();
     onAdds = [];
-    texts = ['مقطع', 'رشته تحصیلی', 'نام دانشگاه و شهر محل تحصیل', 'سال ورود', 'سال اخذ مدرک', 'معدل', 'عنوان پایان‌نامه'];
     [i0, i1, i2, i3, i4, i5, i6].forEach(function(field, i) {
-      var error, hideTooltip, input, text;
+      var error, hideTooltip, input;
       error = hideTooltip = void 0;
       input = field.input || field;
-      text = texts[i];
       onEvent(input, 'focus', function() {
         var h;
         if (error) {
@@ -5314,17 +5333,17 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
       onAdds.push(function() {
         if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
           setStyle(input, style.invalid);
-          return setError(text, error = 'تکمیل این فیلد الزامیست.');
+          return error = 'تکمیل این فیلد الزامیست.';
         } else if ((field.valid != null) && !field.valid()) {
           setStyle(input, style.invalid);
-          return setError(text, error = 'مقدار وارد شده قابل قبول نیست.');
+          return error = 'مقدار وارد شده قابل قبول نیست.';
         }
       });
       return onEvent(input, 'blur', function() {
         if (typeof hideTooltip === "function") {
           hideTooltip();
         }
-        return setError(text, error = null);
+        return error = null;
       });
     });
     onEvent(add, 'click', function() {
@@ -5523,7 +5542,7 @@ module.exports = component('applicantFormEnglish', function(arg, arg1) {
     setStyle(f, style.dropdownPlaceholder);
     setStyle(f.input, style.input);
     f.onChange(function() {
-      return setData(label, f.value());
+      return setData(labelText, f.value());
     });
     column = E(style.column, label = E(style.label, labelText), field = f);
     input = field.input;
@@ -5730,10 +5749,14 @@ module.exports = component('applicantForm', function(arg) {
         setStyle(submit, {
           text: 'در حال ثبت...'
         });
+        setStyle(submit, style.submitDisabled);
+        submitDisabled = true;
         return state.user.on({
           once: true
         }, function(user) {
           return service.submitProfileData(user.userId, data).fin(function() {
+            setStyle(submit, style.submitDisabled);
+            submitDisabled = true;
             setStyle(cover, style.cover);
             return setStyle(submit, {
               text: 'ثبت نهایی اطلاعات'
@@ -5748,7 +5771,7 @@ module.exports = component('applicantForm', function(arg) {
       hide(yesData);
       show(noData);
       return setStyle(noData, {
-        englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.profileData)
+        englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.applicantData, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
       });
     }
   });
@@ -5756,27 +5779,945 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":3,"../../../components/scrollViewer":19,"../../../utils/component":26,"./education":42,"./english":44,"./others":47,"./overview":49,"./personalInfo":51,"./reputation":55,"./style":57,"./talents":58}],47:[function(require,module,exports){
-var component, style;
+},{"../../../components/checkbox":3,"../../../components/scrollViewer":19,"../../../utils/component":26,"./education":42,"./english":44,"./others":47,"./overview":60,"./personalInfo":62,"./reputation":66,"./style":68,"./talents":69}],47:[function(require,module,exports){
+var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
 
-style = require('./style');
+part0 = require('./part0');
+
+part1 = require('./part1');
+
+part2 = require('./part2');
+
+part3 = require('./part3');
+
+part4 = require('./part4');
+
+part5 = require('./part5');
 
 module.exports = component('applicantFormOthers', function(arg, arg1) {
   var E, dom, setData, setError;
   dom = arg.dom;
   setData = arg1.setData, setError = arg1.setError;
   E = dom.E;
-  return E(null, 'به زودی...');
+  return E(null, E(part0, {
+    setData: setData,
+    setError: setError
+  }), E(part1, {
+    setData: setData
+  }), E(part2, {
+    setData: setData,
+    setError: setError
+  }), E(part3, {
+    setData: setData
+  }), E(part4, {
+    setData: setData
+  }), E(part5, {
+    setData: setData,
+    setError: setError
+  }));
 });
 
 
-},{"../../../../utils/component":26,"./style":48}],48:[function(require,module,exports){
+},{"../../../../utils/component":26,"./part0":48,"./part1":50,"./part2":52,"./part3":54,"./part4":56,"./part5":58}],48:[function(require,module,exports){
+var component, dateInput, dropdown, extend, numberInput, ref, remove, style, tooltip;
+
+component = require('../../../../../utils/component');
+
+style = require('./style');
+
+tooltip = require('../../../../../components/tooltip');
+
+dropdown = require('../../../../../components/dropdown');
+
+dateInput = require('../../../../../components/dateInput');
+
+numberInput = require('../../../../../components/restrictedInput/number');
+
+ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
+
+module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
+  var E, dom, events, f, f0, f1, fields, hide, hideTooltips, labels, onEvent, setData, setError, setOff, setStyle, show, text, view;
+  dom = arg.dom, events = arg.events, setOff = arg.setOff;
+  setData = arg1.setData, setError = arg1.setError;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  onEvent = events.onEvent;
+  labels = {};
+  fields = {};
+  fields['متقاضه چه نوع همکاری هستید؟'] = f = E(dropdown, {
+    items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
+  });
+  setStyle(f, style.dropdownPlaceholder);
+  setStyle(f.input, style.dropdown);
+  f0 = E(null, (function() {
+    var x, y;
+    fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = x = E(dropdown, {
+      items: ['نمایشگاه/همایش/کنفرانس', 'آگهی', 'سایت داتین', 'دوستان و همکاران', 'سایر']
+    });
+    setStyle(x, style.dropdownPlaceholder);
+    setStyle(x.input, style.dropdown);
+    hide(y = E('input', extend({
+      placeholder: 'توضیحات...'
+    }, style.descriptionInput)));
+    x.onChange(function() {
+      if (x.value() === 'سایر') {
+        return show(y);
+      } else {
+        return hide(y);
+      }
+    });
+    return [x, y];
+  })());
+  fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = f = E(dateInput);
+  setStyle(f, style.dateInputPlaceholder);
+  setStyle(f.input, style.dateInput);
+  f1 = E(null, (function() {
+    var x, y, z;
+    fields['میزان دستمزد'] = x = E(dropdown, {
+      items: ['طبق قانون کار', 'قابل مذاکره', 'مقدار مشخص']
+    });
+    setStyle(x, style.dropdownPlaceholder);
+    setStyle(x.input, style.dropdown);
+    hide(y = fields['مقدار دستمزد'] = E(numberInput));
+    setStyle(y, style.descriptionInput);
+    hide(z = labels['مقدار دستمزد'] = E(style.inlineLabel, 'ریال'));
+    x.onChange(function() {
+      if (x.value() === 'مقدار مشخص') {
+        show([y, z]);
+        setData('مقدار دستمزد', y.value());
+        if (!y.value()) {
+          return setError('مقدار دستمزد', 'تکمیل این فیلد الزامیست.');
+        }
+      } else {
+        hide([y, z]);
+        setData('مقدار دستمزد', null);
+        return setError('مقدار دستمزد', null);
+      }
+    });
+    return [x, y, z];
+  })());
+  view = E(null, E(style.column, labels['متقاضه چه نوع همکاری هستید؟'] = E(style.label, 'متقاضه چه نوع همکاری هستید؟'), fields['متقاضه چه نوع همکاری هستید؟'], labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = E(style.label, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), f0, labels['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = E(style.label, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟']), E(style.column, E(style.label, labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(style.optional, '(اختیاری)')), fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('input', style.input), labels['مدت زمانی که بیمه بوده‌اید؟'] = E(style.label, 'مدت زمانی که بیمه بوده‌اید؟'), fields['مدت زمانی که بیمه بوده‌اید؟'] = E('input', style.input), labels['میزان دستمزد'] = E(style.label, text('میزان دستمزد '), E(style.underline, 'خالص'), text(' درخواستی شما چقدر است؟')), f1), E(style.clearfix));
+  hideTooltips = [];
+  Object.keys(fields).forEach(function(labelText) {
+    var error, field, hideTooltip, input, label;
+    if (labelText === 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟') {
+      return;
+    }
+    field = fields[labelText];
+    label = labels[labelText];
+    input = field.input || field;
+    error = hideTooltip = void 0;
+    if (labelText !== 'مقدار دستمزد') {
+      setError(labelText, 'تکمیل این فیلد الزامیست.');
+    }
+    onEvent(input, 'focus', function() {
+      var h;
+      if (error) {
+        h = tooltip(input, error);
+        return hideTooltips.push(hideTooltip = function() {
+          h();
+          return remove(hideTooltips, hideTooltip);
+        });
+      }
+    });
+    onEvent(input, ['input', 'pInput'], function() {
+      setStyle([label, input], style.valid);
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    });
+    return onEvent(input, 'blur', function() {
+      return setTimeout((function() {
+        if (typeof hideTooltip === "function") {
+          hideTooltip();
+        }
+        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
+          setStyle([label, input], style.invalid);
+          return setError(labelText, error = 'تکمیل این فیلد الزامیست.');
+        } else if ((field.valid != null) && !field.valid()) {
+          setStyle([label, input], style.invalid);
+          return setError(labelText, error = 'مقدار وارد شده قابل قبول نیست.');
+        } else {
+          return setError(labelText, error = null);
+        }
+      }), 100);
+    });
+  });
+  setOff(function() {
+    return hideTooltips.forEach(function(hideTooltip) {
+      return hideTooltip();
+    });
+  });
+  return view;
+});
 
 
+},{"../../../../../components/dateInput":5,"../../../../../components/dropdown":7,"../../../../../components/restrictedInput/number":16,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":49}],49:[function(require,module,exports){
+var extend;
 
-},{}],49:[function(require,module,exports){
+extend = require('../../../../../utils').extend;
+
+exports.clearfix = {
+  clear: 'both'
+};
+
+exports.valid = {
+  color: '#5c5555',
+  borderColor: '#ccc'
+};
+
+exports.invalid = {
+  color: '#c00',
+  borderColor: '#c00'
+};
+
+exports.column = {
+  float: 'right',
+  width: '50%'
+};
+
+exports.label = {
+  fontSize: 12,
+  lineHeight: 30,
+  fontWeight: 'bold',
+  marginTop: 10,
+  transition: '0.2s',
+  color: '#5c5555'
+};
+
+exports.inlineLabel = extend({}, exports.label, {
+  display: 'inline-block',
+  margin: 0,
+  marginRight: 5
+});
+
+exports.optional = {
+  display: 'inline-block',
+  marginRight: 5,
+  fontSize: 12,
+  color: '#ccc',
+  height: 30,
+  lineHeight: 30
+};
+
+exports.underline = {
+  display: 'inline',
+  textDecoration: 'underline'
+};
+
+exports.input = {
+  fontSize: 12,
+  height: 30,
+  lineHeight: 30,
+  borderRadius: 2,
+  padding: '0 5px',
+  outline: 'none',
+  width: 180,
+  transition: '0.2s',
+  border: '1px solid #ccc',
+  color: '#5c5555'
+};
+
+exports.dropdown = extend({}, exports.input, {
+  paddingLeft: 30
+});
+
+exports.dropdownPlaceholder = {
+  display: 'inline-block',
+  width: 180
+};
+
+exports.dateInput = extend({}, exports.input, {
+  width: 100,
+  paddingLeft: 30
+});
+
+exports.dateInputPlaceholder = {
+  display: 'inline-block',
+  width: 100
+};
+
+exports.descriptionInput = extend({}, exports.input, {
+  width: 250,
+  marginRight: 10
+});
+
+
+},{"../../../../../utils":30}],50:[function(require,module,exports){
+var component, radioSwitch, style;
+
+component = require('../../../../../utils/component');
+
+style = require('./style');
+
+radioSwitch = require('../../../../../components/radioSwitch');
+
+module.exports = component('applicantFormOthersPart1', function(arg, arg1) {
+  var E, dom, fields, setData, setStyle, view;
+  dom = arg.dom;
+  setData = arg1.setData;
+  E = dom.E, setStyle = dom.setStyle;
+  fields = {};
+  view = E(null, E(style.mainLabel, 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:'), E(null, E(style.label, '- در ساعات اضافه کاری حضور داشته و کار کنید؟'), (function() {
+    var f;
+    f = fields['- در ساعات اضافه کاری حضور داشته و کار کنید؟'] = E(radioSwitch, {
+      items: ['بلی', 'خیر']
+    });
+    setStyle(f, style.radioSwitch);
+    return f;
+  })()), E(null, E(style.label, '- در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید؟'), (function() {
+    var f;
+    f = fields['- در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید؟'] = E(radioSwitch, {
+      items: ['بلی', 'خیر']
+    });
+    setStyle(f, style.radioSwitch);
+    return f;
+  })()), E(null, E(style.label, '- در شیفت شب کار کنید؟'), (function() {
+    var f;
+    f = fields['- در شیفت شب کار کنید؟'] = E(radioSwitch, {
+      items: ['بلی', 'خیر']
+    });
+    setStyle(f, style.radioSwitch);
+    return f;
+  })()), E(null, E(style.label, '- در تعطیلات آخر هفته کار کنید؟'), (function() {
+    var f;
+    f = fields['- در تعطیلات آخر هفته کار کنید؟'] = E(radioSwitch, {
+      items: ['بلی', 'خیر']
+    });
+    setStyle(f, style.radioSwitch);
+    return f;
+  })()), E(null, E(style.label, '- در شهر تهران غیر از محل شرکت مشغول کار شوید؟'), (function() {
+    var f;
+    f = fields['- در شهر تهران غیر از محل شرکت مشغول کار شوید؟'] = E(radioSwitch, {
+      items: ['بلی', 'خیر']
+    });
+    setStyle(f, style.radioSwitch);
+    return f;
+  })()));
+  Object.keys(fields).forEach(function(labelText) {
+    var field, set;
+    field = fields[labelText];
+    (set = function() {
+      return setData(labelText, field.value());
+    })();
+    return field.onChange(set);
+  });
+  return view;
+});
+
+
+},{"../../../../../components/radioSwitch":11,"../../../../../utils/component":26,"./style":51}],51:[function(require,module,exports){
+exports.mainLabel = {
+  fontSize: 12,
+  lineHeight: 30,
+  fontWeight: 'bold',
+  color: '#5c5555',
+  margin: '50px 0 10px'
+};
+
+exports.label = {
+  fontSize: 12,
+  lineHeight: 30,
+  color: '#5c5555',
+  display: 'inline-block',
+  width: 300
+};
+
+exports.radioSwitch = {
+  display: 'inline-block',
+  position: 'relative',
+  top: 15
+};
+
+
+},{}],52:[function(require,module,exports){
+var component, phoneNumberInput, remove, style, tooltip;
+
+component = require('../../../../../utils/component');
+
+style = require('./style');
+
+tooltip = require('../../../../../components/tooltip');
+
+phoneNumberInput = require('../../../../../components/restrictedInput/phoneNumber');
+
+remove = require('../../../../../utils').remove;
+
+module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
+  var E, add, append, body, dom, empty, events, hideTooltips, i0, i1, i2, i3, i4, lastLine, onAdds, onEvent, rows, setData, setError, setOff, setStyle, update, view;
+  dom = arg.dom, events = arg.events, setOff = arg.setOff;
+  setData = arg1.setData, setError = arg1.setError;
+  E = dom.E, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
+  onEvent = events.onEvent;
+  hideTooltips = [];
+  setOff(function() {
+    return hideTooltips.forEach(function(hideTooltip) {
+      return hideTooltip();
+    });
+  });
+  rows = [];
+  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', style.input)), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
+    i4 = E(phoneNumberInput);
+    setStyle(i4, style.input);
+    return i4;
+  })()), E('td', style.td, add = E(style.add)));
+  view = E(null, E(style.mainLabel, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شماره تماس'), E('th', style.th))), body = E('tbody', null, lastLine)));
+  (update = function() {
+    empty(body);
+    append(body, rows.map(function(row) {
+      var v0, v1, v2, v3, v4;
+      v0 = row[0], v1 = row[1], v2 = row[2], v3 = row[3], v4 = row[4];
+      return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, v3), E('td', style.td, v4), E('td', style.td, (function() {
+        var removeRow;
+        removeRow = E(style.remove);
+        onEvent(removeRow, 'click', function() {
+          remove(rows, row);
+          return update();
+        });
+        return removeRow;
+      })()));
+    }));
+    append(body, lastLine);
+    setData('جدول', rows);
+    if (rows.length > 1) {
+      return setError('جدول', null);
+    } else {
+      return setError('جدول', 'تکمیل این فیلد الزامیست.');
+    }
+  })();
+  onAdds = [];
+  [i0, i1, i2, i3, i4].forEach(function(field, i) {
+    var error, hideTooltip, input;
+    error = hideTooltip = void 0;
+    input = field.input || field;
+    onEvent(input, 'focus', function() {
+      var h;
+      if (error) {
+        h = tooltip(input, error);
+        return hideTooltips.push(hideTooltip = function() {
+          h();
+          return remove(hideTooltips, hideTooltip);
+        });
+      }
+    });
+    onEvent(input, ['input', 'pInput'], function() {
+      setStyle(input, style.valid);
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    });
+    onAdds.push(function() {
+      if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
+        setStyle(input, style.invalid);
+        return error = 'تکمیل این فیلد الزامیست.';
+      } else if ((field.valid != null) && !field.valid()) {
+        setStyle(input, style.invalid);
+        return error = 'مقدار وارد شده قابل قبول نیست.';
+      }
+    });
+    return onEvent(input, 'blur', function() {
+      if (typeof hideTooltip === "function") {
+        hideTooltip();
+      }
+      return error = null;
+    });
+  });
+  onEvent(add, 'click', function() {
+    var canAdd;
+    canAdd = [i0, i1, i2, i3, i4].every(function(i) {
+      return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
+    });
+    if (!canAdd) {
+      onAdds.forEach(function(x) {
+        return x();
+      });
+      return;
+    }
+    rows.push([i0, i1, i2, i3, i4].map(function(i) {
+      return i.value();
+    }));
+    update();
+    return setStyle([i0, i1, i2, i3, i4], {
+      value: ''
+    });
+  });
+  return view;
+});
+
+
+},{"../../../../../components/restrictedInput/phoneNumber":17,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":53}],53:[function(require,module,exports){
+var extend, icon;
+
+extend = require('../../../../../utils').extend;
+
+exports.clearfix = {
+  clear: 'both'
+};
+
+exports.valid = {
+  color: '#5c5555',
+  borderColor: '#ccc'
+};
+
+exports.invalid = {
+  color: '#c00',
+  borderColor: '#c00'
+};
+
+exports.mainLabel = {
+  fontSize: 12,
+  lineHeight: 30,
+  fontWeight: 'bold',
+  color: '#5c5555',
+  margin: '50px 0 10px'
+};
+
+exports.th = {
+  padding: '10px 10px 0',
+  color: '#5c5555',
+  fontSize: 12
+};
+
+exports.td = {
+  padding: '10px 5px',
+  color: '#5c5555',
+  fontSize: 12
+};
+
+exports.input = {
+  width: 200,
+  fontSize: 12,
+  height: 30,
+  lineHeight: 30,
+  borderRadius: 2,
+  padding: '0 5px',
+  outline: 'none',
+  transition: '0.2s',
+  border: '1px solid #ccc',
+  color: '#5c5555'
+};
+
+icon = {
+  cursor: 'pointer',
+  width: 20,
+  height: 20,
+  fontSize: 20,
+  position: 'relative',
+  top: 2
+};
+
+exports.add = extend({}, icon, {
+  "class": 'fa fa-plus-circle',
+  color: '#449e73'
+});
+
+exports.remove = extend({}, icon, {
+  "class": 'fa fa-minus-circle',
+  color: '#d71d24'
+});
+
+
+},{"../../../../../utils":30}],54:[function(require,module,exports){
+var component, phoneNumberInput, remove, style, tooltip;
+
+component = require('../../../../../utils/component');
+
+style = require('./style');
+
+tooltip = require('../../../../../components/tooltip');
+
+phoneNumberInput = require('../../../../../components/restrictedInput/phoneNumber');
+
+remove = require('../../../../../utils').remove;
+
+module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
+  var E, add, append, body, dom, empty, events, hideTooltips, i0, i1, i2, i3, i4, lastLine, onAdds, onEvent, rows, setData, setOff, setStyle, text, update, view;
+  dom = arg.dom, events = arg.events, setOff = arg.setOff;
+  setData = arg1.setData;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
+  onEvent = events.onEvent;
+  hideTooltips = [];
+  setOff(function() {
+    return hideTooltips.forEach(function(hideTooltip) {
+      return hideTooltip();
+    });
+  });
+  rows = [];
+  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', style.input)), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
+    i4 = E(phoneNumberInput);
+    setStyle(i4, style.input);
+    return i4;
+  })()), E('td', style.td, add = E(style.add)));
+  view = E(null, E(style.mainLabel, text('در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید:'), E(style.optional, '(اختیاری)')), E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'سمت'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'شماره تماس'), E('th', style.th))), body = E('tbody', null, lastLine)));
+  (update = function() {
+    empty(body);
+    append(body, rows.map(function(row) {
+      var v0, v1, v2, v3, v4;
+      v0 = row[0], v1 = row[1], v2 = row[2], v3 = row[3], v4 = row[4];
+      return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, v3), E('td', style.td, v4), E('td', style.td, (function() {
+        var removeRow;
+        removeRow = E(style.remove);
+        onEvent(removeRow, 'click', function() {
+          remove(rows, row);
+          return update();
+        });
+        return removeRow;
+      })()));
+    }));
+    append(body, lastLine);
+    return setData('جدول2', rows);
+  })();
+  onAdds = [];
+  [i0, i1, i2, i3, i4].forEach(function(field, i) {
+    var error, hideTooltip, input;
+    error = hideTooltip = void 0;
+    input = field.input || field;
+    onEvent(input, 'focus', function() {
+      var h;
+      if (error) {
+        h = tooltip(input, error);
+        return hideTooltips.push(hideTooltip = function() {
+          h();
+          return remove(hideTooltips, hideTooltip);
+        });
+      }
+    });
+    onEvent(input, ['input', 'pInput'], function() {
+      setStyle(input, style.valid);
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    });
+    onAdds.push(function() {
+      if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
+        setStyle(input, style.invalid);
+        return error = 'تکمیل این فیلد الزامیست.';
+      } else if ((field.valid != null) && !field.valid()) {
+        setStyle(input, style.invalid);
+        return error = 'مقدار وارد شده قابل قبول نیست.';
+      }
+    });
+    return onEvent(input, 'blur', function() {
+      if (typeof hideTooltip === "function") {
+        hideTooltip();
+      }
+      return error = null;
+    });
+  });
+  onEvent(add, 'click', function() {
+    var canAdd;
+    canAdd = [i0, i1, i2, i3, i4].every(function(i) {
+      return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
+    });
+    if (!canAdd) {
+      onAdds.forEach(function(x) {
+        return x();
+      });
+      return;
+    }
+    rows.push([i0, i1, i2, i3, i4].map(function(i) {
+      return i.value();
+    }));
+    update();
+    return setStyle([i0, i1, i2, i3, i4], {
+      value: ''
+    });
+  });
+  return view;
+});
+
+
+},{"../../../../../components/restrictedInput/phoneNumber":17,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":55}],55:[function(require,module,exports){
+var extend, icon;
+
+extend = require('../../../../../utils').extend;
+
+exports.clearfix = {
+  clear: 'both'
+};
+
+exports.valid = {
+  color: '#5c5555',
+  borderColor: '#ccc'
+};
+
+exports.invalid = {
+  color: '#c00',
+  borderColor: '#c00'
+};
+
+exports.mainLabel = {
+  fontSize: 12,
+  lineHeight: 30,
+  fontWeight: 'bold',
+  color: '#5c5555',
+  margin: '50px 0 10px'
+};
+
+exports.optional = {
+  display: 'inline-block',
+  marginRight: 5,
+  fontSize: 12,
+  color: '#ccc',
+  height: 30,
+  lineHeight: 30
+};
+
+exports.th = {
+  padding: '10px 10px 0',
+  color: '#5c5555',
+  fontSize: 12
+};
+
+exports.td = {
+  padding: '10px 5px',
+  color: '#5c5555',
+  fontSize: 12
+};
+
+exports.input = {
+  width: 200,
+  fontSize: 12,
+  height: 30,
+  lineHeight: 30,
+  borderRadius: 2,
+  padding: '0 5px',
+  outline: 'none',
+  transition: '0.2s',
+  border: '1px solid #ccc',
+  color: '#5c5555'
+};
+
+icon = {
+  cursor: 'pointer',
+  width: 20,
+  height: 20,
+  fontSize: 20,
+  position: 'relative',
+  top: 2
+};
+
+exports.add = extend({}, icon, {
+  "class": 'fa fa-plus-circle',
+  color: '#449e73'
+});
+
+exports.remove = extend({}, icon, {
+  "class": 'fa fa-minus-circle',
+  color: '#d71d24'
+});
+
+
+},{"../../../../../utils":30}],56:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
+  var E, dom, events, onEvent, setData, t0, t1, text, view;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData;
+  E = dom.E, text = dom.text;
+  onEvent = events.onEvent;
+  view = E(null, E(style.column, E(style.label, text('ورزش‌های مورد علاقه'), E(style.optional, '(اختیاری)')), t0 = E('textarea', style.textarea)), E(style.column, E(style.label, text('زمینه‌های هنری مورد علاقه'), E(style.optional, '(اختیاری)')), t1 = E('textarea', style.textarea)), E(style.clearfix));
+  onEvent(t0, 'input', function() {
+    return setData('ورزش‌های مورد علاقه', t0.value());
+  });
+  onEvent(t1, 'input', function() {
+    return setData('زمینه‌های هنری مورد علاقه', t0.value());
+  });
+  return view;
+});
+
+
+},{"../../../../../utils/component":26,"./style":57}],57:[function(require,module,exports){
+exports.clearfix = {
+  clear: 'both'
+};
+
+exports.column = {
+  float: 'right',
+  width: '46%',
+  padding: '2% 10px 0 10px'
+};
+
+exports.label = {
+  fontSize: 12,
+  lineHeight: 30,
+  fontWeight: 'bold',
+  color: '#5c5555'
+};
+
+exports.optional = {
+  display: 'inline-block',
+  marginRight: 5,
+  fontSize: 12,
+  color: '#ccc',
+  height: 30,
+  lineHeight: 30
+};
+
+exports.textarea = {
+  minWidth: '100%',
+  maxWidth: '100%',
+  minHeight: 100,
+  maxHeight: 100,
+  fontSize: 12,
+  borderRadius: 2,
+  padding: '5px',
+  outline: 'none',
+  transition: '0.2s',
+  border: '1px solid #ccc',
+  color: '#5c5555'
+};
+
+
+},{}],58:[function(require,module,exports){
+var component, extend, radioSwitch, ref, remove, style, tooltip;
+
+component = require('../../../../../utils/component');
+
+tooltip = require('../../../../../components/tooltip');
+
+radioSwitch = require('../../../../../components/radioSwitch');
+
+style = require('./style');
+
+ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
+
+module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
+  var E, dom, events, fields, handleY0, handleY1, hide, hideTooltips, onEvent, setData, setError, setOff, setStyle, show, view, x0, x1, y0, y1;
+  dom = arg.dom, events = arg.events, setOff = arg.setOff;
+  setData = arg1.setData, setError = arg1.setError;
+  E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  onEvent = events.onEvent;
+  hideTooltips = [];
+  setOff(function() {
+    return hideTooltips.forEach(function(hideTooltip) {
+      return hideTooltip();
+    });
+  });
+  fields = {};
+  view = E(null, E(style.label, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟'), x0 = fields['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟'] = E(radioSwitch, {
+    items: ['بلی', 'خیر'],
+    selectedIndex: 1
+  }), hide(y0 = E('input', extend({
+    placeholder: 'نوع آن را ذکر نمایید.'
+  }, style.input))), E(style.clearfix), E(style.label, 'آیا دخانیات مصرف می‌کنید؟'), fields['آیا دخانیات مصرف می‌کنید؟'] = E(radioSwitch, {
+    items: ['بلی', 'خیر'],
+    selectedIndex: 1
+  }), E(style.clearfix), E(style.label, 'آیا سابقه محکومیت کیفری دارید؟'), x1 = fields['آیا سابقه محکومیت کیفری دارید؟'] = E(radioSwitch, {
+    items: ['بلی', 'خیر'],
+    selectedIndex: 1
+  }), hide(y1 = E('input', extend({
+    placeholder: 'تاریخ، دلایل و مدت آن را توضیح دهید.'
+  }, style.input))), E(style.clearfix));
+  handleY0 = function() {
+    setData('نوع آن را ذکر نمایید.', y0.value());
+    if (y0.value().trim()) {
+      return setError('نوع آن را ذکر نمایید.', null);
+    } else {
+      return setError('نوع آن را ذکر نمایید.', 'تکمیل این فیلد الزامیست.');
+    }
+  };
+  x0.onChange(function() {
+    if (x0.value() === 'بلی') {
+      show(y0);
+      return handleY0();
+    } else {
+      hide(y0);
+      return setError('نوع آن را ذکر نمایید.', null);
+    }
+  });
+  onEvent(y0, 'input', handleY0);
+  handleY1 = function() {
+    setData('تاریخ، دلایل و مدت آن را توضیح دهید.', y1.value());
+    if (y1.value().trim()) {
+      return setError('تاریخ، دلایل و مدت آن را توضیح دهید.', null);
+    } else {
+      return setError('تاریخ، دلایل و مدت آن را توضیح دهید.', 'تکمیل این فیلد الزامیست.');
+    }
+  };
+  x1.onChange(function() {
+    if (x1.value() === 'بلی') {
+      show(y1);
+      return handleY1();
+    } else {
+      hide(y1);
+      return setError('تاریخ، دلایل و مدت آن را توضیح دهید.', null);
+    }
+  });
+  onEvent(y1, 'input', handleY1);
+  [y0, y1].forEach(function(y) {
+    var error, hideTooltip;
+    error = hideTooltip = void 0;
+    onEvent(y, 'focus', function() {
+      var h;
+      if (error) {
+        h = tooltip(y, error);
+        return hideTooltips.push(hideTooltip = function() {
+          h();
+          return remove(hideTooltips, hideTooltip);
+        });
+      }
+    });
+    onEvent(y, ['input', 'pInput'], function() {
+      setStyle(y, style.valid);
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    });
+    return onEvent(y, 'blur', function() {
+      return setTimeout((function() {
+        if (typeof hideTooltip === "function") {
+          hideTooltip();
+        }
+        if (!y.value().trim()) {
+          setStyle(y, style.invalid);
+          return error = 'تکمیل این فیلد الزامیست.';
+        } else {
+          return error = null;
+        }
+      }), 100);
+    });
+  });
+  return view;
+});
+
+
+},{"../../../../../components/radioSwitch":11,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":59}],59:[function(require,module,exports){
+exports.clearfix = {
+  clear: 'both'
+};
+
+exports.valid = {
+  color: '#5c5555',
+  borderColor: '#ccc'
+};
+
+exports.invalid = {
+  color: '#c00',
+  borderColor: '#c00'
+};
+
+exports.label = {
+  fontSize: 12,
+  lineHeight: 30,
+  fontWeight: 'bold',
+  color: '#5c5555',
+  marginTop: 10
+};
+
+exports.input = {
+  fontSize: 12,
+  borderRadius: 2,
+  padding: '5px',
+  outline: 'none',
+  transition: '0.2s',
+  border: '1px solid #ccc',
+  color: '#5c5555',
+  float: 'right',
+  width: 500,
+  marginRight: 10
+};
+
+
+},{}],60:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -5803,7 +6744,7 @@ module.exports = component('applicantFormOverview', function(arg) {
       src: user.personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/default-avatar-small.png'
     });
     setStyle(name, {
-      text: user.name
+      text: user.firstName + " " + user.lastName
     });
     setStyle(birthday, {
       text: 'متولد ' + birthdayString
@@ -5815,8 +6756,10 @@ module.exports = component('applicantFormOverview', function(arg) {
       text: 'تاریخ ثبت: ' + toDate(user.modificationTime)
     });
     empty(jobs);
-    append(jobs, user.selectedJobs.map(function(job) {
-      return E(style.job, job);
+    append(jobs, user.selectedJobs.map(function(arg1) {
+      var jobName;
+      jobName = arg1.jobName;
+      return E(style.job, jobName);
     }));
     return setStyle(resumeLink, {
       href: '/webApi/resume?address=' + user.resume
@@ -5826,7 +6769,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":30,"../../../../utils/component":26,"./style":50}],50:[function(require,module,exports){
+},{"../../../../utils":30,"../../../../utils/component":26,"./style":61}],61:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -5889,7 +6832,7 @@ exports.resumeLink = {
 };
 
 
-},{}],51:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, tooltip;
 
 component = require('../../../../utils/component');
@@ -6262,7 +7205,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/radioSwitch":11,"../../../../components/restrictedInput/email":13,"../../../../components/restrictedInput/number":16,"../../../../components/restrictedInput/phoneNumber":17,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./multivalue":52,"./style":54}],52:[function(require,module,exports){
+},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/radioSwitch":11,"../../../../components/restrictedInput/email":13,"../../../../components/restrictedInput/number":16,"../../../../components/restrictedInput/phoneNumber":17,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./multivalue":63,"./style":65}],63:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -6330,7 +7273,7 @@ module.exports = component('personalInfoMultivalue', function(arg, input) {
 });
 
 
-},{"../../../../../utils":30,"../../../../../utils/component":26,"./style":53}],53:[function(require,module,exports){
+},{"../../../../../utils":30,"../../../../../utils/component":26,"./style":64}],64:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -6385,7 +7328,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":30}],54:[function(require,module,exports){
+},{"../../../../../utils":30}],65:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -6485,7 +7428,7 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":30}],55:[function(require,module,exports){
+},{"../../../../utils":30}],66:[function(require,module,exports){
 var component, dateInput, dropdown, extend, monthToString, numberInput, ref, remove, style, toEnglish, tooltip;
 
 component = require('../../../../utils/component');
@@ -6684,7 +7627,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/restrictedInput/number":16,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":56}],56:[function(require,module,exports){
+},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/restrictedInput/number":16,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":67}],67:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -6880,7 +7823,7 @@ exports.jobColumnHeader = {
 };
 
 
-},{"../../../../utils":30}],57:[function(require,module,exports){
+},{"../../../../utils":30}],68:[function(require,module,exports){
 exports.cover = {
   position: 'absolute',
   top: 0,
@@ -6939,7 +7882,7 @@ exports.submitDisabled = {
 };
 
 
-},{}],58:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 var component, dropdown, remove, style, tooltip, yearInput;
 
 component = require('../../../../utils/component');
@@ -7186,7 +8129,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":7,"../../../../components/restrictedInput/year":18,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":59}],59:[function(require,module,exports){
+},{"../../../../components/dropdown":7,"../../../../components/restrictedInput/year":18,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":70}],70:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -7276,7 +8219,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":30}],60:[function(require,module,exports){
+},{"../../../../utils":30}],71:[function(require,module,exports){
 var component, extend, form, style, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -7346,7 +8289,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./form":46,"./style":61,"./tests":62}],61:[function(require,module,exports){
+},{"../../utils":30,"../../utils/component":26,"./form":46,"./style":72,"./tests":73}],72:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -7459,7 +8402,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":30}],62:[function(require,module,exports){
+},{"../../utils":30}],73:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -7472,7 +8415,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":26}],63:[function(require,module,exports){
+},{"../../../utils/component":26}],74:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -7621,7 +8564,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./jobs":64,"./style":65}],64:[function(require,module,exports){
+},{"../../utils":30,"../../utils/component":26,"./jobs":75,"./style":76}],75:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -7703,7 +8646,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],65:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -7935,7 +8878,7 @@ exports.footerLink = {
 };
 
 
-},{}],66:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -8045,7 +8988,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":25,"../../utils/component":26,"../../utils/dom":28,"../tableView":71}],67:[function(require,module,exports){
+},{"../../singletons/modal":25,"../../utils/component":26,"../../utils/dom":28,"../tableView":82}],78:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -8073,7 +9016,7 @@ module.exports = component('views', function(arg) {
     currentPage = (function() {
       if (user) {
         switch (user.userType) {
-          case 0:
+          case 3:
             return applicantView;
           case 1:
             return managerView;
@@ -8090,7 +9033,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":26,"./applicantView":60,"./apply":63,"./hrView":66,"./login":68,"./managerView":70}],68:[function(require,module,exports){
+},{"../utils/component":26,"./applicantView":71,"./apply":74,"./hrView":77,"./login":79,"./managerView":81}],79:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -8161,7 +9104,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":16,"../../utils":30,"../../utils/component":26,"./style":69}],69:[function(require,module,exports){
+},{"../../components/restrictedInput/number":16,"../../utils":30,"../../utils/component":26,"./style":80}],80:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -8258,7 +9201,7 @@ exports.invalid = {
 };
 
 
-},{}],70:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -8266,7 +9209,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":71}],71:[function(require,module,exports){
+},{"../tableView":82}],82:[function(require,module,exports){
 var component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
 
 component = require('../../utils/component');
@@ -8392,7 +9335,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"../../utils/logic":32,"./search":74,"./sidebar":76,"./style":78,"./table":80}],72:[function(require,module,exports){
+},{"../../utils":30,"../../utils/component":26,"../../utils/logic":32,"./search":85,"./sidebar":87,"./style":89,"./table":91}],83:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -8613,7 +9556,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../utils":30,"../../../../utils/component":26,"./style":73}],73:[function(require,module,exports){
+},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../utils":30,"../../../../utils/component":26,"./style":84}],84:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -8656,7 +9599,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":30}],74:[function(require,module,exports){
+},{"../../../../utils":30}],85:[function(require,module,exports){
 var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -8764,7 +9707,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":30,"../../../utils/component":26,"../../../utils/logic":32,"./criterion":72,"./style":75}],75:[function(require,module,exports){
+},{"../../../utils":30,"../../../utils/component":26,"../../../utils/logic":32,"./criterion":83,"./style":86}],86:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -8885,7 +9828,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":30}],76:[function(require,module,exports){
+},{"../../../utils":30}],87:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -8957,7 +9900,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":26,"./style":77}],77:[function(require,module,exports){
+},{"../../../utils/component":26,"./style":88}],88:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -9043,7 +9986,7 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":30}],78:[function(require,module,exports){
+},{"../../../utils":30}],89:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -9062,7 +10005,7 @@ exports.iconTd = {};
 exports.icon = {};
 
 
-},{}],79:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -9284,7 +10227,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":30,"./style":81}],80:[function(require,module,exports){
+},{"../../../utils":30,"./style":92}],91:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -9408,7 +10351,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":30,"../../../utils/component":26,"./functions":79,"./style":81}],81:[function(require,module,exports){
+},{"../../../utils":30,"../../../utils/component":26,"./functions":90,"./style":92}],92:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -9499,7 +10442,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":30}],82:[function(require,module,exports){
+},{"../../../utils":30}],93:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -9533,4 +10476,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./alertMessages":2,"./page":22,"./q":23,"./utils/dom":28,"./utils/service":36}]},{},[82]);
+},{"./alertMessages":2,"./page":22,"./q":23,"./utils/dom":28,"./utils/service":36}]},{},[93]);

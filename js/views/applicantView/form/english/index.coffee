@@ -19,7 +19,7 @@ module.exports = component 'applicantFormEnglish', ({dom, events, setOff}, {setD
       setStyle f.input, style.input
 
       f.onChange ->
-        setData label, f.value()
+        setData labelText, f.value()
 
       column = E style.column,
         label = E style.label, labelText
