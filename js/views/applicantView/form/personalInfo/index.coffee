@@ -52,7 +52,7 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
   f.onChange do (f) -> ->
     setData 'وضعیت نظام وظیفه', f.value()
 
-  fieldCollections[1]['نوع معافیت'] = f = E dropdown, items: ['خرید خدمت', 'معافیت تخصیلی', 'معافیت کفالت', 'معافیت پزشکی']
+  fieldCollections[1]['نوع معافیت'] = f = E dropdown, items: ['خرید خدمت', 'معافیت تحصیلی', 'معافیت کفالت', 'معافیت پزشکی']
   setStyle f, style.dropdownPlaceholder
   setStyle f.input, style.specialInput
   f.onChange do (f) -> ->
@@ -248,6 +248,17 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
         ), 100
   setOff ->
     hideTooltips.forEach (hideTooltip) -> hideTooltip()
+
+  hideChildren = ->
+    hide groupArrays[1][4]
+    setData 'تعداد افراد تحت تکفل', null
+    setError 'تعداد افراد تحت تکفل', null
+  fieldCollections[0]['جنسیت'].onChange ->
+    if fieldCollections[0]['جنسیت'].value() is 'مرد'
+      show groupArrays[1][4]
+      setData 'تعداد افراد تحت تکفل', fieldCollections[1]['تعداد افراد تحت تکفل'].value()
+      unless fieldCollections[1]['تعداد افراد تحت تکفل'].value()
+        setError 'تعداد افراد تحت تکفل', 'تکمیل این فیلد الزامیست.'
 
   do hideMoaf = ->
     hide groupArrays[1][1]
