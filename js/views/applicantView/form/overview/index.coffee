@@ -10,7 +10,7 @@ module.exports = component 'applicantFormOverview', ({dom, state}) ->
       E style.sectionText,
         name      = E style.sectionTitle
         birthday  = E style.regular
-        ssid      = E style.regular
+        identificationCode      = E style.regular
         createdAt = E style.regular
     E style.section,
       E style.sectionCircle,
@@ -33,7 +33,7 @@ module.exports = component 'applicantFormOverview', ({dom, state}) ->
     setStyle profileImg, src: if user.personalPic then "/webApi/image?address=#{personalPic}" else 'assets/img/default-avatar-small.png'
     setStyle name, text: "#{user.firstName} #{user.lastName}"
     setStyle birthday, text: 'متولد ' + birthdayString
-    setStyle ssid, text: 'کد ملی: ' + user.ssid
+    setStyle identificationCode, text: 'کد ملی: ' + user.identificationCode
     setStyle createdAt, text: 'تاریخ ثبت: ' + toDate user.modificationTime
 
     empty jobs

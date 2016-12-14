@@ -21,7 +21,7 @@ exports.logout = (automatic = false) ->
   Q()
 
 exports.submitProfileData = (userId, data) ->
-  post 'submitProfileData', {userId, data}
+  post 'submitProfileData', {userId, data: JSON.stringify data}
   .then ->
     state.user.on once: true, (user) ->
       state.user.set extend {}, user, applicantData: data

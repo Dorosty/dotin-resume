@@ -60,7 +60,7 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     itemsList.show()
 
   onEvent input, 'blur', ->
-    defer(5) ->
+    defer(1000) ->
       itemsList.hide()
 
   onEvent input, 'keydown', (e) ->

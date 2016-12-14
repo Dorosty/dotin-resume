@@ -65,7 +65,9 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events, setOff}, {
         labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E 'span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'
         E style.optional, '(اختیاری)'
       fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E 'input', style.input
-      labels['مدت زمانی که بیمه بوده‌اید؟'] = E style.label, 'مدت زمانی که بیمه بوده‌اید؟'
+      E style.label,
+        labels['مدت زمانی که بیمه بوده‌اید؟'] = E 'span', null, 'مدت زمانی که بیمه بوده‌اید؟'
+        E style.optional, '(اختیاری)'
       fields['مدت زمانی که بیمه بوده‌اید؟'] = E 'input', style.input
       labels['میزان دستمزد'] = E style.label,
         text 'میزان دستمزد '
@@ -76,7 +78,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events, setOff}, {
 
   hideTooltips = []
   Object.keys(fields).forEach (labelText) ->
-    if labelText is 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'
+    if labelText in ['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟', 'مدت زمانی که بیمه بوده‌اید؟']
       return
     field = fields[labelText]
     label = labels[labelText]

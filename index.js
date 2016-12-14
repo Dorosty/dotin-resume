@@ -486,7 +486,7 @@ module.exports = component('dropdown', function(arg, arg1) {
     return itemsList.show();
   });
   onEvent(input, 'blur', function() {
-    return defer(5)(function() {
+    return defer(1000)(function() {
       return itemsList.hide();
     });
   });
@@ -4595,7 +4595,7 @@ exports.logout = function(automatic) {
 exports.submitProfileData = function(userId, data) {
   return post('submitProfileData', {
     userId: userId,
-    data: data
+    data: JSON.stringify(data)
   }).then(function() {
     return state.user.on({
       once: true
@@ -4828,6 +4828,8 @@ exports.autoPing = function() {
 },{"../../q":23,"../log":31,"./ex":34,"./getPost":35,"./names":38}],37:[function(require,module,exports){
 var Q, applicants, extend, user;
 
+return;
+
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -4873,7 +4875,7 @@ applicants = [
 ];
 
 user = {
-  ssid: '0016503368',
+  identificationCode: '0016503368',
   personalPic: null,
   firstName: 'علی',
   lastName: 'درستی',
@@ -5340,10 +5342,7 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
         }
       });
       return onEvent(input, 'blur', function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        return error = null;
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
       });
     });
     onEvent(add, 'click', function() {
@@ -5769,10 +5768,7 @@ module.exports = component('applicantForm', function(arg) {
   state.user.on(function(user) {
     if (user.applicantData) {
       hide(yesData);
-      show(noData);
-      return setStyle(noData, {
-        englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.applicantData, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
-      });
+      return show(noData);
     }
   });
   return view;
@@ -5897,11 +5893,11 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
     });
     return [x, y, z];
   })());
-  view = E(null, E(style.column, labels['متقاضه چه نوع همکاری هستید؟'] = E(style.label, 'متقاضه چه نوع همکاری هستید؟'), fields['متقاضه چه نوع همکاری هستید؟'], labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = E(style.label, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), f0, labels['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = E(style.label, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟']), E(style.column, E(style.label, labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(style.optional, '(اختیاری)')), fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('input', style.input), labels['مدت زمانی که بیمه بوده‌اید؟'] = E(style.label, 'مدت زمانی که بیمه بوده‌اید؟'), fields['مدت زمانی که بیمه بوده‌اید؟'] = E('input', style.input), labels['میزان دستمزد'] = E(style.label, text('میزان دستمزد '), E(style.underline, 'خالص'), text(' درخواستی شما چقدر است؟')), f1), E(style.clearfix));
+  view = E(null, E(style.column, labels['متقاضه چه نوع همکاری هستید؟'] = E(style.label, 'متقاضه چه نوع همکاری هستید؟'), fields['متقاضه چه نوع همکاری هستید؟'], labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = E(style.label, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), f0, labels['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = E(style.label, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟']), E(style.column, E(style.label, labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(style.optional, '(اختیاری)')), fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('input', style.input), E(style.label, labels['مدت زمانی که بیمه بوده‌اید؟'] = E('span', null, 'مدت زمانی که بیمه بوده‌اید؟'), E(style.optional, '(اختیاری)')), fields['مدت زمانی که بیمه بوده‌اید؟'] = E('input', style.input), labels['میزان دستمزد'] = E(style.label, text('میزان دستمزد '), E(style.underline, 'خالص'), text(' درخواستی شما چقدر است؟')), f1), E(style.clearfix));
   hideTooltips = [];
   Object.keys(fields).forEach(function(labelText) {
     var error, field, hideTooltip, input, label;
-    if (labelText === 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟') {
+    if (labelText === 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟' || labelText === 'مدت زمانی که بیمه بوده‌اید؟') {
       return;
     }
     field = fields[labelText];
@@ -6130,7 +6126,7 @@ exports.radioSwitch = {
 
 
 },{}],52:[function(require,module,exports){
-var component, phoneNumberInput, remove, style, tooltip;
+var component, extend, numberInput, ref, remove, style, tooltip;
 
 component = require('../../../../../utils/component');
 
@@ -6138,9 +6134,9 @@ style = require('./style');
 
 tooltip = require('../../../../../components/tooltip');
 
-phoneNumberInput = require('../../../../../components/restrictedInput/phoneNumber');
+numberInput = require('../../../../../components/restrictedInput/number');
 
-remove = require('../../../../../utils').remove;
+ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
   var E, add, append, body, dom, empty, events, hideTooltips, i0, i1, i2, i3, i4, lastLine, onAdds, onEvent, rows, setData, setError, setOff, setStyle, update, view;
@@ -6155,8 +6151,10 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
     });
   });
   rows = [];
-  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', style.input)), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
-    i4 = E(phoneNumberInput);
+  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
+    width: 250
+  }))), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
+    i4 = E(numberInput);
     setStyle(i4, style.input);
     return i4;
   })()), E('td', style.td, add = E(style.add)));
@@ -6213,10 +6211,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
       }
     });
     return onEvent(input, 'blur', function() {
-      if (typeof hideTooltip === "function") {
-        hideTooltip();
-      }
-      return error = null;
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
     });
   });
   onEvent(add, 'click', function() {
@@ -6242,7 +6237,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/phoneNumber":17,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":53}],53:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":16,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":53}],53:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -6282,7 +6277,7 @@ exports.td = {
 };
 
 exports.input = {
-  width: 200,
+  width: 150,
   fontSize: 12,
   height: 30,
   lineHeight: 30,
@@ -6315,7 +6310,7 @@ exports.remove = extend({}, icon, {
 
 
 },{"../../../../../utils":30}],54:[function(require,module,exports){
-var component, phoneNumberInput, remove, style, tooltip;
+var component, extend, numberInput, ref, remove, style, tooltip;
 
 component = require('../../../../../utils/component');
 
@@ -6323,9 +6318,9 @@ style = require('./style');
 
 tooltip = require('../../../../../components/tooltip');
 
-phoneNumberInput = require('../../../../../components/restrictedInput/phoneNumber');
+numberInput = require('../../../../../components/restrictedInput/number');
 
-remove = require('../../../../../utils').remove;
+ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
   var E, add, append, body, dom, empty, events, hideTooltips, i0, i1, i2, i3, i4, lastLine, onAdds, onEvent, rows, setData, setOff, setStyle, text, update, view;
@@ -6340,8 +6335,10 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
     });
   });
   rows = [];
-  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', style.input)), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
-    i4 = E(phoneNumberInput);
+  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
+    width: 250
+  }))), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
+    i4 = E(numberInput);
     setStyle(i4, style.input);
     return i4;
   })()), E('td', style.td, add = E(style.add)));
@@ -6393,10 +6390,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
       }
     });
     return onEvent(input, 'blur', function() {
-      if (typeof hideTooltip === "function") {
-        hideTooltip();
-      }
-      return error = null;
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
     });
   });
   onEvent(add, 'click', function() {
@@ -6422,7 +6416,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/phoneNumber":17,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":55}],55:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":16,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":55}],55:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -6471,7 +6465,7 @@ exports.td = {
 };
 
 exports.input = {
-  width: 200,
+  width: 150,
   fontSize: 12,
   height: 30,
   lineHeight: 30,
@@ -6727,10 +6721,10 @@ style = require('./style');
 ref = require('../../../../utils'), extend = ref.extend, toDate = ref.toDate, monthToString = ref.monthToString;
 
 module.exports = component('applicantFormOverview', function(arg) {
-  var E, append, birthday, createdAt, dom, empty, jobs, name, profileImg, resumeLink, setStyle, ssid, state, view;
+  var E, append, birthday, createdAt, dom, empty, identificationCode, jobs, name, profileImg, resumeLink, setStyle, state, view;
   dom = arg.dom, state = arg.state;
   E = dom.E, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
-  view = E(null, E(style.section, profileImg = E('img', style.sectionCircle), E(style.sectionText, name = E(style.sectionTitle), birthday = E(style.regular), ssid = E(style.regular), createdAt = E(style.regular))), E(style.section, E(style.sectionCircle, E(extend({
+  view = E(null, E(style.section, profileImg = E('img', style.sectionCircle), E(style.sectionText, name = E(style.sectionTitle), birthday = E(style.regular), identificationCode = E(style.regular), createdAt = E(style.regular))), E(style.section, E(style.sectionCircle, E(extend({
     "class": 'fa fa-suitcase'
   }, style.sectionIcon))), E(style.sectionText, E(style.sectionTitle, 'شغل‌های درخواستی'), jobs = E())), E(style.section, E(style.sectionCircle, E(extend({
     "class": 'fa fa-download'
@@ -6749,8 +6743,8 @@ module.exports = component('applicantFormOverview', function(arg) {
     setStyle(birthday, {
       text: 'متولد ' + birthdayString
     });
-    setStyle(ssid, {
-      text: 'کد ملی: ' + user.ssid
+    setStyle(identificationCode, {
+      text: 'کد ملی: ' + user.identificationCode
     });
     setStyle(createdAt, {
       text: 'تاریخ ثبت: ' + toDate(user.modificationTime)
@@ -6833,7 +6827,7 @@ exports.resumeLink = {
 
 
 },{}],62:[function(require,module,exports){
-var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, tooltip;
+var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian, tooltip;
 
 component = require('../../../../utils/component');
 
@@ -6857,10 +6851,10 @@ checkbox = require('../../../../components/checkbox');
 
 multivalue = require('./multivalue');
 
-ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, defer = ref.defer;
+ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, defer = ref.defer, toPersian = ref.toPersian;
 
 module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
-  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideMoaf, hideTooltips, labelArrays, onEvent, phone, phone2, setData, setError, setOff, setStyle, show, state, text, textArrays, view;
+  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideTooltips, labelArrays, manageDalil, manageMoaf, onEvent, phone, phone2, setData, setError, setOff, setStyle, show, state, text, textArrays, view;
   dom = arg.dom, events = arg.events, state = arg.state, setOff = arg.setOff;
   setData = arg1.setData, setError = arg1.setError;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
@@ -6918,7 +6912,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     };
   })(f));
   fieldCollections[1]['نوع معافیت'] = f = E(dropdown, {
-    items: ['خرید خدمت', 'معافیت تخصیلی', 'معافیت کفالت', 'معافیت پزشکی']
+    items: ['خرید خدمت', 'معافیت تحصیلی', 'معافیت کفالت', 'معافیت پزشکی']
   });
   setStyle(f, style.dropdownPlaceholder);
   setStyle(f.input, style.specialInput);
@@ -6955,12 +6949,13 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   addTextField(1, 'نام معرف');
   f = E(emailInput);
   setStyle(f, style.input);
-  fieldCollections[2]['ایمیل'] = f = E(multivalue, f);
   state.user.on({
     once: true
   }, function(user) {
-    f.add(user.email);
-    return setData('ایمیل', [user.email]);
+    return fieldCollections[2]['ایمیل'] = f = E(multivalue, {
+      input: f,
+      initialItems: [user.email]
+    });
   });
   (function(f) {
     return setTimeout(function() {
@@ -6982,6 +6977,11 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
         setStyle([label, input], style.valid);
         error = null;
         return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+      });
+      onEvent(input, 'blur', function() {
+        return setTimeout((function() {
+          return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+        }), 100);
       });
       return f.onChange(function(adding) {
         if (!adding && f.value().length === 1) {
@@ -7009,8 +7009,14 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   })(f);
   f = E(phoneNumberInput);
   setStyle(f, style.input);
-  fieldCollections[2]['تلفن همراه'] = f = E(multivalue, f);
-  setError('تلفن همراه', 'تکمیل این فیلد الزامیست.');
+  state.user.on({
+    once: true
+  }, function(user) {
+    return fieldCollections[2]['تلفن همراه'] = f = E(multivalue, {
+      input: f,
+      initialItems: [toPersian(user.phoneNumber)]
+    });
+  });
   (function(f) {
     return setTimeout(function() {
       var error, hideTooltip, input, label;
@@ -7031,6 +7037,11 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
         setStyle([label, input], style.valid);
         error = null;
         return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+      });
+      onEvent(input, 'blur', function() {
+        return setTimeout((function() {
+          return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+        }), 100);
       });
       return f.onChange(function(adding) {
         if (!adding && f.value().length === 1) {
@@ -7124,7 +7135,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       if (i === 0 && j === 0) {
         return;
       }
-      if (i === 1 && (j === 3 || j === 6)) {
+      if (i === 1 && (j === 3 || j === 5 || j === 6)) {
         return;
       }
       if (i === 2) {
@@ -7174,30 +7185,71 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       return hideTooltip();
     });
   });
-  (hideMoaf = function() {
-    hide(groupArrays[1][1]);
-    hide(groupArrays[1][2]);
-    setData('نوع معافیت', null);
-    setData('دلیل معافیت', null);
-    setError('نوع معافیت', null);
-    return setError('دلیل معافیت', null);
-  })();
-  fieldCollections[1]['وضعیت نظام وظیفه'].onChange(function() {
+  fieldCollections[1]['وضعیت تاهل'].onChange(function() {
+    if (fieldCollections[1]['وضعیت تاهل'].value() !== 'مجرد') {
+      show(groupArrays[1][4]);
+      setData('تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value());
+      if (!fieldCollections[1]['تعداد فرزندان'].value()) {
+        return setError('تعداد فرزندان', 'تکمیل این فیلد الزامیست.');
+      }
+    } else {
+      hide(groupArrays[1][4]);
+      setData('تعداد فرزندان', null);
+      return setError('تعداد فرزندان', null);
+    }
+  });
+  fieldCollections[0]['جنسیت'].onChange(function() {
+    if (fieldCollections[0]['جنسیت'].value() === 'مرد') {
+      show(groupArrays[1][0]);
+      setData('وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value());
+      if (!fieldCollections[1]['وضعیت نظام وظیفه'].value()) {
+        setError('وضعیت نظام وظیفه', 'تکمیل این فیلد الزامیست.');
+      }
+      return manageMoaf();
+    } else {
+      hide(groupArrays[1][0]);
+      hide(groupArrays[1][1]);
+      hide(groupArrays[1][2]);
+      setData('وضعیت نظام وظیفه', null);
+      setData('نوع معافیت', null);
+      setData('دلیل معافیت', null);
+      setError('وضعیت نظام وظیفه', null);
+      setError('نوع معافیت', null);
+      return setError('دلیل معافیت', null);
+    }
+  });
+  (manageMoaf = function() {
     if (fieldCollections[1]['وضعیت نظام وظیفه'].value() === 'معاف') {
       show(groupArrays[1][1]);
-      show(groupArrays[1][2]);
       setData('نوع معافیت', fieldCollections[1]['نوع معافیت'].value());
-      setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
       if (!fieldCollections[1]['نوع معافیت'].value()) {
         setError('نوع معافیت', 'تکمیل این فیلد الزامیست.');
       }
+      return manageDalil();
+    } else {
+      hide(groupArrays[1][1]);
+      hide(groupArrays[1][2]);
+      setData('نوع معافیت', null);
+      setData('دلیل معافیت', null);
+      setError('نوع معافیت', null);
+      return setError('دلیل معافیت', null);
+    }
+  })();
+  manageDalil = function() {
+    if (fieldCollections[1]['نوع معافیت'].value() === 'معافیت پزشکی') {
+      show(groupArrays[1][2]);
+      setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
       if (!fieldCollections[1]['دلیل معافیت'].value()) {
         return setError('دلیل معافیت', 'تکمیل این فیلد الزامیست.');
       }
     } else {
-      return hideMoaf();
+      hide(groupArrays[1][2]);
+      setData('دلیل معافیت', null);
+      return setError('دلیل معافیت', null);
     }
-  });
+  };
+  fieldCollections[1]['وضعیت نظام وظیفه'].onChange(manageMoaf);
+  fieldCollections[1]['نوع معافیت'].onChange(manageDalil);
   view = E(null, groupArrays.map(function(groupArray) {
     return E(style.column, groupArray);
   }), E(style.clearfix), addresses);
@@ -7214,21 +7266,26 @@ style = require('./style');
 
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
-module.exports = component('personalInfoMultivalue', function(arg, input) {
-  var E, add, addItem, append, changeListeners, data, destroy, dom, events, items, itemsPlaceholder, onEvent, returnObject, setStyle, setViewHeight, view;
+module.exports = component('personalInfoMultivalue', function(arg, arg1) {
+  var E, add, addItem, append, changeListeners, data, destroy, dom, events, initialItems, input, items, itemsPlaceholder, onEvent, returnObject, setStyle, setViewHeight, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  initialItems = arg1.initialItems, input = arg1.input;
   E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
   changeListeners = [];
   data = [];
   items = [];
   setStyle(input, style.input);
-  view = E(style.view, itemsPlaceholder = E(), input, add = E(style.add));
-  setViewHeight = function() {
+  view = E(style.view, itemsPlaceholder = E(null, initialItems.map(function(text) {
+    return E(style.item, E(extend({
+      englishText: text
+    }, style.itemText)));
+  })), input, add = E(style.add));
+  (setViewHeight = function() {
     return setStyle(view, {
-      height: (items.length + 1) * 30
+      height: (initialItems.length + items.length + 1) * 30
     });
-  };
+  })();
   addItem = function(text) {
     var newItem, removeItem;
     newItem = E(style.item, E(extend({
@@ -7281,7 +7338,6 @@ extend = require('../../../../../utils').extend;
 exports.view = {
   position: 'relative',
   transition: '0.2s',
-  height: 30,
   paddingTop: 7
 };
 
@@ -7573,10 +7629,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
       }
     });
     return onEvent(input, 'blur', function() {
-      if (typeof hideTooltip === "function") {
-        hideTooltip();
-      }
-      return error = null;
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
     });
   });
   onEvent(add, 'click', function() {
@@ -7969,10 +8022,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
         }
       });
       return onEvent(input, 'blur', function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        return error = null;
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
       });
     });
     onEvent(add, 'click', function() {
@@ -8052,10 +8102,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
         }
       });
       return onEvent(input, 'blur', function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        return error = null;
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
       });
     });
     onEvent(add, 'click', function() {
@@ -8091,38 +8138,10 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
       field: textarea1
     }
   ].forEach(function(arg2) {
-    var error, field, hideTooltip, label, text;
+    var field, label, text;
     text = arg2.text, label = arg2.label, field = arg2.field;
-    onEvent(field, 'input', function() {
+    return onEvent(field, 'input', function() {
       return setData(text, field.value());
-    });
-    error = hideTooltip = void 0;
-    onEvent(field, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(field, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(field, ['input', 'pInput'], function() {
-      setStyle([label, field], style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    return onEvent(field, 'blur', function() {
-      return setTimeout((function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        if (!field.value().trim()) {
-          setStyle([label, field], style.invalid);
-          return error = 'تکمیل این فیلد الزامیست.';
-        } else {
-          return error = null;
-        }
-      }), 100);
     });
   });
   return view;
@@ -8447,7 +8466,7 @@ module.exports = component('apply', function(arg) {
       text: 'نام خانوادگی*',
       isPersian: true
     }, {
-      key: 'ssid',
+      key: 'identificationCode',
       text: 'کد ملی*',
       isNumber: true
     }, {
@@ -8493,7 +8512,7 @@ module.exports = component('apply', function(arg) {
       });
     }
     onEvent(input, 'blur', function() {
-      if ((key === 'phoneNumber' && (toEnglish(input.value()).indexOf('09') !== 0 || input.value().length !== 11)) || (key === 'ssid' && input.value().length !== 10)) {
+      if ((key === 'phoneNumber' && (toEnglish(input.value()).indexOf('09') !== 0 || input.value().length !== 11)) || (key === 'identificationCode' && input.value().length !== 10)) {
         if (tooltip === 1) {
           $(input.fn.element).tooltip('destroy');
         }

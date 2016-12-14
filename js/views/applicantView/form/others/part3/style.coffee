@@ -37,7 +37,7 @@ exports.td =
   fontSize: 12
 
 exports.input =
-  width: 200
+  width: 150
   fontSize: 12
   height: 30
   lineHeight: 30

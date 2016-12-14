@@ -107,7 +107,7 @@ module.exports = component 'applicantForm', ({dom, events, state, service}) ->
       hide yesData
       show noData
       #####################
-      setStyle noData, englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.applicantData, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+      # setStyle noData, englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.applicantData, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
       #####################
 
   view

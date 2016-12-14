@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -32,7 +32,7 @@ applicants = [{
 }]
 
 user =
-  ssid: '0016503368'
+  identificationCode: '0016503368'
   personalPic: null
   firstName: 'علی'
   lastName: 'درستی'

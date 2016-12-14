@@ -94,7 +94,6 @@ module.exports = component 'applicantFormReputation', ({dom, events, setOff}, {s
         error = 'مقدار وارد شده قابل قبول نیست.'
     onEvent input, 'blur', ->
       hideTooltip?()
-      error = null
 
   onEvent add, 'click', ->
     canAdd = [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))

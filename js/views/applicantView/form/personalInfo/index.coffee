@@ -9,7 +9,7 @@ emailInput = require '../../../../components/restrictedInput/email'
 phoneNumberInput = require '../../../../components/restrictedInput/phoneNumber'
 checkbox = require '../../../../components/checkbox'
 multivalue = require './multivalue'
-{extend, remove, defer} = require '../../../../utils'
+{extend, remove, defer, toPersian} = require '../../../../utils'
 
 module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, setOff}, {setData, setError}) ->
   {E, text, setStyle, show, hide} = dom
@@ -79,10 +79,8 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
 
   f = E emailInput
   setStyle f, style.input
-  fieldCollections[2]['ایمیل'] = f = E multivalue, f
   state.user.on once: true, (user) ->
-    f.add user.email
-    setData 'ایمیل', [user.email]
+    fieldCollections[2]['ایمیل'] = f = E multivalue, input: f, initialItems: [user.email]
   do (f) -> setTimeout ->
     label = labelArrays[2][0]
     input = f.input
@@ -97,6 +95,10 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       setStyle [label, input], style.valid
       error = null
       hideTooltip?()
+    onEvent input, 'blur', ->
+      setTimeout (->
+        hideTooltip?()
+      ), 100
     f.onChange (adding) ->
       if !adding && f.value().length is 1
         setData 'ایمیل', null
@@ -117,8 +119,8 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
 
   f = E phoneNumberInput
   setStyle f, style.input
-  fieldCollections[2]['تلفن همراه'] = f = E multivalue, f
-  setError 'تلفن همراه', 'تکمیل این فیلد الزامیست.'
+  state.user.on once: true, (user) ->
+    fieldCollections[2]['تلفن همراه'] = f = E multivalue, input: f, initialItems: [toPersian user.phoneNumber]
   do (f) -> setTimeout ->
     label = labelArrays[2][1]
     input = f.input
@@ -133,6 +135,10 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       setStyle [label, input], style.valid
       error = null
       hideTooltip?()
+    onEvent input, 'blur', ->
+      setTimeout (->
+        hideTooltip?()
+      ), 100
     f.onChange (adding) ->
       if !adding && f.value().length is 1
         setData 'تلفن همراه', null
@@ -215,7 +221,7 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
     fieldArray.forEach (field, j) ->
       if i is 0 && j is 0
         return
-      if i is 1 && j in [3, 6]
+      if i is 1 && j in [3, 5, 6]
         return
       if i is 2
         return
@@ -249,36 +255,63 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
   setOff ->
     hideTooltips.forEach (hideTooltip) -> hideTooltip()
 
-  hideChildren = ->
-    hide groupArrays[1][4]
-    setData 'تعداد افراد تحت تکفل', null
-    setError 'تعداد افراد تحت تکفل', null
+  fieldCollections[1]['وضعیت تاهل'].onChange ->
+    if fieldCollections[1]['وضعیت تاهل'].value() isnt 'مجرد'
+      show groupArrays[1][4]
+      setData 'تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value()
+      unless fieldCollections[1]['تعداد فرزندان'].value()
+        setError 'تعداد فرزندان', 'تکمیل این فیلد الزامیست.'
+    else
+      hide groupArrays[1][4]
+      setData 'تعداد فرزندان', null
+      setError 'تعداد فرزندان', null
+
   fieldCollections[0]['جنسیت'].onChange ->
     if fieldCollections[0]['جنسیت'].value() is 'مرد'
-      show groupArrays[1][4]
-      setData 'تعداد افراد تحت تکفل', fieldCollections[1]['تعداد افراد تحت تکفل'].value()
-      unless fieldCollections[1]['تعداد افراد تحت تکفل'].value()
-        setError 'تعداد افراد تحت تکفل', 'تکمیل این فیلد الزامیست.'
+      show groupArrays[1][0]
+      setData 'وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value()
+      unless fieldCollections[1]['وضعیت نظام وظیفه'].value()
+        setError 'وضعیت نظام وظیفه', 'تکمیل این فیلد الزامیست.'
+      manageMoaf()
+    else
+      hide groupArrays[1][0]
+      hide groupArrays[1][1]
+      hide groupArrays[1][2]
+      setData 'وضعیت نظام وظیفه', null
+      setData 'نوع معافیت', null
+      setData 'دلیل معافیت', null
+      setError 'وضعیت نظام وظیفه', null
+      setError 'نوع معافیت', null
+      setError 'دلیل معافیت', null
 
-  do hideMoaf = ->
-    hide groupArrays[1][1]
-    hide groupArrays[1][2]
-    setData 'نوع معافیت', null
-    setData 'دلیل معافیت', null
-    setError 'نوع معافیت', null
-    setError 'دلیل معافیت', null
-  fieldCollections[1]['وضعیت نظام وظیفه'].onChange ->
+  do manageMoaf = ->
     if fieldCollections[1]['وضعیت نظام وظیفه'].value() is 'معاف'
       show groupArrays[1][1]
-      show groupArrays[1][2]
       setData 'نوع معافیت', fieldCollections[1]['نوع معافیت'].value()
-      setData 'دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value()
       unless fieldCollections[1]['نوع معافیت'].value()
         setError 'نوع معافیت', 'تکمیل این فیلد الزامیست.'
+      manageDalil()
+    else
+      hide groupArrays[1][1]
+      hide groupArrays[1][2]
+      setData 'نوع معافیت', null
+      setData 'دلیل معافیت', null
+      setError 'نوع معافیت', null
+      setError 'دلیل معافیت', null
+
+  manageDalil = ->
+    if fieldCollections[1]['نوع معافیت'].value() is 'معافیت پزشکی'
+      show groupArrays[1][2]
+      setData 'دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value()
       unless fieldCollections[1]['دلیل معافیت'].value()
         setError 'دلیل معافیت', 'تکمیل این فیلد الزامیست.'
     else
-      hideMoaf()
+      hide groupArrays[1][2]
+      setData 'دلیل معافیت', null
+      setError 'دلیل معافیت', null
+
+  fieldCollections[1]['وضعیت نظام وظیفه'].onChange manageMoaf
+  fieldCollections[1]['نوع معافیت'].onChange manageDalil
 
   view = E null,
     groupArrays.map (groupArray) ->

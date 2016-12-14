@@ -1,8 +1,8 @@
 component = require '../../../../../utils/component'
 style = require './style'
 tooltip = require '../../../../../components/tooltip'
-phoneNumberInput = require '../../../../../components/restrictedInput/phoneNumber'
-{remove} = require '../../../../../utils'
+numberInput = require '../../../../../components/restrictedInput/number'
+{extend, remove} = require '../../../../../utils'
 
 module.exports = component 'applicantFormOthersPart2', ({dom, events, setOff}, {setData}) ->
   {E, text, setStyle, append, empty} = dom
@@ -20,12 +20,12 @@ module.exports = component 'applicantFormOthersPart2', ({dom, events, setOff}, {
     E 'td', style.td,
       i1 = E 'input', style.input
     E 'td', style.td,
-      i2 = E 'input', style.input
+      i2 = E 'input', extend {}, style.input, width: 250
     E 'td', style.td,
       i3 = E 'input', style.input
     E 'td', style.td,
       i4 = do ->
-        i4 = E phoneNumberInput
+        i4 = E numberInput
         setStyle i4, style.input
         i4
     E 'td', style.td,
@@ -88,7 +88,6 @@ module.exports = component 'applicantFormOthersPart2', ({dom, events, setOff}, {
         error = 'مقدار وارد شده قابل قبول نیست.'
     onEvent input, 'blur', ->
       hideTooltip?()
-      error = null
 
   onEvent add, 'click', ->
     canAdd = [i0, i1, i2, i3, i4].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))

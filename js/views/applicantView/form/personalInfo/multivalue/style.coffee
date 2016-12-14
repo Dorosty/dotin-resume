@@ -3,7 +3,6 @@
 exports.view =
   position: 'relative'
   transition: '0.2s'
-  height: 30
   paddingTop: 7
 
 exports.item =

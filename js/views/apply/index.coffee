@@ -30,7 +30,7 @@ module.exports = component 'apply', ({dom, events}) ->
         [
           {key: 'name', text: 'نام*', isPersian: true}
           {key: 'surname', text: 'نام خانوادگی*', isPersian: true}
-          {key: 'ssid', text: 'کد ملی*', isNumber: true}
+          {key: 'identificationCode', text: 'کد ملی*', isNumber: true}
           {key: 'phoneNumber', text: 'تلفن همراه*', isNumber: true}
           {key: 'email', text: 'ایمیل*'}
         ].map ({key, text, isNumber, isPersian}) ->
@@ -55,7 +55,7 @@ module.exports = component 'apply', ({dom, events}) ->
                   setTimeout -> $(input.fn.element).tooltip 'show'
               setStyle input, value: previousValue
           onEvent input, 'blur', ->
-            if (key is 'phoneNumber' and (toEnglish(input.value()).indexOf('09') isnt 0 or input.value().length isnt 11)) or (key is 'ssid' and input.value().length isnt 10)
+            if (key is 'phoneNumber' and (toEnglish(input.value()).indexOf('09') isnt 0 or input.value().length isnt 11)) or (key is 'identificationCode' and input.value().length isnt 10)
               if tooltip is 1
                 $(input.fn.element).tooltip 'destroy'
               tooltip = 2

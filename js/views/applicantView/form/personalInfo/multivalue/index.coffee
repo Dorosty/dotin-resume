@@ -2,7 +2,7 @@ component = require '../../../../../utils/component'
 style = require './style'
 {extend, remove} = require '../../../../../utils'
 
-module.exports = component 'personalInfoMultivalue', ({dom, events, returnObject}, input) ->
+module.exports = component 'personalInfoMultivalue', ({dom, events, returnObject}, {initialItems, input}) ->
   {E, setStyle, append, destroy} = dom
   {onEvent} = events
 
@@ -13,12 +13,14 @@ module.exports = component 'personalInfoMultivalue', ({dom, events, returnObject
   setStyle input, style.input
 
   view = E style.view,
-    itemsPlaceholder = E()
+    itemsPlaceholder = E null, initialItems.map (text) ->
+      E style.item,
+        E extend {englishText: text}, style.itemText
     input
     add = E style.add
 
-  setViewHeight = ->
-    setStyle view, height: (items.length + 1) * 30
+  do setViewHeight = ->
+    setStyle view, height: (initialItems.length + items.length + 1) * 30
 
   addItem = (text) ->
     newItem = E style.item,

@@ -81,7 +81,6 @@ module.exports = component 'applicantFormTalents', ({dom, events, setOff}, {setD
           error = 'مقدار وارد شده قابل قبول نیست.'
       onEvent input, 'blur', ->
         hideTooltip?()
-        error = null
 
     onEvent add, 'click', ->
       canAdd = [i0, i1, i2].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
@@ -160,7 +159,6 @@ module.exports = component 'applicantFormTalents', ({dom, events, setOff}, {setD
           error = 'مقدار وارد شده قابل قبول نیست.'
       onEvent input, 'blur', ->
         hideTooltip?()
-        error = null
 
     onEvent add, 'click', ->
       canAdd = [i0, i1, i2].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
@@ -195,25 +193,5 @@ module.exports = component 'applicantFormTalents', ({dom, events, setOff}, {setD
   }].forEach ({text, label, field}) ->
     onEvent field, 'input', ->
       setData text, field.value()
-
-    error = hideTooltip = undefined
-    onEvent field, 'focus', ->
-      if error
-        h = tooltip field, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent field, ['input', 'pInput'], ->
-      setStyle [label, field], style.valid
-      hideTooltip?()
-    onEvent field, 'blur', ->
-      setTimeout (->
-        hideTooltip?()
-        if !field.value().trim()
-          setStyle [label, field], style.invalid
-          error = 'تکمیل این فیلد الزامیست.'
-        else
-          error = null
-      ), 100
 
   view
