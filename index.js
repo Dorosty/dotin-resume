@@ -759,7 +759,6 @@ extend = require('../../utils').extend;
 exports.option = {
   float: 'right',
   border: '1px solid #ddd',
-  color: '#777',
   cursor: 'pointer',
   padding: '0 10px',
   marginLeft: -1,
@@ -767,7 +766,8 @@ exports.option = {
   height: 30,
   lineHeight: 30,
   transition: '0.2s',
-  backgroundColor: 'white'
+  backgroundColor: 'white',
+  color: '#777'
 };
 
 exports.leftOption = extend({}, exports.option, {
@@ -779,7 +779,8 @@ exports.rightOption = extend({}, exports.option, {
 });
 
 exports.optionActive = {
-  backgroundColor: '#ddd'
+  backgroundColor: '#449e73',
+  color: 'white'
 };
 
 
@@ -4827,8 +4828,6 @@ exports.autoPing = function() {
 
 },{"../../q":23,"../log":31,"./ex":34,"./getPost":35,"./names":38}],37:[function(require,module,exports){
 var Q, applicants, extend, user;
-
-return;
 
 Q = require('../../q');
 
