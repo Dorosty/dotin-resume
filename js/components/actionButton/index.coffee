@@ -1,10 +1,11 @@
 component = require '../../utils/component'
 style = require './style'
 list = require './list'
+{toPersian} = require '../../utils'
 
 module.exports = component 'actionButton', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex}) ->
   {E, setStyle} = dom
-  {onEvent, onEnter} = events
+  {onEvent} = events
 
   getId ?= (x) -> x
   getTitle ?= (x) -> x
@@ -14,34 +15,43 @@ module.exports = component 'actionButton', ({dom, events, returnObject}, {getId,
     else
       toPersian getTitle x
 
-  changeListeners = []
+  selectedIndex ?= 0
   selectListeners = []
 
   onSelect = (item) ->
+    setStyle button, englishText: getTitle item
+    selectListeners.forEach (x) -> x item
+    itemsList.hide()
 
   actionButton = E style.actionButton,
-    # input = E 'input', style.input
+    button = E style.button
     arrow = E 'i', style.arrow
     itemsList = E list, {getTitle, onSelect}
 
   itemsList.update items
 
-  onEvent [input, arrow], 'mouseover', ->
-    setStyle arrow, style.arrowHover
+  setStyle button, englishText: getTitle items[selectedIndex]
 
-  onEvent [input, arrow], 'mouseout', ->
+  onEvent arrow, 'mouseover', ->
+    setStyle arrow, style.hover
+
+  onEvent arrow, 'mouseout', ->
     setStyle arrow, style.arrow
+  itemsList.update items
+
+  onEvent button, 'mouseover', ->
+    setStyle button, style.hover
+
+  onEvent button, 'mouseout', ->
+    setStyle button, style.button
 
   onEvent arrow, 'click', ->
     itemsList.show()
 
-  onEvent actionButton, 'blur', ->
-    itemsList.hide()
-
-  onEnter actionButton, ->
+  onEvent button, 'click', ->
+    selectListeners.forEach (x) -> x itemsList.value() || items[selectedIndex]
 
   returnObject
-    onChange: (listener) -> changeListeners.push listener
     onSelect: (listener) -> selectListeners.push listener
 
   actionButton

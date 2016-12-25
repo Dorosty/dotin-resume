@@ -1,3 +1,11 @@
+exports.valid =
+  color: '#5c5555'
+  borderColor: '#ccc'
+
+exports.invalid =
+  color: '#c00'
+  borderColor: '#c00'
+
 exports.cover =
   position: 'absolute'
   top: 0

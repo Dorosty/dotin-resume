@@ -17,8 +17,8 @@ module.exports = component 'applicantFormTalents', ({dom, events, setOff}, {setD
 
     rows = []
 
-    dropdowns = [0 .. 1].map ->
-      f = E dropdown, items: ['کم', 'متوسط', 'زیاد']
+    dropdowns = [0 .. 1].map (i) ->
+      f = E dropdown, items: if i then ['کم', 'متوسط', 'زیاد'] else ['کم', 'زیاد']
       setStyle f.input, style.input
       f
 

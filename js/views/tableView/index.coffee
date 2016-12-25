@@ -3,12 +3,15 @@ style = require './style'
 sidebar = require './sidebar'
 table = require './table'
 search = require './search'
+actionButton = require '../../components/actionButton'
 {extend, toDate} = require '../../utils'
 {stateToPersian} = require '../../utils/logic'
 
-module.exports = component 'tableView', ({dom, events, state}) ->
+module.exports = component 'tableView', ({dom, events, state, service}) ->
   {E, text, setStyle, append, empty} = dom
   {onEvent} = events
+
+  selectedApplicants = []
 
   view = E 'span', null,
     E sidebar
@@ -66,7 +69,20 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
         ]
         handlers:
+          update: (descriptors) ->
+            selectedApplicants = descriptors.filter(({selected}) -> selected).map ({entity}) -> entity
           select: (applicant) ->
+
+  actionButtonInstance.onSelect (value) ->
+    unless selectedApplicants.length is 1
+      alert 'لطفا یک سطر را انتخاب کنید'
+      return
+    selectedApplicant = selectedApplicants[0]
+    switch value
+      when 'ایجاد حساب کاربری'
+        console.log 1
+      when 'درخواست مصاحبه'
+        console.log 2
 
   applicants = []
   update = ->

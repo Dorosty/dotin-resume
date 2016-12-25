@@ -36,7 +36,7 @@ user =
   personalPic: null
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 1
+  userType: 3
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
@@ -76,10 +76,10 @@ exports.login = ({email}) ->
       else
         throw 'invalid'
 
-exports.logout = ({email, password}) ->
+exports.logout = ->
+  user = undefined
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then ->
-    user = undefined
     loggedOut: true
 
 exports.addJob = ->

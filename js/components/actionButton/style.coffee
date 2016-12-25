@@ -1,25 +1,36 @@
 exports.actionButton =
   position: 'relative'
   
-# exports.input =
-#   height: 30
-#   border: '1px solid #ddd'
-
-exports.arrow =
-  class: 'fa fa-chevron-down'
-  position: 'absolute'
+exports.button =
+  display: 'inline-block'
+  height: 30
+  lineHeight: 30
+  fontSize: 14
+  padding: '0 5px'
+  border: '1px solid #ddd'
   cursor: 'pointer'
-  borderRight: '1px solid #ddd'
-  borderRadius: '3px 0 0 3px'
+  borderRadius: '0 3px 3px 0'
   textAlign: 'center'
   color: '#777'
-  top: 1
-  left: 1
-  width: 28
-  height: 28
-  lineHeight: 27
   transition: '0.2s'
   backgroundColor: '#f5f5f5'
 
-exports.arrowHover =
+exports.arrow =
+  display: 'inline-block'
+  position: 'relative'
+  top: 1
+  right: -1
+  class: 'fa fa-chevron-down'
+  cursor: 'pointer'
+  border: '1px solid #ddd'
+  borderRadius: '3px 0 0 3px'
+  textAlign: 'center'
+  color: '#777'
+  width: 30
+  height: 30
+  lineHeight: 29
+  transition: '0.2s'
+  backgroundColor: '#f5f5f5'
+
+exports.hover =
   backgroundColor: '#e5e5e5'

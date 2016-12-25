@@ -255,7 +255,260 @@ exports["do"] = function() {
 };
 
 
-},{"./singletons/alert":24,"./utils":30,"./utils/service":36}],3:[function(require,module,exports){
+},{"./singletons/alert":28,"./utils":34,"./utils/service":40}],3:[function(require,module,exports){
+var component, list, style, toPersian;
+
+component = require('../../utils/component');
+
+style = require('./style');
+
+list = require('./list');
+
+toPersian = require('../../utils').toPersian;
+
+module.exports = component('actionButton', function(arg, arg1) {
+  var E, actionButton, arrow, button, dom, english, events, getId, getTitle, items, itemsList, onEvent, onSelect, returnObject, selectListeners, selectedIndex, setStyle;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  getId = arg1.getId, getTitle = arg1.getTitle, english = arg1.english, items = arg1.items, selectedIndex = arg1.selectedIndex;
+  E = dom.E, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  if (getId == null) {
+    getId = function(x) {
+      return x;
+    };
+  }
+  if (getTitle == null) {
+    getTitle = function(x) {
+      return x;
+    };
+  }
+  getTitle = (function(getTitle) {
+    return function(x) {
+      if (english) {
+        return getTitle(x);
+      } else {
+        return toPersian(getTitle(x));
+      }
+    };
+  })(getTitle);
+  if (selectedIndex == null) {
+    selectedIndex = 0;
+  }
+  selectListeners = [];
+  onSelect = function(item) {
+    setStyle(button, {
+      englishText: getTitle(item)
+    });
+    selectListeners.forEach(function(x) {
+      return x(item);
+    });
+    return itemsList.hide();
+  };
+  actionButton = E(style.actionButton, button = E(style.button), arrow = E('i', style.arrow), itemsList = E(list, {
+    getTitle: getTitle,
+    onSelect: onSelect
+  }));
+  itemsList.update(items);
+  setStyle(button, {
+    englishText: getTitle(items[selectedIndex])
+  });
+  onEvent(arrow, 'mouseover', function() {
+    return setStyle(arrow, style.hover);
+  });
+  onEvent(arrow, 'mouseout', function() {
+    return setStyle(arrow, style.arrow);
+  });
+  itemsList.update(items);
+  onEvent(button, 'mouseover', function() {
+    return setStyle(button, style.hover);
+  });
+  onEvent(button, 'mouseout', function() {
+    return setStyle(button, style.button);
+  });
+  onEvent(arrow, 'click', function() {
+    return itemsList.show();
+  });
+  onEvent(button, 'click', function() {
+    return selectListeners.forEach(function(x) {
+      return x(itemsList.value() || items[selectedIndex]);
+    });
+  });
+  returnObject({
+    onSelect: function(listener) {
+      return selectListeners.push(listener);
+    }
+  });
+  return actionButton;
+});
+
+
+},{"../../utils":34,"../../utils/component":30,"./list":4,"./style":6}],4:[function(require,module,exports){
+var component, style;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('dropdownList', function(arg, arg1) {
+  var E, append, dom, empty, entities, events, getTitle, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  onSelect = arg1.onSelect, getTitle = arg1.getTitle;
+  E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  list = E(style.list);
+  entities = items = highlightIndex = value = void 0;
+  highlightCurrentItem = function() {
+    if (!(items != null ? items.length : void 0)) {
+      return;
+    }
+    setStyle(items, style.item);
+    if (highlightIndex != null) {
+      return setStyle(items[highlightIndex], style.highlightedItem);
+    }
+  };
+  show = function() {
+    return setStyle(list, style.visibleList);
+  };
+  hide = function() {
+    return setStyle(list, style.list);
+  };
+  select = function() {
+    value = entities[highlightIndex];
+    onSelect(value);
+    return hide();
+  };
+  returnObject({
+    value: function() {
+      return value;
+    },
+    set: function(x) {
+      return value = x;
+    },
+    update: function(_entities, reset) {
+      if (reset) {
+        value = null;
+      }
+      highlightIndex = 0;
+      empty(list);
+      entities = _entities;
+      append(list, items = entities.map(function(entity, i) {
+        var item;
+        item = E({
+          englishText: getTitle(entity)
+        });
+        onEvent(item, 'mousemove', function() {
+          highlightIndex = i;
+          return highlightCurrentItem();
+        });
+        onEvent(item, 'mouseout', function() {
+          return setStyle(item, style.item);
+        });
+        onEvent(item, 'click', select);
+        return item;
+      }));
+      return highlightCurrentItem();
+    },
+    goUp: function() {
+      highlightIndex--;
+      if (highlightIndex < 0) {
+        highlightIndex = 0;
+      }
+      return highlightCurrentItem();
+    },
+    goDown: function() {
+      highlightIndex++;
+      if (highlightIndex >= entities.length) {
+        highlightIndex = entities.length - 1;
+      }
+      return highlightCurrentItem();
+    },
+    select: select,
+    show: show,
+    hide: hide
+  });
+  return list;
+});
+
+
+},{"../../../utils/component":30,"./style":5}],5:[function(require,module,exports){
+exports.list = {
+  cursor: 'pointer',
+  position: 'absolute',
+  backgroundColor: 'white',
+  zIndex: 1000,
+  top: 30,
+  left: 0,
+  right: 0,
+  border: '1px solid #CCC',
+  borderTop: 'none',
+  borderRadius: '0 0 5px 5px',
+  transition: '0.1s',
+  opacity: 0,
+  visibility: 'hidden'
+};
+
+exports.visibleList = {
+  opacity: 1,
+  visibility: 'visible'
+};
+
+exports.item = {
+  fontSize: 12,
+  height: 30,
+  lineHeight: 30,
+  padding: '0 5px',
+  backgroundColor: 'transparent'
+};
+
+exports.highlightedItem = {
+  backgroundColor: '#ddd'
+};
+
+
+},{}],6:[function(require,module,exports){
+exports.actionButton = {
+  position: 'relative'
+};
+
+exports.button = {
+  display: 'inline-block',
+  height: 30,
+  lineHeight: 30,
+  fontSize: 14,
+  padding: '0 5px',
+  border: '1px solid #ddd',
+  cursor: 'pointer',
+  borderRadius: '0 3px 3px 0',
+  textAlign: 'center',
+  color: '#777',
+  transition: '0.2s',
+  backgroundColor: '#f5f5f5'
+};
+
+exports.arrow = {
+  display: 'inline-block',
+  position: 'relative',
+  top: 1,
+  right: -1,
+  "class": 'fa fa-chevron-down',
+  cursor: 'pointer',
+  border: '1px solid #ddd',
+  borderRadius: '3px 0 0 3px',
+  textAlign: 'center',
+  color: '#777',
+  width: 30,
+  height: 30,
+  lineHeight: 29,
+  transition: '0.2s',
+  backgroundColor: '#f5f5f5'
+};
+
+exports.hover = {
+  backgroundColor: '#e5e5e5'
+};
+
+
+},{}],7:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -293,7 +546,7 @@ module.exports = component('checkbox', function(arg, text) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./style":4}],4:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30,"./style":8}],8:[function(require,module,exports){
 exports.view = {};
 
 exports.text = {
@@ -325,7 +578,7 @@ exports.checkboxChecked = {
 };
 
 
-},{}],5:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var component, style, toEnglish;
 
 component = require('../../utils/component');
@@ -377,7 +630,7 @@ module.exports = component('dateInput', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./style":6}],6:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30,"./style":10}],10:[function(require,module,exports){
 exports.view = {
   position: 'relative'
 };
@@ -397,7 +650,7 @@ exports.calendar = {
 };
 
 
-},{}],7:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var component, defer, list, ref, style, textIsInSearch, toPersian;
 
 component = require('../../utils/component');
@@ -507,7 +760,7 @@ module.exports = component('dropdown', function(arg, arg1) {
     return input.blur();
   });
   prevInputValue = '';
-  onEvent(input, 'input', function() {
+  onEvent(input, ['input', 'pInput'], function() {
     if (!english) {
       setStyle(input, {
         value: input.value()
@@ -544,130 +797,11 @@ module.exports = component('dropdown', function(arg, arg1) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./list":8,"./style":10}],8:[function(require,module,exports){
-var component, style;
-
-component = require('../../../utils/component');
-
-style = require('./style');
-
-module.exports = component('dropdownList', function(arg, arg1) {
-  var E, append, dom, empty, entities, events, getTitle, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
-  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  onSelect = arg1.onSelect, getTitle = arg1.getTitle;
-  E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle;
-  onEvent = events.onEvent;
-  list = E(style.list);
-  entities = items = highlightIndex = value = void 0;
-  highlightCurrentItem = function() {
-    if (!(items != null ? items.length : void 0)) {
-      return;
-    }
-    setStyle(items, style.item);
-    if (highlightIndex != null) {
-      return setStyle(items[highlightIndex], style.highlightedItem);
-    }
-  };
-  show = function() {
-    return setStyle(list, style.visibleList);
-  };
-  hide = function() {
-    return setStyle(list, style.list);
-  };
-  select = function() {
-    value = entities[highlightIndex];
-    onSelect(value);
-    return hide();
-  };
-  returnObject({
-    value: function() {
-      return value;
-    },
-    set: function(x) {
-      return value = x;
-    },
-    update: function(_entities, reset) {
-      if (reset) {
-        value = null;
-      }
-      highlightIndex = 0;
-      empty(list);
-      entities = _entities;
-      append(list, items = entities.map(function(entity, i) {
-        var item;
-        item = E({
-          englishText: getTitle(entity)
-        });
-        onEvent(item, 'mousemove', function() {
-          highlightIndex = i;
-          return highlightCurrentItem();
-        });
-        onEvent(item, 'mouseout', function() {
-          return setStyle(item, style.item);
-        });
-        onEvent(item, 'click', select);
-        return item;
-      }));
-      return highlightCurrentItem();
-    },
-    goUp: function() {
-      highlightIndex--;
-      if (highlightIndex < 0) {
-        highlightIndex = 0;
-      }
-      return highlightCurrentItem();
-    },
-    goDown: function() {
-      highlightIndex++;
-      if (highlightIndex >= entities.length) {
-        highlightIndex = entities.length - 1;
-      }
-      return highlightCurrentItem();
-    },
-    select: select,
-    show: show,
-    hide: hide
-  });
-  return list;
-});
-
-
-},{"../../../utils/component":26,"./style":9}],9:[function(require,module,exports){
-exports.list = {
-  cursor: 'pointer',
-  position: 'absolute',
-  backgroundColor: 'white',
-  zIndex: 1000,
-  top: 30,
-  left: 0,
-  right: 0,
-  border: '1px solid #CCC',
-  borderTop: 'none',
-  borderRadius: '0 0 5px 5px',
-  transition: '0.1s',
-  opacity: 0,
-  visibility: 'hidden'
-};
-
-exports.visibleList = {
-  opacity: 1,
-  visibility: 'visible'
-};
-
-exports.item = {
-  fontSize: 12,
-  height: 30,
-  lineHeight: 30,
-  padding: '0 5px',
-  backgroundColor: 'transparent'
-};
-
-exports.highlightedItem = {
-  backgroundColor: '#ddd'
-};
-
-
-},{}],10:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30,"./list":12,"./style":14}],12:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"../../../utils/component":30,"./style":13,"dup":4}],13:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],14:[function(require,module,exports){
 exports.dropdown = {
   position: 'relative'
 };
@@ -699,7 +833,7 @@ exports.arrowHover = {
 };
 
 
-},{}],11:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var component, style;
 
 component = require('../../utils/component');
@@ -751,7 +885,7 @@ module.exports = component('radioSwitch', function(arg, arg1) {
 });
 
 
-},{"../../utils/component":26,"./style":12}],12:[function(require,module,exports){
+},{"../../utils/component":30,"./style":16}],16:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -784,7 +918,7 @@ exports.optionActive = {
 };
 
 
-},{"../../utils":30}],13:[function(require,module,exports){
+},{"../../utils":34}],17:[function(require,module,exports){
 var component, emailIsValid;
 
 component = require('../../utils/component');
@@ -807,7 +941,7 @@ module.exports = component('emailInput', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26}],14:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30}],18:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -832,7 +966,7 @@ module.exports = component('gradeInput', function(arg) {
 });
 
 
-},{".":15,"../../utils":30,"../../utils/component":26}],15:[function(require,module,exports){
+},{".":19,"../../utils":34,"../../utils/component":30}],19:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -867,7 +1001,7 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26}],16:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30}],20:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -892,7 +1026,7 @@ module.exports = component('numberInput', function(arg, isFraction) {
 });
 
 
-},{".":15,"../../utils":30,"../../utils/component":26}],17:[function(require,module,exports){
+},{".":19,"../../utils":34,"../../utils/component":30}],21:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -917,7 +1051,7 @@ module.exports = component('phoneNumberInput', function(arg) {
 });
 
 
-},{".":15,"../../utils":30,"../../utils/component":26}],18:[function(require,module,exports){
+},{".":19,"../../utils":34,"../../utils/component":30}],22:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -942,7 +1076,7 @@ module.exports = component('yearInput', function(arg) {
 });
 
 
-},{".":15,"../../utils":30,"../../utils/component":26}],19:[function(require,module,exports){
+},{".":19,"../../utils":34,"../../utils/component":30}],23:[function(require,module,exports){
 var component, window;
 
 component = require('../utils/component');
@@ -1022,7 +1156,7 @@ module.exports = component('scrollViewer', function(arg) {
 });
 
 
-},{"../utils/component":26,"../utils/dom":28}],20:[function(require,module,exports){
+},{"../utils/component":30,"../utils/dom":32}],24:[function(require,module,exports){
 var body, component, defer, extend, ref, style;
 
 component = require('../../utils/component');
@@ -1072,7 +1206,7 @@ module.exports = function(element, text) {
 };
 
 
-},{"../../utils":30,"../../utils/component":26,"../../utils/dom":28,"./style":21}],21:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30,"../../utils/dom":32,"./style":25}],25:[function(require,module,exports){
 exports.tooltip = {
   position: 'absolute',
   textAlign: 'center',
@@ -1106,7 +1240,7 @@ exports.arrow = {
 };
 
 
-},{}],22:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var body, component, views;
 
 component = require('./utils/component');
@@ -1140,7 +1274,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":26,"./utils/dom":28,"./views":78}],23:[function(require,module,exports){
+},{"./utils/component":30,"./utils/dom":32,"./views":82}],27:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3192,15 +3326,15 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":1}],24:[function(require,module,exports){
+},{"_process":1}],28:[function(require,module,exports){
 exports.set = function(x) {
   return exports.instance = x;
 };
 
 
-},{}],25:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"dup":24}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],30:[function(require,module,exports){
 var _dom, _events, _service, _state, extend, log,
   slice = [].slice;
 
@@ -3269,7 +3403,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":30,"./dom":28,"./events":29,"./log":31,"./service":36,"./state":40}],27:[function(require,module,exports){
+},{".":34,"./dom":32,"./events":33,"./log":35,"./service":40,"./state":44}],31:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -3310,7 +3444,7 @@ module.exports = {
 };
 
 
-},{}],28:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -3711,7 +3845,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":30,"./log":31}],29:[function(require,module,exports){
+},{".":34,"./log":35}],33:[function(require,module,exports){
 var body, isIn, log, ref, remove, window,
   slice = [].slice;
 
@@ -3987,7 +4121,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":30,"./dom":28,"./log":31}],30:[function(require,module,exports){
+},{".":34,"./dom":32,"./log":35}],34:[function(require,module,exports){
 var slice = [].slice;
 
 exports.emailIsValid = function(email) {
@@ -4169,7 +4303,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],31:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -4482,7 +4616,7 @@ exports.service = {
 };
 
 
-},{}],32:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
@@ -4511,7 +4645,7 @@ exports.stateToPersian = function(state) {
 };
 
 
-},{}],33:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -4558,7 +4692,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":23,"./mock":37}],34:[function(require,module,exports){
+},{"../../q":27,"./mock":41}],38:[function(require,module,exports){
 var Q, cruds, eraseCookie, extend, get, gets, post, posts, ref, ref1, ref2, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -4686,7 +4820,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":30,"../../q":23,"../cookies":27,"../state":40,"./getPost":35,"./names":38,"./stateChangingServices":39}],35:[function(require,module,exports){
+},{"..":34,"../../q":27,"../cookies":31,"../state":44,"./getPost":39,"./names":42,"./stateChangingServices":43}],39:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -4776,7 +4910,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":27,"../state":40,"./ajax":33,"./ex":34,"./names":38,"./stateChangingServices":39}],36:[function(require,module,exports){
+},{"../cookies":31,"../state":44,"./ajax":37,"./ex":38,"./names":42,"./stateChangingServices":43}],40:[function(require,module,exports){
 var Q, ex, get, gets, log, others, post, posts, ref, ref1,
   slice = [].slice;
 
@@ -4826,7 +4960,7 @@ exports.autoPing = function() {
 };
 
 
-},{"../../q":23,"../log":31,"./ex":34,"./getPost":35,"./names":38}],37:[function(require,module,exports){
+},{"../../q":27,"../log":35,"./ex":38,"./getPost":39,"./names":42}],41:[function(require,module,exports){
 var Q, applicants, extend, user;
 
 Q = require('../../q');
@@ -4878,7 +5012,7 @@ user = {
   personalPic: null,
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 1,
+  userType: 3,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -4943,11 +5077,9 @@ exports.login = function(arg) {
   });
 };
 
-exports.logout = function(arg) {
-  var email, password;
-  email = arg.email, password = arg.password;
+exports.logout = function() {
+  user = void 0;
   return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
-    user = void 0;
     return {
       loggedOut: true
     };
@@ -4977,7 +5109,7 @@ exports.submitProfileData = function(arg) {
 };
 
 
-},{"../../q":23,"../../utils":30}],38:[function(require,module,exports){
+},{"../../q":27,"../../utils":34}],42:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
 exports.posts = ['login', 'addJob'];
@@ -4994,7 +5126,7 @@ exports.others = ['logout', 'submitProfileData'];
 exports.states = ['user', 'applicants'];
 
 
-},{}],39:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -5024,7 +5156,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":30,"./names":38}],40:[function(require,module,exports){
+},{"..":34,"./names":42}],44:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -5229,11 +5361,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":31,"./names":41}],41:[function(require,module,exports){
+},{"../log":35,"./names":45}],45:[function(require,module,exports){
 module.exports = ['user', 'applicants'];
 
 
-},{}],42:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var checkbox, component, dropdown, extend, gradeInput, ref, remove, style, tooltip, yearInput;
 
 component = require('../../../../utils/component');
@@ -5268,9 +5400,11 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
     var add, body, f, i0, i1, i2, i3, i4, i5, i6, lastLine, onAdds, rows, update, view;
     rows = [];
     i0 = f = E(dropdown, {
-      items: ['دیپلم', 'لیسانس', 'فوق لیسانس']
+      items: ['دیپلم', 'کاردانی', 'کارشناسی', 'کارشناسی ارشد', 'دکتری']
     });
-    setStyle(f.input, style.input);
+    setStyle(f.input, extend({}, style.input, {
+      width: 150
+    }));
     lastLine = E('tr', null, E('td', style.td, i0), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
       width: 150
     }))), E('td', style.td, i3 = (function() {
@@ -5422,7 +5556,7 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dropdown":7,"../../../../components/restrictedInput/grade":14,"../../../../components/restrictedInput/year":18,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":43}],43:[function(require,module,exports){
+},{"../../../../components/checkbox":7,"../../../../components/dropdown":11,"../../../../components/restrictedInput/grade":18,"../../../../components/restrictedInput/year":22,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./style":47}],47:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -5507,69 +5641,40 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":30}],44:[function(require,module,exports){
-var component, dropdown, remove, style, tooltip;
+},{"../../../../utils":34}],48:[function(require,module,exports){
+var component, dropdown, style;
 
 component = require('../../../../utils/component');
-
-tooltip = require('../../../../components/tooltip');
 
 style = require('./style');
 
 dropdown = require('../../../../components/dropdown');
 
-remove = require('../../../../utils').remove;
-
 module.exports = component('applicantFormEnglish', function(arg, arg1) {
-  var E, dom, events, hideTooltips, onEvent, setData, setError, setOff, setStyle;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData, setError = arg1.setError;
+  var E, dom, events, onEvent, registerErrorField, setData, setError, setStyle;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
-  hideTooltips = [];
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
-  });
   return E(null, ['مکالمه', 'نوشتن', 'خواندن'].map(function(labelText) {
-    var column, error, f, field, hideTooltip, input, label;
-    f = E(dropdown, {
-      items: ['قوی', 'متوسط', 'ضعیف']
+    var column, errorId, field, label;
+    field = E(dropdown, {
+      items: ['عالی', 'خوب', 'متوسط', 'ضعیف']
     });
-    setStyle(f, style.dropdownPlaceholder);
-    setStyle(f.input, style.input);
-    f.onChange(function() {
-      return setData(labelText, f.value());
+    setStyle(field, style.dropdownPlaceholder);
+    setStyle(field.input, style.input);
+    field.onChange(function() {
+      return setData(labelText, field.value());
     });
-    column = E(style.column, label = E(style.label, labelText), field = f);
-    input = field.input;
-    error = hideTooltip = void 0;
-    setError(labelText, 'تکمیل این فیلد الزامیست.');
-    onEvent(input, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(input, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(input, ['input', 'pInput'], function() {
-      setStyle([label, input], style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    onEvent(input, 'blur', function() {
+    column = E(style.column, label = E(style.label, labelText), field);
+    errorId = registerErrorField(label, field);
+    setError(errorId, 'تکمیل این فیلد الزامیست.', true);
+    onEvent(field.input, 'blur', function() {
       return setTimeout((function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          setStyle([label, input], style.invalid);
-          return setError(labelText, error = 'تکمیل این فیلد الزامیست.');
+        if (!field.value()) {
+          return setError(errorId, 'تکمیل این فیلد الزامیست.');
         } else {
-          return setError(labelText, error = null);
+          return setError(errorId, null);
         }
       }), 100);
     });
@@ -5578,19 +5683,9 @@ module.exports = component('applicantFormEnglish', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":7,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":45}],45:[function(require,module,exports){
+},{"../../../../components/dropdown":11,"../../../../utils/component":30,"./style":49}],49:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.column = {
@@ -5630,8 +5725,8 @@ exports.input = {
 };
 
 
-},{}],46:[function(require,module,exports){
-var checkbox, component, education, english, others, overview, personalInfo, reputation, scrollViewer, style, talents;
+},{}],50:[function(require,module,exports){
+var checkbox, component, education, english, others, overview, personalInfo, remove, reputation, scrollViewer, style, talents, tooltip;
 
 component = require('../../../utils/component');
 
@@ -5655,9 +5750,13 @@ reputation = require('./reputation');
 
 others = require('./others');
 
+tooltip = require('../../../components/tooltip');
+
+remove = require('../../../utils').remove;
+
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, cover, data, dom, errors, events, hide, noData, onEvent, onResize, resize, scroll, service, setData, setError, setStyle, show, state, submit, submitDisabled, text, view, x, y, yesData;
-  dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
+  var E, accept, cover, data, dom, errorInputs, errorIsInitial, errorLabels, errors, events, hide, hideTooltips, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, show, state, submit, submitDisabled, text, view, x, y, yesData;
+  dom = arg.dom, events = arg.events, state = arg.state, service = arg.service, setOff = arg.setOff;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent, onResize = events.onResize;
   data = {};
@@ -5684,62 +5783,68 @@ module.exports = component('applicantForm', function(arg) {
   };
   submit = E(style.submit, 'ثبت نهایی اطلاعات');
   submitDisabled = true;
-  errors = {};
-  setError = function(category) {
-    return function(key, value) {
-      if (value != null) {
-        if (errors[category] == null) {
-          errors[category] = {};
-        }
-        errors[category][key] = value;
-      } else if (errors[category]) {
-        delete errors[category][key];
-        if (!Object.keys(errors[category]).length) {
-          delete errors[category];
-        }
-      }
-      if (Object.keys(errors).length) {
-        setStyle(submit, style.submitDisabled);
-        submitDisabled = true;
-      } else {
-        setStyle(submit, style.submit);
-        submitDisabled = false;
-      }
-      return setTimeout(function() {
-        window.y = data;
-        return setStyle(y, {
-          englishHtml: JSON.stringify(errors, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+  hideTooltips = [];
+  setOff(function() {
+    return hideTooltips.forEach(function(hideTooltip) {
+      return hideTooltip();
+    });
+  });
+  errors = [];
+  errorIsInitial = [];
+  errorLabels = [];
+  errorInputs = [];
+  registerErrorField = function(label, field) {
+    var errorId, hideTooltip, input;
+    hideTooltip = void 0;
+    input = field.input || field;
+    errorLabels.push(label);
+    errorInputs.push(input);
+    errorId = errors.length;
+    errors.push(null);
+    errorIsInitial.push(null);
+    onEvent(input, 'focus', function() {
+      var error, h;
+      error = errors[errorId];
+      if (error && !errorIsInitial[errorId]) {
+        h = tooltip(input, error);
+        return hideTooltips.push(hideTooltip = function() {
+          h();
+          return remove(hideTooltips, hideTooltip);
         });
+      }
+    });
+    onEvent(input, ['input', 'pInput'], function() {
+      setStyle([label, input], style.valid);
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    });
+    if (typeof field.onChange === "function") {
+      field.onChange(function() {
+        setStyle([label, input], style.valid);
+        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
       });
-    };
+    }
+    onEvent(input, 'blur', function() {
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    });
+    return errorId;
+  };
+  setError = function(errorId, error, initial) {
+    var input, label;
+    errors[errorId] = error;
+    errorIsInitial[errorId] = initial;
+    label = errorLabels[errorId];
+    input = errorInputs[errorId];
+    if (error && !initial) {
+      return setStyle([label, input], style.invalid);
+    }
   };
   view = E(null, cover = E(style.cover), hide(noData = E(null, 'اطلاعات شما ثبت شده‌است.')), yesData = E(null, x = E(), E('h1', {
     color: 'red'
-  }, '---------'), y = E(), E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
-    setData: setData('مشخصات فردی'),
-    setError: setError('مشخصات فردی')
-  }), E(style.header, 'سوابق تحصیلی'), E(education, {
-    setData: setData('سوابق تحصیلی'),
-    setError: setError('سوابق تحصیلی')
-  }), E(style.header, text('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), E(style.optional, '(اختیاری)')), E(talents, {
-    setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها')
-  }), E(style.header, 'مهارت زبان انگلیسی'), E(english, {
+  }, '---------'), y = E(), E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(style.header, 'سوابق تحصیلی'), E(style.header, text('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), E(style.optional, '(اختیاری)')), E(style.header, 'مهارت زبان انگلیسی'), E(english, {
     setData: setData('مهارت زبان انگلیسی'),
-    setError: setError('مهارت زبان انگلیسی')
-  }), E(style.header, text('آخرین سوابق سازمانی و پروژه‌ای'), E(style.optional, '(اختیاری)')), E(reputation, {
-    setData: setData('آخرین سوابق سازمانی و پروژه‌ای')
-  }), E(style.header, 'سایر اطلاعات'), E(others, {
-    setData: setData('سایر اطلاعات'),
-    setError: setError('سایر اطلاعات')
-  }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit));
-  setError('ac')('cept', true);
-  accept.onChange(function() {
-    if (accept.value()) {
-      return setError('ac')('cept', null);
-    } else {
-      return setError('ac')('cept', true);
-    }
-  });
+    registerErrorField: registerErrorField,
+    setError: setError
+  }), E(style.header, text('آخرین سوابق سازمانی و پروژه‌ای'), E(style.optional, '(اختیاری)')), E(style.header, 'سایر اطلاعات'), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit));
   resize = function() {
     var body, height, html;
     body = document.body;
@@ -5788,7 +5893,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":3,"../../../components/scrollViewer":19,"../../../utils/component":26,"./education":42,"./english":44,"./others":47,"./overview":60,"./personalInfo":62,"./reputation":66,"./style":68,"./talents":69}],47:[function(require,module,exports){
+},{"../../../components/checkbox":7,"../../../components/scrollViewer":23,"../../../components/tooltip":24,"../../../utils":34,"../../../utils/component":30,"./education":46,"./english":48,"./others":51,"./overview":64,"./personalInfo":66,"./reputation":70,"./style":72,"./talents":73}],51:[function(require,module,exports){
 var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
@@ -5829,7 +5934,7 @@ module.exports = component('applicantFormOthers', function(arg, arg1) {
 });
 
 
-},{"../../../../utils/component":26,"./part0":48,"./part1":50,"./part2":52,"./part3":54,"./part4":56,"./part5":58}],48:[function(require,module,exports){
+},{"../../../../utils/component":30,"./part0":52,"./part1":54,"./part2":56,"./part3":58,"./part4":60,"./part5":62}],52:[function(require,module,exports){
 var component, dateInput, dropdown, extend, numberInput, ref, remove, style, tooltip;
 
 component = require('../../../../../utils/component');
@@ -5960,7 +6065,7 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/dateInput":5,"../../../../../components/dropdown":7,"../../../../../components/restrictedInput/number":16,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":49}],49:[function(require,module,exports){
+},{"../../../../../components/dateInput":9,"../../../../../components/dropdown":11,"../../../../../components/restrictedInput/number":20,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":53}],53:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../../utils').extend;
@@ -6051,7 +6156,7 @@ exports.descriptionInput = extend({}, exports.input, {
 });
 
 
-},{"../../../../../utils":30}],50:[function(require,module,exports){
+},{"../../../../../utils":34}],54:[function(require,module,exports){
 var component, radioSwitch, style;
 
 component = require('../../../../../utils/component');
@@ -6114,7 +6219,7 @@ module.exports = component('applicantFormOthersPart1', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":11,"../../../../../utils/component":26,"./style":51}],51:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":15,"../../../../../utils/component":30,"./style":55}],55:[function(require,module,exports){
 exports.mainLabel = {
   fontSize: 12,
   lineHeight: 30,
@@ -6138,7 +6243,7 @@ exports.radioSwitch = {
 };
 
 
-},{}],52:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 var component, extend, numberInput, ref, remove, style, tooltip;
 
 component = require('../../../../../utils/component');
@@ -6250,7 +6355,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/number":16,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":53}],53:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":20,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":57}],57:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -6322,7 +6427,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":30}],54:[function(require,module,exports){
+},{"../../../../../utils":34}],58:[function(require,module,exports){
 var component, extend, numberInput, ref, remove, style, tooltip;
 
 component = require('../../../../../utils/component');
@@ -6429,7 +6534,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/number":16,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":55}],55:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":20,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":59}],59:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -6510,7 +6615,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":30}],56:[function(require,module,exports){
+},{"../../../../../utils":34}],60:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../../utils/component');
@@ -6534,7 +6639,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils/component":26,"./style":57}],57:[function(require,module,exports){
+},{"../../../../../utils/component":30,"./style":61}],61:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -6576,7 +6681,7 @@ exports.textarea = {
 };
 
 
-},{}],58:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 var component, extend, radioSwitch, ref, remove, style, tooltip;
 
 component = require('../../../../../utils/component');
@@ -6687,7 +6792,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":11,"../../../../../components/tooltip":20,"../../../../../utils":30,"../../../../../utils/component":26,"./style":59}],59:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":15,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":63}],63:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -6724,7 +6829,7 @@ exports.input = {
 };
 
 
-},{}],60:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -6776,7 +6881,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":30,"../../../../utils/component":26,"./style":61}],61:[function(require,module,exports){
+},{"../../../../utils":34,"../../../../utils/component":30,"./style":65}],65:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -6839,7 +6944,7 @@ exports.resumeLink = {
 };
 
 
-},{}],62:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian, tooltip;
 
 component = require('../../../../utils/component');
@@ -7275,7 +7380,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":3,"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/radioSwitch":11,"../../../../components/restrictedInput/email":13,"../../../../components/restrictedInput/number":16,"../../../../components/restrictedInput/phoneNumber":17,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./multivalue":63,"./style":65}],63:[function(require,module,exports){
+},{"../../../../components/checkbox":7,"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../components/radioSwitch":15,"../../../../components/restrictedInput/email":17,"../../../../components/restrictedInput/number":20,"../../../../components/restrictedInput/phoneNumber":21,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./multivalue":67,"./style":69}],67:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7348,7 +7453,7 @@ module.exports = component('personalInfoMultivalue', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils":30,"../../../../../utils/component":26,"./style":64}],64:[function(require,module,exports){
+},{"../../../../../utils":34,"../../../../../utils/component":30,"./style":68}],68:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -7402,7 +7507,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":30}],65:[function(require,module,exports){
+},{"../../../../../utils":34}],69:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -7502,7 +7607,7 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":30}],66:[function(require,module,exports){
+},{"../../../../utils":34}],70:[function(require,module,exports){
 var component, dateInput, dropdown, extend, monthToString, numberInput, ref, remove, style, toEnglish, tooltip;
 
 component = require('../../../../utils/component');
@@ -7698,7 +7803,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../components/restrictedInput/number":16,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":67}],67:[function(require,module,exports){
+},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../components/restrictedInput/number":20,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./style":71}],71:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -7894,7 +7999,17 @@ exports.jobColumnHeader = {
 };
 
 
-},{"../../../../utils":30}],68:[function(require,module,exports){
+},{"../../../../utils":34}],72:[function(require,module,exports){
+exports.valid = {
+  color: '#5c5555',
+  borderColor: '#ccc'
+};
+
+exports.invalid = {
+  color: '#c00',
+  borderColor: '#c00'
+};
+
 exports.cover = {
   position: 'absolute',
   top: 0,
@@ -7953,7 +8068,7 @@ exports.submitDisabled = {
 };
 
 
-},{}],69:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 var component, dropdown, remove, style, tooltip, yearInput;
 
 component = require('../../../../utils/component');
@@ -7983,10 +8098,10 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
   table0 = (function() {
     var add, body, dropdowns, i0, i1, i2, lastLine, onAdds, rows, update, view;
     rows = [];
-    dropdowns = [0, 1].map(function() {
+    dropdowns = [0, 1].map(function(i) {
       var f;
       f = E(dropdown, {
-        items: ['کم', 'متوسط', 'زیاد']
+        items: i ? ['کم', 'متوسط', 'زیاد'] : ['کم', 'زیاد']
       });
       setStyle(f.input, style.input);
       return f;
@@ -8166,7 +8281,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":7,"../../../../components/restrictedInput/year":18,"../../../../components/tooltip":20,"../../../../utils":30,"../../../../utils/component":26,"./style":70}],70:[function(require,module,exports){
+},{"../../../../components/dropdown":11,"../../../../components/restrictedInput/year":22,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./style":74}],74:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -8256,7 +8371,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":30}],71:[function(require,module,exports){
+},{"../../../../utils":34}],75:[function(require,module,exports){
 var component, extend, form, style, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -8326,7 +8441,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./form":46,"./style":72,"./tests":73}],72:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30,"./form":50,"./style":76,"./tests":77}],76:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -8439,7 +8554,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":30}],73:[function(require,module,exports){
+},{"../../utils":34}],77:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -8452,7 +8567,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":26}],74:[function(require,module,exports){
+},{"../../../utils/component":30}],78:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -8601,7 +8716,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"./jobs":75,"./style":76}],75:[function(require,module,exports){
+},{"../../utils":34,"../../utils/component":30,"./jobs":79,"./style":80}],79:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -8683,7 +8798,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],76:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -8915,7 +9030,7 @@ exports.footerLink = {
 };
 
 
-},{}],77:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -9025,7 +9140,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":25,"../../utils/component":26,"../../utils/dom":28,"../tableView":82}],78:[function(require,module,exports){
+},{"../../singletons/modal":29,"../../utils/component":30,"../../utils/dom":32,"../tableView":86}],82:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -9070,7 +9185,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":26,"./applicantView":71,"./apply":74,"./hrView":77,"./login":79,"./managerView":81}],79:[function(require,module,exports){
+},{"../utils/component":30,"./applicantView":75,"./apply":78,"./hrView":81,"./login":83,"./managerView":85}],83:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -9141,7 +9256,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":16,"../../utils":30,"../../utils/component":26,"./style":80}],80:[function(require,module,exports){
+},{"../../components/restrictedInput/number":20,"../../utils":34,"../../utils/component":30,"./style":84}],84:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -9238,7 +9353,7 @@ exports.invalid = {
 };
 
 
-},{}],81:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -9246,8 +9361,8 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":82}],82:[function(require,module,exports){
-var component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
+},{"../tableView":86}],86:[function(require,module,exports){
+var actionButton, component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
 
 component = require('../../utils/component');
 
@@ -9259,16 +9374,21 @@ table = require('./table');
 
 search = require('./search');
 
+actionButton = require('../../components/actionButton');
+
 ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 
 stateToPersian = require('../../utils/logic').stateToPersian;
 
 module.exports = component('tableView', function(arg) {
-  var E, append, applicants, dom, empty, events, onEvent, searchInstance, setStyle, state, tableInstance, text, update, view;
-  dom = arg.dom, events = arg.events, state = arg.state;
+  var E, actionButtonInstance, append, applicants, dom, empty, events, onEvent, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
   onEvent = events.onEvent;
-  view = E('span', null, E(sidebar), E(style.contents, E(style.action, 'salam'), searchInstance = E(search), tableInstance = E(table, {
+  selectedApplicants = [];
+  view = E('span', null, E(sidebar), E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
+    items: ['ایجاد حساب کاربری', 'درخواست مصاحبه']
+  })), searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
       multiSelect: true
@@ -9354,9 +9474,34 @@ module.exports = component('tableView', function(arg) {
       }
     ],
     handlers: {
+      update: function(descriptors) {
+        return selectedApplicants = descriptors.filter(function(arg1) {
+          var selected;
+          selected = arg1.selected;
+          return selected;
+        }).map(function(arg1) {
+          var entity;
+          entity = arg1.entity;
+          return entity;
+        });
+      },
       select: function(applicant) {}
     }
   })));
+  actionButtonInstance.onSelect(function(value) {
+    var selectedApplicant;
+    if (selectedApplicants.length !== 1) {
+      alert('لطفا یک سطر را انتخاب کنید');
+      return;
+    }
+    selectedApplicant = selectedApplicants[0];
+    switch (value) {
+      case 'ایجاد حساب کاربری':
+        return console.log(1);
+      case 'درخواست مصاحبه':
+        return console.log(2);
+    }
+  });
   applicants = [];
   update = function() {
     return tableInstance.setData(applicants.filter(searchInstance.isInSearch));
@@ -9376,7 +9521,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../utils":30,"../../utils/component":26,"../../utils/logic":32,"./search":85,"./sidebar":87,"./style":89,"./table":91}],83:[function(require,module,exports){
+},{"../../components/actionButton":3,"../../utils":34,"../../utils/component":30,"../../utils/logic":36,"./search":89,"./sidebar":91,"./style":93,"./table":95}],87:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -9597,7 +9742,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":5,"../../../../components/dropdown":7,"../../../../utils":30,"../../../../utils/component":26,"./style":84}],84:[function(require,module,exports){
+},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../utils":34,"../../../../utils/component":30,"./style":88}],88:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -9640,7 +9785,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":30}],85:[function(require,module,exports){
+},{"../../../../utils":34}],89:[function(require,module,exports){
 var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -9748,7 +9893,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":30,"../../../utils/component":26,"../../../utils/logic":32,"./criterion":83,"./style":86}],86:[function(require,module,exports){
+},{"../../../utils":34,"../../../utils/component":30,"../../../utils/logic":36,"./criterion":87,"./style":90}],90:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -9869,7 +10014,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":30}],87:[function(require,module,exports){
+},{"../../../utils":34}],91:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -9941,7 +10086,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":26,"./style":88}],88:[function(require,module,exports){
+},{"../../../utils/component":30,"./style":92}],92:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -10027,7 +10172,7 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":30}],89:[function(require,module,exports){
+},{"../../../utils":34}],93:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -10053,7 +10198,7 @@ exports.action = {
 };
 
 
-},{}],90:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -10275,7 +10420,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":30,"./style":92}],91:[function(require,module,exports){
+},{"../../../utils":34,"./style":96}],95:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -10399,7 +10544,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":30,"../../../utils/component":26,"./functions":90,"./style":92}],92:[function(require,module,exports){
+},{"../../../utils":34,"../../../utils/component":30,"./functions":94,"./style":96}],96:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -10490,7 +10635,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":30}],93:[function(require,module,exports){
+},{"../../../utils":34}],97:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -10524,4 +10669,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./alertMessages":2,"./page":22,"./q":23,"./utils/dom":28,"./utils/service":36}]},{},[93]);
+},{"./alertMessages":2,"./page":26,"./q":27,"./utils/dom":32,"./utils/service":40}]},{},[97]);
