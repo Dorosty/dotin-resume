@@ -13,6 +13,8 @@ module.exports = component 'tableView', ({dom, events, state}) ->
   view = E 'span', null,
     E sidebar
     E style.contents,
+      E style.action,
+        actionButtonInstance = E actionButton, items: ['ایجاد حساب کاربری', 'درخواست مصاحبه']
       searchInstance = E search
       tableInstance = E table,
         entityId: 'userId'
@@ -37,7 +39,7 @@ module.exports = component 'tableView', ({dom, events, state}) ->
           }
           {
             name: 'شغل‌های درخواستی'
-            getValue: ({selectedJobs}) -> selectedJobs.join ' - '
+            getValue: ({selectedJobs}) -> selectedJobs.map(({jobName}) -> jobName).join ' - '
           }
           {
             name: 'وضعیت'

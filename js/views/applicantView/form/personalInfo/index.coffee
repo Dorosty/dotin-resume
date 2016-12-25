@@ -240,17 +240,19 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       onEvent input, ['input', 'pInput'], ->
         setStyle [label, input], style.valid
         hideTooltip?()
+        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
+          setError labelText, error = 'تکمیل این فیلد الزامیست.'
+        else if field.valid? && !field.valid()
+          setError labelText, error = 'مقدار وارد شده قابل قبول نیست.'
+        else
+          setError labelText, error = null
       onEvent input, 'blur', ->
         setTimeout (->
           hideTooltip?()
           if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
             setStyle [label, input], style.invalid
-            setError labelText, error = 'تکمیل این فیلد الزامیست.'
           else if field.valid? && !field.valid()
             setStyle [label, input], style.invalid
-            setError labelText, error = 'مقدار وارد شده قابل قبول نیست.'
-          else
-            setError labelText, error = null
         ), 100
   setOff ->
     hideTooltips.forEach (hideTooltip) -> hideTooltip()

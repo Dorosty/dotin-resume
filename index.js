@@ -4878,7 +4878,7 @@ user = {
   personalPic: null,
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 3,
+  userType: 1,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -5656,7 +5656,7 @@ reputation = require('./reputation');
 others = require('./others');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, cover, data, dom, errors, events, hide, noData, onEvent, onResize, resize, scroll, service, setData, setError, setStyle, show, state, submit, submitDisabled, text, view, yesData;
+  var E, accept, cover, data, dom, errors, events, hide, noData, onEvent, onResize, resize, scroll, service, setData, setError, setStyle, show, state, submit, submitDisabled, text, view, x, y, yesData;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent, onResize = events.onResize;
@@ -5667,13 +5667,19 @@ module.exports = component('applicantForm', function(arg) {
         if (data[category] == null) {
           data[category] = {};
         }
-        return data[category][key] = value;
+        data[category][key] = value;
       } else if (data[category]) {
         delete data[category][key];
         if (!Object.keys(data[category]).length) {
-          return delete data[category];
+          delete data[category];
         }
       }
+      return setTimeout(function() {
+        window.x = data;
+        return setStyle(x, {
+          englishHtml: JSON.stringify(data, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+        });
+      });
     };
   };
   submit = E(style.submit, 'ثبت نهایی اطلاعات');
@@ -5694,14 +5700,22 @@ module.exports = component('applicantForm', function(arg) {
       }
       if (Object.keys(errors).length) {
         setStyle(submit, style.submitDisabled);
-        return submitDisabled = true;
+        submitDisabled = true;
       } else {
         setStyle(submit, style.submit);
-        return submitDisabled = false;
+        submitDisabled = false;
       }
+      return setTimeout(function() {
+        window.y = data;
+        return setStyle(y, {
+          englishHtml: JSON.stringify(errors, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+        });
+      });
     };
   };
-  view = E(null, cover = E(style.cover), hide(noData = E(null, 'اطلاعات شما ثبت شده‌است.')), yesData = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
+  view = E(null, cover = E(style.cover), hide(noData = E(null, 'اطلاعات شما ثبت شده‌است.')), yesData = E(null, x = E(), E('h1', {
+    color: 'red'
+  }, '---------'), y = E(), E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
     setData: setData('مشخصات فردی'),
     setError: setError('مشخصات فردی')
   }), E(style.header, 'سوابق تحصیلی'), E(education, {
@@ -7159,7 +7173,16 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       });
       onEvent(input, ['input', 'pInput'], function() {
         setStyle([label, input], style.valid);
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+        if (typeof hideTooltip === "function") {
+          hideTooltip();
+        }
+        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
+          return setError(labelText, error = 'تکمیل این فیلد الزامیست.');
+        } else if ((field.valid != null) && !field.valid()) {
+          return setError(labelText, error = 'مقدار وارد شده قابل قبول نیست.');
+        } else {
+          return setError(labelText, error = null);
+        }
       });
       return onEvent(input, 'blur', function() {
         return setTimeout((function() {
@@ -7167,13 +7190,9 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
             hideTooltip();
           }
           if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-            setStyle([label, input], style.invalid);
-            return setError(labelText, error = 'تکمیل این فیلد الزامیست.');
+            return setStyle([label, input], style.invalid);
           } else if ((field.valid != null) && !field.valid()) {
-            setStyle([label, input], style.invalid);
-            return setError(labelText, error = 'مقدار وارد شده قابل قبول نیست.');
-          } else {
-            return setError(labelText, error = null);
+            return setStyle([label, input], style.invalid);
           }
         }), 100);
       });
@@ -9249,7 +9268,7 @@ module.exports = component('tableView', function(arg) {
   dom = arg.dom, events = arg.events, state = arg.state;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
   onEvent = events.onEvent;
-  view = E('span', null, E(sidebar), E(style.contents, searchInstance = E(search), tableInstance = E(table, {
+  view = E('span', null, E(sidebar), E(style.contents, E(style.action, 'salam'), searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
       multiSelect: true
@@ -9287,7 +9306,11 @@ module.exports = component('tableView', function(arg) {
         getValue: function(arg1) {
           var selectedJobs;
           selectedJobs = arg1.selectedJobs;
-          return selectedJobs.join(' - ');
+          return selectedJobs.map(function(arg2) {
+            var jobName;
+            jobName = arg2.jobName;
+            return jobName;
+          }).join(' - ');
         }
       }, {
         name: 'وضعیت',
@@ -10008,7 +10031,8 @@ exports.linkActive = extend({}, exports.link, {
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
-  marginLeft: 50
+  marginLeft: 50,
+  position: 'relative'
 };
 
 exports.profilePicture = {
@@ -10021,6 +10045,12 @@ exports.profilePicture = {
 exports.iconTd = {};
 
 exports.icon = {};
+
+exports.action = {
+  position: 'absolute',
+  top: 0,
+  left: 0
+};
 
 
 },{}],90:[function(require,module,exports){

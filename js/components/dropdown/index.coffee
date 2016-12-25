@@ -78,7 +78,7 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     input.blur()
 
   prevInputValue = ''
-  onEvent input, 'input', ->
+  onEvent input, ['input', 'pInput'], ->
     unless english
       setStyle input, value: input.value()
     if getFilteredItems().length

@@ -23,6 +23,9 @@ module.exports = component 'applicantForm', ({dom, events, state, service}) ->
       delete data[category][key]
       unless Object.keys(data[category]).length
         delete data[category]
+    setTimeout ->
+      window.x = data
+      setStyle x, englishHtml: JSON.stringify(data, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
 
   submit = E style.submit, 'ثبت نهایی اطلاعات'
   submitDisabled = true
@@ -42,11 +45,17 @@ module.exports = component 'applicantForm', ({dom, events, state, service}) ->
     else
       setStyle submit, style.submit
       submitDisabled = false
+    setTimeout ->
+      window.y = data
+      setStyle y, englishHtml: JSON.stringify(errors, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
 
   view = E null,
     cover = E style.cover
     hide noData = E null, 'اطلاعات شما ثبت شده‌است.'
     yesData = E null,
+      x = E()
+      E 'h1', color: 'red', '---------'
+      y = E()
       E overview
       scroll = E scrollViewer
       E style.header, 'مشخصات فردی'
