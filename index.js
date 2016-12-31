@@ -5087,8 +5087,6 @@ exports.autoPing = function() {
 },{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
 var Q, applicants, extend, user;
 
-return;
-
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -5140,7 +5138,7 @@ user = {
   personalPic: null,
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 3,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
