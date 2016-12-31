@@ -3,14 +3,6 @@
 exports.clearfix =
   clear: 'both'
 
-exports.valid =
-  color: '#5c5555'
-  borderColor: '#ccc'
-
-exports.invalid =
-  color: '#c00'
-  borderColor: '#c00'
-
 exports.column =
   float: 'right'
   width: '50%'

@@ -82,11 +82,11 @@ exports.instance = (thisComponent) ->
       else
         if typeof firstArg is 'string'
           tagName = firstArg
-          style = args[1] or {}
+          style = args[1] || {}
           children = args[2..]
-        else if typeof firstArg is 'object' and not Array.isArray firstArg
+        else if typeof firstArg is 'object' && not Array.isArray firstArg
           tagName = 'div'
-          style = firstArg or {}
+          style = firstArg || {}
           children = args[1..]
         else
           tagName = 'div'
@@ -192,7 +192,7 @@ exports.instance = (thisComponent) ->
         when 'class', 'type', 'id', 'for', 'src', 'href', 'target'
           element.setAttribute key, value
         else
-          if (typeof value is 'number') and not (key in ['opacity', 'zIndex'])
+          if (typeof value is 'number') && not (key in ['opacity', 'zIndex'])
             value = Math.floor(value) + 'px'
           if (key is 'float')
             key = 'cssFloat'

@@ -44,11 +44,11 @@ module.exports = component 'hrView', ({dom, events, service}) ->
     input.focus()
 
   onEvent [title, description], 'input', setEnabled = ->
-    modal.instance.setEnabled title.value() and
-    description.value() and
-    requirements.length and
-    duties.length and
-    requirements.every((x) -> x.value()) and
+    modal.instance.setEnabled title.value() &&
+    description.value() &&
+    requirements.length &&
+    duties.length &&
+    requirements.every((x) -> x.value()) &&
     duties.every((x) -> x.value())
 
   submit = ->

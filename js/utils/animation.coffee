@@ -29,7 +29,7 @@ linear = (rawCallback, wrapCallback) ->
     xDest = dest
     startTime = performance.now()
     totalTime = time * (xDest - xStart) / (dest - start)
-    unless running or totalTime is 0
+    unless running || totalTime is 0
       running = true
       requestAnimationFrame animate
 

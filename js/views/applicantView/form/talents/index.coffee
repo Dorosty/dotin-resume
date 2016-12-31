@@ -1,175 +1,182 @@
 component = require '../../../../utils/component'
 style = require './style'
-tooltip = require '../../../../components/tooltip'
 dropdown = require '../../../../components/dropdown'
 yearInput = require '../../../../components/restrictedInput/year'
 {remove} = require '../../../../utils'
 
-module.exports = component 'applicantFormTalents', ({dom, events, setOff}, {setData}) ->
-  {E, setStyle, empty, append} = dom
+module.exports = component 'applicantFormTalents', ({dom, events}, {setData, registerErrorField, setError}) ->
+  {E, setStyle, append, destroy} = dom
   {onEvent} = events
 
-  hideTooltips = []
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
+
 
   table0 = do ->
 
+    entries = []
     rows = []
+    removeButtons = []
 
-    dropdowns = [0 .. 1].map (i) ->
-      f = E dropdown, items: if i then ['کم', 'متوسط', 'زیاد'] else ['کم', 'زیاد']
-      setStyle f.input, style.input
-      f
-
-    lastLine = E 'tr', null,
-      E 'td', style.td,
-        i0 = E 'input', style.input
-      E 'td', style.td,
-        i1 = dropdowns[0]
-      E 'td', style.td,
-        i2 = dropdowns[1]
-      E 'td', style.td,
+    view = E 'span', null,
+      E 'table', null,
+        E 'thead', null,
+          E 'tr', null,
+            E 'th', style.th, 'شایستگی / مهارت'
+            E 'th', style.th, 'علاقه به کار در این حوزه'
+            E 'th', style.th, 'دانش و مهارت در این حوزه'
+            E 'th', style.th
+        body = E 'tbody', null
+      E null,
         add = E style.add
 
-    view = E 'table', null,
-      E 'thead', null,
-        E 'tr', null,
-          E 'th', style.th, 'شایستگی / مهارت'
-          E 'th', style.th, 'علاقه به کار در این حوزه'
-          E 'th', style.th, 'دانش و مهارت در این حوزه'
-          E 'th', style.th
-      body = E 'tbody', null,
-        lastLine
+    createRow = ->
+      entries.push entry = {}
+      rows.push row = E 'tr', null,
+        E 'td', style.td, 
+        i0 = E 'input', style.input
+        E 'td', style.td,
+          i1 = do ->
+            i1 = E dropdown, items: ['کم', 'زیاد']
+            setStyle i1.input, style.input
+            i1
+        E 'td', style.td,
+          i2 = do ->
+            i2 = E dropdown, items: ['کم', 'متوسط', 'زیاد']
+            setStyle i2.input, style.input
+            i2
+        E 'td', style.td, do ->
+          removeButtons.push removeButton = E style.remove
+          onEvent removeButton, 'click', ->
+            remove rows, row
+            remove entries, entry
+            setData 'مهارت‌ها', entries
+            destroy row
+            offErrors.forEach (x) -> x()
+          removeButton
+      append body, row
 
-    update = ->    
-      empty body
-      append body, rows.map (row) ->
-        [v0, v1, v2] = row
-        E 'tr', null,
-          E 'td', style.td, v0
-          E 'td', style.td, v1
-          E 'td', style.td, v2
-          E 'td', style.td, do ->
-            removeRow = E style.remove
-            onEvent removeRow, 'click', ->
-              remove rows, row
-              update()
-            removeRow
-      append body, lastLine
-      setData 'جدول', rows
+      offErrors = []
+      Object.keys fields =
+        'شایستگی / مهارت': i0
+        'علاقه به کار در این حوزه': i1
+        'دانش و مهارت در این حوزه': i2
+      .forEach (fieldName) ->
+        field = fields[fieldName]
+        error = registerErrorField field, field
+        offErrors.push error.off
+        setError error, 'تکمیل این فیلد الزامیست.', true
+        if field.onChange
+          field.onChange ->
+            entry[fieldName] = field.value()
+            setData 'مهارت‌ها', entries
+          onEvent field.input, 'input', ->
+            setError error, 'تکمیل این فیلد الزامیست.', true
+          onEvent field.input, 'blur', ->
+            setTimeout ->
+              if !field.value()?
+                setError error, 'تکمیل این فیلد الزامیست.'
+              else
+                setError error, null
+        else
+          input = field.input || field
+          onEvent input, 'input', ->
+            entry[fieldName] = field.value()
+            setData 'مهارت‌ها', entries
+          handleChange = (hidden) -> ->
+            if !field.value().trim()
+              setError error, 'تکمیل این فیلد الزامیست.', hidden
+            else if field.valid? && !field.valid()
+              setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
+            else
+              setError error, null
+          onEvent input, 'input', handleChange true
+          onEvent input, 'blur', handleChange false
 
-    onAdds = []
-    [i0, i1, i2].forEach (field, i) ->
-      error = hideTooltip = undefined
-      input = field.input || field
-      onEvent input, 'focus', ->
-        if error
-          h = tooltip input, error
-          hideTooltips.push hideTooltip = ->
-            h()
-            remove hideTooltips, hideTooltip
-      onEvent input, ['input', 'pInput'], ->
-        setStyle input, style.valid
-        hideTooltip?()
-      onAdds.push ->
-        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-          setStyle input, style.invalid
-          error = 'تکمیل این فیلد الزامیست.'
-        else if field.valid? && !field.valid()
-          setStyle input, style.invalid
-          error = 'مقدار وارد شده قابل قبول نیست.'
-      onEvent input, 'blur', ->
-        hideTooltip?()
-
-    onEvent add, 'click', ->
-      canAdd = [i0, i1, i2].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
-      unless canAdd
-        onAdds.forEach (x) -> x()
-        return
-      rows.push [i0, i1, i2].map (i) -> i.value()
-      update()
-      setStyle [i0, i1.input, i2.input], value: ''
+    onEvent add, 'click', createRow
 
     view
 
   table1 = do ->
 
+    entries = []
     rows = []
+    removeButtons = []
 
-    lastLine = E 'tr', null,
-      E 'td', style.td,
-        i0 = E 'input', style.input
-      E 'td', style.td,
-        i1 = E 'input', style.input
-      E 'td', style.td,
-        i2 = do ->
-          i2 = E yearInput
-          setStyle i2, style.input
-          i2
-      E 'td', style.td,
+    view = E 'span', null,
+      E 'table', null,
+        E 'thead', null,
+          E 'tr', null,
+            E 'th', style.th, 'دوره'
+            E 'th', style.th, 'برگزار کننده'
+            E 'th', style.th, 'سال'
+            E 'th', style.th
+        body = E 'tbody', null
+      E null,
         add = E style.add
 
-    view = E 'table', null,
-      E 'thead', null,
-        E 'tr', null,
-          E 'th', style.th, 'دوره'
-          E 'th', style.th, 'برگزار کننده'
-          E 'th', style.th, 'سال'
-          E 'th', style.th
-      body = E 'tbody', null,
-        lastLine
+    createRow = ->
+      entries.push entry = {}
+      rows.push row = E 'tr', null,
+        E 'td', style.td,
+          i0 = E 'input', style.input
+        E 'td', style.td,
+          i1 = E 'input', style.input
+        E 'td', style.td,
+          i2 = do ->
+            i2 = E yearInput
+            setStyle i2, style.input
+            i2
+        E 'td', style.td, do ->
+          removeButtons.push removeButton = E style.remove
+          onEvent removeButton, 'click', ->
+            remove rows, row
+            remove entries, entry
+            setData 'دوره‌ها', entries
+            destroy row
+            offErrors.forEach (x) -> x()
+          removeButton
+      append body, row
 
-    update = ->    
-      empty body
-      append body, rows.map (row) ->
-        [v0, v1, v2] = row
-        E 'tr', null,
-          E 'td', style.td, v0
-          E 'td', style.td, v1
-          E 'td', style.td, v2
-          E 'td', style.td, do ->
-            removeRow = E style.remove
-            onEvent removeRow, 'click', ->
-              remove rows, row
-              update()
-            removeRow
-      append body, lastLine
-      setData 'جدول 2', rows
+      offErrors = []
+      Object.keys fields =
+        'دوره': i0
+        'برگزار کننده': i1
+        'سال': i2
+      .forEach (fieldName) ->
+        field = fields[fieldName]
+        error = registerErrorField field, field
+        offErrors.push error.off
+        setError error, 'تکمیل این فیلد الزامیست.', true
+        if field.onChange
+          field.onChange ->
+            entry[fieldName] = field.value()
+            setData 'دوره‌ها', entries
+          onEvent field.input, 'input', ->
+            setError error, 'تکمیل این فیلد الزامیست.', true
+          onEvent field.input, 'blur', ->
+            setTimeout ->
+              if !field.value()?
+                setError error, 'تکمیل این فیلد الزامیست.'
+              else
+                setError error, null
+        else
+          input = field.input || field
+          onEvent input, 'input', ->
+            entry[fieldName] = field.value()
+            setData 'دوره‌ها', entries
+          handleChange = (hidden) -> ->
+            if !field.value().trim()
+              setError error, 'تکمیل این فیلد الزامیست.', hidden
+            else if field.valid? && !field.valid()
+              setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
+            else
+              setError error, null
+          onEvent input, 'input', handleChange true
+          onEvent input, 'blur', handleChange false
 
-    onAdds = []
-    [i0, i1, i2].forEach (field, i) ->
-      error = hideTooltip = undefined
-      input = field.input || field
-      onEvent input, 'focus', ->
-        if error
-          h = tooltip input, error
-          hideTooltips.push hideTooltip = ->
-            h()
-            remove hideTooltips, hideTooltip
-      onEvent input, ['input', 'pInput'], ->
-        setStyle input, style.valid
-        hideTooltip?()
-      onAdds.push ->
-        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-          setStyle input, style.invalid
-          error = 'تکمیل این فیلد الزامیست.'
-        else if field.valid? && !field.valid()
-          setStyle input, style.invalid
-          error = 'مقدار وارد شده قابل قبول نیست.'
-      onEvent input, 'blur', ->
-        hideTooltip?()
-
-    onEvent add, 'click', ->
-      canAdd = [i0, i1, i2].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
-      unless canAdd
-        onAdds.forEach (x) -> x()
-        return
-      rows.push [i0, i1, i2].map (i) -> i.value()
-      update()
-      setStyle [i0, i1, i2], value: ''
+    onEvent add, 'click', createRow
 
     view
+
 
   view = E null,
     table0

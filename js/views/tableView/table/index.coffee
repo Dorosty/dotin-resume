@@ -16,7 +16,7 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
     entityId: entityId
     headers: []
     descriptors: null
-    sort: sort or {
+    sort: sort || {
       header: headers[0]
       direction: 'up'
     }
@@ -31,7 +31,7 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
       setStyle selectAll, style.checkboxSelected
   handlers.update = (descriptors) ->
     prevHandleUpdate? descriptors
-    allSelected = descriptors.length and descriptors.every ({selected}) -> selected
+    allSelected = descriptors.length && descriptors.every ({selected}) -> selected
     styleSelectAll()
 
   functions = _functions.create {headers, properties, handlers, variables, components, dom, events}
@@ -47,8 +47,8 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
               selectAllTd = E 'th', width: 20, cursor: 'pointer',
                 selectAll = E style.checkbox
             headers.map (header) ->
-              th = E 'th', extend({cursor: if header.key or header.getValue then 'pointer' else 'default'}, style.th),
-                if header.key or header.getValue
+              th = E 'th', extend({cursor: if header.key || header.getValue then 'pointer' else 'default'}, style.th),
+                if header.key || header.getValue
                   [
                     header.arrowUp = E style.arrowUp
                     header.arrowDown = E style.arrowDown
@@ -56,7 +56,7 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
                 text header.name
               if header.width
                 setStyle th, width: header.width
-              if header.key or header.getValue
+              if header.key || header.getValue
                 onEvent th, 'click', ->
                   functions.setSort header
                 onEvent th, 'mouseover', ->

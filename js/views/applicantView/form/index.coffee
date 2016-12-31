@@ -10,11 +10,20 @@ english = require './english'
 reputation = require './reputation'
 others = require './others'
 tooltip = require '../../../components/tooltip'
-{remove} = require '../../../utils'
+{extend, remove} = require '../../../utils'
+{spring} = require '../../../utils/animation'
+d = require '../../../utils/dom'
 
 module.exports = component 'applicantForm', ({dom, events, state, service, setOff}) ->
   {E, text, setStyle, show, hide} = dom
   {onEvent, onResize} = events
+
+  do setSubmitStyle = ->
+    setTimeout ->
+      if accept.value() && errors.every(({text}) -> !text)
+        setStyle submit, style.submit
+      else
+        setStyle submit, style.submitDisabled
 
   data = {}
   setData = (category) -> (key, value) ->
@@ -25,107 +34,74 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
       delete data[category][key]
       unless Object.keys(data[category]).length
         delete data[category]
-    setTimeout ->
-      window.x = data
-      setStyle x, englishHtml: JSON.stringify(data, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+    ['############'].concat(JSON.stringify(data, null, '  ').split('\n')).forEach (x) -> console.log x
+    ##################
+    # setTimeout ->
+    #   window.x = data
+    #   setStyle x, englishHtml: JSON.stringify(data, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+    ##################
 
-  submit = E style.submit, 'ثبت نهایی اطلاعات'
-  submitDisabled = true
-
-  hideTooltips = []
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
   errors = []
-  errorIsInitial = []
-  errorLabels = []
-  errorInputs = []
-  registerErrorField = (label, field) ->
-    hideTooltip = undefined
+  setOff ->
+    errors.forEach ({hideTooltip}) -> hideTooltip?()
+  registerErrorField = (label, field, notCritical) ->
     input = field.input || field
-    errorLabels.push label
-    errorInputs.push input
-    errorId = errors.length
-    errors.push null
-    errorIsInitial.push null
+    error = {
+      label
+      input
+      text: null
+      off: ->
+        remove errors, error
+        setSubmitStyle()
+    }
+    unless notCritical
+      errors.push error
     onEvent input, 'focus', ->
-      error = errors[errorId]
-      if error && !errorIsInitial[errorId]
-        h = tooltip input, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent input, ['input', 'pInput'], ->
+      if error.text && !error.hidden
+        h = tooltip input, error.text
+        error.hideTooltip = ->
+          h?()
+          h = null
+    handleChange = ->
       setStyle [label, input], style.valid
-      hideTooltip?()
-    field.onChange? ->
-      setStyle [label, input], style.valid
-      hideTooltip?()
+      error.hideTooltip?()
+    onEvent input, 'input', handleChange
+    field.onChange? handleChange
     onEvent input, 'blur', ->
-      hideTooltip?()
-    errorId
-
-  setError = (errorId, error, initial) ->
-    errors[errorId] = error
-    errorIsInitial[errorId] = initial
-    label = errorLabels[errorId]
-    input = errorInputs[errorId]
-    if error && !initial
-      setStyle [label, input], style.invalid
-
-
-  # (category) -> (key, error) ->
-  #   if error?
-  #     errors[category] ?= {}
-  #     errors[category][key] = error
-  #   else if errors[category]
-  #     delete errors[category][key]
-  #     unless Object.keys(errors[category]).length
-  #       delete errors[category]
-  #   if Object.keys(errors).length
-  #     setStyle submit, style.submitDisabled
-  #     submitDisabled = true
-  #   else
-  #     setStyle submit, style.submit
-  #     submitDisabled = false
-  #   setTimeout ->
-  #     window.y = data
-  #     setStyle y, englishHtml: JSON.stringify(errors, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
+      error.hideTooltip?()
+    error
+  setError = (error, text, hidden) ->
+    extend error, {text, hidden}
+    if text && !hidden
+      setStyle [error.label, error.input], style.invalid
+    setSubmitStyle()
 
   view = E null,
     cover = E style.cover
     hide noData = E null, 'اطلاعات شما ثبت شده‌است.'
     yesData = E null,
-      x = E()
-      E 'h1', color: 'red', '---------'
-      y = E()
       E overview
       scroll = E scrollViewer
       E style.header, 'مشخصات فردی'
-      # E personalInfo, setData: setData('مشخصات فردی'), setError: setError('مشخصات فردی')
+      E personalInfo, {setData: setData('مشخصات فردی'), registerErrorField, setError}
       E style.header, 'سوابق تحصیلی'
-      # E education, setData: setData('سوابق تحصیلی'), setError: setError('سوابق تحصیلی')
+      E education, {setData: setData('سوابق تحصیلی'), registerErrorField, setError}
       E style.header,
         text 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'
         E style.optional, '(اختیاری)'
-      # E talents, setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها')
+      E talents, {setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), registerErrorField, setError}
       E style.header, 'مهارت زبان انگلیسی'
       E english, {setData: setData('مهارت زبان انگلیسی'), registerErrorField, setError}
       E style.header,
         text 'آخرین سوابق سازمانی و پروژه‌ای'
         E style.optional, '(اختیاری)'
-      # E reputation, setData: setData('آخرین سوابق سازمانی و پروژه‌ای')
+      E reputation, {setData: setData('آخرین سوابق سازمانی و پروژه‌ای'), registerErrorField, setError}
       E style.header, 'سایر اطلاعات'
-      # E others, setData: setData('سایر اطلاعات'), setError: setError('سایر اطلاعات')
+      E others, {setData: setData('سایر اطلاعات'), registerErrorField, setError}
       E style.checkboxWrapper,
         accept = E checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.'
-      submit
-
-  # setError('ac') 'cept', true
-  # accept.onChange ->
-  #   if accept.value()
-  #     setError('ac') 'cept', null
-  #   else
-  #     setError('ac') 'cept', true
+      submit = E style.submit, 'ثبت نهایی اطلاعات'
+  accept.onChange setSubmitStyle
 
   resize = ->
     body = document.body
@@ -135,30 +111,52 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
   onResize resize
   setTimeout resize
 
+  errorSpringRunning = false
+  errorSpring = spring [300, 50], (y, running) ->
+    window.scroll 0, [y]
+    errorSpringRunning = running
+  onEvent E(d.window), ['scroll', 'resize'], ->
+    unless errorSpringRunning
+      errorSpring window.scrollY, 'goto'
+  submitting = false
   onEvent submit, 'click', ->
     setTimeout (->
-      if submitDisabled
+      if submitting
+        return
+      unless errors.every(({text}) -> !text)
+        errors.some ({label, text}) ->
+          if text
+            {element} = label.fn
+            top = 0
+            loop
+              top += element.offsetTop || 0
+              element = element.offsetParent
+              break unless element
+            errorSpring top - 50
+            true
+        errors.forEach (error) ->
+          setError error, error.text
+        return
+      unless accept.value()
+        alert 'لطفا تیک تأیید صحت اطلاعات (در انتهای صفحه) را بزنید.'
         return
       if confirm 'پس از ثبت نهایی اطلاعات، این صفحه قابل ویرایش نخواهد‌بود.\nآیا از صحت اطلاعات وارد شده اطمینان دارید؟'
         setStyle cover, style.coverVisible
         setStyle submit, text: 'در حال ثبت...'
-        setStyle submit, style.submitDisabled
-        submitDisabled = true
+        setStyle submit, style.submitSubmitting
+        submitting = true
         state.user.on once: true, (user) ->
           service.submitProfileData user.userId, data
           .fin ->
-            setStyle submit, style.submitDisabled
-            submitDisabled = true
+            setStyle submit, style.submitSubmitting
+            submitting = false
             setStyle cover, style.cover
             setStyle submit, text: 'ثبت نهایی اطلاعات'
-    ), 200
+    )
 
   state.user.on (user) ->
     if user.applicantData
       hide yesData
       show noData
-      #####################
-      # setStyle noData, englishHtml: 'اطلاعات شما ثبت شده‌است.' + '<br /><br /><br /><br /><br />اطلاعات ثبت شده (جهت تست):<br /><br /><br />' + JSON.stringify(user.applicantData, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
-      #####################
 
   view

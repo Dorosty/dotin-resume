@@ -16,11 +16,11 @@ createPubSub = (name) ->
         callback data
         firstDataSent = true
 
-    if options.once and not options.omitFirst and firstDataSent
+    if options.once && not options.omitFirst && firstDataSent
       return ->
 
     subscribers.push wrappedCallback = (data) ->
-      if not options.allowNull and not data?
+      if not options.allowNull && not data?
         return
 
       callback data

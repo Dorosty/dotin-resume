@@ -255,7 +255,7 @@ exports["do"] = function() {
 };
 
 
-},{"./singletons/alert":28,"./utils":34,"./utils/service":40}],3:[function(require,module,exports){
+},{"./singletons/alert":28,"./utils":35,"./utils/service":41}],3:[function(require,module,exports){
 var component, list, style, toPersian;
 
 component = require('../../utils/component');
@@ -342,7 +342,7 @@ module.exports = component('actionButton', function(arg, arg1) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30,"./list":4,"./style":6}],4:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"./list":4,"./style":6}],4:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -430,7 +430,7 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":30,"./style":5}],5:[function(require,module,exports){
+},{"../../../utils/component":31,"./style":5}],5:[function(require,module,exports){
 exports.list = {
   cursor: 'pointer',
   position: 'absolute',
@@ -546,7 +546,7 @@ module.exports = component('checkbox', function(arg, text) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30,"./style":8}],8:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"./style":8}],8:[function(require,module,exports){
 exports.view = {};
 
 exports.text = {
@@ -630,7 +630,7 @@ module.exports = component('dateInput', function(arg) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30,"./style":10}],10:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"./style":10}],10:[function(require,module,exports){
 exports.view = {
   position: 'relative'
 };
@@ -651,7 +651,7 @@ exports.calendar = {
 
 
 },{}],11:[function(require,module,exports){
-var component, defer, list, ref, style, textIsInSearch, toPersian;
+var component, list, ref, style, textIsInSearch, toPersian;
 
 component = require('../../utils/component');
 
@@ -659,7 +659,7 @@ style = require('./style');
 
 list = require('./list');
 
-ref = require('../../utils'), toPersian = ref.toPersian, textIsInSearch = ref.textIsInSearch, defer = ref.defer;
+ref = require('../../utils'), toPersian = ref.toPersian, textIsInSearch = ref.textIsInSearch;
 
 module.exports = component('dropdown', function(arg, arg1) {
   var E, arrow, changeListeners, clear, dom, dropdown, english, events, filteredItems, getFilteredItems, getId, getTitle, input, items, itemsList, onEnter, onEvent, onSelect, prevInputValue, returnObject, selectedIndex, setInputValue, setStyle;
@@ -706,8 +706,8 @@ module.exports = component('dropdown', function(arg, arg1) {
   };
   onSelect = function(item) {
     setInputValue(getTitle(item));
-    itemsList.hide();
     itemsList.update(getFilteredItems());
+    input.blur();
     return changeListeners.forEach(function(x) {
       return x();
     });
@@ -717,7 +717,7 @@ module.exports = component('dropdown', function(arg, arg1) {
     onSelect: onSelect
   }));
   clear = function() {
-    setInputValue(items[selectedIndex]);
+    setInputValue(getTitle(items[selectedIndex]));
     itemsList.update(getFilteredItems());
     return itemsList.set(items[selectedIndex]);
   };
@@ -739,9 +739,7 @@ module.exports = component('dropdown', function(arg, arg1) {
     return itemsList.show();
   });
   onEvent(input, 'blur', function() {
-    return defer(1000)(function() {
-      return itemsList.hide();
-    });
+    return itemsList.hide();
   });
   onEvent(input, 'keydown', function(e) {
     var code;
@@ -760,7 +758,7 @@ module.exports = component('dropdown', function(arg, arg1) {
     return input.blur();
   });
   prevInputValue = '';
-  onEvent(input, ['input', 'pInput'], function() {
+  onEvent(input, 'input', function() {
     if (!english) {
       setStyle(input, {
         value: input.value()
@@ -773,7 +771,8 @@ module.exports = component('dropdown', function(arg, arg1) {
         englishValue: prevInputValue
       });
     }
-    itemsList.update(getFilteredItems(), true);
+    itemsList.reset();
+    itemsList.update(getFilteredItems());
     return itemsList.show();
   });
   returnObject({
@@ -789,7 +788,8 @@ module.exports = component('dropdown', function(arg, arg1) {
         setStyle(input, {
           value: ''
         });
-        return itemsList.update(getFilteredItems(), true);
+        itemsList.reset();
+        return itemsList.update(getFilteredItems());
       }
     }
   });
@@ -797,9 +797,98 @@ module.exports = component('dropdown', function(arg, arg1) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30,"./list":12,"./style":14}],12:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"../../../utils/component":30,"./style":13,"dup":4}],13:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"./list":12,"./style":14}],12:[function(require,module,exports){
+var component, style;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('dropdownList', function(arg, arg1) {
+  var E, append, dom, empty, entities, events, getTitle, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  onSelect = arg1.onSelect, getTitle = arg1.getTitle;
+  E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  list = E(style.list);
+  entities = items = highlightIndex = value = void 0;
+  highlightCurrentItem = function() {
+    if (!(items != null ? items.length : void 0)) {
+      return;
+    }
+    setStyle(items, style.item);
+    if (highlightIndex != null) {
+      return setStyle(items[highlightIndex], style.highlightedItem);
+    }
+  };
+  show = function() {
+    return setStyle(list, style.visibleList);
+  };
+  hide = function() {
+    return setStyle(list, style.list);
+  };
+  select = function() {
+    value = entities[highlightIndex];
+    onSelect(value);
+    return hide();
+  };
+  returnObject({
+    value: function() {
+      return value;
+    },
+    set: function(x) {
+      return value = x;
+    },
+    reset: function() {
+      return value = null;
+    },
+    update: function(_entities) {
+      highlightIndex = 0;
+      empty(list);
+      entities = _entities;
+      append(list, items = entities.map(function(entity, i) {
+        var item;
+        item = E({
+          englishText: getTitle(entity)
+        });
+        onEvent(item, 'mousemove', function() {
+          highlightIndex = i;
+          return highlightCurrentItem();
+        });
+        onEvent(item, 'mouseout', function() {
+          return setStyle(item, style.item);
+        });
+        onEvent(item, 'mousedown', function(e) {
+          return e.preventDefault();
+        });
+        onEvent(item, 'click', select);
+        return item;
+      }));
+      return highlightCurrentItem();
+    },
+    goUp: function() {
+      highlightIndex--;
+      if (highlightIndex < 0) {
+        highlightIndex = 0;
+      }
+      return highlightCurrentItem();
+    },
+    goDown: function() {
+      highlightIndex++;
+      if (highlightIndex >= entities.length) {
+        highlightIndex = entities.length - 1;
+      }
+      return highlightCurrentItem();
+    },
+    select: select,
+    show: show,
+    hide: hide
+  });
+  return list;
+});
+
+
+},{"../../../utils/component":31,"./style":13}],13:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],14:[function(require,module,exports){
 exports.dropdown = {
@@ -885,7 +974,7 @@ module.exports = component('radioSwitch', function(arg, arg1) {
 });
 
 
-},{"../../utils/component":30,"./style":16}],16:[function(require,module,exports){
+},{"../../utils/component":31,"./style":16}],16:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -918,7 +1007,7 @@ exports.optionActive = {
 };
 
 
-},{"../../utils":34}],17:[function(require,module,exports){
+},{"../../utils":35}],17:[function(require,module,exports){
 var component, emailIsValid;
 
 component = require('../../utils/component');
@@ -941,7 +1030,7 @@ module.exports = component('emailInput', function(arg) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30}],18:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31}],18:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -966,7 +1055,7 @@ module.exports = component('gradeInput', function(arg) {
 });
 
 
-},{".":19,"../../utils":34,"../../utils/component":30}],19:[function(require,module,exports){
+},{".":19,"../../utils":35,"../../utils/component":31}],19:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -1001,7 +1090,7 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30}],20:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31}],20:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1026,7 +1115,7 @@ module.exports = component('numberInput', function(arg, isFraction) {
 });
 
 
-},{".":19,"../../utils":34,"../../utils/component":30}],21:[function(require,module,exports){
+},{".":19,"../../utils":35,"../../utils/component":31}],21:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1051,7 +1140,7 @@ module.exports = component('phoneNumberInput', function(arg) {
 });
 
 
-},{".":19,"../../utils":34,"../../utils/component":30}],22:[function(require,module,exports){
+},{".":19,"../../utils":35,"../../utils/component":31}],22:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1076,7 +1165,7 @@ module.exports = component('yearInput', function(arg) {
 });
 
 
-},{".":19,"../../utils":34,"../../utils/component":30}],23:[function(require,module,exports){
+},{".":19,"../../utils":35,"../../utils/component":31}],23:[function(require,module,exports){
 var component, window;
 
 component = require('../utils/component');
@@ -1156,7 +1245,7 @@ module.exports = component('scrollViewer', function(arg) {
 });
 
 
-},{"../utils/component":30,"../utils/dom":32}],24:[function(require,module,exports){
+},{"../utils/component":31,"../utils/dom":33}],24:[function(require,module,exports){
 var body, component, defer, extend, ref, style;
 
 component = require('../../utils/component');
@@ -1206,7 +1295,7 @@ module.exports = function(element, text) {
 };
 
 
-},{"../../utils":34,"../../utils/component":30,"../../utils/dom":32,"./style":25}],25:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"../../utils/dom":33,"./style":25}],25:[function(require,module,exports){
 exports.tooltip = {
   position: 'absolute',
   textAlign: 'center',
@@ -1274,7 +1363,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":30,"./utils/dom":32,"./views":82}],27:[function(require,module,exports){
+},{"./utils/component":31,"./utils/dom":33,"./views":83}],27:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3335,6 +3424,121 @@ exports.set = function(x) {
 },{}],29:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
 },{"dup":28}],30:[function(require,module,exports){
+var linear, spring, timeStep;
+
+linear = function(rawCallback, wrapCallback) {
+  var animate, callback, lastX, running, startTime, totalTime, x, xDest, xStart;
+  lastX = void 0;
+  callback = function(x) {
+    if (lastX !== x) {
+      lastX = x;
+      return rawCallback(x, function(start, end) {
+        return start + (end - start) * x;
+      });
+    }
+  };
+  x = 0;
+  running = false;
+  xStart = xDest = startTime = totalTime = void 0;
+  callback(x);
+  animate = function() {
+    var passedTime;
+    passedTime = performance.now() - startTime;
+    x = xStart + (xDest - xStart) * passedTime / totalTime;
+    if (passedTime >= totalTime) {
+      running = false;
+      return callback(xDest);
+    } else {
+      callback(x);
+      return requestAnimationFrame(animate);
+    }
+  };
+  return function(start, dest, time) {
+    xStart = x;
+    xDest = dest;
+    startTime = performance.now();
+    totalTime = time * (xDest - xStart) / (dest - start);
+    if (!(running || totalTime === 0)) {
+      running = true;
+      return requestAnimationFrame(animate);
+    }
+  };
+};
+
+timeStep = 1 / 60;
+
+spring = function(arg1, rawCallback) {
+  var animate, callback, k, lastTime, lastX, m, running, v, x, xRest;
+  k = arg1[0], m = arg1[1];
+  lastX = void 0;
+  callback = function(x) {
+    if (lastX !== x) {
+      lastX = x;
+      return rawCallback(x, running, function(start, end) {
+        return start + (end - start) * x;
+      });
+    }
+  };
+  x = xRest = 0;
+  v = 0;
+  running = false;
+  lastTime = void 0;
+  callback(xRest);
+  animate = function() {
+    var a, deltaTime, i, j, now, ref, remainingTime, stepsCount;
+    now = performance.now();
+    deltaTime = now - lastTime;
+    stepsCount = Math.floor(deltaTime / 1000 / timeStep);
+    lastTime = now;
+    for (i = j = 0, ref = stepsCount; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
+      a = -k * (x - xRest) - m * v;
+      v += a * timeStep;
+      x += v * timeStep;
+    }
+    remainingTime = (deltaTime / 1000) - (stepsCount * timeStep);
+    a = -k * (x - xRest) - m * v;
+    v += a * remainingTime;
+    x += v * remainingTime;
+    if (Math.abs(a) <= 0.1) {
+      running = false;
+      return callback(xRest);
+    } else {
+      callback(x);
+      return requestAnimationFrame(animate);
+    }
+  };
+  return function(arg, arg2) {
+    if (typeof arg === 'function') {
+      return rawCallback = arg;
+    } else if (typeof arg === 'object') {
+      return k = arg[0], m = arg[1], arg;
+    } else if (arg2 === 'stretch') {
+      x = arg;
+      v = 0;
+      return callback(x);
+    } else if (arg2 === 'goto') {
+      x = xRest = arg;
+      v = 0;
+      running = false;
+      return callback(x);
+    } else {
+      xRest = arg;
+      if (!running) {
+        running = true;
+        lastTime = performance.now();
+        return requestAnimationFrame(animate);
+      }
+    }
+  };
+};
+
+module.exports = {
+  linear: linear,
+  spring: spring
+};
+
+
+},{}],31:[function(require,module,exports){
 var _dom, _events, _service, _state, extend, log,
   slice = [].slice;
 
@@ -3403,7 +3607,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":34,"./dom":32,"./events":33,"./log":35,"./service":40,"./state":44}],31:[function(require,module,exports){
+},{".":35,"./dom":33,"./events":34,"./log":36,"./service":41,"./state":45}],32:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -3444,7 +3648,7 @@ module.exports = {
 };
 
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -3845,7 +4049,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":34,"./log":35}],33:[function(require,module,exports){
+},{".":35,"./log":36}],34:[function(require,module,exports){
 var body, isIn, log, ref, remove, window,
   slice = [].slice;
 
@@ -4121,7 +4325,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":34,"./dom":32,"./log":35}],34:[function(require,module,exports){
+},{".":35,"./dom":33,"./log":36}],35:[function(require,module,exports){
 var slice = [].slice;
 
 exports.emailIsValid = function(email) {
@@ -4303,7 +4507,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -4616,7 +4820,7 @@ exports.service = {
 };
 
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
@@ -4645,7 +4849,7 @@ exports.stateToPersian = function(state) {
 };
 
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -4692,7 +4896,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":27,"./mock":41}],38:[function(require,module,exports){
+},{"../../q":27,"./mock":42}],39:[function(require,module,exports){
 var Q, cruds, eraseCookie, extend, get, gets, post, posts, ref, ref1, ref2, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -4820,7 +5024,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":34,"../../q":27,"../cookies":31,"../state":44,"./getPost":39,"./names":42,"./stateChangingServices":43}],39:[function(require,module,exports){
+},{"..":35,"../../q":27,"../cookies":32,"../state":45,"./getPost":40,"./names":43,"./stateChangingServices":44}],40:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -4910,7 +5114,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":31,"../state":44,"./ajax":37,"./ex":38,"./names":42,"./stateChangingServices":43}],40:[function(require,module,exports){
+},{"../cookies":32,"../state":45,"./ajax":38,"./ex":39,"./names":43,"./stateChangingServices":44}],41:[function(require,module,exports){
 var Q, ex, get, gets, log, others, post, posts, ref, ref1,
   slice = [].slice;
 
@@ -4960,7 +5164,7 @@ exports.autoPing = function() {
 };
 
 
-},{"../../q":27,"../log":35,"./ex":38,"./getPost":39,"./names":42}],41:[function(require,module,exports){
+},{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
 var Q, applicants, extend, user;
 
 Q = require('../../q');
@@ -5109,7 +5313,7 @@ exports.submitProfileData = function(arg) {
 };
 
 
-},{"../../q":27,"../../utils":34}],42:[function(require,module,exports){
+},{"../../q":27,"../../utils":35}],43:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
 exports.posts = ['login', 'addJob'];
@@ -5126,7 +5330,7 @@ exports.others = ['logout', 'submitProfileData'];
 exports.states = ['user', 'applicants'];
 
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -5156,7 +5360,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":34,"./names":42}],44:[function(require,module,exports){
+},{"..":35,"./names":43}],45:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -5361,18 +5565,16 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":35,"./names":45}],45:[function(require,module,exports){
+},{"../log":36,"./names":46}],46:[function(require,module,exports){
 module.exports = ['user', 'applicants'];
 
 
-},{}],46:[function(require,module,exports){
-var checkbox, component, dropdown, extend, gradeInput, ref, remove, style, tooltip, yearInput;
+},{}],47:[function(require,module,exports){
+var checkbox, component, dropdown, extend, gradeInput, ref, remove, style, yearInput;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
-
-tooltip = require('../../../../components/tooltip');
 
 dropdown = require('../../../../components/dropdown');
 
@@ -5385,194 +5587,164 @@ checkbox = require('../../../../components/checkbox');
 ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormEducation', function(arg, arg1) {
-  var E, append, checkbox0, dom, empty, events, handleTextarea, hide, hideTooltips, onEvent, setData, setError, setOff, setStyle, show, table, textarea0, view;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData, setError = arg1.setError;
-  E = dom.E, setStyle = dom.setStyle, empty = dom.empty, append = dom.append, show = dom.show, hide = dom.hide;
+  var E, append, checkbox0, destroy, dom, events, handleTextarea, hide, onEvent, registerErrorField, setData, setError, setStyle, show, table, textarea0, textareaError, view;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
+  E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
-  hideTooltips = [];
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
-  });
   table = (function() {
-    var add, body, f, i0, i1, i2, i3, i4, i5, i6, lastLine, onAdds, rows, update, view;
+    var add, body, createRow, entries, removeButtons, rows, view;
+    entries = [];
     rows = [];
-    i0 = f = E(dropdown, {
-      items: ['دیپلم', 'کاردانی', 'کارشناسی', 'کارشناسی ارشد', 'دکتری']
-    });
-    setStyle(f.input, extend({}, style.input, {
-      width: 150
-    }));
-    lastLine = E('tr', null, E('td', style.td, i0), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
-      width: 150
-    }))), E('td', style.td, i3 = (function() {
-      i3 = E(yearInput);
-      setStyle(i3, style.input);
-      return i3;
-    })()), E('td', style.td, i4 = (function() {
-      i4 = E(yearInput);
-      setStyle(i4, style.input);
-      return i4;
-    })()), E('td', style.td, i5 = (function() {
-      i5 = E(gradeInput);
-      setStyle(i5, style.input);
-      return i5;
-    })()), E('td', style.td, i6 = E('input', extend({}, style.input, {
-      width: 150
-    }))), E('td', style.td, add = E(style.add)));
-    view = E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'), E('th', style.th))), body = E('tbody', null, lastLine));
-    (update = function() {
-      empty(body);
-      append(body, rows.map(function(row) {
-        var v0, v1, v2, v3, v4, v5, v6;
-        v0 = row[0], v1 = row[1], v2 = row[2], v3 = row[3], v4 = row[4], v5 = row[5], v6 = row[6];
-        return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, v3), E('td', style.td, v4), E('td', style.td, v5), E('td', style.td, v6), E('td', style.td, (function() {
-          var removeRow;
-          removeRow = E(style.remove);
-          onEvent(removeRow, 'click', function() {
-            remove(rows, row);
-            return update();
-          });
-          return removeRow;
-        })()));
-      }));
-      append(body, lastLine);
-      setData('جدول', rows);
-      if (rows.length) {
-        return setError('جدول', null);
-      } else {
-        return setError('جدول', 'تکمیل این فیلد الزامیست.');
-      }
-    })();
-    onAdds = [];
-    [i0, i1, i2, i3, i4, i5, i6].forEach(function(field, i) {
-      var error, hideTooltip, input;
-      error = hideTooltip = void 0;
-      input = field.input || field;
-      onEvent(input, 'focus', function() {
-        var h;
-        if (error) {
-          h = tooltip(input, error);
-          return hideTooltips.push(hideTooltip = function() {
-            h();
-            return remove(hideTooltips, hideTooltip);
-          });
-        }
-      });
-      onEvent(input, ['input', 'pInput'], function() {
-        setStyle(input, style.valid);
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-      onAdds.push(function() {
-        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          setStyle(input, style.invalid);
-          return error = 'تکمیل این فیلد الزامیست.';
-        } else if ((field.valid != null) && !field.valid()) {
-          setStyle(input, style.invalid);
-          return error = 'مقدار وارد شده قابل قبول نیست.';
-        }
-      });
-      return onEvent(input, 'blur', function() {
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-    });
-    onEvent(add, 'click', function() {
-      var canAdd;
-      canAdd = [i0, i1, i2, i3, i4, i5, i6].every(function(i) {
-        return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
-      });
-      if (!canAdd) {
-        onAdds.forEach(function(x) {
-          return x();
+    removeButtons = [];
+    view = E('span', null, E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'), E('th', style.th))), body = E('tbody', null)), E(null, add = E(style.add)));
+    (createRow = function() {
+      var entry, fields, i0, i1, i2, i3, i4, i5, i6, offErrors, row, showHideRemoveButtons;
+      entries.push(entry = {});
+      rows.push(row = E('tr', null, E('td', style.td, i0 = (function() {
+        var f;
+        i0 = f = E(dropdown, {
+          items: ['دیپلم', 'کاردانی', 'کارشناسی', 'کارشناسی ارشد', 'دکتری']
         });
-        return;
-      }
-      rows.push([i0, i1, i2, i3, i4, i5, i6].map(function(i) {
-        return i.value();
-      }));
-      update();
-      setStyle([i1, i2, i3, i4, i5, i6], {
-        value: ''
+        setStyle(f.input, extend({}, style.input, {
+          width: 150
+        }));
+        return i0;
+      })()), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
+        width: 150
+      }))), E('td', style.td, i3 = (function() {
+        i3 = E(yearInput);
+        setStyle(i3, style.input);
+        return i3;
+      })()), E('td', style.td, i4 = (function() {
+        i4 = E(yearInput);
+        setStyle(i4, style.input);
+        return i4;
+      })()), E('td', style.td, i5 = (function() {
+        i5 = E(gradeInput);
+        setStyle(i5, style.input);
+        return i5;
+      })()), E('td', style.td, i6 = E('input', extend({}, style.input, {
+        width: 150
+      }))), E('td', style.td, (function() {
+        var removeButton;
+        removeButtons.push(removeButton = E(style.remove));
+        onEvent(removeButton, 'click', function() {
+          remove(rows, row);
+          remove(entries, entry);
+          setData('سوابق تحصیلی', entries);
+          destroy(row);
+          showHideRemoveButtons();
+          return offErrors.forEach(function(x) {
+            return x();
+          });
+        });
+        return removeButton;
+      })())));
+      (showHideRemoveButtons = function() {
+        if (entries.length > 1) {
+          return show(removeButtons);
+        } else {
+          return hide(removeButtons);
+        }
+      })();
+      append(body, row);
+      offErrors = [];
+      return Object.keys(fields = {
+        'مقطع': i0,
+        'رشته تحصیلی': i1,
+        'نام دانشگاه و شهر محل تحصیل': i2,
+        'سال ورود': i3,
+        'سال اخذ مدرک': i4,
+        'معدل': i5,
+        'عنوان پایان‌نامه': i6
+      }).forEach(function(fieldName) {
+        var error, field, handleChange, input;
+        field = fields[fieldName];
+        error = registerErrorField(field, field);
+        offErrors.push(error.off);
+        setError(error, 'تکمیل این فیلد الزامیست.', true);
+        if (field.onChange) {
+          field.onChange(function() {
+            entry[fieldName] = field.value();
+            return setData('سوابق تحصیلی', entries);
+          });
+          onEvent(field.input, 'input', function() {
+            return setError(error, 'تکمیل این فیلد الزامیست.', true);
+          });
+          return onEvent(field.input, 'blur', function() {
+            return setTimeout(function() {
+              if (field.value() == null) {
+                return setError(error, 'تکمیل این فیلد الزامیست.');
+              } else {
+                return setError(error, null);
+              }
+            });
+          });
+        } else {
+          input = field.input || field;
+          onEvent(input, 'input', function() {
+            entry[fieldName] = field.value();
+            return setData('سوابق تحصیلی', entries);
+          });
+          handleChange = function(hidden) {
+            return function() {
+              if (!field.value().trim()) {
+                return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+              } else if ((field.valid != null) && !field.valid()) {
+                return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+              } else {
+                return setError(error, null);
+              }
+            };
+          };
+          onEvent(input, 'input', handleChange(true));
+          return onEvent(input, 'blur', handleChange(false));
+        }
       });
-      return i0.clear();
-    });
+    })();
+    onEvent(add, 'click', createRow);
     return view;
   })();
   view = E(null, table, E(style.column, checkbox0 = E(checkbox, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟'), textarea0 = hide(E('textarea', extend({
     placeholder: 'مقطع و رشته‌ای را که ادامه می‌دهید ذکر کنید.'
   }, style.textarea)))), E(style.clearfix));
-  handleTextarea = function() {
+  textareaError = registerErrorField(textarea0, textarea0);
+  handleTextarea = function(hidden) {
     setData('مقطع و رشته‌ای که ادامه می‌دهید', textarea0.value());
     if (textarea0.value().trim()) {
-      return setError('مقطع و رشته‌ای که ادامه می‌دهید', null);
+      return setError(textareaError, null);
     } else {
-      return setError('مقطع و رشته‌ای که ادامه می‌دهید', 'تکمیل این فیلد الزامیست.');
+      return setError(textareaError, 'تکمیل این فیلد الزامیست.', hidden);
     }
   };
   checkbox0.onChange(function() {
     if (checkbox0.value()) {
       show(textarea0);
-      return handleTextarea();
+      return handleTextarea(true);
     } else {
       hide(textarea0);
-      return setError('مقطع و رشته‌ای که ادامه می‌دهید', null);
+      setData('مقطع و رشته‌ای که ادامه می‌دهید', null);
+      return setError(textareaError, null);
     }
   });
-  onEvent(textarea0, 'input', handleTextarea);
-  (function() {
-    var error, hideTooltip;
-    error = hideTooltip = void 0;
-    onEvent(textarea0, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(textarea0, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(textarea0, ['input', 'pInput'], function() {
-      setStyle(textarea0, style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    return onEvent(textarea0, 'blur', function() {
-      return setTimeout((function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        if (!textarea0.value().trim()) {
-          setStyle(textarea0, style.invalid);
-          return error = 'تکمیل این فیلد الزامیست.';
-        } else {
-          return error = null;
-        }
-      }), 100);
-    });
-  })();
+  onEvent(textarea0, 'input', function() {
+    return handleTextarea(true);
+  });
+  onEvent(textarea0, 'blur', function() {
+    return handleTextarea(false);
+  });
   return view;
 });
 
 
-},{"../../../../components/checkbox":7,"../../../../components/dropdown":11,"../../../../components/restrictedInput/grade":18,"../../../../components/restrictedInput/year":22,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./style":47}],47:[function(require,module,exports){
+},{"../../../../components/checkbox":7,"../../../../components/dropdown":11,"../../../../components/restrictedInput/grade":18,"../../../../components/restrictedInput/year":22,"../../../../utils":35,"../../../../utils/component":31,"./style":48}],48:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
 
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.th = {
@@ -5611,7 +5783,9 @@ icon = {
 
 exports.add = extend({}, icon, {
   "class": 'fa fa-plus-circle',
-  color: '#449e73'
+  color: '#449e73',
+  top: 0,
+  right: 5
 });
 
 exports.remove = extend({}, icon, {
@@ -5641,7 +5815,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":34}],48:[function(require,module,exports){
+},{"../../../../utils":35}],49:[function(require,module,exports){
 var component, dropdown, style;
 
 component = require('../../../../utils/component');
@@ -5657,7 +5831,7 @@ module.exports = component('applicantFormEnglish', function(arg, arg1) {
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
   return E(null, ['مکالمه', 'نوشتن', 'خواندن'].map(function(labelText) {
-    var column, errorId, field, label;
+    var column, error, field, label;
     field = E(dropdown, {
       items: ['عالی', 'خوب', 'متوسط', 'ضعیف']
     });
@@ -5667,23 +5841,26 @@ module.exports = component('applicantFormEnglish', function(arg, arg1) {
       return setData(labelText, field.value());
     });
     column = E(style.column, label = E(style.label, labelText), field);
-    errorId = registerErrorField(label, field);
-    setError(errorId, 'تکمیل این فیلد الزامیست.', true);
+    error = registerErrorField(label, field);
+    setError(error, 'تکمیل این فیلد الزامیست.', true);
+    onEvent(field.input, 'input', function() {
+      return setError(error, 'تکمیل این فیلد الزامیست.', true);
+    });
     onEvent(field.input, 'blur', function() {
-      return setTimeout((function() {
+      return setTimeout(function() {
         if (!field.value()) {
-          return setError(errorId, 'تکمیل این فیلد الزامیست.');
+          return setError(error, 'تکمیل این فیلد الزامیست.');
         } else {
-          return setError(errorId, null);
+          return setError(error, null);
         }
-      }), 100);
+      });
     });
     return column;
   }), E(style.clearfix));
 });
 
 
-},{"../../../../components/dropdown":11,"../../../../utils/component":30,"./style":49}],49:[function(require,module,exports){
+},{"../../../../components/dropdown":11,"../../../../utils/component":31,"./style":50}],50:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -5725,8 +5902,8 @@ exports.input = {
 };
 
 
-},{}],50:[function(require,module,exports){
-var checkbox, component, education, english, others, overview, personalInfo, remove, reputation, scrollViewer, style, talents, tooltip;
+},{}],51:[function(require,module,exports){
+var checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, talents, tooltip;
 
 component = require('../../../utils/component');
 
@@ -5752,13 +5929,30 @@ others = require('./others');
 
 tooltip = require('../../../components/tooltip');
 
-remove = require('../../../utils').remove;
+ref = require('../../../utils'), extend = ref.extend, remove = ref.remove;
+
+spring = require('../../../utils/animation').spring;
+
+d = require('../../../utils/dom');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, cover, data, dom, errorInputs, errorIsInitial, errorLabels, errors, events, hide, hideTooltips, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, show, state, submit, submitDisabled, text, view, x, y, yesData;
+  var E, accept, cover, data, dom, errorSpring, errorSpringRunning, errors, events, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service, setOff = arg.setOff;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent, onResize = events.onResize;
+  (setSubmitStyle = function() {
+    return setTimeout(function() {
+      if (accept.value() && errors.every(function(arg1) {
+        var text;
+        text = arg1.text;
+        return !text;
+      })) {
+        return setStyle(submit, style.submit);
+      } else {
+        return setStyle(submit, style.submitDisabled);
+      }
+    });
+  })();
   data = {};
   setData = function(category) {
     return function(key, value) {
@@ -5773,78 +5967,95 @@ module.exports = component('applicantForm', function(arg) {
           delete data[category];
         }
       }
-      return setTimeout(function() {
-        window.x = data;
-        return setStyle(x, {
-          englishHtml: JSON.stringify(data, null, '  ').replace(/\n/g, '<br />').replace(/  /g, '<div style="display:inline-block; width:50px"></div>')
-        });
+      return ['############'].concat(JSON.stringify(data, null, '  ').split('\n')).forEach(function(x) {
+        return console.log(x);
       });
     };
   };
-  submit = E(style.submit, 'ثبت نهایی اطلاعات');
-  submitDisabled = true;
-  hideTooltips = [];
+  errors = [];
   setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
+    return errors.forEach(function(arg1) {
+      var hideTooltip;
+      hideTooltip = arg1.hideTooltip;
+      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
     });
   });
-  errors = [];
-  errorIsInitial = [];
-  errorLabels = [];
-  errorInputs = [];
-  registerErrorField = function(label, field) {
-    var errorId, hideTooltip, input;
-    hideTooltip = void 0;
+  registerErrorField = function(label, field, notCritical) {
+    var error, handleChange, input;
     input = field.input || field;
-    errorLabels.push(label);
-    errorInputs.push(input);
-    errorId = errors.length;
-    errors.push(null);
-    errorIsInitial.push(null);
+    error = {
+      label: label,
+      input: input,
+      text: null,
+      off: function() {
+        remove(errors, error);
+        return setSubmitStyle();
+      }
+    };
+    if (!notCritical) {
+      errors.push(error);
+    }
     onEvent(input, 'focus', function() {
-      var error, h;
-      error = errors[errorId];
-      if (error && !errorIsInitial[errorId]) {
-        h = tooltip(input, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
+      var h;
+      if (error.text && !error.hidden) {
+        h = tooltip(input, error.text);
+        return error.hideTooltip = function() {
+          if (typeof h === "function") {
+            h();
+          }
+          return h = null;
+        };
       }
     });
-    onEvent(input, ['input', 'pInput'], function() {
+    handleChange = function() {
       setStyle([label, input], style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
+      return typeof error.hideTooltip === "function" ? error.hideTooltip() : void 0;
+    };
+    onEvent(input, 'input', handleChange);
     if (typeof field.onChange === "function") {
-      field.onChange(function() {
-        setStyle([label, input], style.valid);
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
+      field.onChange(handleChange);
     }
     onEvent(input, 'blur', function() {
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+      return typeof error.hideTooltip === "function" ? error.hideTooltip() : void 0;
     });
-    return errorId;
+    return error;
   };
-  setError = function(errorId, error, initial) {
-    var input, label;
-    errors[errorId] = error;
-    errorIsInitial[errorId] = initial;
-    label = errorLabels[errorId];
-    input = errorInputs[errorId];
-    if (error && !initial) {
-      return setStyle([label, input], style.invalid);
+  setError = function(error, text, hidden) {
+    extend(error, {
+      text: text,
+      hidden: hidden
+    });
+    if (text && !hidden) {
+      setStyle([error.label, error.input], style.invalid);
     }
+    return setSubmitStyle();
   };
-  view = E(null, cover = E(style.cover), hide(noData = E(null, 'اطلاعات شما ثبت شده‌است.')), yesData = E(null, x = E(), E('h1', {
-    color: 'red'
-  }, '---------'), y = E(), E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(style.header, 'سوابق تحصیلی'), E(style.header, text('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), E(style.optional, '(اختیاری)')), E(style.header, 'مهارت زبان انگلیسی'), E(english, {
+  view = E(null, cover = E(style.cover), hide(noData = E(null, 'اطلاعات شما ثبت شده‌است.')), yesData = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
+    setData: setData('مشخصات فردی'),
+    registerErrorField: registerErrorField,
+    setError: setError
+  }), E(style.header, 'سوابق تحصیلی'), E(education, {
+    setData: setData('سوابق تحصیلی'),
+    registerErrorField: registerErrorField,
+    setError: setError
+  }), E(style.header, text('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), E(style.optional, '(اختیاری)')), E(talents, {
+    setData: setData('توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'),
+    registerErrorField: registerErrorField,
+    setError: setError
+  }), E(style.header, 'مهارت زبان انگلیسی'), E(english, {
     setData: setData('مهارت زبان انگلیسی'),
     registerErrorField: registerErrorField,
     setError: setError
-  }), E(style.header, text('آخرین سوابق سازمانی و پروژه‌ای'), E(style.optional, '(اختیاری)')), E(style.header, 'سایر اطلاعات'), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit));
+  }), E(style.header, text('آخرین سوابق سازمانی و پروژه‌ای'), E(style.optional, '(اختیاری)')), E(reputation, {
+    setData: setData('آخرین سوابق سازمانی و پروژه‌ای'),
+    registerErrorField: registerErrorField,
+    setError: setError
+  }), E(style.header, 'سایر اطلاعات'), E(others, {
+    setData: setData('سایر اطلاعات'),
+    registerErrorField: registerErrorField,
+    setError: setError
+  }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit = E(style.submit, 'ثبت نهایی اطلاعات')));
+  accept.onChange(setSubmitStyle);
   resize = function() {
     var body, height, html;
     body = document.body;
@@ -5856,9 +6067,51 @@ module.exports = component('applicantForm', function(arg) {
   };
   onResize(resize);
   setTimeout(resize);
+  errorSpringRunning = false;
+  errorSpring = spring([300, 50], function(y, running) {
+    window.scroll(0, [y]);
+    return errorSpringRunning = running;
+  });
+  onEvent(E(d.window), ['scroll', 'resize'], function() {
+    if (!errorSpringRunning) {
+      return errorSpring(window.scrollY, 'goto');
+    }
+  });
+  submitting = false;
   onEvent(submit, 'click', function() {
     return setTimeout((function() {
-      if (submitDisabled) {
+      if (submitting) {
+        return;
+      }
+      if (!errors.every(function(arg1) {
+        var text;
+        text = arg1.text;
+        return !text;
+      })) {
+        errors.some(function(arg1) {
+          var element, label, text, top;
+          label = arg1.label, text = arg1.text;
+          if (text) {
+            element = label.fn.element;
+            top = 0;
+            while (true) {
+              top += element.offsetTop || 0;
+              element = element.offsetParent;
+              if (!element) {
+                break;
+              }
+            }
+            errorSpring(top - 50);
+            return true;
+          }
+        });
+        errors.forEach(function(error) {
+          return setError(error, error.text);
+        });
+        return;
+      }
+      if (!accept.value()) {
+        alert('لطفا تیک تأیید صحت اطلاعات (در انتهای صفحه) را بزنید.');
         return;
       }
       if (confirm('پس از ثبت نهایی اطلاعات، این صفحه قابل ویرایش نخواهد‌بود.\nآیا از صحت اطلاعات وارد شده اطمینان دارید؟')) {
@@ -5866,14 +6119,14 @@ module.exports = component('applicantForm', function(arg) {
         setStyle(submit, {
           text: 'در حال ثبت...'
         });
-        setStyle(submit, style.submitDisabled);
-        submitDisabled = true;
+        setStyle(submit, style.submitSubmitting);
+        submitting = true;
         return state.user.on({
           once: true
         }, function(user) {
           return service.submitProfileData(user.userId, data).fin(function() {
-            setStyle(submit, style.submitDisabled);
-            submitDisabled = true;
+            setStyle(submit, style.submitSubmitting);
+            submitting = false;
             setStyle(cover, style.cover);
             return setStyle(submit, {
               text: 'ثبت نهایی اطلاعات'
@@ -5881,7 +6134,7 @@ module.exports = component('applicantForm', function(arg) {
           });
         });
       }
-    }), 200);
+    }));
   });
   state.user.on(function(user) {
     if (user.applicantData) {
@@ -5893,7 +6146,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":7,"../../../components/scrollViewer":23,"../../../components/tooltip":24,"../../../utils":34,"../../../utils/component":30,"./education":46,"./english":48,"./others":51,"./overview":64,"./personalInfo":66,"./reputation":70,"./style":72,"./talents":73}],51:[function(require,module,exports){
+},{"../../../components/checkbox":7,"../../../components/scrollViewer":23,"../../../components/tooltip":24,"../../../utils":35,"../../../utils/animation":30,"../../../utils/component":31,"../../../utils/dom":33,"./education":47,"./english":49,"./others":52,"./overview":65,"./personalInfo":67,"./reputation":71,"./style":73,"./talents":74}],52:[function(require,module,exports){
 var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
@@ -5911,37 +6164,40 @@ part4 = require('./part4');
 part5 = require('./part5');
 
 module.exports = component('applicantFormOthers', function(arg, arg1) {
-  var E, dom, setData, setError;
+  var E, dom, registerErrorField, setData, setError;
   dom = arg.dom;
-  setData = arg1.setData, setError = arg1.setError;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E;
   return E(null, E(part0, {
     setData: setData,
+    registerErrorField: registerErrorField,
     setError: setError
   }), E(part1, {
     setData: setData
   }), E(part2, {
     setData: setData,
+    registerErrorField: registerErrorField,
     setError: setError
   }), E(part3, {
-    setData: setData
+    setData: setData,
+    registerErrorField: registerErrorField,
+    setError: setError
   }), E(part4, {
     setData: setData
   }), E(part5, {
     setData: setData,
+    registerErrorField: registerErrorField,
     setError: setError
   }));
 });
 
 
-},{"../../../../utils/component":30,"./part0":52,"./part1":54,"./part2":56,"./part3":58,"./part4":60,"./part5":62}],52:[function(require,module,exports){
-var component, dateInput, dropdown, extend, numberInput, ref, remove, style, tooltip;
+},{"../../../../utils/component":31,"./part0":53,"./part1":55,"./part2":57,"./part3":59,"./part4":61,"./part5":63}],53:[function(require,module,exports){
+var component, dateInput, dropdown, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
 
 style = require('./style');
-
-tooltip = require('../../../../../components/tooltip');
 
 dropdown = require('../../../../../components/dropdown');
 
@@ -5952,13 +6208,14 @@ numberInput = require('../../../../../components/restrictedInput/number');
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
-  var E, dom, events, f, f0, f1, fields, hide, hideTooltips, labels, onEvent, setData, setError, setOff, setStyle, show, text, view;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData, setError = arg1.setError;
+  var E, dom, events, f, f0, f1, fields, hide, hideTooltips, incomeError, labels, onEvent, registerErrorField, setData, setError, setStyle, show, text, view;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
   labels = {};
   fields = {};
+  incomeError = void 0;
   fields['متقاضه چه نوع همکاری هستید؟'] = f = E(dropdown, {
     items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
   });
@@ -6001,12 +6258,12 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
         show([y, z]);
         setData('مقدار دستمزد', y.value());
         if (!y.value()) {
-          return setError('مقدار دستمزد', 'تکمیل این فیلد الزامیست.');
+          return setError(incomeError, 'تکمیل این فیلد الزامیست.', true);
         }
       } else {
         hide([y, z]);
         setData('مقدار دستمزد', null);
-        return setError('مقدار دستمزد', null);
+        return setError(incomeError, null);
       }
     });
     return [x, y, z];
@@ -6014,74 +6271,66 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
   view = E(null, E(style.column, labels['متقاضه چه نوع همکاری هستید؟'] = E(style.label, 'متقاضه چه نوع همکاری هستید؟'), fields['متقاضه چه نوع همکاری هستید؟'], labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = E(style.label, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), f0, labels['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = E(style.label, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟']), E(style.column, E(style.label, labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(style.optional, '(اختیاری)')), fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E('input', style.input), E(style.label, labels['مدت زمانی که بیمه بوده‌اید؟'] = E('span', null, 'مدت زمانی که بیمه بوده‌اید؟'), E(style.optional, '(اختیاری)')), fields['مدت زمانی که بیمه بوده‌اید؟'] = E('input', style.input), labels['میزان دستمزد'] = E(style.label, text('میزان دستمزد '), E(style.underline, 'خالص'), text(' درخواستی شما چقدر است؟')), f1), E(style.clearfix));
   hideTooltips = [];
   Object.keys(fields).forEach(function(labelText) {
-    var error, field, hideTooltip, input, label;
+    var error, field, handleChange, input, label;
     if (labelText === 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟' || labelText === 'مدت زمانی که بیمه بوده‌اید؟') {
       return;
     }
-    field = fields[labelText];
     label = labels[labelText];
-    input = field.input || field;
-    error = hideTooltip = void 0;
+    field = fields[labelText];
+    error = registerErrorField(label, field);
     if (labelText !== 'مقدار دستمزد') {
-      setError(labelText, 'تکمیل این فیلد الزامیست.');
+      setError(error, 'تکمیل این فیلد الزامیست.', true);
     }
-    onEvent(input, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(input, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
+    if (labelText === 'مقدار دستمزد') {
+      incomeError = error;
+    }
+    if (field.onChange) {
+      field.onChange(function() {
+        return setData(labelText, field.value());
+      });
+      onEvent(field.input, 'input', function() {
+        return setError(error, 'تکمیل این فیلد الزامیست.', true);
+      });
+      return onEvent(field.input, 'blur', function() {
+        return setTimeout(function() {
+          if (field.value() == null) {
+            return setError(error, 'تکمیل این فیلد الزامیست.');
+          } else {
+            return setError(error, null);
+          }
         });
-      }
-    });
-    onEvent(input, ['input', 'pInput'], function() {
-      setStyle([label, input], style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    return onEvent(input, 'blur', function() {
-      return setTimeout((function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          setStyle([label, input], style.invalid);
-          return setError(labelText, error = 'تکمیل این فیلد الزامیست.');
-        } else if ((field.valid != null) && !field.valid()) {
-          setStyle([label, input], style.invalid);
-          return setError(labelText, error = 'مقدار وارد شده قابل قبول نیست.');
-        } else {
-          return setError(labelText, error = null);
-        }
-      }), 100);
-    });
-  });
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
+      });
+    } else {
+      input = field.input || field;
+      onEvent(input, 'input', function() {
+        return setData(labelText, field.value());
+      });
+      handleChange = function(hidden) {
+        return function() {
+          if (!field.value().trim()) {
+            return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+          } else if ((field.valid != null) && !field.valid()) {
+            return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+          } else {
+            return setError(error, null);
+          }
+        };
+      };
+      onEvent(input, 'input', handleChange(true));
+      return onEvent(input, 'blur', handleChange(false));
+    }
   });
   return view;
 });
 
 
-},{"../../../../../components/dateInput":9,"../../../../../components/dropdown":11,"../../../../../components/restrictedInput/number":20,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":53}],53:[function(require,module,exports){
+},{"../../../../../components/dateInput":9,"../../../../../components/dropdown":11,"../../../../../components/restrictedInput/number":20,"../../../../../utils":35,"../../../../../utils/component":31,"./style":54}],54:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../../utils').extend;
 
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.column = {
@@ -6156,7 +6405,7 @@ exports.descriptionInput = extend({}, exports.input, {
 });
 
 
-},{"../../../../../utils":34}],54:[function(require,module,exports){
+},{"../../../../../utils":35}],55:[function(require,module,exports){
 var component, radioSwitch, style;
 
 component = require('../../../../../utils/component');
@@ -6173,35 +6422,35 @@ module.exports = component('applicantFormOthersPart1', function(arg, arg1) {
   fields = {};
   view = E(null, E(style.mainLabel, 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:'), E(null, E(style.label, '- در ساعات اضافه کاری حضور داشته و کار کنید؟'), (function() {
     var f;
-    f = fields['- در ساعات اضافه کاری حضور داشته و کار کنید؟'] = E(radioSwitch, {
+    f = fields['در ساعات اضافه کاری حضور داشته و کار کنید'] = E(radioSwitch, {
       items: ['بلی', 'خیر']
     });
     setStyle(f, style.radioSwitch);
     return f;
   })()), E(null, E(style.label, '- در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید؟'), (function() {
     var f;
-    f = fields['- در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید؟'] = E(radioSwitch, {
+    f = fields['در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید'] = E(radioSwitch, {
       items: ['بلی', 'خیر']
     });
     setStyle(f, style.radioSwitch);
     return f;
   })()), E(null, E(style.label, '- در شیفت شب کار کنید؟'), (function() {
     var f;
-    f = fields['- در شیفت شب کار کنید؟'] = E(radioSwitch, {
+    f = fields['در شیفت شب کار کنید'] = E(radioSwitch, {
       items: ['بلی', 'خیر']
     });
     setStyle(f, style.radioSwitch);
     return f;
   })()), E(null, E(style.label, '- در تعطیلات آخر هفته کار کنید؟'), (function() {
     var f;
-    f = fields['- در تعطیلات آخر هفته کار کنید؟'] = E(radioSwitch, {
+    f = fields['در تعطیلات آخر هفته کار کنید'] = E(radioSwitch, {
       items: ['بلی', 'خیر']
     });
     setStyle(f, style.radioSwitch);
     return f;
   })()), E(null, E(style.label, '- در شهر تهران غیر از محل شرکت مشغول کار شوید؟'), (function() {
     var f;
-    f = fields['- در شهر تهران غیر از محل شرکت مشغول کار شوید؟'] = E(radioSwitch, {
+    f = fields['در شهر تهران غیر از محل شرکت مشغول کار شوید'] = E(radioSwitch, {
       items: ['بلی', 'خیر']
     });
     setStyle(f, style.radioSwitch);
@@ -6219,7 +6468,7 @@ module.exports = component('applicantFormOthersPart1', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":15,"../../../../../utils/component":30,"./style":55}],55:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":15,"../../../../../utils/component":31,"./style":56}],56:[function(require,module,exports){
 exports.mainLabel = {
   fontSize: 12,
   lineHeight: 30,
@@ -6243,135 +6492,125 @@ exports.radioSwitch = {
 };
 
 
-},{}],56:[function(require,module,exports){
-var component, extend, numberInput, ref, remove, style, tooltip;
+},{}],57:[function(require,module,exports){
+var component, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
 
 style = require('./style');
-
-tooltip = require('../../../../../components/tooltip');
 
 numberInput = require('../../../../../components/restrictedInput/number');
 
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
-  var E, add, append, body, dom, empty, events, hideTooltips, i0, i1, i2, i3, i4, lastLine, onAdds, onEvent, rows, setData, setError, setOff, setStyle, update, view;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData, setError = arg1.setError;
-  E = dom.E, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
+  var E, add, append, body, createRow, destroy, dom, entries, events, hide, onEvent, registerErrorField, removeButtons, rows, setData, setError, setStyle, show, view;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
+  E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
-  hideTooltips = [];
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
-  });
+  entries = [];
   rows = [];
-  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
-    width: 250
-  }))), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
-    i4 = E(numberInput);
-    setStyle(i4, style.input);
-    return i4;
-  })()), E('td', style.td, add = E(style.add)));
-  view = E(null, E(style.mainLabel, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شماره تماس'), E('th', style.th))), body = E('tbody', null, lastLine)));
-  (update = function() {
-    empty(body);
-    append(body, rows.map(function(row) {
-      var v0, v1, v2, v3, v4;
-      v0 = row[0], v1 = row[1], v2 = row[2], v3 = row[3], v4 = row[4];
-      return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, v3), E('td', style.td, v4), E('td', style.td, (function() {
-        var removeRow;
-        removeRow = E(style.remove);
-        onEvent(removeRow, 'click', function() {
-          remove(rows, row);
-          return update();
+  removeButtons = [];
+  view = E('span', null, E(style.mainLabel, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شماره تماس'), E('th', style.th))), body = E('tbody', null)), E(null, add = E(style.add)));
+  createRow = function() {
+    var entry, fields, i0, i1, i2, i3, i4, offErrors, row, showHideRemoveButtons;
+    entries.push(entry = {});
+    rows.push(row = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
+      width: 250
+    }))), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
+      i4 = E(numberInput);
+      setStyle(i4, style.input);
+      return i4;
+    })()), E('td', style.td, (function() {
+      var removeButton;
+      removeButtons.push(removeButton = E(style.remove));
+      onEvent(removeButton, 'click', function() {
+        remove(rows, row);
+        remove(entries, entry);
+        setData('مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries);
+        destroy(row);
+        showHideRemoveButtons();
+        return offErrors.forEach(function(x) {
+          return x();
         });
-        return removeRow;
-      })()));
-    }));
-    append(body, lastLine);
-    setData('جدول', rows);
-    if (rows.length > 1) {
-      return setError('جدول', null);
-    } else {
-      return setError('جدول', 'تکمیل این فیلد الزامیست.');
-    }
-  })();
-  onAdds = [];
-  [i0, i1, i2, i3, i4].forEach(function(field, i) {
-    var error, hideTooltip, input;
-    error = hideTooltip = void 0;
-    input = field.input || field;
-    onEvent(input, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(input, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(input, ['input', 'pInput'], function() {
-      setStyle(input, style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    onAdds.push(function() {
-      if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-        setStyle(input, style.invalid);
-        return error = 'تکمیل این فیلد الزامیست.';
-      } else if ((field.valid != null) && !field.valid()) {
-        setStyle(input, style.invalid);
-        return error = 'مقدار وارد شده قابل قبول نیست.';
-      }
-    });
-    return onEvent(input, 'blur', function() {
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-  });
-  onEvent(add, 'click', function() {
-    var canAdd;
-    canAdd = [i0, i1, i2, i3, i4].every(function(i) {
-      return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
-    });
-    if (!canAdd) {
-      onAdds.forEach(function(x) {
-        return x();
       });
-      return;
-    }
-    rows.push([i0, i1, i2, i3, i4].map(function(i) {
-      return i.value();
-    }));
-    update();
-    return setStyle([i0, i1, i2, i3, i4], {
-      value: ''
+      return removeButton;
+    })())));
+    (showHideRemoveButtons = function() {
+      if (entries.length > 2) {
+        return show(removeButtons);
+      } else {
+        return hide(removeButtons);
+      }
+    })();
+    append(body, row);
+    offErrors = [];
+    return Object.keys(fields = {
+      'نام و نام خانوادگی': i0,
+      'نسبت با شما': i1,
+      'نام محل کار': i2,
+      'سمت': i3,
+      'شماره تماس': i4
+    }).forEach(function(fieldName) {
+      var error, field, handleChange, input;
+      field = fields[fieldName];
+      error = registerErrorField(field, field);
+      offErrors.push(error.off);
+      setError(error, 'تکمیل این فیلد الزامیست.', true);
+      if (field.onChange) {
+        field.onChange(function() {
+          entry[fieldName] = field.value();
+          return setData('مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries);
+        });
+        onEvent(field.input, 'input', function() {
+          return setError(error, 'تکمیل این فیلد الزامیست.', true);
+        });
+        return onEvent(field.input, 'blur', function() {
+          return setTimeout(function() {
+            if (field.value() == null) {
+              return setError(error, 'تکمیل این فیلد الزامیست.');
+            } else {
+              return setError(error, null);
+            }
+          });
+        });
+      } else {
+        input = field.input || field;
+        onEvent(input, 'input', function() {
+          entry[fieldName] = field.value();
+          return setData('مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries);
+        });
+        handleChange = function(hidden) {
+          return function() {
+            if (!field.value().trim()) {
+              return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+            } else if ((field.valid != null) && !field.valid()) {
+              return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+            } else {
+              return setError(error, null);
+            }
+          };
+        };
+        onEvent(input, 'input', handleChange(true));
+        return onEvent(input, 'blur', handleChange(false));
+      }
     });
-  });
+  };
+  createRow();
+  createRow();
+  onEvent(add, 'click', createRow);
   return view;
 });
 
 
-},{"../../../../../components/restrictedInput/number":20,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":57}],57:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":20,"../../../../../utils":35,"../../../../../utils/component":31,"./style":58}],58:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
 
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.mainLabel = {
@@ -6385,7 +6624,8 @@ exports.mainLabel = {
 exports.th = {
   padding: '10px 10px 0',
   color: '#5c5555',
-  fontSize: 12
+  fontSize: 12,
+  width: 150
 };
 
 exports.td = {
@@ -6418,7 +6658,9 @@ icon = {
 
 exports.add = extend({}, icon, {
   "class": 'fa fa-plus-circle',
-  color: '#449e73'
+  color: '#449e73',
+  top: 5,
+  right: 5
 });
 
 exports.remove = extend({}, icon, {
@@ -6427,130 +6669,115 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":34}],58:[function(require,module,exports){
-var component, extend, numberInput, ref, remove, style, tooltip;
+},{"../../../../../utils":35}],59:[function(require,module,exports){
+var component, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
 
 style = require('./style');
-
-tooltip = require('../../../../../components/tooltip');
 
 numberInput = require('../../../../../components/restrictedInput/number');
 
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
-  var E, add, append, body, dom, empty, events, hideTooltips, i0, i1, i2, i3, i4, lastLine, onAdds, onEvent, rows, setData, setOff, setStyle, text, update, view;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData;
-  E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
+  var E, add, append, body, createRow, destroy, dom, entries, events, onEvent, registerErrorField, removeButtons, rows, setData, setError, setStyle, view;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
+  E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
-  hideTooltips = [];
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
-  });
+  entries = [];
   rows = [];
-  lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
-    width: 250
-  }))), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
-    i4 = E(numberInput);
-    setStyle(i4, style.input);
-    return i4;
-  })()), E('td', style.td, add = E(style.add)));
-  view = E(null, E(style.mainLabel, text('در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید:'), E(style.optional, '(اختیاری)')), E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'سمت'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'شماره تماس'), E('th', style.th))), body = E('tbody', null, lastLine)));
-  (update = function() {
-    empty(body);
-    append(body, rows.map(function(row) {
-      var v0, v1, v2, v3, v4;
-      v0 = row[0], v1 = row[1], v2 = row[2], v3 = row[3], v4 = row[4];
-      return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, v3), E('td', style.td, v4), E('td', style.td, (function() {
-        var removeRow;
-        removeRow = E(style.remove);
-        onEvent(removeRow, 'click', function() {
-          remove(rows, row);
-          return update();
+  removeButtons = [];
+  view = E('span', null, E(style.mainLabel, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'سمت'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'شماره تماس'), E('th', style.th))), body = E('tbody', null)), E(null, add = E(style.add)));
+  createRow = function() {
+    var entry, fields, i0, i1, i2, i3, i4, offErrors, row;
+    entries.push(entry = {});
+    rows.push(row = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = E('input', extend({}, style.input, {
+      width: 250
+    }))), E('td', style.td, i3 = E('input', style.input)), E('td', style.td, i4 = (function() {
+      i4 = E(numberInput);
+      setStyle(i4, style.input);
+      return i4;
+    })()), E('td', style.td, (function() {
+      var removeButton;
+      removeButtons.push(removeButton = E(style.remove));
+      onEvent(removeButton, 'click', function() {
+        remove(rows, row);
+        remove(entries, entry);
+        setData('مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries);
+        destroy(row);
+        return offErrors.forEach(function(x) {
+          return x();
         });
-        return removeRow;
-      })()));
-    }));
-    append(body, lastLine);
-    return setData('جدول2', rows);
-  })();
-  onAdds = [];
-  [i0, i1, i2, i3, i4].forEach(function(field, i) {
-    var error, hideTooltip, input;
-    error = hideTooltip = void 0;
-    input = field.input || field;
-    onEvent(input, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(input, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(input, ['input', 'pInput'], function() {
-      setStyle(input, style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    onAdds.push(function() {
-      if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-        setStyle(input, style.invalid);
-        return error = 'تکمیل این فیلد الزامیست.';
-      } else if ((field.valid != null) && !field.valid()) {
-        setStyle(input, style.invalid);
-        return error = 'مقدار وارد شده قابل قبول نیست.';
-      }
-    });
-    return onEvent(input, 'blur', function() {
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-  });
-  onEvent(add, 'click', function() {
-    var canAdd;
-    canAdd = [i0, i1, i2, i3, i4].every(function(i) {
-      return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
-    });
-    if (!canAdd) {
-      onAdds.forEach(function(x) {
-        return x();
       });
-      return;
-    }
-    rows.push([i0, i1, i2, i3, i4].map(function(i) {
-      return i.value();
-    }));
-    update();
-    return setStyle([i0, i1, i2, i3, i4], {
-      value: ''
+      return removeButton;
+    })())));
+    append(body, row);
+    offErrors = [];
+    return Object.keys(fields = {
+      'نام و نام خانوادگی': i0,
+      'سمت': i1,
+      'نام محل کار': i2,
+      'نسبت با شما': i3,
+      'شماره تماس': i4
+    }).forEach(function(fieldName) {
+      var error, field, handleChange, input;
+      field = fields[fieldName];
+      error = registerErrorField(field, field);
+      offErrors.push(error.off);
+      setError(error, 'تکمیل این فیلد الزامیست.', true);
+      if (field.onChange) {
+        field.onChange(function() {
+          entry[fieldName] = field.value();
+          return setData('مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries);
+        });
+        onEvent(field.input, 'input', function() {
+          return setError(error, 'تکمیل این فیلد الزامیست.', true);
+        });
+        return onEvent(field.input, 'blur', function() {
+          return setTimeout(function() {
+            if (field.value() == null) {
+              return setError(error, 'تکمیل این فیلد الزامیست.');
+            } else {
+              return setError(error, null);
+            }
+          });
+        });
+      } else {
+        input = field.input || field;
+        onEvent(input, 'input', function() {
+          entry[fieldName] = field.value();
+          return setData('مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries);
+        });
+        handleChange = function(hidden) {
+          return function() {
+            if (!field.value().trim()) {
+              return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+            } else if ((field.valid != null) && !field.valid()) {
+              return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+            } else {
+              return setError(error, null);
+            }
+          };
+        };
+        onEvent(input, 'input', handleChange(true));
+        return onEvent(input, 'blur', handleChange(false));
+      }
     });
-  });
+  };
+  onEvent(add, 'click', createRow);
   return view;
 });
 
 
-},{"../../../../../components/restrictedInput/number":20,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":59}],59:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":20,"../../../../../utils":35,"../../../../../utils/component":31,"./style":60}],60:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
 
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.mainLabel = {
@@ -6573,7 +6800,8 @@ exports.optional = {
 exports.th = {
   padding: '10px 10px 0',
   color: '#5c5555',
-  fontSize: 12
+  fontSize: 12,
+  width: 150
 };
 
 exports.td = {
@@ -6606,7 +6834,9 @@ icon = {
 
 exports.add = extend({}, icon, {
   "class": 'fa fa-plus-circle',
-  color: '#449e73'
+  color: '#449e73',
+  top: 5,
+  right: 5
 });
 
 exports.remove = extend({}, icon, {
@@ -6615,7 +6845,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":34}],60:[function(require,module,exports){
+},{"../../../../../utils":35}],61:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../../utils/component');
@@ -6639,7 +6869,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils/component":30,"./style":61}],61:[function(require,module,exports){
+},{"../../../../../utils/component":31,"./style":62}],62:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -6681,12 +6911,10 @@ exports.textarea = {
 };
 
 
-},{}],62:[function(require,module,exports){
-var component, extend, radioSwitch, ref, remove, style, tooltip;
+},{}],63:[function(require,module,exports){
+var component, extend, radioSwitch, ref, remove, style;
 
 component = require('../../../../../utils/component');
-
-tooltip = require('../../../../../components/tooltip');
 
 radioSwitch = require('../../../../../components/radioSwitch');
 
@@ -6695,116 +6923,89 @@ style = require('./style');
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
-  var E, dom, events, fields, handleY0, handleY1, hide, hideTooltips, onEvent, setData, setError, setOff, setStyle, show, view, x0, x1, y0, y1;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData, setError = arg1.setError;
+  var E, dom, events, fields, handleY0, handleY1, hide, onEvent, registerErrorField, setData, setError, setStyle, show, view, x0, x1, y0, y0Error, y1, y1Error;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
-  hideTooltips = [];
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
-  });
   fields = {};
-  view = E(null, E(style.label, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟'), x0 = fields['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟'] = E(radioSwitch, {
+  view = E(null, E(style.label, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟'), x0 = fields['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] = E(radioSwitch, {
     items: ['بلی', 'خیر'],
     selectedIndex: 1
   }), hide(y0 = E('input', extend({
     placeholder: 'نوع آن را ذکر نمایید.'
-  }, style.input))), E(style.clearfix), E(style.label, 'آیا دخانیات مصرف می‌کنید؟'), fields['آیا دخانیات مصرف می‌کنید؟'] = E(radioSwitch, {
+  }, style.input))), E(style.clearfix), E(style.label, 'آیا دخانیات مصرف می‌کنید؟'), fields['آیا دخانیات مصرف می‌کنید'] = E(radioSwitch, {
     items: ['بلی', 'خیر'],
     selectedIndex: 1
-  }), E(style.clearfix), E(style.label, 'آیا سابقه محکومیت کیفری دارید؟'), x1 = fields['آیا سابقه محکومیت کیفری دارید؟'] = E(radioSwitch, {
+  }), E(style.clearfix), E(style.label, 'آیا سابقه محکومیت کیفری دارید؟'), x1 = fields['آیا سابقه محکومیت کیفری دارید'] = E(radioSwitch, {
     items: ['بلی', 'خیر'],
     selectedIndex: 1
   }), hide(y1 = E('input', extend({
     placeholder: 'تاریخ، دلایل و مدت آن را توضیح دهید.'
   }, style.input))), E(style.clearfix));
-  handleY0 = function() {
+  Object.keys(fields).forEach(function(fieldName) {
+    var field;
+    field = fields[fieldName];
+    setData(fieldName, field.value());
+    return field.onChange(function() {
+      return setData(fieldName, field.value());
+    });
+  });
+  y0Error = registerErrorField(y0, y0);
+  y1Error = registerErrorField(y1, y1);
+  handleY0 = function(hidden) {
     setData('نوع آن را ذکر نمایید.', y0.value());
     if (y0.value().trim()) {
-      return setError('نوع آن را ذکر نمایید.', null);
+      return setError(y0Error, null);
     } else {
-      return setError('نوع آن را ذکر نمایید.', 'تکمیل این فیلد الزامیست.');
+      return setError(y0Error, 'تکمیل این فیلد الزامیست.', hidden);
     }
   };
   x0.onChange(function() {
     if (x0.value() === 'بلی') {
       show(y0);
-      return handleY0();
+      return handleY0(true);
     } else {
       hide(y0);
-      return setError('نوع آن را ذکر نمایید.', null);
+      return setError(y0Error, null);
     }
   });
-  onEvent(y0, 'input', handleY0);
-  handleY1 = function() {
+  onEvent(y0, 'input', function() {
+    return handleY0(true);
+  });
+  onEvent(y0, 'blur', function() {
+    return handleY0(false);
+  });
+  handleY1 = function(hidden) {
     setData('تاریخ، دلایل و مدت آن را توضیح دهید.', y1.value());
     if (y1.value().trim()) {
-      return setError('تاریخ، دلایل و مدت آن را توضیح دهید.', null);
+      return setError(y1Error, null);
     } else {
-      return setError('تاریخ، دلایل و مدت آن را توضیح دهید.', 'تکمیل این فیلد الزامیست.');
+      return setError(y1Error, 'تکمیل این فیلد الزامیست.', hidden);
     }
   };
   x1.onChange(function() {
     if (x1.value() === 'بلی') {
       show(y1);
-      return handleY1();
+      return handleY1(true);
     } else {
       hide(y1);
-      return setError('تاریخ، دلایل و مدت آن را توضیح دهید.', null);
+      return setError(y1Error, null);
     }
   });
-  onEvent(y1, 'input', handleY1);
-  [y0, y1].forEach(function(y) {
-    var error, hideTooltip;
-    error = hideTooltip = void 0;
-    onEvent(y, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(y, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(y, ['input', 'pInput'], function() {
-      setStyle(y, style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
-    return onEvent(y, 'blur', function() {
-      return setTimeout((function() {
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        if (!y.value().trim()) {
-          setStyle(y, style.invalid);
-          return error = 'تکمیل این فیلد الزامیست.';
-        } else {
-          return error = null;
-        }
-      }), 100);
-    });
+  onEvent(y1, 'input', function() {
+    return handleY1(true);
+  });
+  onEvent(y1, 'blur', function() {
+    return handleY1(false);
   });
   return view;
 });
 
 
-},{"../../../../../components/radioSwitch":15,"../../../../../components/tooltip":24,"../../../../../utils":34,"../../../../../utils/component":30,"./style":63}],63:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":15,"../../../../../utils":35,"../../../../../utils/component":31,"./style":64}],64:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.label = {
@@ -6829,7 +7030,7 @@ exports.input = {
 };
 
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -6881,7 +7082,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":34,"../../../../utils/component":30,"./style":65}],65:[function(require,module,exports){
+},{"../../../../utils":35,"../../../../utils/component":31,"./style":66}],66:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -6944,14 +7145,12 @@ exports.resumeLink = {
 };
 
 
-},{}],66:[function(require,module,exports){
-var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian, tooltip;
+},{}],67:[function(require,module,exports){
+var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
-
-tooltip = require('../../../../components/tooltip');
 
 radioSwitch = require('../../../../components/radioSwitch');
 
@@ -6972,9 +7171,9 @@ multivalue = require('./multivalue');
 ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, defer = ref.defer, toPersian = ref.toPersian;
 
 module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
-  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, events, f, fieldArrays, fieldCollections, groupArrays, hide, hideTooltips, labelArrays, manageDalil, manageMoaf, onEvent, phone, phone2, setData, setError, setOff, setStyle, show, state, text, textArrays, view;
-  dom = arg.dom, events = arg.events, state = arg.state, setOff = arg.setOff;
-  setData = arg1.setData, setError = arg1.setError;
+  var E, addTextField, address, address2, address2Checkbox, addressLabel, addresses, dom, errors, events, f, fieldArrays, fieldCollections, groupArrays, handleMultivalue, hide, labelArrays, manageDalil, manageMoaf, onEvent, phone, phone2, registerErrorField, setData, setError, setStyle, show, state, text, textArrays, view;
+  dom = arg.dom, events = arg.events, state = arg.state;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
   fieldCollections = [0, 1, 2].map(function() {
@@ -7065,126 +7264,58 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     };
   })(f));
   addTextField(1, 'نام معرف');
+  handleMultivalue = function(fieldName, label, f) {
+    var error;
+    error = registerErrorField(label, f, true);
+    onEvent(f.input, 'input', function() {
+      return setError(error, null);
+    });
+    return f.onChange(function(adding) {
+      if (adding) {
+        if (!f.input.value()) {
+          setError(error, 'تکمیل این فیلد الزامیست.');
+          return false;
+        }
+        if (!f.input.valid()) {
+          setError(error, 'مقدار وارد شده قابل قبول نیست.');
+          return false;
+        }
+      }
+      return setTimeout(function() {
+        return setData(fieldName, f.value());
+      });
+    });
+  };
   f = E(emailInput);
   setStyle(f, style.input);
   state.user.on({
     once: true
   }, function(user) {
-    return fieldCollections[2]['ایمیل'] = f = E(multivalue, {
+    fieldCollections[2]['ایمیل'] = f = E(multivalue, {
       input: f,
       initialItems: [user.email]
     });
+    return (function(f) {
+      return setTimeout(function() {
+        return handleMultivalue('ایمیل', labelArrays[2][0], f);
+      });
+    })(f);
   });
-  (function(f) {
-    return setTimeout(function() {
-      var error, hideTooltip, input, label;
-      label = labelArrays[2][0];
-      input = f.input;
-      error = hideTooltip = void 0;
-      onEvent(input, 'focus', function() {
-        var h;
-        if (error) {
-          h = tooltip(input, error);
-          return hideTooltips.push(hideTooltip = function() {
-            h();
-            return remove(hideTooltips, hideTooltip);
-          });
-        }
-      });
-      onEvent(input, ['input', 'pInput'], function() {
-        setStyle([label, input], style.valid);
-        error = null;
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-      onEvent(input, 'blur', function() {
-        return setTimeout((function() {
-          return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-        }), 100);
-      });
-      return f.onChange(function(adding) {
-        if (!adding && f.value().length === 1) {
-          setData('ایمیل', null);
-          setError('ایمیل', 'تکمیل این فیلد الزامیست.');
-        } else {
-          setData('ایمیل', f.value());
-          setError('ایمیل', null);
-        }
-        if (!adding) {
-          return;
-        }
-        if (!input.value()) {
-          error = 'تکمیل این فیلد الزامیست.';
-          setStyle([input, label], style.invalid);
-          return false;
-        }
-        if (!input.valid()) {
-          error = 'مقدار وارد شده قابل قبول نیست.';
-          setStyle([input, label], style.invalid);
-          return false;
-        }
-      });
-    });
-  })(f);
   f = E(phoneNumberInput);
   setStyle(f, style.input);
   state.user.on({
     once: true
   }, function(user) {
-    return fieldCollections[2]['تلفن همراه'] = f = E(multivalue, {
+    fieldCollections[2]['تلفن همراه'] = f = E(multivalue, {
       input: f,
       initialItems: [toPersian(user.phoneNumber)]
     });
+    return (function(f) {
+      return setTimeout(function() {
+        return handleMultivalue('تلفن همراه', labelArrays[2][1], f);
+      });
+    })(f);
   });
-  (function(f) {
-    return setTimeout(function() {
-      var error, hideTooltip, input, label;
-      label = labelArrays[2][1];
-      input = f.input;
-      error = hideTooltip = void 0;
-      onEvent(input, 'focus', function() {
-        var h;
-        if (error) {
-          h = tooltip(input, error);
-          return hideTooltips.push(hideTooltip = function() {
-            h();
-            return remove(hideTooltips, hideTooltip);
-          });
-        }
-      });
-      onEvent(input, ['input', 'pInput'], function() {
-        setStyle([label, input], style.valid);
-        error = null;
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-      onEvent(input, 'blur', function() {
-        return setTimeout((function() {
-          return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-        }), 100);
-      });
-      return f.onChange(function(adding) {
-        if (!adding && f.value().length === 1) {
-          setData('تلفن همراه', null);
-          setError('تلفن همراه', 'تکمیل این فیلد الزامیست.');
-        } else {
-          setData('تلفن همراه', f.value());
-          setError('تلفن همراه', null);
-        }
-        if (!adding) {
-          return;
-        }
-        if (!input.value()) {
-          error = 'تکمیل این فیلد الزامیست.';
-          setStyle([input, label], style.invalid);
-          return false;
-        }
-        if (!input.valid()) {
-          error = 'مقدار وارد شده قابل قبول نیست.';
-          setStyle([input, label], style.invalid);
-          return false;
-        }
-      });
-    });
-  })(f);
   textArrays = [];
   groupArrays = [];
   labelArrays = [];
@@ -7215,41 +7346,34 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       placeholder: 'آدرس پستی محل سکونت'
     }, style.address))), hide(phone2 = E(numberInput)))
   ];
+  onEvent(address, 'input', function() {
+    return setData('آدرس محل سکونت دائم', address.value());
+  });
+  onEvent(phone, 'input', function() {
+    return setData('تلفن ثابت محل سکونت دائم', phone.value());
+  });
+  onEvent(address2, 'input', function() {
+    return setData('آدرس محل سکونت فعلی', address2.value());
+  });
+  onEvent(phone2, 'input', function() {
+    return setData('تلفن ثابت محل سکونت فعلی', phone2.value());
+  });
   setStyle(phone, extend({
     placeholder: 'تلفن تماس - 02185585558'
   }, style.phoneNumber));
   setStyle(phone2, extend({
     placeholder: 'تلفن تماس محل سکونت'
   }, style.phoneNumber));
-  textArrays.push(['آدرس', 'تلفن ثابت', 'آدرس 2', 'تلفن ثابت 2']);
-  labelArrays.push([E(), E(), E(), E()]);
+  textArrays.push(['آدرس محل سکونت دائم', 'تلفن ثابت محل سکونت دائم', 'آدرس محل سکونت فعلی', 'تلفن ثابت محل سکونت فعلی']);
+  labelArrays.push([address, phone, address2, phone2]);
   fieldArrays.push([address, phone, address2, phone2]);
-  address2Checkbox.onChange(function() {
-    if (address2Checkbox.value()) {
-      show([address2, phone2]);
-      setData('آدرس 2', address2.value());
-      setData('تلفن ثابت 2', phone2.value());
-      if (!address2.value()) {
-        setError('آدرس 2', 'تکمیل این فیلد الزامیست.');
-      }
-      if (!phone2.value()) {
-        return setError('تلفن ثابت 2', 'تکمیل این فیلد الزامیست.');
-      }
-    } else {
-      hide([address2, phone2]);
-      setData('آدرس 2', null);
-      setData('تلفن ثابت 2', null);
-      setError('آدرس 2', null);
-      return setError('تلفن ثابت 2', null);
-    }
-  });
-  hideTooltips = [];
+  errors = {};
   fieldArrays.forEach(function(fieldArray, i) {
     var labelArray, textArray;
     textArray = textArrays[i];
     labelArray = labelArrays[i];
     return fieldArray.forEach(function(field, j) {
-      var error, hideTooltip, input, label, labelText;
+      var error, handleChange, input, label, labelText;
       if (i === 0 && j === 0) {
         return;
       }
@@ -7261,64 +7385,93 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       }
       labelText = textArray[j];
       label = labelArray[j];
-      input = field.input || field;
-      error = hideTooltip = void 0;
+      error = registerErrorField(label, field);
       if (!((i === 1 && (j === 1 || j === 2)) || (i === 3 && (j === 2 || j === 3)))) {
-        setError(labelText, 'تکمیل این فیلد الزامیست.');
+        setError(error, 'تکمیل این فیلد الزامیست.', true);
       }
-      onEvent(input, 'focus', function() {
-        var h;
-        if (error) {
-          h = tooltip(input, error);
-          return hideTooltips.push(hideTooltip = function() {
-            h();
-            return remove(hideTooltips, hideTooltip);
+      if (i === 1) {
+        if (j === 0) {
+          errors['وضعیت نظام وظیفه'] = error;
+        }
+        if (j === 1) {
+          errors['نوع معافیت'] = error;
+        }
+        if (j === 2) {
+          errors['دلیل معافیت'] = error;
+        }
+        if (j === 4) {
+          errors['تعداد فرزندان'] = error;
+        }
+      }
+      if (i === 3) {
+        if (j === 2) {
+          errors['آدرس محل سکونت فعلی'] = error;
+        }
+        if (j === 3) {
+          errors['تلفن ثابت محل سکونت فعلی'] = error;
+        }
+      }
+      if (field.onChange) {
+        onEvent(field.input, 'input', function() {
+          return setError(error, 'تکمیل این فیلد الزامیست.', true);
+        });
+        return onEvent(field.input, 'blur', function() {
+          return setTimeout(function() {
+            if (field.value() == null) {
+              return setError(error, 'تکمیل این فیلد الزامیست.');
+            } else {
+              return setError(error, null);
+            }
           });
-        }
-      });
-      onEvent(input, ['input', 'pInput'], function() {
-        setStyle([label, input], style.valid);
-        if (typeof hideTooltip === "function") {
-          hideTooltip();
-        }
-        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          return setError(labelText, error = 'تکمیل این فیلد الزامیست.');
-        } else if ((field.valid != null) && !field.valid()) {
-          return setError(labelText, error = 'مقدار وارد شده قابل قبول نیست.');
-        } else {
-          return setError(labelText, error = null);
-        }
-      });
-      return onEvent(input, 'blur', function() {
-        return setTimeout((function() {
-          if (typeof hideTooltip === "function") {
-            hideTooltip();
-          }
-          if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-            return setStyle([label, input], style.invalid);
-          } else if ((field.valid != null) && !field.valid()) {
-            return setStyle([label, input], style.invalid);
-          }
-        }), 100);
-      });
+        });
+      } else {
+        input = field.input || field;
+        handleChange = function(hidden) {
+          return function() {
+            if (!field.value().trim()) {
+              return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+            } else if ((field.valid != null) && !field.valid()) {
+              return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+            } else {
+              return setError(error, null);
+            }
+          };
+        };
+        onEvent(input, 'input', handleChange(true));
+        return onEvent(input, 'blur', handleChange(false));
+      }
     });
   });
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
+  address2Checkbox.onChange(function() {
+    if (address2Checkbox.value()) {
+      show([address2, phone2]);
+      setData('آدرس محل سکونت فعلی', address2.value());
+      setData('تلفن ثابت محل سکونت فعلی', phone2.value());
+      if (!address2.value()) {
+        setError(errors['آدرس محل سکونت فعلی'], 'تکمیل این فیلد الزامیست.', true);
+      }
+      if (!phone2.value()) {
+        return setError(errors['تلفن ثابت محل سکونت فعلی'], 'تکمیل این فیلد الزامیست.', true);
+      }
+    } else {
+      hide([address2, phone2]);
+      setData('آدرس محل سکونت فعلی', null);
+      setData('تلفن ثابت محل سکونت فعلی', null);
+      setError(errors['آدرس محل سکونت فعلی'], null);
+      return setError(errors['تلفن ثابت محل سکونت فعلی'], null);
+    }
   });
   fieldCollections[1]['وضعیت تاهل'].onChange(function() {
     if (fieldCollections[1]['وضعیت تاهل'].value() !== 'مجرد') {
       show(groupArrays[1][4]);
       setData('تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value());
       if (!fieldCollections[1]['تعداد فرزندان'].value()) {
-        return setError('تعداد فرزندان', 'تکمیل این فیلد الزامیست.');
+        return setError(errors['تعداد فرزندان'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
       hide(groupArrays[1][4]);
       setData('تعداد فرزندان', null);
-      return setError('تعداد فرزندان', null);
+      return setError(errors['تعداد فرزندان'], null);
     }
   });
   fieldCollections[0]['جنسیت'].onChange(function() {
@@ -7326,7 +7479,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       show(groupArrays[1][0]);
       setData('وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value());
       if (!fieldCollections[1]['وضعیت نظام وظیفه'].value()) {
-        setError('وضعیت نظام وظیفه', 'تکمیل این فیلد الزامیست.');
+        setError(errors['وضعیت نظام وظیفه'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageMoaf();
     } else {
@@ -7336,9 +7489,9 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       setData('وضعیت نظام وظیفه', null);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
-      setError('وضعیت نظام وظیفه', null);
-      setError('نوع معافیت', null);
-      return setError('دلیل معافیت', null);
+      setError(errors['وضعیت نظام وظیفه'], null);
+      setError(errors['نوع معافیت'], null);
+      return setError(errors['دلیل معافیت'], null);
     }
   });
   (manageMoaf = function() {
@@ -7346,7 +7499,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       show(groupArrays[1][1]);
       setData('نوع معافیت', fieldCollections[1]['نوع معافیت'].value());
       if (!fieldCollections[1]['نوع معافیت'].value()) {
-        setError('نوع معافیت', 'تکمیل این فیلد الزامیست.');
+        setError(errors['نوع معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageDalil();
     } else {
@@ -7354,8 +7507,8 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       hide(groupArrays[1][2]);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
-      setError('نوع معافیت', null);
-      return setError('دلیل معافیت', null);
+      setError(errors['نوع معافیت'], null);
+      return setError(errors['دلیل معافیت'], null);
     }
   })();
   manageDalil = function() {
@@ -7363,12 +7516,12 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       show(groupArrays[1][2]);
       setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
       if (!fieldCollections[1]['دلیل معافیت'].value()) {
-        return setError('دلیل معافیت', 'تکمیل این فیلد الزامیست.');
+        return setError(errors['دلیل معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
       hide(groupArrays[1][2]);
       setData('دلیل معافیت', null);
-      return setError('دلیل معافیت', null);
+      return setError(errors['دلیل معافیت'], null);
     }
   };
   fieldCollections[1]['وضعیت نظام وظیفه'].onChange(manageMoaf);
@@ -7380,7 +7533,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":7,"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../components/radioSwitch":15,"../../../../components/restrictedInput/email":17,"../../../../components/restrictedInput/number":20,"../../../../components/restrictedInput/phoneNumber":21,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./multivalue":67,"./style":69}],67:[function(require,module,exports){
+},{"../../../../components/checkbox":7,"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../components/radioSwitch":15,"../../../../components/restrictedInput/email":17,"../../../../components/restrictedInput/number":20,"../../../../components/restrictedInput/phoneNumber":21,"../../../../utils":35,"../../../../utils/component":31,"./multivalue":68,"./style":70}],68:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7453,7 +7606,7 @@ module.exports = component('personalInfoMultivalue', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils":34,"../../../../../utils/component":30,"./style":68}],68:[function(require,module,exports){
+},{"../../../../../utils":35,"../../../../../utils/component":31,"./style":69}],69:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -7507,23 +7660,13 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":34}],69:[function(require,module,exports){
+},{"../../../../../utils":35}],70:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
 
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.column = {
@@ -7607,12 +7750,10 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":34}],70:[function(require,module,exports){
-var component, dateInput, dropdown, extend, monthToString, numberInput, ref, remove, style, toEnglish, tooltip;
+},{"../../../../utils":35}],71:[function(require,module,exports){
+var component, dateInput, dropdown, extend, monthToString, numberInput, ref, remove, style, toEnglish;
 
 component = require('../../../../utils/component');
-
-tooltip = require('../../../../components/tooltip');
 
 numberInput = require('../../../../components/restrictedInput/number');
 
@@ -7625,9 +7766,9 @@ style = require('./style');
 ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, monthToString = ref.monthToString, toEnglish = ref.toEnglish;
 
 module.exports = component('applicantFormReputation', function(arg, arg1) {
-  var E, add, append, destroy, dom, events, hideTooltips, i0, i1, i10, i11, i2, i3, i4, i5, i6, i7, i8, i9, jobItemsPlaceholder, jobs, onAdds, onEvent, setData, setOff, setStyle, text, view;
+  var E, add, append, destroy, dom, events, hideTooltips, i0, i1, i10, i11, i2, i3, i4, i5, i6, i7, i8, i9, jobItemsPlaceholder, jobs, onAdds, onEvent, registerErrorField, setData, setError, setOff, setStyle, text, view;
   dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, setStyle = dom.setStyle, text = dom.text, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
   hideTooltips = [];
@@ -7725,34 +7866,22 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
   }, style.textarea))), E(style.clearfix)));
   onAdds = [];
   [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].forEach(function(field, i) {
-    var error, hideTooltip, input;
-    error = hideTooltip = void 0;
-    input = field.input || field;
-    onEvent(input, 'focus', function() {
-      var h;
-      if (error) {
-        h = tooltip(input, error);
-        return hideTooltips.push(hideTooltip = function() {
-          h();
-          return remove(hideTooltips, hideTooltip);
-        });
-      }
-    });
-    onEvent(input, ['input', 'pInput'], function() {
-      setStyle(input, style.valid);
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-    });
+    var error;
+    error = registerErrorField(field, field, true);
     onAdds.push(function() {
       if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-        setStyle(input, style.invalid);
-        return error = 'تکمیل این فیلد الزامیست.';
+        return setError(error, 'تکمیل این فیلد الزامیست.');
       } else if ((field.valid != null) && !field.valid()) {
-        setStyle(input, style.invalid);
-        return error = 'مقدار وارد شده قابل قبول نیست.';
+        return setError(error, 'تکمیل این فیلد الزامیست.');
       }
     });
-    return onEvent(input, 'blur', function() {
-      return typeof hideTooltip === "function" ? hideTooltip() : void 0;
+    if (field.onChange) {
+      field.onChange(function() {
+        return setError(error, null);
+      });
+    }
+    return onEvent(field.input || field, 'input', function() {
+      return setError(error, null);
     });
   });
   onEvent(add, 'click', function() {
@@ -7797,29 +7926,19 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
       destroy(jobItem);
       return remove(jobs, job);
     });
-    return setData('مشاغل', jobs);
+    return setData('آخرین سوابق سازمانی و پروژه‌ای', jobs);
   });
   return view;
 });
 
 
-},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../components/restrictedInput/number":20,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./style":71}],71:[function(require,module,exports){
+},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../components/restrictedInput/number":20,"../../../../utils":35,"../../../../utils/component":31,"./style":72}],72:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
 
 exports.clearfix = {
   clear: 'both'
-};
-
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
 };
 
 exports.view = {
@@ -7999,7 +8118,7 @@ exports.jobColumnHeader = {
 };
 
 
-},{"../../../../utils":34}],72:[function(require,module,exports){
+},{"../../../../utils":35}],73:[function(require,module,exports){
 exports.valid = {
   color: '#5c5555',
   borderColor: '#ccc'
@@ -8063,19 +8182,21 @@ exports.submit = {
 };
 
 exports.submitDisabled = {
-  cursor: 'default',
   backgroundColor: 'gray'
 };
 
+exports.submitSubmitting = {
+  backgroundColor: 'gray',
+  cursor: 'default'
+};
 
-},{}],73:[function(require,module,exports){
-var component, dropdown, remove, style, tooltip, yearInput;
+
+},{}],74:[function(require,module,exports){
+var component, dropdown, remove, style, yearInput;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
-
-tooltip = require('../../../../components/tooltip');
 
 dropdown = require('../../../../components/dropdown');
 
@@ -8084,179 +8205,179 @@ yearInput = require('../../../../components/restrictedInput/year');
 remove = require('../../../../utils').remove;
 
 module.exports = component('applicantFormTalents', function(arg, arg1) {
-  var E, append, dom, empty, events, hideTooltips, label0, label1, onEvent, setData, setOff, setStyle, table0, table1, textarea0, textarea1, view;
-  dom = arg.dom, events = arg.events, setOff = arg.setOff;
-  setData = arg1.setData;
-  E = dom.E, setStyle = dom.setStyle, empty = dom.empty, append = dom.append;
+  var E, append, destroy, dom, events, label0, label1, onEvent, registerErrorField, setData, setError, setStyle, table0, table1, textarea0, textarea1, view;
+  dom = arg.dom, events = arg.events;
+  setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
+  E = dom.E, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy;
   onEvent = events.onEvent;
-  hideTooltips = [];
-  setOff(function() {
-    return hideTooltips.forEach(function(hideTooltip) {
-      return hideTooltip();
-    });
-  });
   table0 = (function() {
-    var add, body, dropdowns, i0, i1, i2, lastLine, onAdds, rows, update, view;
+    var add, body, createRow, entries, removeButtons, rows, view;
+    entries = [];
     rows = [];
-    dropdowns = [0, 1].map(function(i) {
-      var f;
-      f = E(dropdown, {
-        items: i ? ['کم', 'متوسط', 'زیاد'] : ['کم', 'زیاد']
-      });
-      setStyle(f.input, style.input);
-      return f;
-    });
-    lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = dropdowns[0]), E('td', style.td, i2 = dropdowns[1]), E('td', style.td, add = E(style.add)));
-    view = E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'شایستگی / مهارت'), E('th', style.th, 'علاقه به کار در این حوزه'), E('th', style.th, 'دانش و مهارت در این حوزه'), E('th', style.th))), body = E('tbody', null, lastLine));
-    update = function() {
-      empty(body);
-      append(body, rows.map(function(row) {
-        var v0, v1, v2;
-        v0 = row[0], v1 = row[1], v2 = row[2];
-        return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, (function() {
-          var removeRow;
-          removeRow = E(style.remove);
-          onEvent(removeRow, 'click', function() {
-            remove(rows, row);
-            return update();
-          });
-          return removeRow;
-        })()));
-      }));
-      append(body, lastLine);
-      return setData('جدول', rows);
-    };
-    onAdds = [];
-    [i0, i1, i2].forEach(function(field, i) {
-      var error, hideTooltip, input;
-      error = hideTooltip = void 0;
-      input = field.input || field;
-      onEvent(input, 'focus', function() {
-        var h;
-        if (error) {
-          h = tooltip(input, error);
-          return hideTooltips.push(hideTooltip = function() {
-            h();
-            return remove(hideTooltips, hideTooltip);
-          });
-        }
-      });
-      onEvent(input, ['input', 'pInput'], function() {
-        setStyle(input, style.valid);
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-      onAdds.push(function() {
-        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          setStyle(input, style.invalid);
-          return error = 'تکمیل این فیلد الزامیست.';
-        } else if ((field.valid != null) && !field.valid()) {
-          setStyle(input, style.invalid);
-          return error = 'مقدار وارد شده قابل قبول نیست.';
-        }
-      });
-      return onEvent(input, 'blur', function() {
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-    });
-    onEvent(add, 'click', function() {
-      var canAdd;
-      canAdd = [i0, i1, i2].every(function(i) {
-        return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
-      });
-      if (!canAdd) {
-        onAdds.forEach(function(x) {
-          return x();
+    removeButtons = [];
+    view = E('span', null, E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'شایستگی / مهارت'), E('th', style.th, 'علاقه به کار در این حوزه'), E('th', style.th, 'دانش و مهارت در این حوزه'), E('th', style.th))), body = E('tbody', null)), E(null, add = E(style.add)));
+    createRow = function() {
+      var entry, fields, i0, i1, i2, offErrors, row;
+      entries.push(entry = {});
+      rows.push(row = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = (function() {
+        i1 = E(dropdown, {
+          items: ['کم', 'زیاد']
         });
-        return;
-      }
-      rows.push([i0, i1, i2].map(function(i) {
-        return i.value();
-      }));
-      update();
-      return setStyle([i0, i1.input, i2.input], {
-        value: ''
+        setStyle(i1.input, style.input);
+        return i1;
+      })()), E('td', style.td, i2 = (function() {
+        i2 = E(dropdown, {
+          items: ['کم', 'متوسط', 'زیاد']
+        });
+        setStyle(i2.input, style.input);
+        return i2;
+      })()), E('td', style.td, (function() {
+        var removeButton;
+        removeButtons.push(removeButton = E(style.remove));
+        onEvent(removeButton, 'click', function() {
+          remove(rows, row);
+          remove(entries, entry);
+          setData('مهارت‌ها', entries);
+          destroy(row);
+          return offErrors.forEach(function(x) {
+            return x();
+          });
+        });
+        return removeButton;
+      })())));
+      append(body, row);
+      offErrors = [];
+      return Object.keys(fields = {
+        'شایستگی / مهارت': i0,
+        'علاقه به کار در این حوزه': i1,
+        'دانش و مهارت در این حوزه': i2
+      }).forEach(function(fieldName) {
+        var error, field, handleChange, input;
+        field = fields[fieldName];
+        error = registerErrorField(field, field);
+        offErrors.push(error.off);
+        setError(error, 'تکمیل این فیلد الزامیست.', true);
+        if (field.onChange) {
+          field.onChange(function() {
+            entry[fieldName] = field.value();
+            return setData('مهارت‌ها', entries);
+          });
+          onEvent(field.input, 'input', function() {
+            return setError(error, 'تکمیل این فیلد الزامیست.', true);
+          });
+          return onEvent(field.input, 'blur', function() {
+            return setTimeout(function() {
+              if (field.value() == null) {
+                return setError(error, 'تکمیل این فیلد الزامیست.');
+              } else {
+                return setError(error, null);
+              }
+            });
+          });
+        } else {
+          input = field.input || field;
+          onEvent(input, 'input', function() {
+            entry[fieldName] = field.value();
+            return setData('مهارت‌ها', entries);
+          });
+          handleChange = function(hidden) {
+            return function() {
+              if (!field.value().trim()) {
+                return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+              } else if ((field.valid != null) && !field.valid()) {
+                return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+              } else {
+                return setError(error, null);
+              }
+            };
+          };
+          onEvent(input, 'input', handleChange(true));
+          return onEvent(input, 'blur', handleChange(false));
+        }
       });
-    });
+    };
+    onEvent(add, 'click', createRow);
     return view;
   })();
   table1 = (function() {
-    var add, body, i0, i1, i2, lastLine, onAdds, rows, update, view;
+    var add, body, createRow, entries, removeButtons, rows, view;
+    entries = [];
     rows = [];
-    lastLine = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = (function() {
-      i2 = E(yearInput);
-      setStyle(i2, style.input);
-      return i2;
-    })()), E('td', style.td, add = E(style.add)));
-    view = E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'دوره'), E('th', style.th, 'برگزار کننده'), E('th', style.th, 'سال'), E('th', style.th))), body = E('tbody', null, lastLine));
-    update = function() {
-      empty(body);
-      append(body, rows.map(function(row) {
-        var v0, v1, v2;
-        v0 = row[0], v1 = row[1], v2 = row[2];
-        return E('tr', null, E('td', style.td, v0), E('td', style.td, v1), E('td', style.td, v2), E('td', style.td, (function() {
-          var removeRow;
-          removeRow = E(style.remove);
-          onEvent(removeRow, 'click', function() {
-            remove(rows, row);
-            return update();
+    removeButtons = [];
+    view = E('span', null, E('table', null, E('thead', null, E('tr', null, E('th', style.th, 'دوره'), E('th', style.th, 'برگزار کننده'), E('th', style.th, 'سال'), E('th', style.th))), body = E('tbody', null)), E(null, add = E(style.add)));
+    createRow = function() {
+      var entry, fields, i0, i1, i2, offErrors, row;
+      entries.push(entry = {});
+      rows.push(row = E('tr', null, E('td', style.td, i0 = E('input', style.input)), E('td', style.td, i1 = E('input', style.input)), E('td', style.td, i2 = (function() {
+        i2 = E(yearInput);
+        setStyle(i2, style.input);
+        return i2;
+      })()), E('td', style.td, (function() {
+        var removeButton;
+        removeButtons.push(removeButton = E(style.remove));
+        onEvent(removeButton, 'click', function() {
+          remove(rows, row);
+          remove(entries, entry);
+          setData('دوره‌ها', entries);
+          destroy(row);
+          return offErrors.forEach(function(x) {
+            return x();
           });
-          return removeRow;
-        })()));
-      }));
-      append(body, lastLine);
-      return setData('جدول 2', rows);
-    };
-    onAdds = [];
-    [i0, i1, i2].forEach(function(field, i) {
-      var error, hideTooltip, input;
-      error = hideTooltip = void 0;
-      input = field.input || field;
-      onEvent(input, 'focus', function() {
-        var h;
-        if (error) {
-          h = tooltip(input, error);
-          return hideTooltips.push(hideTooltip = function() {
-            h();
-            return remove(hideTooltips, hideTooltip);
-          });
-        }
-      });
-      onEvent(input, ['input', 'pInput'], function() {
-        setStyle(input, style.valid);
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-      onAdds.push(function() {
-        if ((field.value() == null) || (typeof (field.value()) === 'string' && !field.value().trim())) {
-          setStyle(input, style.invalid);
-          return error = 'تکمیل این فیلد الزامیست.';
-        } else if ((field.valid != null) && !field.valid()) {
-          setStyle(input, style.invalid);
-          return error = 'مقدار وارد شده قابل قبول نیست.';
-        }
-      });
-      return onEvent(input, 'blur', function() {
-        return typeof hideTooltip === "function" ? hideTooltip() : void 0;
-      });
-    });
-    onEvent(add, 'click', function() {
-      var canAdd;
-      canAdd = [i0, i1, i2].every(function(i) {
-        return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
-      });
-      if (!canAdd) {
-        onAdds.forEach(function(x) {
-          return x();
         });
-        return;
-      }
-      rows.push([i0, i1, i2].map(function(i) {
-        return i.value();
-      }));
-      update();
-      return setStyle([i0, i1, i2], {
-        value: ''
+        return removeButton;
+      })())));
+      append(body, row);
+      offErrors = [];
+      return Object.keys(fields = {
+        'دوره': i0,
+        'برگزار کننده': i1,
+        'سال': i2
+      }).forEach(function(fieldName) {
+        var error, field, handleChange, input;
+        field = fields[fieldName];
+        error = registerErrorField(field, field);
+        offErrors.push(error.off);
+        setError(error, 'تکمیل این فیلد الزامیست.', true);
+        if (field.onChange) {
+          field.onChange(function() {
+            entry[fieldName] = field.value();
+            return setData('دوره‌ها', entries);
+          });
+          onEvent(field.input, 'input', function() {
+            return setError(error, 'تکمیل این فیلد الزامیست.', true);
+          });
+          return onEvent(field.input, 'blur', function() {
+            return setTimeout(function() {
+              if (field.value() == null) {
+                return setError(error, 'تکمیل این فیلد الزامیست.');
+              } else {
+                return setError(error, null);
+              }
+            });
+          });
+        } else {
+          input = field.input || field;
+          onEvent(input, 'input', function() {
+            entry[fieldName] = field.value();
+            return setData('دوره‌ها', entries);
+          });
+          handleChange = function(hidden) {
+            return function() {
+              if (!field.value().trim()) {
+                return setError(error, 'تکمیل این فیلد الزامیست.', hidden);
+              } else if ((field.valid != null) && !field.valid()) {
+                return setError(error, 'مقدار وارد شده قابل قبول نیست.', hidden);
+              } else {
+                return setError(error, null);
+              }
+            };
+          };
+          onEvent(input, 'input', handleChange(true));
+          return onEvent(input, 'blur', handleChange(false));
+        }
       });
-    });
+    };
+    onEvent(add, 'click', createRow);
     return view;
   })();
   view = E(null, table0, table1, E(style.column, label0 = E(style.label, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده:'), textarea0 = E('textarea', style.textarea)), E(style.column, label1 = E(style.label, 'آثار علمی و عضویت در انجمن‌ها:'), textarea1 = E('textarea', style.textarea)), E(style.clearfix));
@@ -8281,7 +8402,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":11,"../../../../components/restrictedInput/year":22,"../../../../components/tooltip":24,"../../../../utils":34,"../../../../utils/component":30,"./style":74}],74:[function(require,module,exports){
+},{"../../../../components/dropdown":11,"../../../../components/restrictedInput/year":22,"../../../../utils":35,"../../../../utils/component":31,"./style":75}],75:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -8290,20 +8411,11 @@ exports.clearfix = {
   clear: 'both'
 };
 
-exports.valid = {
-  color: '#5c5555',
-  borderColor: '#ccc'
-};
-
-exports.invalid = {
-  color: '#c00',
-  borderColor: '#c00'
-};
-
 exports.th = {
   padding: '10px 10px 0',
   color: '#5c5555',
-  fontSize: 12
+  fontSize: 12,
+  width: 200
 };
 
 exports.td = {
@@ -8313,6 +8425,7 @@ exports.td = {
 };
 
 exports.input = {
+  width: 200,
   fontSize: 12,
   height: 30,
   lineHeight: 30,
@@ -8335,7 +8448,9 @@ icon = {
 
 exports.add = extend({}, icon, {
   "class": 'fa fa-plus-circle',
-  color: '#449e73'
+  color: '#449e73',
+  top: 5,
+  right: 10
 });
 
 exports.remove = extend({}, icon, {
@@ -8371,7 +8486,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":34}],75:[function(require,module,exports){
+},{"../../../../utils":35}],76:[function(require,module,exports){
 var component, extend, form, style, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -8441,7 +8556,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30,"./form":50,"./style":76,"./tests":77}],76:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"./form":51,"./style":77,"./tests":78}],77:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -8554,7 +8669,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":34}],77:[function(require,module,exports){
+},{"../../utils":35}],78:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -8567,7 +8682,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":30}],78:[function(require,module,exports){
+},{"../../../utils/component":31}],79:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -8716,7 +8831,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":34,"../../utils/component":30,"./jobs":79,"./style":80}],79:[function(require,module,exports){
+},{"../../utils":35,"../../utils/component":31,"./jobs":80,"./style":81}],80:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -8798,7 +8913,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -9030,7 +9145,7 @@ exports.footerLink = {
 };
 
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 var component, generateId, modal, tableView;
 
 component = require('../../utils/component');
@@ -9140,7 +9255,7 @@ module.exports = component('hrView', function(arg) {
 });
 
 
-},{"../../singletons/modal":29,"../../utils/component":30,"../../utils/dom":32,"../tableView":86}],82:[function(require,module,exports){
+},{"../../singletons/modal":29,"../../utils/component":31,"../../utils/dom":33,"../tableView":87}],83:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView;
 
 component = require('../utils/component');
@@ -9185,7 +9300,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":30,"./applicantView":75,"./apply":78,"./hrView":81,"./login":83,"./managerView":85}],83:[function(require,module,exports){
+},{"../utils/component":31,"./applicantView":76,"./apply":79,"./hrView":82,"./login":84,"./managerView":86}],84:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -9256,7 +9371,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":20,"../../utils":34,"../../utils/component":30,"./style":84}],84:[function(require,module,exports){
+},{"../../components/restrictedInput/number":20,"../../utils":35,"../../utils/component":31,"./style":85}],85:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -9353,7 +9468,7 @@ exports.invalid = {
 };
 
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -9361,7 +9476,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":86}],86:[function(require,module,exports){
+},{"../tableView":87}],87:[function(require,module,exports){
 var actionButton, component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
 
 component = require('../../utils/component');
@@ -9387,7 +9502,7 @@ module.exports = component('tableView', function(arg) {
   onEvent = events.onEvent;
   selectedApplicants = [];
   view = E('span', null, E(sidebar), E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
-    items: ['ایجاد حساب کاربری', 'درخواست مصاحبه']
+    items: ['ایجاد حساب کاربری', 'چاپ']
   })), searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
@@ -9498,7 +9613,7 @@ module.exports = component('tableView', function(arg) {
     switch (value) {
       case 'ایجاد حساب کاربری':
         return console.log(1);
-      case 'درخواست مصاحبه':
+      case 'چاپ':
         return console.log(2);
     }
   });
@@ -9521,7 +9636,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../components/actionButton":3,"../../utils":34,"../../utils/component":30,"../../utils/logic":36,"./search":89,"./sidebar":91,"./style":93,"./table":95}],87:[function(require,module,exports){
+},{"../../components/actionButton":3,"../../utils":35,"../../utils/component":31,"../../utils/logic":37,"./search":90,"./sidebar":92,"./style":94,"./table":96}],88:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -9742,7 +9857,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../utils":34,"../../../../utils/component":30,"./style":88}],88:[function(require,module,exports){
+},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../utils":35,"../../../../utils/component":31,"./style":89}],89:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -9785,7 +9900,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":34}],89:[function(require,module,exports){
+},{"../../../../utils":35}],90:[function(require,module,exports){
 var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -9893,7 +10008,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":34,"../../../utils/component":30,"../../../utils/logic":36,"./criterion":87,"./style":90}],90:[function(require,module,exports){
+},{"../../../utils":35,"../../../utils/component":31,"../../../utils/logic":37,"./criterion":88,"./style":91}],91:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -10014,7 +10129,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":34}],91:[function(require,module,exports){
+},{"../../../utils":35}],92:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -10086,7 +10201,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils/component":30,"./style":92}],92:[function(require,module,exports){
+},{"../../../utils/component":31,"./style":93}],93:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../utils').extend;
@@ -10172,7 +10287,7 @@ exports.linkActive = extend({}, exports.link, {
 });
 
 
-},{"../../../utils":34}],93:[function(require,module,exports){
+},{"../../../utils":35}],94:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -10198,7 +10313,7 @@ exports.action = {
 };
 
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -10420,7 +10535,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":34,"./style":96}],95:[function(require,module,exports){
+},{"../../../utils":35,"./style":97}],96:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -10544,7 +10659,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":34,"../../../utils/component":30,"./functions":94,"./style":96}],96:[function(require,module,exports){
+},{"../../../utils":35,"../../../utils/component":31,"./functions":95,"./style":97}],97:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -10635,7 +10750,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":34}],97:[function(require,module,exports){
+},{"../../../utils":35}],98:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -10669,4 +10784,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./alertMessages":2,"./page":26,"./q":27,"./utils/dom":32,"./utils/service":40}]},{},[97]);
+},{"./alertMessages":2,"./page":26,"./q":27,"./utils/dom":33,"./utils/service":41}]},{},[98]);

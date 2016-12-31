@@ -1,7 +1,7 @@
 component = require '../../utils/component'
 style = require './style'
 list = require './list'
-{toPersian, textIsInSearch, defer} = require '../../utils'
+{toPersian, textIsInSearch} = require '../../utils'
 
 module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex}) ->
   {E, setStyle} = dom
@@ -29,8 +29,8 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
 
   onSelect = (item) ->
     setInputValue getTitle item
-    itemsList.hide()
     itemsList.update getFilteredItems()
+    input.blur()
     changeListeners.forEach (x) -> x()
 
   dropdown = E style.dropdown,
@@ -39,7 +39,7 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     itemsList = E list, {getTitle, onSelect}
 
   clear = ->
-    setInputValue items[selectedIndex]
+    setInputValue getTitle items[selectedIndex]
     itemsList.update getFilteredItems()
     itemsList.set items[selectedIndex]
   if selectedIndex
@@ -60,11 +60,10 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     itemsList.show()
 
   onEvent input, 'blur', ->
-    defer(1000) ->
-      itemsList.hide()
+    itemsList.hide()
 
   onEvent input, 'keydown', (e) ->
-    code = e.keyCode or e.which
+    code = e.keyCode || e.which
     switch code
       when 40
         e.preventDefault()
@@ -78,14 +77,15 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     input.blur()
 
   prevInputValue = ''
-  onEvent input, ['input', 'pInput'], ->
+  onEvent input, 'input', ->
     unless english
       setStyle input, value: input.value()
     if getFilteredItems().length
       prevInputValue = input.value()
     else
       setStyle input, englishValue: prevInputValue
-    itemsList.update getFilteredItems(), true
+    itemsList.reset()
+    itemsList.update getFilteredItems()
     itemsList.show()
 
   returnObject
@@ -97,6 +97,7 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
         clear()
       else
         setStyle input, value: ''
-        itemsList.update getFilteredItems(), true
+        itemsList.reset()
+        itemsList.update getFilteredItems()
 
   dropdown

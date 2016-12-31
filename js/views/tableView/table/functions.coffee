@@ -24,11 +24,11 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
               firstValue = first[header.key]
               secondValue = second[header.key]
             result = compare firstValue, secondValue
-            if result is 0 and variables.entityId
+            if result is 0 && variables.entityId
               compare first[variables.entityId], second[variables.entityId]
             else
               result
-      descriptors = variables.descriptors or []
+      descriptors = variables.descriptors || []
       variables.selectionMode = descriptors.some ({selected}) -> selected
       descriptors.forEach (descriptor, index) ->
         descriptor.index = index
@@ -64,7 +64,7 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
         if arrowDown
           setStyle arrowDown, style.arrowDown
       sort = variables.sort
-      if sort?.header is header and sort.direction is 'up'
+      if sort?.header is header && sort.direction is 'up'
         setStyle header.arrowDown, style.arrowActive
         sort.direction = 'down'
       else
@@ -103,7 +103,7 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
         row.offs.push onEvent row.checkboxTd, 'click', ->
           descriptor.selected = !descriptor.selected
           functions.update()
-      if handlers.select and not descriptor.unselectable
+      if handlers.select && not descriptor.unselectable
         unless descriptor.selected
           row.offs.push onEvent row.tr, 'mousemove', ->
             setStyle row.tr, style.rowHover

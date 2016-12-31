@@ -37,10 +37,10 @@ module.exports = component 'apply', ({dom, events}) ->
           tooltip = undefined
           group = E null,
             input = E 'input', extend {placeholder: text}, style.formInput
-          if isNumber or isPersian
+          if isNumber || isPersian
             previousValue = ''
             onEvent input, 'input', ->
-              if (not isNumber or not (isNaN toEnglish input.value())) and (not isPersian or (/^[آئا-ی]*$/.test input.value()))
+              if (not isNumber || not (isNaN toEnglish input.value())) && (not isPersian || (/^[آئا-ی]*$/.test input.value()))
                 $(input.fn.element).tooltip 'destroy'
                 previousValue = input.value()
               else
@@ -55,7 +55,7 @@ module.exports = component 'apply', ({dom, events}) ->
                   setTimeout -> $(input.fn.element).tooltip 'show'
               setStyle input, value: previousValue
           onEvent input, 'blur', ->
-            if (key is 'phoneNumber' and (toEnglish(input.value()).indexOf('09') isnt 0 or input.value().length isnt 11)) or (key is 'identificationCode' and input.value().length isnt 10)
+            if (key is 'phoneNumber' && (toEnglish(input.value()).indexOf('09') isnt 0 || input.value().length isnt 11)) || (key is 'identificationCode' && input.value().length isnt 10)
               if tooltip is 1
                 $(input.fn.element).tooltip 'destroy'
               tooltip = 2

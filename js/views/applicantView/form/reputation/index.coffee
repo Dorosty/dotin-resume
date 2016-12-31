@@ -1,12 +1,11 @@
 component = require '../../../../utils/component'
-tooltip = require '../../../../components/tooltip'
 numberInput = require '../../../../components/restrictedInput/number'
 dateInput = require '../../../../components/dateInput'
 dropdown = require '../../../../components/dropdown'
 style = require './style'
 {extend, remove, monthToString, toEnglish} = require '../../../../utils'
 
-module.exports = component 'applicantFormReputation', ({dom, events, setOff}, {setData}) ->
+module.exports = component 'applicantFormReputation', ({dom, events, setOff}, {setData, registerErrorField, setError}) ->
   {E, setStyle, text, append, destroy} = dom
   {onEvent} = events
 
@@ -74,26 +73,17 @@ module.exports = component 'applicantFormReputation', ({dom, events, setOff}, {s
 
   onAdds = []
   [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].forEach (field, i) ->
-    error = hideTooltip = undefined
-    input = field.input || field
-    onEvent input, 'focus', ->
-      if error
-        h = tooltip input, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent input, ['input', 'pInput'], ->
-      setStyle input, style.valid
-      hideTooltip?()
+    error = registerErrorField field, field, true
     onAdds.push ->
       if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-        setStyle input, style.invalid
-        error = 'تکمیل این فیلد الزامیست.'
+        setError error, 'تکمیل این فیلد الزامیست.'
       else if field.valid? && !field.valid()
-        setStyle input, style.invalid
-        error = 'مقدار وارد شده قابل قبول نیست.'
-    onEvent input, 'blur', ->
-      hideTooltip?()
+        setError error, 'تکمیل این فیلد الزامیست.'
+    if field.onChange
+      field.onChange ->
+        setError error, null
+    onEvent (field.input || field), 'input', ->
+      setError error, null
 
   onEvent add, 'click', ->
     canAdd = [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
@@ -168,6 +158,6 @@ module.exports = component 'applicantFormReputation', ({dom, events, setOff}, {s
       destroy jobItem
       remove jobs, job
 
-    setData 'مشاغل', jobs
+    setData 'آخرین سوابق سازمانی و پروژه‌ای', jobs
 
   view

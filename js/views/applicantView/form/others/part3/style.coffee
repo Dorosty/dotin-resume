@@ -2,14 +2,6 @@
 
 exports.clearfix =
   clear: 'both'
-  
-exports.valid =
-  color: '#5c5555'
-  borderColor: '#ccc'
-
-exports.invalid =
-  color: '#c00'
-  borderColor: '#c00'
 
 exports.mainLabel =
   fontSize: 12
@@ -30,6 +22,7 @@ exports.th =
   padding: '10px 10px 0'
   color: '#5c5555'
   fontSize: 12
+  width: 150
 
 exports.td =
   padding: '10px 5px'
@@ -59,6 +52,8 @@ icon =
 exports.add = extend {}, icon,
   class: 'fa fa-plus-circle'
   color: '#449e73'
+  top: 5
+  right: 5
 
 exports.remove = extend {}, icon,
   class: 'fa fa-minus-circle'

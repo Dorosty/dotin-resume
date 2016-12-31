@@ -33,7 +33,7 @@ module.exports = component 'sheet', ({dom, events, returnObject}) ->
         if isEnabled
           enabled = isEnabled()
         else
-          enabled = fields.every ({optional, component}) -> optional or component.value()
+          enabled = fields.every ({optional, component}) -> optional || component.value()
         modal.instance.setEnabled enabled
 
       submit = do (submit) -> ->

@@ -8,7 +8,7 @@ isIn = (component, {pageX, pageY}) ->
   maxX = rect.left + rect.width
   minY = rect.top + window().fn.element.scrollY
   maxY = rect.top + window().fn.element.scrollY + rect.height
-  minX < pageX < maxX and minY < pageY < maxY
+  minX < pageX < maxX && minY < pageY < maxY
 
 exports.instance = (thisComponent) ->
   exports = {}
@@ -41,14 +41,14 @@ exports.instance = (thisComponent) ->
       e.target ?= e.srcElement
       if ignores
         target = e.target
-        while target and target isnt document and target isnt document.body
+        while target && target isnt document && target isnt document.body
           shouldIgnore = ignores.some (ignore) ->
             if target is ignore.fn.element
               l.ignore ignore, e
               return true
           if shouldIgnore
             return
-          target = target.parentNode or target.parentElement
+          target = target.parentNode || target.parentElement
       l 1, e
       callback e
       l 1, e

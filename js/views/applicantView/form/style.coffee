@@ -53,5 +53,8 @@ exports.submit =
   backgroundColor: '#449e73'
 
 exports.submitDisabled =
-  cursor: 'default'
   backgroundColor: 'gray'
+
+exports.submitSubmitting =
+  backgroundColor: 'gray'
+  cursor: 'default'

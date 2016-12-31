@@ -1,125 +1,125 @@
 component = require '../../../../utils/component'
 style = require './style'
-tooltip = require '../../../../components/tooltip'
 dropdown = require '../../../../components/dropdown'
 yearInput = require '../../../../components/restrictedInput/year'
 gradeInput = require '../../../../components/restrictedInput/grade'
 checkbox = require '../../../../components/checkbox'
 {extend, remove} = require '../../../../utils'
 
-module.exports = component 'applicantFormEducation', ({dom, events, setOff}, {setData, setError}) ->
-  {E, setStyle, empty, append, show, hide} = dom
+module.exports = component 'applicantFormEducation', ({dom, events}, {setData, registerErrorField, setError}) ->
+  {E, setStyle, append, destroy, show, hide} = dom
   {onEvent} = events
-
-  hideTooltips = []
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
 
   table = do ->
 
+    entries = []
     rows = []
+    removeButtons = []
 
-    i0 = f = E dropdown, items: ['دیپلم', 'کاردانی', 'کارشناسی', 'کارشناسی ارشد', 'دکتری']
-    setStyle f.input, extend {}, style.input, width: 150
-
-    lastLine = E 'tr', null,
-      E 'td', style.td,
-        i0
-      E 'td', style.td,
-        i1 = E 'input', style.input
-      E 'td', style.td,
-        i2 = E 'input', extend {}, style.input, width: 150
-      E 'td', style.td,
-        i3 = do ->
-          i3 = E yearInput
-          setStyle i3, style.input
-          i3
-      E 'td', style.td,
-        i4 = do ->
-          i4 = E yearInput
-          setStyle i4, style.input
-          i4
-      E 'td', style.td,
-        i5 = do ->
-          i5 = E gradeInput
-          setStyle i5, style.input
-          i5
-      E 'td', style.td,
-        i6 = E 'input', extend {}, style.input, width: 150
-      E 'td', style.td,
+    view = E 'span', null,
+      E 'table', null,
+        E 'thead', null,
+          E 'tr', null,
+            E 'th', style.th, 'مقطع'
+            E 'th', style.th, 'رشته تحصیلی'
+            E 'th', style.th, 'نام دانشگاه و شهر محل تحصیل'
+            E 'th', style.th, 'سال ورود'
+            E 'th', style.th, 'سال اخذ مدرک'
+            E 'th', style.th, 'معدل'
+            E 'th', style.th, 'عنوان پایان‌نامه'
+            E 'th', style.th
+        body = E 'tbody', null
+      E null,
         add = E style.add
 
-    view = E 'table', null,
-      E 'thead', null,
-        E 'tr', null,
-          E 'th', style.th, 'مقطع'
-          E 'th', style.th, 'رشته تحصیلی'
-          E 'th', style.th, 'نام دانشگاه و شهر محل تحصیل'
-          E 'th', style.th, 'سال ورود'
-          E 'th', style.th, 'سال اخذ مدرک'
-          E 'th', style.th, 'معدل'
-          E 'th', style.th, 'عنوان پایان‌نامه'
-          E 'th', style.th
-      body = E 'tbody', null,
-        lastLine
+    do createRow = ->
+      entries.push entry = {}
+      rows.push row = E 'tr', null,
+        E 'td', style.td, 
+          i0 = do ->          
+            i0 = f = E dropdown, items: ['دیپلم', 'کاردانی', 'کارشناسی', 'کارشناسی ارشد', 'دکتری']
+            setStyle f.input, extend {}, style.input, width: 150
+            i0
+        E 'td', style.td,
+          i1 = E 'input', style.input
+        E 'td', style.td,
+          i2 = E 'input', extend {}, style.input, width: 150
+        E 'td', style.td,
+          i3 = do ->
+            i3 = E yearInput
+            setStyle i3, style.input
+            i3
+        E 'td', style.td,
+          i4 = do ->
+            i4 = E yearInput
+            setStyle i4, style.input
+            i4
+        E 'td', style.td,
+          i5 = do ->
+            i5 = E gradeInput
+            setStyle i5, style.input
+            i5
+        E 'td', style.td,
+          i6 = E 'input', extend {}, style.input, width: 150
+        E 'td', style.td, do ->
+          removeButtons.push removeButton = E style.remove
+          onEvent removeButton, 'click', ->
+            remove rows, row
+            remove entries, entry
+            setData 'سوابق تحصیلی', entries
+            destroy row
+            showHideRemoveButtons()
+            offErrors.forEach (x) -> x()
+          removeButton
+      do showHideRemoveButtons = ->
+        if entries.length > 1
+          show removeButtons
+        else
+          hide removeButtons
+      append body, row
 
-    do update = ->    
-      empty body
-      append body, rows.map (row) ->
-        [v0, v1, v2, v3, v4, v5, v6] = row
-        E 'tr', null,
-          E 'td', style.td, v0
-          E 'td', style.td, v1
-          E 'td', style.td, v2
-          E 'td', style.td, v3
-          E 'td', style.td, v4
-          E 'td', style.td, v5
-          E 'td', style.td, v6
-          E 'td', style.td, do ->
-            removeRow = E style.remove
-            onEvent removeRow, 'click', ->
-              remove rows, row
-              update()
-            removeRow
-      append body, lastLine
-      setData 'جدول', rows
-      if rows.length
-        setError 'جدول', null
-      else
-        setError 'جدول', 'تکمیل این فیلد الزامیست.'
+      offErrors = []
+      Object.keys fields =
+        'مقطع': i0
+        'رشته تحصیلی': i1
+        'نام دانشگاه و شهر محل تحصیل': i2
+        'سال ورود': i3
+        'سال اخذ مدرک': i4
+        'معدل': i5
+        'عنوان پایان‌نامه': i6
+      .forEach (fieldName) ->
+        field = fields[fieldName]
+        error = registerErrorField field, field
+        offErrors.push error.off
+        setError error, 'تکمیل این فیلد الزامیست.', true
+        if field.onChange
+          field.onChange ->
+            entry[fieldName] = field.value()
+            setData 'سوابق تحصیلی', entries
+          onEvent field.input, 'input', ->
+            setError error, 'تکمیل این فیلد الزامیست.', true
+          onEvent field.input, 'blur', ->
+            setTimeout ->
+              if !field.value()?
+                setError error, 'تکمیل این فیلد الزامیست.'
+              else
+                setError error, null
+        else
+          input = field.input || field
+          onEvent input, 'input', ->
+            entry[fieldName] = field.value()
+            setData 'سوابق تحصیلی', entries
+          handleChange = (hidden) -> ->
+            if !field.value().trim()
+              setError error, 'تکمیل این فیلد الزامیست.', hidden
+            else if field.valid? && !field.valid()
+              setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
+            else
+              setError error, null
+          onEvent input, 'input', handleChange true
+          onEvent input, 'blur', handleChange false
 
-    onAdds = []
-    [i0, i1, i2, i3, i4, i5, i6].forEach (field, i) ->
-      error = hideTooltip = undefined
-      input = field.input || field
-      onEvent input, 'focus', ->
-        if error
-          h = tooltip input, error
-          hideTooltips.push hideTooltip = ->
-            h()
-            remove hideTooltips, hideTooltip
-      onEvent input, ['input', 'pInput'], ->
-        setStyle input, style.valid
-        hideTooltip?()
-      onAdds.push ->
-        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-          setStyle input, style.invalid
-          error = 'تکمیل این فیلد الزامیست.'
-        else if field.valid? && !field.valid()
-          setStyle input, style.invalid
-          error = 'مقدار وارد شده قابل قبول نیست.'
-      onEvent input, 'blur', ->
-        hideTooltip?()
-
-    onEvent add, 'click', ->
-      canAdd = [i0, i1, i2, i3, i4, i5, i6].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
-      unless canAdd
-        onAdds.forEach (x) -> x()
-        return
-      rows.push [i0, i1, i2, i3, i4, i5, i6].map (i) -> i.value()
-      update()
-      setStyle [i1, i2, i3, i4, i5, i6], value: ''
-      i0.clear()
+    onEvent add, 'click', createRow
 
     view
 
@@ -130,42 +130,28 @@ module.exports = component 'applicantFormEducation', ({dom, events, setOff}, {se
       textarea0 = hide E 'textarea', extend {placeholder: 'مقطع و رشته‌ای را که ادامه می‌دهید ذکر کنید.'}, style.textarea
     E style.clearfix
 
-  handleTextarea = ->
+  textareaError = registerErrorField textarea0, textarea0
+
+  handleTextarea = (hidden) ->
     setData 'مقطع و رشته‌ای که ادامه می‌دهید', textarea0.value()
     if textarea0.value().trim()
-      setError 'مقطع و رشته‌ای که ادامه می‌دهید', null
+      setError textareaError, null
     else
-      setError 'مقطع و رشته‌ای که ادامه می‌دهید', 'تکمیل این فیلد الزامیست.'
+      setError textareaError, 'تکمیل این فیلد الزامیست.', hidden
 
   checkbox0.onChange ->
     if checkbox0.value()
       show textarea0
-      handleTextarea()
+      handleTextarea true
     else
       hide textarea0
-      setError 'مقطع و رشته‌ای که ادامه می‌دهید', null
+      setData 'مقطع و رشته‌ای که ادامه می‌دهید', null
+      setError textareaError, null
 
-  onEvent textarea0, 'input', handleTextarea
+  onEvent textarea0, 'input', ->
+    handleTextarea true
 
-  do ->
-    error = hideTooltip = undefined
-    onEvent textarea0, 'focus', ->
-      if error
-        h = tooltip textarea0, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent textarea0, ['input', 'pInput'], ->
-      setStyle textarea0, style.valid
-      hideTooltip?()
-    onEvent textarea0, 'blur', ->
-      setTimeout (->
-        hideTooltip?()
-        if !textarea0.value().trim()
-          setStyle textarea0, style.invalid
-          error = 'تکمیل این فیلد الزامیست.'
-        else
-          error = null
-      ), 100
+  onEvent textarea0, 'blur', ->
+    handleTextarea false
 
   view

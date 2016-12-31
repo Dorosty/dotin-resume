@@ -17,7 +17,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     E sidebar
     E style.contents,
       E style.action,
-        actionButtonInstance = E actionButton, items: ['ایجاد حساب کاربری', 'درخواست مصاحبه']
+        actionButtonInstance = E actionButton, items: ['ایجاد حساب کاربری', 'چاپ']
       searchInstance = E search
       tableInstance = E table,
         entityId: 'userId'
@@ -81,7 +81,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     switch value
       when 'ایجاد حساب کاربری'
         console.log 1
-      when 'درخواست مصاحبه'
+      when 'چاپ'
         console.log 2
 
   applicants = []

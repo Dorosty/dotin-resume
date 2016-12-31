@@ -1,37 +1,17 @@
 component = require '../../../../../utils/component'
 style = require './style'
-tooltip = require '../../../../../components/tooltip'
 numberInput = require '../../../../../components/restrictedInput/number'
 {extend, remove} = require '../../../../../utils'
 
-module.exports = component 'applicantFormOthersPart2', ({dom, events, setOff}, {setData, setError}) ->
-  {E, setStyle, append, empty} = dom
+module.exports = component 'applicantFormOthersPart2', ({dom, events}, {setData, registerErrorField, setError}) ->
+  {E, setStyle, append, destroy, show, hide} = dom
   {onEvent} = events
 
-  hideTooltips = []
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
-
+  entries = []
   rows = []
+  removeButtons = []
 
-  lastLine = E 'tr', null,
-    E 'td', style.td,
-      i0 = E 'input', style.input
-    E 'td', style.td,
-      i1 = E 'input', style.input
-    E 'td', style.td,
-      i2 = E 'input', extend {}, style.input, width: 250
-    E 'td', style.td,
-      i3 = E 'input', style.input
-    E 'td', style.td,
-      i4 = do ->
-        i4 = E numberInput
-        setStyle i4, style.input
-        i4
-    E 'td', style.td,
-      add = E style.add
-
-  view = E null,
+  view = E 'span', null,
     E style.mainLabel, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'
     E 'table', null,
       E 'thead', null,
@@ -42,62 +22,85 @@ module.exports = component 'applicantFormOthersPart2', ({dom, events, setOff}, {
           E 'th', style.th, 'سمت'
           E 'th', style.th, 'شماره تماس'
           E 'th', style.th
-      body = E 'tbody', null,
-        lastLine
+      body = E 'tbody', null
+    E null,
+      add = E style.add
 
-  do update = ->    
-    empty body
-    append body, rows.map (row) ->
-      [v0, v1, v2, v3, v4] = row
-      E 'tr', null,
-        E 'td', style.td, v0
-        E 'td', style.td, v1
-        E 'td', style.td, v2
-        E 'td', style.td, v3
-        E 'td', style.td, v4
-        E 'td', style.td, do ->
-          removeRow = E style.remove
-          onEvent removeRow, 'click', ->
-            remove rows, row
-            update()
-          removeRow
-    append body, lastLine
-    setData 'جدول', rows
-    if rows.length > 1
-      setError 'جدول', null
-    else
-      setError 'جدول', 'تکمیل این فیلد الزامیست.'
+  createRow = ->
+    entries.push entry = {}
+    rows.push row = E 'tr', null,
+      E 'td', style.td,
+        i0 = E 'input', style.input
+      E 'td', style.td,
+        i1 = E 'input', style.input
+      E 'td', style.td,
+        i2 = E 'input', extend {}, style.input, width: 250
+      E 'td', style.td,
+        i3 = E 'input', style.input
+      E 'td', style.td,
+        i4 = do ->
+          i4 = E numberInput
+          setStyle i4, style.input
+          i4
+      E 'td', style.td, do ->
+        removeButtons.push removeButton = E style.remove
+        onEvent removeButton, 'click', ->
+          remove rows, row
+          remove entries, entry
+          setData 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries
+          destroy row
+          showHideRemoveButtons()
+          offErrors.forEach (x) -> x()
+        removeButton
+    do showHideRemoveButtons = ->
+      if entries.length > 2
+        show removeButtons
+      else
+        hide removeButtons
+    append body, row
 
-  onAdds = []
-  [i0, i1, i2, i3, i4].forEach (field, i) ->
-    error = hideTooltip = undefined
-    input = field.input || field
-    onEvent input, 'focus', ->
-      if error
-        h = tooltip input, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent input, ['input', 'pInput'], ->
-      setStyle input, style.valid
-      hideTooltip?()
-    onAdds.push ->
-      if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-        setStyle input, style.invalid
-        error = 'تکمیل این فیلد الزامیست.'
-      else if field.valid? && !field.valid()
-        setStyle input, style.invalid
-        error = 'مقدار وارد شده قابل قبول نیست.'
-    onEvent input, 'blur', ->
-      hideTooltip?()
+    offErrors = []
+    Object.keys fields =
+      'نام و نام خانوادگی': i0
+      'نسبت با شما': i1
+      'نام محل کار': i2
+      'سمت': i3
+      'شماره تماس': i4
+    .forEach (fieldName) ->
+      field = fields[fieldName]
+      error = registerErrorField field, field
+      offErrors.push error.off
+      setError error, 'تکمیل این فیلد الزامیست.', true
+      if field.onChange
+        field.onChange ->
+          entry[fieldName] = field.value()
+          setData 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries
+        onEvent field.input, 'input', ->
+          setError error, 'تکمیل این فیلد الزامیست.', true
+        onEvent field.input, 'blur', ->
+          setTimeout ->
+            if !field.value()?
+              setError error, 'تکمیل این فیلد الزامیست.'
+            else
+              setError error, null
+      else
+        input = field.input || field
+        onEvent input, 'input', ->
+          entry[fieldName] = field.value()
+          setData 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند', entries
+        handleChange = (hidden) -> ->
+          if !field.value().trim()
+            setError error, 'تکمیل این فیلد الزامیست.', hidden
+          else if field.valid? && !field.valid()
+            setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
+          else
+            setError error, null
+        onEvent input, 'input', handleChange true
+        onEvent input, 'blur', handleChange false
 
-  onEvent add, 'click', ->
-    canAdd = [i0, i1, i2, i3, i4].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
-    unless canAdd
-      onAdds.forEach (x) -> x()
-      return
-    rows.push [i0, i1, i2, i3, i4].map (i) -> i.value()
-    update()
-    setStyle [i0, i1, i2, i3, i4], value: ''
+  createRow()
+  createRow()
+
+  onEvent add, 'click', createRow
 
   view

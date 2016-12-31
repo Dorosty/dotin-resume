@@ -20,7 +20,7 @@ handle = (isGet) -> (serviceName, params) ->
     states.forEach (name) ->
       dontSetState = Object.keys(stateChangingServices).some (_serviceName) ->
         service = stateChangingServices[_serviceName]
-        if service.stateName is name or _serviceName is 'logout'
+        if service.stateName is name || _serviceName is 'logout'
           if _serviceName is serviceName
             false
           else if service.running
@@ -36,7 +36,7 @@ handle = (isGet) -> (serviceName, params) ->
           responseValue = response[name]
           setTimeout ->
             state[name].set responseValue
-        if name is 'user' and response.loggedOut
+        if name is 'user' && response.loggedOut
           setTimeout ->
             ex.logout true
     delete response.user

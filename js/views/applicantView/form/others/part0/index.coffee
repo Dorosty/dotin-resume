@@ -1,17 +1,17 @@
 component = require '../../../../../utils/component'
 style = require './style'
-tooltip = require '../../../../../components/tooltip'
 dropdown = require '../../../../../components/dropdown'
 dateInput = require '../../../../../components/dateInput'
 numberInput = require '../../../../../components/restrictedInput/number'
 {extend, remove} = require '../../../../../utils'
 
-module.exports = component 'applicantFormOthersPart0', ({dom, events, setOff}, {setData, setError}) ->
+module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData, registerErrorField, setError}) ->
   {E, text, setStyle, show, hide} = dom
   {onEvent} = events
 
   labels = {}
   fields = {}
+  incomeError = undefined
 
   fields['متقاضه چه نوع همکاری هستید؟'] = f = E dropdown, items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
   setStyle f, style.dropdownPlaceholder
@@ -45,11 +45,11 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events, setOff}, {
         show [y, z]
         setData 'مقدار دستمزد', y.value()
         unless y.value()
-          setError 'مقدار دستمزد', 'تکمیل این فیلد الزامیست.'
+          setError incomeError, 'تکمیل این فیلد الزامیست.', true
       else
         hide [y, z]
         setData 'مقدار دستمزد', null
-        setError 'مقدار دستمزد', null
+        setError incomeError, null
     [x, y, z]
 
   view = E null,
@@ -79,35 +79,37 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events, setOff}, {
   hideTooltips = []
   Object.keys(fields).forEach (labelText) ->
     if labelText in ['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟', 'مدت زمانی که بیمه بوده‌اید؟']
-      return
-    field = fields[labelText]
+      return#######################
     label = labels[labelText]
-    input = field.input || field
-    error = hideTooltip = undefined
+    field = fields[labelText]
+    error = registerErrorField label, field
     unless labelText is 'مقدار دستمزد'
-      setError labelText, 'تکمیل این فیلد الزامیست.'
-    onEvent input, 'focus', ->
-      if error
-        h = tooltip input, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent input, ['input', 'pInput'], ->
-      setStyle [label, input], style.valid
-      hideTooltip?()
-    onEvent input, 'blur', ->
-      setTimeout (->
-        hideTooltip?()
-        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-          setStyle [label, input], style.invalid
-          setError labelText, error = 'تکمیل این فیلد الزامیست.'
+      setError error, 'تکمیل این فیلد الزامیست.', true
+    if labelText is 'مقدار دستمزد'
+      incomeError = error
+    if field.onChange
+      field.onChange ->
+        setData labelText, field.value()
+      onEvent field.input, 'input', ->
+        setError error, 'تکمیل این فیلد الزامیست.', true
+      onEvent field.input, 'blur', ->
+        setTimeout ->
+          if !field.value()?
+            setError error, 'تکمیل این فیلد الزامیست.'
+          else
+            setError error, null
+    else
+      input = field.input || field
+      onEvent input, 'input', ->
+        setData labelText, field.value()
+      handleChange = (hidden) -> ->
+        if !field.value().trim()
+          setError error, 'تکمیل این فیلد الزامیست.', hidden
         else if field.valid? && !field.valid()
-          setStyle [label, input], style.invalid
-          setError labelText, error = 'مقدار وارد شده قابل قبول نیست.'
+          setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
         else
-          setError labelText, error = null
-      ), 100
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
+          setError error, null
+      onEvent input, 'input', handleChange true
+      onEvent input, 'blur', handleChange false
 
   view

@@ -1,6 +1,5 @@
 component = require '../../../../utils/component'
 style = require './style'
-tooltip = require '../../../../components/tooltip'
 radioSwitch = require '../../../../components/radioSwitch'
 dateInput = require '../../../../components/dateInput'
 dropdown = require '../../../../components/dropdown'
@@ -11,7 +10,7 @@ checkbox = require '../../../../components/checkbox'
 multivalue = require './multivalue'
 {extend, remove, defer, toPersian} = require '../../../../utils'
 
-module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, setOff}, {setData, setError}) ->
+module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {setData, registerErrorField, setError}) ->
   {E, text, setStyle, show, hide} = dom
   {onEvent} = events
 
@@ -77,85 +76,34 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
 
   addTextField 1, 'نام معرف'
 
+  handleMultivalue = (fieldName, label, f) ->
+    error = registerErrorField label, f, true
+    onEvent f.input, 'input', ->
+      setError error, null
+    f.onChange (adding) ->
+      if adding
+        if !f.input.value()
+          setError error, 'تکمیل این فیلد الزامیست.'
+          return false
+        if !f.input.valid()
+          setError error, 'مقدار وارد شده قابل قبول نیست.'
+          return false
+      setTimeout ->
+        setData fieldName, f.value()
+
   f = E emailInput
   setStyle f, style.input
   state.user.on once: true, (user) ->
     fieldCollections[2]['ایمیل'] = f = E multivalue, input: f, initialItems: [user.email]
-  do (f) -> setTimeout ->
-    label = labelArrays[2][0]
-    input = f.input
-    error = hideTooltip = undefined
-    onEvent input, 'focus', ->
-      if error
-        h = tooltip input, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent input, ['input', 'pInput'], ->
-      setStyle [label, input], style.valid
-      error = null
-      hideTooltip?()
-    onEvent input, 'blur', ->
-      setTimeout (->
-        hideTooltip?()
-      ), 100
-    f.onChange (adding) ->
-      if !adding && f.value().length is 1
-        setData 'ایمیل', null
-        setError 'ایمیل', 'تکمیل این فیلد الزامیست.'
-      else
-        setData 'ایمیل', f.value()
-        setError 'ایمیل', null
-      unless adding
-        return
-      if !input.value()
-        error = 'تکمیل این فیلد الزامیست.'
-        setStyle [input, label], style.invalid
-        return false
-      if !input.valid()
-        error = 'مقدار وارد شده قابل قبول نیست.'
-        setStyle [input, label], style.invalid
-        return false
+    do (f) -> setTimeout ->
+      handleMultivalue 'ایمیل', labelArrays[2][0], f
 
   f = E phoneNumberInput
   setStyle f, style.input
   state.user.on once: true, (user) ->
     fieldCollections[2]['تلفن همراه'] = f = E multivalue, input: f, initialItems: [toPersian user.phoneNumber]
-  do (f) -> setTimeout ->
-    label = labelArrays[2][1]
-    input = f.input
-    error = hideTooltip = undefined
-    onEvent input, 'focus', ->
-      if error
-        h = tooltip input, error
-        hideTooltips.push hideTooltip = ->
-          h()
-          remove hideTooltips, hideTooltip
-    onEvent input, ['input', 'pInput'], ->
-      setStyle [label, input], style.valid
-      error = null
-      hideTooltip?()
-    onEvent input, 'blur', ->
-      setTimeout (->
-        hideTooltip?()
-      ), 100
-    f.onChange (adding) ->
-      if !adding && f.value().length is 1
-        setData 'تلفن همراه', null
-        setError 'تلفن همراه', 'تکمیل این فیلد الزامیست.'
-      else
-        setData 'تلفن همراه', f.value()
-        setError 'تلفن همراه', null
-      unless adding
-        return
-      if !input.value()
-        error = 'تکمیل این فیلد الزامیست.'
-        setStyle [input, label], style.invalid
-        return false
-      if !input.valid()
-        error = 'مقدار وارد شده قابل قبول نیست.'
-        setStyle [input, label], style.invalid
-        return false
+    do (f) -> setTimeout ->
+      handleMultivalue 'تلفن همراه', labelArrays[2][1], f
 
   textArrays = []
   groupArrays = []
@@ -191,30 +139,23 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       hide phone2 = E numberInput
   ]
 
+  onEvent address, 'input', ->
+    setData 'آدرس محل سکونت دائم', address.value()
+  onEvent phone, 'input', ->
+    setData 'تلفن ثابت محل سکونت دائم', phone.value()
+  onEvent address2, 'input', ->
+    setData 'آدرس محل سکونت فعلی', address2.value()
+  onEvent phone2, 'input', ->
+    setData 'تلفن ثابت محل سکونت فعلی', phone2.value()
+
   setStyle phone, extend {placeholder: 'تلفن تماس - 02185585558'}, style.phoneNumber
   setStyle phone2, extend {placeholder: 'تلفن تماس محل سکونت'}, style.phoneNumber
 
-  textArrays.push ['آدرس', 'تلفن ثابت', 'آدرس 2', 'تلفن ثابت 2']
-  labelArrays.push [E(), E(), E(), E()]
+  textArrays.push ['آدرس محل سکونت دائم', 'تلفن ثابت محل سکونت دائم', 'آدرس محل سکونت فعلی', 'تلفن ثابت محل سکونت فعلی']
+  labelArrays.push [address, phone, address2, phone2]
   fieldArrays.push [address, phone, address2, phone2]
 
-  address2Checkbox.onChange ->
-    if address2Checkbox.value()
-      show [address2, phone2]
-      setData 'آدرس 2', address2.value()
-      setData 'تلفن ثابت 2', phone2.value()
-      unless address2.value()
-        setError 'آدرس 2', 'تکمیل این فیلد الزامیست.'
-      unless phone2.value()
-        setError 'تلفن ثابت 2', 'تکمیل این فیلد الزامیست.'
-    else
-      hide [address2, phone2]
-      setData 'آدرس 2', null
-      setData 'تلفن ثابت 2', null
-      setError 'آدرس 2', null
-      setError 'تلفن ثابت 2', null
-
-  hideTooltips = []
+  errors = {}
   fieldArrays.forEach (fieldArray, i) ->
     textArray = textArrays[i]
     labelArray = labelArrays[i]
@@ -227,53 +168,77 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
         return
       labelText = textArray[j]
       label = labelArray[j]
-      input = field.input || field
-      error = hideTooltip = undefined
+      error = registerErrorField label, field
       unless (i is 1 && j in [1, 2]) || (i is 3 && j in [2, 3])
-        setError labelText, 'تکمیل این فیلد الزامیست.'
-      onEvent input, 'focus', ->
-        if error
-          h = tooltip input, error
-          hideTooltips.push hideTooltip = ->
-            h()
-            remove hideTooltips, hideTooltip
-      onEvent input, ['input', 'pInput'], ->
-        setStyle [label, input], style.valid
-        hideTooltip?()
-        if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-          setError labelText, error = 'تکمیل این فیلد الزامیست.'
-        else if field.valid? && !field.valid()
-          setError labelText, error = 'مقدار وارد شده قابل قبول نیست.'
-        else
-          setError labelText, error = null
-      onEvent input, 'blur', ->
-        setTimeout (->
-          hideTooltip?()
-          if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
-            setStyle [label, input], style.invalid
+        setError error, 'تکمیل این فیلد الزامیست.', true
+      if i is 1
+        if j is 0
+          errors['وضعیت نظام وظیفه'] = error
+        if j is 1
+          errors['نوع معافیت'] = error
+        if j is 2
+          errors['دلیل معافیت'] = error
+        if j is 4
+          errors['تعداد فرزندان'] = error
+      if i is 3
+        if j is 2
+          errors['آدرس محل سکونت فعلی'] = error
+        if j is 3
+          errors['تلفن ثابت محل سکونت فعلی'] = error
+      if field.onChange
+        onEvent field.input, 'input', ->
+          setError error, 'تکمیل این فیلد الزامیست.', true
+        onEvent field.input, 'blur', ->
+          setTimeout ->
+            if !field.value()?
+              setError error, 'تکمیل این فیلد الزامیست.'
+            else
+              setError error, null
+      else
+        input = field.input || field
+        handleChange = (hidden) -> ->
+          if !field.value().trim()
+            setError error, 'تکمیل این فیلد الزامیست.', hidden
           else if field.valid? && !field.valid()
-            setStyle [label, input], style.invalid
-        ), 100
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
+            setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
+          else
+            setError error, null
+        onEvent input, 'input', handleChange true
+        onEvent input, 'blur', handleChange false
+
+  address2Checkbox.onChange ->
+    if address2Checkbox.value()
+      show [address2, phone2]
+      setData 'آدرس محل سکونت فعلی', address2.value()
+      setData 'تلفن ثابت محل سکونت فعلی', phone2.value()
+      unless address2.value()
+        setError errors['آدرس محل سکونت فعلی'], 'تکمیل این فیلد الزامیست.', true
+      unless phone2.value()
+        setError errors['تلفن ثابت محل سکونت فعلی'], 'تکمیل این فیلد الزامیست.', true
+    else
+      hide [address2, phone2]
+      setData 'آدرس محل سکونت فعلی', null
+      setData 'تلفن ثابت محل سکونت فعلی', null
+      setError errors['آدرس محل سکونت فعلی'], null
+      setError errors['تلفن ثابت محل سکونت فعلی'], null
 
   fieldCollections[1]['وضعیت تاهل'].onChange ->
     if fieldCollections[1]['وضعیت تاهل'].value() isnt 'مجرد'
       show groupArrays[1][4]
       setData 'تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value()
       unless fieldCollections[1]['تعداد فرزندان'].value()
-        setError 'تعداد فرزندان', 'تکمیل این فیلد الزامیست.'
+        setError errors['تعداد فرزندان'], 'تکمیل این فیلد الزامیست.', true
     else
       hide groupArrays[1][4]
       setData 'تعداد فرزندان', null
-      setError 'تعداد فرزندان', null
+      setError errors['تعداد فرزندان'], null
 
   fieldCollections[0]['جنسیت'].onChange ->
     if fieldCollections[0]['جنسیت'].value() is 'مرد'
       show groupArrays[1][0]
       setData 'وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value()
       unless fieldCollections[1]['وضعیت نظام وظیفه'].value()
-        setError 'وضعیت نظام وظیفه', 'تکمیل این فیلد الزامیست.'
+        setError errors['وضعیت نظام وظیفه'], 'تکمیل این فیلد الزامیست.', true
       manageMoaf()
     else
       hide groupArrays[1][0]
@@ -282,35 +247,35 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state, se
       setData 'وضعیت نظام وظیفه', null
       setData 'نوع معافیت', null
       setData 'دلیل معافیت', null
-      setError 'وضعیت نظام وظیفه', null
-      setError 'نوع معافیت', null
-      setError 'دلیل معافیت', null
+      setError errors['وضعیت نظام وظیفه'], null
+      setError errors['نوع معافیت'], null
+      setError errors['دلیل معافیت'], null
 
   do manageMoaf = ->
     if fieldCollections[1]['وضعیت نظام وظیفه'].value() is 'معاف'
       show groupArrays[1][1]
       setData 'نوع معافیت', fieldCollections[1]['نوع معافیت'].value()
       unless fieldCollections[1]['نوع معافیت'].value()
-        setError 'نوع معافیت', 'تکمیل این فیلد الزامیست.'
+        setError errors['نوع معافیت'], 'تکمیل این فیلد الزامیست.', true
       manageDalil()
     else
       hide groupArrays[1][1]
       hide groupArrays[1][2]
       setData 'نوع معافیت', null
       setData 'دلیل معافیت', null
-      setError 'نوع معافیت', null
-      setError 'دلیل معافیت', null
+      setError errors['نوع معافیت'], null
+      setError errors['دلیل معافیت'], null
 
   manageDalil = ->
     if fieldCollections[1]['نوع معافیت'].value() is 'معافیت پزشکی'
       show groupArrays[1][2]
       setData 'دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value()
       unless fieldCollections[1]['دلیل معافیت'].value()
-        setError 'دلیل معافیت', 'تکمیل این فیلد الزامیست.'
+        setError errors['دلیل معافیت'], 'تکمیل این فیلد الزامیست.', true
     else
       hide groupArrays[1][2]
       setData 'دلیل معافیت', null
-      setError 'دلیل معافیت', null
+      setError errors['دلیل معافیت'], null
 
   fieldCollections[1]['وضعیت نظام وظیفه'].onChange manageMoaf
   fieldCollections[1]['نوع معافیت'].onChange manageDalil

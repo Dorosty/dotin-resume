@@ -2,20 +2,12 @@
 
 exports.clearfix =
   clear: 'both'
-  
-exports.valid =
-  color: '#5c5555'
-  borderColor: '#ccc'
-
-exports.invalid =
-  color: '#c00'
-  borderColor: '#c00'
-
 
 exports.th =
   padding: '10px 10px 0'
   color: '#5c5555'
   fontSize: 12
+  width: 200
 
 exports.td =
   padding: 10
@@ -23,6 +15,7 @@ exports.td =
   fontSize: 12
 
 exports.input =
+  width: 200
   fontSize: 12
   height: 30
   lineHeight: 30
@@ -44,6 +37,8 @@ icon =
 exports.add = extend {}, icon,
   class: 'fa fa-plus-circle'
   color: '#449e73'
+  top: 5
+  right: 10
 
 exports.remove = extend {}, icon,
   class: 'fa fa-minus-circle'

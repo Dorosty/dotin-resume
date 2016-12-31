@@ -19,16 +19,17 @@ module.exports = component 'applicantFormEnglish', ({dom, events}, {setData, reg
         label = E style.label, labelText
         field
 
-      errorId = registerErrorField label, field
+      error = registerErrorField label, field
 
-      setError errorId, 'تکمیل این فیلد الزامیست.', true
+      setError error, 'تکمیل این فیلد الزامیست.', true
+      onEvent field.input, 'input', ->
+        setError error, 'تکمیل این فیلد الزامیست.', true
       onEvent field.input, 'blur', ->
-        setTimeout (->
+        setTimeout ->
           unless field.value()
-            setError errorId, 'تکمیل این فیلد الزامیست.'
+            setError error, 'تکمیل این فیلد الزامیست.'
           else
-            setError errorId, null
-        ), 100
+            setError error, null
 
       column
 

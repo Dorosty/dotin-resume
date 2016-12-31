@@ -19,7 +19,7 @@ module.exports = component 'scrollViewer', ({dom, events, returnObject}) ->
         onEvent w, ['scroll', 'resize'], ->
 
           {scrollY, innerHeight} = w.fn.element
-          return if scrollY is prevScrollY and innerHeight is prevInnerHeight
+          return if scrollY is prevScrollY && innerHeight is prevInnerHeight
           prevScrollY = scrollY
           prevInnerHeight = innerHeight
 
@@ -47,7 +47,7 @@ module.exports = component 'scrollViewer', ({dom, events, returnObject}) ->
             else if state is 1
               b = i - 1
             else
-              break if i is 0 or viewState(elements[i - 1]) isnt 0
+              break if i is 0 || viewState(elements[i - 1]) isnt 0
               b = i
 
           setStyle elements, opacity: 0.5

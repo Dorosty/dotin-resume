@@ -39,7 +39,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
         nameInput = E 'input', style.input
         onEvent nameInput, 'input', -> changeListener?()
         isInSearch = ({firstName, lastName}) ->
-          not nameInput.value() or textIsInSearch "#{firstName} #{lastName}", nameInput.value()
+          not nameInput.value() || textIsInSearch "#{firstName} #{lastName}", nameInput.value()
         nameInput
       when 1 then do ->
         dateDropdown = E dropdown, items: [0 .. 2], getTitle: (x) ->
@@ -80,7 +80,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
         jobsInput = E 'input', style.input
         onEvent jobsInput, 'input', -> changeListener?()
         isInSearch = ({selectedJobsString}) ->
-          not jobsInput.value() or textIsInSearch selectedJobsString.toLowerCase(), jobsInput.value()
+          not jobsInput.value() || textIsInSearch selectedJobsString.toLowerCase(), jobsInput.value()
         jobsInput
       when 3 then do ->
         stateDropdown = E dropdown, items: [0 .. 2], getTitle: (x) ->
