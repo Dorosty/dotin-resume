@@ -28,9 +28,8 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
   returnObject
     value: -> value
     set: (x) -> value = x
-    update: (_entities, reset) ->
-      if reset
-        value = null
+    reset: -> value = null
+    update: (_entities) ->
       highlightIndex = 0
       empty list
       entities = _entities
@@ -41,6 +40,8 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
           highlightCurrentItem()
         onEvent item, 'mouseout', ->
           setStyle item, style.item
+        onEvent item, 'mousedown', (e) ->
+          e.preventDefault()
         onEvent item, 'click', select
         item
       highlightCurrentItem()

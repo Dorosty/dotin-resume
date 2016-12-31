@@ -32,7 +32,7 @@ module.exports = component 'applicantFormOthersPart2', ({dom, events}, {setData,
   y1Error = registerErrorField y1, y1
 
   handleY0 = (hidden) ->
-    setData 'نوع آن را ذکر نمایید.', y0.value()
+    setData 'نوع آن را ذکر نمایید', y0.value()
     if y0.value().trim()
       setError y0Error, null
     else
@@ -53,7 +53,7 @@ module.exports = component 'applicantFormOthersPart2', ({dom, events}, {setData,
     handleY0 false
 
   handleY1 = (hidden) ->
-    setData 'تاریخ، دلایل و مدت آن را توضیح دهید.', y1.value()
+    setData 'تاریخ، دلایل و مدت آن را توضیح دهید', y1.value()
     if y1.value().trim()
       setError y1Error, null
     else

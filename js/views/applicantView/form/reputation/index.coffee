@@ -5,13 +5,9 @@ dropdown = require '../../../../components/dropdown'
 style = require './style'
 {extend, remove, monthToString, toEnglish} = require '../../../../utils'
 
-module.exports = component 'applicantFormReputation', ({dom, events, setOff}, {setData, registerErrorField, setError}) ->
+module.exports = component 'applicantFormReputation', ({dom, events}, {setData, registerErrorField, setError}) ->
   {E, setStyle, text, append, destroy} = dom
   {onEvent} = events
-
-  hideTooltips = []
-  setOff ->
-    hideTooltips.forEach (hideTooltip) -> hideTooltip()
 
   jobs = []
 

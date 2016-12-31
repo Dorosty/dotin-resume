@@ -2,6 +2,7 @@ component = require '../../utils/component'
 style = require './style'
 list = require './list'
 {toPersian} = require '../../utils'
+{window} = require '../../utils/dom'
 
 module.exports = component 'actionButton', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex}) ->
   {E, setStyle} = dom
@@ -49,7 +50,11 @@ module.exports = component 'actionButton', ({dom, events, returnObject}, {getId,
     itemsList.show()
 
   onEvent button, 'click', ->
+    itemsList.hide()
     selectListeners.forEach (x) -> x itemsList.value() || items[selectedIndex]
+
+  onEvent E(window), 'click', actionButton, ->
+    itemsList.hide()
 
   returnObject
     onSelect: (listener) -> selectListeners.push listener

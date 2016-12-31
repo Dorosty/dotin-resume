@@ -4,6 +4,7 @@ login = require './login'
 hrView = require './hrView'
 managerView = require './managerView'
 applicantView = require './applicantView'
+printView = require './printView'
 
 module.exports = component 'views', ({dom, state}) ->
   {E, append, empty} = dom
@@ -11,22 +12,22 @@ module.exports = component 'views', ({dom, state}) ->
   wrapper = E()
 
   currentPage = undefined
-  state.user.on allowNull: true, (user) ->
-    
-    empty wrapper
+  if ~location.hash.indexOf '#print_'
+    append wrapper, E printView, +location.hash.slice '#print_'.length
+  else
+    state.user.on allowNull: true, (user) ->
+      empty wrapper
+      currentPage = if user
+        switch user.userType
+          when 3
+            applicantView
+          when 1
+            managerView
+          when 2
+            hrView
+      else
+        login
+      append wrapper, E currentPage
 
-    currentPage = if user
-      switch user.userType
-        when 3
-          applicantView
-        when 1
-          managerView
-        when 2
-          hrView
-    else
-      login
-    # currentPage = apply
-
-    append wrapper, E currentPage
 
   wrapper

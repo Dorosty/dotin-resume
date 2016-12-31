@@ -13,12 +13,12 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
   fields = {}
   incomeError = undefined
 
-  fields['متقاضه چه نوع همکاری هستید؟'] = f = E dropdown, items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
+  fields['متقاضی چه نوع همکاری هستید'] = f = E dropdown, items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
   setStyle f, style.dropdownPlaceholder
   setStyle f.input, style.dropdown
 
   f0 = E null, do ->
-    fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = x = E dropdown, items: ['نمایشگاه/همایش/کنفرانس', 'آگهی', 'سایت داتین', 'دوستان و همکاران', 'سایر']
+    fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] = x = E dropdown, items: ['نمایشگاه/همایش/کنفرانس', 'آگهی', 'سایت داتین', 'دوستان و همکاران', 'سایر']
     setStyle x, style.dropdownPlaceholder
     setStyle x.input, style.dropdown
     hide y = E 'input', extend {placeholder: 'توضیحات...'}, style.descriptionInput
@@ -29,7 +29,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
         hide y
     [x, y]
 
-  fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = f = E dateInput
+  fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] = f = E dateInput
   setStyle f, style.dateInputPlaceholder
   setStyle f.input, style.dateInput
 
@@ -54,21 +54,21 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
 
   view = E null,
     E style.column,
-      labels['متقاضه چه نوع همکاری هستید؟'] = E style.label, 'متقاضه چه نوع همکاری هستید؟'
-      fields['متقاضه چه نوع همکاری هستید؟']
-      labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'] = E style.label, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'
+      labels['متقاضی چه نوع همکاری هستید'] = E style.label, 'متقاضی چه نوع همکاری هستید؟'
+      fields['متقاضی چه نوع همکاری هستید']
+      labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] = E style.label, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'
       f0
-      labels['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'] = E style.label, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'
-      fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟']
+      labels['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] = E style.label, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'
+      fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']
     E style.column,
       E style.label,
-        labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E 'span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'
+        labels['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] = E 'span', null, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'
         E style.optional, '(اختیاری)'
-      fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'] = E 'input', style.input
+      fields['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] = E 'input', style.input
       E style.label,
-        labels['مدت زمانی که بیمه بوده‌اید؟'] = E 'span', null, 'مدت زمانی که بیمه بوده‌اید؟'
+        labels['مدت زمانی که بیمه بوده‌اید'] = E 'span', null, 'مدت زمانی که بیمه بوده‌اید؟'
         E style.optional, '(اختیاری)'
-      fields['مدت زمانی که بیمه بوده‌اید؟'] = E 'input', style.input
+      fields['مدت زمانی که بیمه بوده‌اید'] = E 'input', style.input
       labels['میزان دستمزد'] = E style.label,
         text 'میزان دستمزد '
         E style.underline, 'خالص'
@@ -77,19 +77,26 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
     E style.clearfix
 
   hideTooltips = []
-  Object.keys(fields).forEach (labelText) ->
-    if labelText in ['نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟', 'مدت زمانی که بیمه بوده‌اید؟']
-      return#######################
-    label = labels[labelText]
-    field = fields[labelText]
+  Object.keys(fields).forEach (fieldName) ->
+    label = labels[fieldName]
+    field = fields[fieldName]
+    if fieldName in ['نوع بیمه‌ای که تا‌به‌حال داشته‌اید', 'مدت زمانی که بیمه بوده‌اید']
+      if field.onChange
+        field.onChange ->
+          setData fieldName, field.value()
+      else
+        input = field.input || field
+        onEvent input, 'input', ->
+          setData fieldName, field.value()
+      return
     error = registerErrorField label, field
-    unless labelText is 'مقدار دستمزد'
+    unless fieldName is 'مقدار دستمزد'
       setError error, 'تکمیل این فیلد الزامیست.', true
-    if labelText is 'مقدار دستمزد'
+    if fieldName is 'مقدار دستمزد'
       incomeError = error
     if field.onChange
       field.onChange ->
-        setData labelText, field.value()
+        setData fieldName, field.value()
       onEvent field.input, 'input', ->
         setError error, 'تکمیل این فیلد الزامیست.', true
       onEvent field.input, 'blur', ->
@@ -101,7 +108,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
     else
       input = field.input || field
       onEvent input, 'input', ->
-        setData labelText, field.value()
+        setData fieldName, field.value()
       handleChange = (hidden) -> ->
         if !field.value().trim()
           setError error, 'تکمیل این فیلد الزامیست.', hidden

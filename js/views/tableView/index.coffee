@@ -8,7 +8,7 @@ actionButton = require '../../components/actionButton'
 {stateToPersian} = require '../../utils/logic'
 
 module.exports = component 'tableView', ({dom, events, state, service}) ->
-  {E, text, setStyle, append, empty} = dom
+  {E, text, setStyle, append, empty, hide} = dom
   {onEvent} = events
 
   selectedApplicants = []
@@ -17,7 +17,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     E sidebar
     E style.contents,
       E style.action,
-        actionButtonInstance = E actionButton, items: ['ایجاد حساب کاربری', 'چاپ']
+        actionButtonInstance = E actionButton, items: ['دعوت به مصاحبه', 'چاپ']
       searchInstance = E search
       tableInstance = E table,
         entityId: 'userId'
@@ -73,16 +73,22 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             selectedApplicants = descriptors.filter(({selected}) -> selected).map ({entity}) -> entity
           select: (applicant) ->
 
+  ######################
+  state.user.on once: true, (user) ->
+    if user.userType isnt 2
+      hide actionButtonInstance
+  ######################
+
   actionButtonInstance.onSelect (value) ->
     unless selectedApplicants.length is 1
       alert 'لطفا یک سطر را انتخاب کنید'
       return
     selectedApplicant = selectedApplicants[0]
     switch value
-      when 'ایجاد حساب کاربری'
-        console.log 1
+      when 'دعوت به مصاحبه'
+        console.log 1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
       when 'چاپ'
-        console.log 2
+        window.open '#print_' + selectedApplicant.userId, '_blank'
 
   applicants = []
   update = ->

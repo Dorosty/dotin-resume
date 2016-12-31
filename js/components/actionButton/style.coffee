@@ -2,6 +2,7 @@ exports.actionButton =
   position: 'relative'
   
 exports.button =
+  width: 130
   display: 'inline-block'
   height: 30
   lineHeight: 30
@@ -10,7 +11,6 @@ exports.button =
   border: '1px solid #ddd'
   cursor: 'pointer'
   borderRadius: '0 3px 3px 0'
-  textAlign: 'center'
   color: '#777'
   transition: '0.2s'
   backgroundColor: '#f5f5f5'

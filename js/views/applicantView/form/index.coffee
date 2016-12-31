@@ -34,7 +34,6 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
       delete data[category][key]
       unless Object.keys(data[category]).length
         delete data[category]
-    ['############'].concat(JSON.stringify(data, null, '  ').split('\n')).forEach (x) -> console.log x
     ##################
     # setTimeout ->
     #   window.x = data
