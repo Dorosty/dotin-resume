@@ -144,13 +144,12 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
         setStyle submit, text: 'در حال ثبت...'
         setStyle submit, style.submitSubmitting
         submitting = true
-        state.user.on once: true, (user) ->
-          service.submitProfileData user.userId, data
-          .fin ->
-            setStyle submit, style.submitSubmitting
-            submitting = false
-            setStyle cover, style.cover
-            setStyle submit, text: 'ثبت نهایی اطلاعات'
+        service.submitProfileData data
+        .fin ->
+          setStyle submit, style.submitSubmitting
+          submitting = false
+          setStyle cover, style.cover
+          setStyle submit, text: 'ثبت نهایی اطلاعات'
     )
 
   state.user.on (user) ->

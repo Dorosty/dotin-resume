@@ -14,7 +14,10 @@ module.exports = (isGet, serviceName, params = {}) ->
     xhr.onreadystatechange = ->
       if xhr.readyState is 4
         if xhr.status is 200
-          resolve JSON.parse xhr.responseText
+          response = xhr.responseText
+          try
+            response = JSON.parse xhr.responseText
+          resolve response
         else
           reject xhr.responseText
     methodType = if isGet then 'GET' else 'POST'

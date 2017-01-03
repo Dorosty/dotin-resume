@@ -2,7 +2,6 @@ component = require '../../../utils/component'
 style = require './style'
 criterion = require './criterion'
 {remove, textIsInSearch} = require '../../../utils'
-{stateToPersian} = require '../../../utils/logic'
 
 module.exports = component 'search', ({dom, events, returnObject}) ->
   {E, empty, append, setStyle, enable, disable} = dom

@@ -20,11 +20,23 @@ exports.logout = (automatic = false) ->
     stateChangingServices.logout.endedAt = +new Date()
   Q()
 
-exports.submitProfileData = (userId, data) ->
-  post 'submitProfileData', {userId, data: JSON.stringify data}
+exports.submitProfileData = (data) ->
+  post 'submitProfileData', data: JSON.stringify data
   .then ->
     state.user.on once: true, (user) ->
       state.user.set extend {}, user, applicantData: data
+
+exports.changeHRStatus = (applicantId, status) ->
+  post 'changeHRStatus', {applicantId, status}
+  .then ->
+    state.applicants.on once: true, (applicants) ->
+      [applicant] = applicants.filter ({userId}) -> userId is applicantId
+      {applicantsHRStatus} = applicant
+      applicants = applicants.slice()
+      applicantsHRStatus = applicantsHRStatus.slice()
+      applicantsHRStatus.push {status}
+      applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
+      state.applicants.set applicants
 
 gets.forEach (x) ->
   exports[x] = (params) ->

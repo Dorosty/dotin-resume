@@ -1,9 +1,10 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
 
 applicants = [{
+  applicantsHRStatus: []
   userId: 0
   identificationCode: '0016503368'
   firstName: 'علی'
@@ -16,8 +17,8 @@ applicants = [{
   personalPic: null
   modificationTime: 1473132854116
   notes: []
-  state: 0
 }, {
+  applicantsHRStatus: []
   userId: 1
   identificationCode: '0016503368'
   firstName: 'سعید'
@@ -30,15 +31,15 @@ applicants = [{
   personalPic: null
   modificationTime: 1373132854116
   notes: ['aaaaaaaaaaaa']
-  state: 1
 }]
 
 user =
+  applicantsHRStatus: []
   identificationCode: '0016503368'
   personalPic: null
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 3
+  userType: 2
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
@@ -47,7 +48,6 @@ user =
   notes: []
   selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
   resume: null
-  state: 0
   applicantData: {
     "مشخصات فردی": {
       "جنسیت": "مرد",
@@ -226,7 +226,11 @@ exports.getCaptcha = ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then -> '12*x=48'
 
-exports.submitProfileData = ({userId, data}) ->
+exports.submitProfileData = ({data}) ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then ->
     user = extend {}, user, applicantData: data
+
+exports.changeHRStatus = ->
+  Q.delay 1000 + 2000 * Math.floor Math.random()
+  .then -> {}

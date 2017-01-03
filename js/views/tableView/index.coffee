@@ -5,7 +5,7 @@ table = require './table'
 search = require './search'
 actionButton = require '../../components/actionButton'
 {extend, toDate} = require '../../utils'
-{stateToPersian} = require '../../utils/logic'
+{getApplicantStatus} = require '../../utils/logic'
 
 module.exports = component 'tableView', ({dom, events, state, service}) ->
   {E, text, setStyle, append, empty, hide} = dom
@@ -46,7 +46,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           }
           {
             name: 'وضعیت'
-            getValue: ({state}) -> 'ثبت شده'#stateToPersian state
+            getValue: getApplicantStatus
           }
           {
             name: 'یادداشت'
@@ -86,7 +86,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     selectedApplicant = selectedApplicants[0]
     switch value
       when 'دعوت به مصاحبه'
-        console.log 1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+        service.changeHRStatus selectedApplicant.userId, 0
       when 'چاپ'
         window.open '#print_' + selectedApplicant.userId, '_blank'
 

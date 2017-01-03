@@ -4745,26 +4745,35 @@ exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
 
-exports.stateToPersian = function(state) {
-  switch (state) {
-    case 0:
-      return 'ثبت شده';
-    case 1:
-      return 'تایید اولیه توسط مدیر';
-    case 2:
-      return 'مصاحبه تلفنی انجام شده';
-    case 3:
-      return 'اطلاعات تکمیل شده';
-    case 4:
-      return 'آزمون‌های شخصیت‌شناسی داده شده';
-    case 5:
-      return 'مصاحبه فنی برگزار شده';
-    case 6:
-      return 'کمیته جذب برگزار شده';
-    case 7:
-      return 'جذب شده';
-    case 8:
-      return 'بایگانی';
+exports.getApplicantStatus = function(arg) {
+  var applicantData, applicantsHRStatus;
+  applicantsHRStatus = arg.applicantsHRStatus, applicantData = arg.applicantData;
+  if (applicantsHRStatus.length) {
+    switch (applicantsHRStatus[applicantsHRStatus.length - 1].status) {
+      case -1:
+        return 'بایگانی';
+      case 0:
+        if (applicantData) {
+          return 'اطلاعات تکمیل شده';
+        } else {
+          return 'در انتظار تکمیل اطلاعات';
+        }
+        break;
+      case 1:
+        return 'در انتظار مصاحبه تلفنی';
+      case 2:
+        return 'در انتظار مصاحبه فنی';
+      case 3:
+        return 'در انتظار مصاحبه عمومی';
+      case 4:
+        return 'در انتظار تصمیم‌گیری';
+      case 5:
+        return 'مراحل اداری ';
+      case 6:
+        return 'جذب شده';
+    }
+  } else {
+    return 'ثبت شده';
   }
 };
 
@@ -4794,9 +4803,14 @@ module.exports = function(isGet, serviceName, params) {
     var methodType, xhr;
     xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
+      var response;
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          return resolve(JSON.parse(xhr.responseText));
+          response = xhr.responseText;
+          try {
+            response = JSON.parse(xhr.responseText);
+          } catch (undefined) {}
+          return resolve(response);
         } else {
           return reject(xhr.responseText);
         }
@@ -4851,9 +4865,8 @@ exports.logout = function(automatic) {
   return Q();
 };
 
-exports.submitProfileData = function(userId, data) {
+exports.submitProfileData = function(data) {
   return post('submitProfileData', {
-    userId: userId,
     data: JSON.stringify(data)
   }).then(function() {
     return state.user.on({
@@ -4862,6 +4875,34 @@ exports.submitProfileData = function(userId, data) {
       return state.user.set(extend({}, user, {
         applicantData: data
       }));
+    });
+  });
+};
+
+exports.changeHRStatus = function(applicantId, status) {
+  return post('changeHRStatus', {
+    applicantId: applicantId,
+    status: status
+  }).then(function() {
+    return state.applicants.on({
+      once: true
+    }, function(applicants) {
+      var applicant, applicantsHRStatus;
+      applicant = applicants.filter(function(arg) {
+        var userId;
+        userId = arg.userId;
+        return userId === applicantId;
+      })[0];
+      applicantsHRStatus = applicant.applicantsHRStatus;
+      applicants = applicants.slice();
+      applicantsHRStatus = applicantsHRStatus.slice();
+      applicantsHRStatus.push({
+        status: status
+      });
+      applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
+        applicantsHRStatus: applicantsHRStatus
+      });
+      return state.applicants.set(applicants);
     });
   });
 };
@@ -4977,7 +5018,7 @@ handle = function(isGet) {
       throw ex;
     }).then(function(response) {
       var ref1, ref2;
-      if (response == null) {
+      if (!((response != null) && typeof response === 'object')) {
         response = {};
       }
       if ((ref1 = stateChangingServices[serviceName]) != null) {
@@ -5087,12 +5128,15 @@ exports.autoPing = function() {
 },{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
 var Q, applicants, extend, user;
 
+return;
+
 Q = require('../../q');
 
 extend = require('../../utils').extend;
 
 applicants = [
   {
+    applicantsHRStatus: [],
     userId: 0,
     identificationCode: '0016503368',
     firstName: 'علی',
@@ -5110,9 +5154,9 @@ applicants = [
     resume: null,
     personalPic: null,
     modificationTime: 1473132854116,
-    notes: [],
-    state: 0
+    notes: []
   }, {
+    applicantsHRStatus: [],
     userId: 1,
     identificationCode: '0016503368',
     firstName: 'سعید',
@@ -5128,17 +5172,17 @@ applicants = [
     resume: null,
     personalPic: null,
     modificationTime: 1373132854116,
-    notes: ['aaaaaaaaaaaa'],
-    state: 1
+    notes: ['aaaaaaaaaaaa']
   }
 ];
 
 user = {
+  applicantsHRStatus: [],
   identificationCode: '0016503368',
   personalPic: null,
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 3,
+  userType: 2,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -5153,7 +5197,6 @@ user = {
     }
   ],
   resume: null,
-  state: 0,
   applicantData: {
     "مشخصات فردی": {
       "جنسیت": "مرد",
@@ -5359,12 +5402,18 @@ exports.getCaptcha = function() {
 };
 
 exports.submitProfileData = function(arg) {
-  var data, userId;
-  userId = arg.userId, data = arg.data;
+  var data;
+  data = arg.data;
   return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
     return user = extend({}, user, {
       applicantData: data
     });
+  });
+};
+
+exports.changeHRStatus = function() {
+  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+    return {};
   });
 };
 
@@ -5381,7 +5430,7 @@ exports.cruds = [
   }
 ];
 
-exports.others = ['logout', 'submitProfileData'];
+exports.others = ['logout', 'submitProfileData', 'changeHRStatus'];
 
 exports.states = ['user', 'applicants'];
 
@@ -6174,16 +6223,12 @@ module.exports = component('applicantForm', function(arg) {
         });
         setStyle(submit, style.submitSubmitting);
         submitting = true;
-        return state.user.on({
-          once: true
-        }, function(user) {
-          return service.submitProfileData(user.userId, data).fin(function() {
-            setStyle(submit, style.submitSubmitting);
-            submitting = false;
-            setStyle(cover, style.cover);
-            return setStyle(submit, {
-              text: 'ثبت نهایی اطلاعات'
-            });
+        return service.submitProfileData(data).fin(function() {
+          setStyle(submit, style.submitSubmitting);
+          submitting = false;
+          setStyle(cover, style.cover);
+          return setStyle(submit, {
+            text: 'ثبت نهایی اطلاعات'
           });
         });
       }
@@ -9596,7 +9641,7 @@ module.exports = component('views', function(arg, userId) {
 
 
 },{"../../utils":35,"../../utils/component":31}],88:[function(require,module,exports){
-var actionButton, component, extend, ref, search, sidebar, stateToPersian, style, table, toDate;
+var actionButton, component, extend, getApplicantStatus, ref, search, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
 
@@ -9612,7 +9657,7 @@ actionButton = require('../../components/actionButton');
 
 ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 
-stateToPersian = require('../../utils/logic').stateToPersian;
+getApplicantStatus = require('../../utils/logic').getApplicantStatus;
 
 module.exports = component('tableView', function(arg) {
   var E, actionButtonInstance, append, applicants, dom, empty, events, hide, onEvent, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
@@ -9668,11 +9713,7 @@ module.exports = component('tableView', function(arg) {
         }
       }, {
         name: 'وضعیت',
-        getValue: function(arg1) {
-          var state;
-          state = arg1.state;
-          return 'ثبت شده';
-        }
+        getValue: getApplicantStatus
       }, {
         name: 'یادداشت',
         width: 50,
@@ -9738,7 +9779,7 @@ module.exports = component('tableView', function(arg) {
     selectedApplicant = selectedApplicants[0];
     switch (value) {
       case 'دعوت به مصاحبه':
-        return console.log(1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111);
+        return service.changeHRStatus(selectedApplicant.userId, 0);
       case 'چاپ':
         return window.open('#print_' + selectedApplicant.userId, '_blank');
     }
@@ -10027,7 +10068,7 @@ exports.remove = {
 
 
 },{"../../../../utils":35}],91:[function(require,module,exports){
-var component, criterion, ref, remove, stateToPersian, style, textIsInSearch;
+var component, criterion, ref, remove, style, textIsInSearch;
 
 component = require('../../../utils/component');
 
@@ -10036,8 +10077,6 @@ style = require('./style');
 criterion = require('./criterion');
 
 ref = require('../../../utils'), remove = ref.remove, textIsInSearch = ref.textIsInSearch;
-
-stateToPersian = require('../../../utils/logic').stateToPersian;
 
 module.exports = component('search', function(arg) {
   var E, add, addCriterion, append, arrow, arrowBorder, criteria, criteriaPlaceholder, disable, dom, empty, enable, events, isActive, onChangeListener, onEvent, panel, returnObject, searchbox, setStyle, settings, view;
@@ -10134,7 +10173,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":35,"../../../utils/component":31,"../../../utils/logic":37,"./criterion":89,"./style":92}],92:[function(require,module,exports){
+},{"../../../utils":35,"../../../utils/component":31,"./criterion":89,"./style":92}],92:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;

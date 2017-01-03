@@ -1,22 +1,26 @@
 exports.passwordIsValid = (password) -> password.length >= 6
 
-exports.stateToPersian = (state) ->
-  switch state
-    when 0
-      'ثبت شده'
-    when 1
-      'تایید اولیه توسط مدیر'
-    when 2
-      'مصاحبه تلفنی انجام شده'
-    when 3
-      'اطلاعات تکمیل شده'
-    when 4
-      'آزمون‌های شخصیت‌شناسی داده شده'
-    when 5
-      'مصاحبه فنی برگزار شده'
-    when 6
-      'کمیته جذب برگزار شده'
-    when 7
-      'جذب شده'
-    when 8
-      'بایگانی'
+exports.getApplicantStatus = ({applicantsHRStatus, applicantData}) ->
+  if applicantsHRStatus.length
+    switch applicantsHRStatus[applicantsHRStatus.length - 1].status
+      when -1
+        'بایگانی'
+      when 0
+        if applicantData
+          'اطلاعات تکمیل شده'
+        else
+          'در انتظار تکمیل اطلاعات'
+      when 1
+        'در انتظار مصاحبه تلفنی'
+      when 2
+        'در انتظار مصاحبه فنی'
+      when 3
+        'در انتظار مصاحبه عمومی'
+      when 4
+        'در انتظار تصمیم‌گیری'
+      when 5
+        'مراحل اداری '
+      when 6
+        'جذب شده'
+  else
+    'ثبت شده'
