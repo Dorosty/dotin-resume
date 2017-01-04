@@ -4746,15 +4746,20 @@ exports.passwordIsValid = function(password) {
 };
 
 exports.getApplicantStatus = function(arg) {
-  var applicantData, applicantsHRStatus;
+  var applicantData, applicantsHRStatus, error;
   applicantsHRStatus = arg.applicantsHRStatus, applicantData = arg.applicantData;
   if (applicantsHRStatus.length) {
     switch (applicantsHRStatus[applicantsHRStatus.length - 1].status) {
       case -1:
         return 'بایگانی';
       case 0:
-        if (applicantData) {
-          return 'اطلاعات تکمیل شده';
+        if (applicantData && applicantData.trim()) {
+          try {
+            JSON.parse(applicantData);
+            return 'اطلاعات تکمیل شده';
+          } catch (error) {
+            return 'در انتظار تکمیل اطلاعات';
+          }
         } else {
           return 'در انتظار تکمیل اطلاعات';
         }
@@ -5199,7 +5204,7 @@ user = {
     }
   ],
   resume: null,
-  applicantData: {
+  applicantData: JSON.stringify({
     "مشخصات فردی": {
       "جنسیت": "مرد",
       "وضعیت تاهل": "سایر",
@@ -5324,7 +5329,7 @@ user = {
         }
       ]
     }
-  }
+  })
 };
 
 applicants.forEach(function(applicant) {
@@ -9606,6 +9611,7 @@ module.exports = component('views', function(arg, userId) {
       return applicant.userId === userId;
     })[0];
     applicantData = applicant.applicantData;
+    applicantData = JSON.parse(applicantData);
     birthdayString = applicant.birthday.split('/');
     birthdayString[1] = monthToString(birthdayString[1]);
     birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');

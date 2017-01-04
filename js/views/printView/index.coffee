@@ -9,6 +9,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
   state.applicants.on once: true, (applicants) ->
     [applicant] = applicants.filter (applicant) -> applicant.userId is userId
     {applicantData} = applicant
+    applicantData = JSON.parse applicantData
 
     birthdayString = applicant.birthday.split '/'
     birthdayString[1] = monthToString birthdayString[1]

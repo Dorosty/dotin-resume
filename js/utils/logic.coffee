@@ -6,8 +6,12 @@ exports.getApplicantStatus = ({applicantsHRStatus, applicantData}) ->
       when -1
         'بایگانی'
       when 0
-        if applicantData
-          'اطلاعات تکمیل شده'
+        if applicantData && applicantData.trim()
+          try
+            JSON.parse applicantData
+            'اطلاعات تکمیل شده'
+          catch
+            'در انتظار تکمیل اطلاعات'
         else
           'در انتظار تکمیل اطلاعات'
       when 1

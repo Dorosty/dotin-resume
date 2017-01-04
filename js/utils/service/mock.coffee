@@ -48,7 +48,7 @@ user =
   notes: []
   selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
   resume: null
-  applicantData: {
+  applicantData: JSON.stringify {
     "مشخصات فردی": {
       "جنسیت": "مرد",
       "وضعیت تاهل": "سایر",
