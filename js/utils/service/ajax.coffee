@@ -16,7 +16,7 @@ module.exports = (isGet, serviceName, params = {}) ->
         if xhr.status is 200
           response = xhr.responseText
           try
-            response = JSON.parse xhr.responseText
+            response = JSON.parse response
           resolve response
         else
           reject xhr.responseText

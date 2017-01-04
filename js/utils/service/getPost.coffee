@@ -15,7 +15,7 @@ handle = (isGet) -> (serviceName, params) ->
     throw ex
   .then (response) ->
     unless response? && typeof(response) is 'object'
-      response = {}
+      response = value: response
     stateChangingServices[serviceName]?.running = false
     stateChangingServices[serviceName]?.endedAt = +new Date()
     states.forEach (name) ->

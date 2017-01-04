@@ -38,7 +38,11 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           }
           {
             name: 'تاریخ ثبت'
-            getValue: ({modificationTime}) -> toDate modificationTime
+            width: 100
+            getValue: ({modificationTime}) ->
+              modificationTime
+            styleTd: ({modificationTime}, td) ->
+              setStyle td, text: toDate modificationTime
           }
           {
             name: 'شغل‌های درخواستی'

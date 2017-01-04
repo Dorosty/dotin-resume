@@ -4808,7 +4808,7 @@ module.exports = function(isGet, serviceName, params) {
         if (xhr.status === 200) {
           response = xhr.responseText;
           try {
-            response = JSON.parse(xhr.responseText);
+            response = JSON.parse(response);
           } catch (undefined) {}
           return resolve(response);
         } else {
@@ -5019,7 +5019,9 @@ handle = function(isGet) {
     }).then(function(response) {
       var ref1, ref2;
       if (!((response != null) && typeof response === 'object')) {
-        response = {};
+        response = {
+          value: response
+        };
       }
       if ((ref1 = stateChangingServices[serviceName]) != null) {
         ref1.running = false;
@@ -9695,10 +9697,18 @@ module.exports = component('tableView', function(arg) {
         }
       }, {
         name: 'تاریخ ثبت',
+        width: 100,
         getValue: function(arg1) {
           var modificationTime;
           modificationTime = arg1.modificationTime;
-          return toDate(modificationTime);
+          return modificationTime;
+        },
+        styleTd: function(arg1, td) {
+          var modificationTime;
+          modificationTime = arg1.modificationTime;
+          return setStyle(td, {
+            text: toDate(modificationTime)
+          });
         }
       }, {
         name: 'شغل‌های درخواستی',
