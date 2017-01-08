@@ -38,6 +38,11 @@ exports.changeHRStatus = (applicantId, status) ->
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
+exports.clearAllNotifications = ->
+  post 'clearAllNotifications'
+  .then ->
+    state.notifications.set []
+
 gets.forEach (x) ->
   exports[x] = (params) ->
     get x, params

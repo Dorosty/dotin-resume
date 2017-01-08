@@ -16,9 +16,11 @@ exports.others = [
   'logout'
   'submitProfileData'
   'changeHRStatus'
+  'clearAllNotifications'
 ]
 
 exports.states = [
   'user'
   'applicants'
+  'notifications'
 ]

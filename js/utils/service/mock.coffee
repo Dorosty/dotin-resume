@@ -183,10 +183,42 @@ user =
 applicants.forEach (applicant) ->
   extend applicant, applicantData: user.applicantData
 
-user.applicantData = null
+# user.applicantData = null
+
+notifications = [{
+  userName: 'علی فرخی'
+  userPersonalPic: null
+  action: 0
+  time: 1373132854116
+  applicantName: 'مسعود فرخی'
+  applicantResume: null
+}, {
+  userName: 'سجاد افشاریان'
+  userPersonalPic: null
+  action: 0
+  time: 1373132854116
+  applicantName: 'امیر شجاعی'
+  applicantResume: null
+}, {
+  userName: 'سجاد افشاریان'
+  userPersonalPic: null
+  action: 1
+  time: 1373132854116
+  applicantName: 'سمیه جلالی'
+  applicantResume: null
+}, {
+  userName: 'سجاد افشاریان'
+  userPersonalPic: null
+  action: 1
+  time: 1373132854116
+  applicantName: 'مهشید رسولی'
+  applicantResume: null
+}]
+
+notifications = [].concat.apply [], [1..10].map -> notifications
 
 exports.ping = ->
-  Q {user, applicants}
+  Q {user, applicants, notifications}
 
 exports.getUser = ->
   Q {user}
@@ -234,3 +266,9 @@ exports.submitProfileData = ({data}) ->
 exports.changeHRStatus = ->
   Q.delay 1000 + 2000 * Math.floor Math.random()
   .then -> {}
+
+exports.clearAllNotifications = ->
+  Q.delay 1000 + 2000 * Math.floor Math.random()
+  .then ->
+    notifications = []
+    {}

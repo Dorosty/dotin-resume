@@ -1,24 +1,56 @@
 component = require '../../../utils/component'
 style = require './style'
+{extend, toDate, toTime} = require '../../../utils'
+{actionToText, actionModifiable} = require '../../../utils/logic'
 
 module.exports = component 'sidebar', ({dom, state, events, service}) ->
-  {E, setStyle} = dom
+  {E, text, setStyle, empty, append} = dom
   {onEvent, onResize} = events
   
   view = E style.sidebar,
+    notifications = E style.notifications,
+      E style.notificationsHeader,
+        clearAllNotifications = E style.clearAllNotifications, 'پاک شدن همه'
+      notificationsPanel = E()
     E style.profile,
       profileImg = E 'img', style.profileImg
     name = E style.name
     position = E style.title
-    logout = E style.logout
-    E style.settings
-    E style.notifications
+    logout = E extend {class: 'fa fa-power-off'}, style.icon, marginRight: 30
+    E extend {class: 'fa fa-sliders'}, style.icon
+    notificationsIcon = E extend({class: 'fa fa-bell-o'}, style.icon),
+      notificationsBadge = E style.badge
     E style.divider
     E style.links
-      E style.linkActive, 'رزومه‌ها'
-      E style.link, 'تقویم'
-      E style.link, 'فرصت‌های شغلی'
-      E style.link, 'بایگانی'
+      links = [
+        E style.link,
+          E extend {class: 'fa fa-file-text-o'}, style.linkIcon
+          text 'رزومه‌ها'
+        E style.link,
+          E extend {class: 'fa fa-calendar'}, style.linkIcon
+          text 'تقویم'
+        E style.link,
+          E extend {class: 'fa fa-database'}, style.linkIcon
+          text 'فرصت‌های شغلی'
+        E style.link,
+          E extend {class: 'fa fa-folder'}, style.linkIcon
+          text 'بایگانی'
+      ]
+
+  linkIndex = 0
+  links.forEach (link, i) ->
+    if linkIndex is i
+      setStyle link, style.linkActive
+    onEvent link, 'click', ->
+      linkIndex = i
+      setStyle links, style.link
+      setStyle link, style.linkActive
+    onEvent link, 'mouseover', ->
+      unless linkIndex is i
+        setStyle link, style.linkHover
+    onEvent link, 'mouseout', ->
+      unless linkIndex is i
+        setStyle link, style.link
 
   resize = ->
     body = document.body
@@ -55,5 +87,44 @@ module.exports = component 'sidebar', ({dom, state, events, service}) ->
         user.position
       when 2
         'کارشناس واحد منابع انسانی'
+
+  state.notifications.on (notifications) ->
+    if notifications?.length
+      setStyle notificationsBadge, style.badgeActive
+      setStyle notificationsBadge, text: notifications.length
+    else
+      setStyle notificationsBadge, style.badge
+      setStyle notificationsBadge, text: ''
+    empty notificationsPanel
+    append notificationsPanel, notifications.map (notification) ->
+      notificationElement = E style.notification,
+        E 'img', extend {src: if notification.userPersonalPic then '/webApi/image?address=' + notification.userPersonalPic else 'assets/img/default-avatar-small.png'}, style.notificationPersonalPic
+        E style.notificationUserName, notification.userName
+        E style.notificationAction, actionToText notification.action
+        E style.notificationTime, "#{toDate notification.time} #{toTime notification.time}"
+        E 'a', extend({href: '/webApi/resume?address=' + notification.applicantResume}, style.notificationResume),
+          E style.notificationIcon
+          text notification.applicantName
+      onEvent notificationElement, 'mouseover', ->
+        setStyle notificationElement, style.notificationHover
+      onEvent notificationElement, 'mouseout', ->
+        setStyle notificationElement, style.notification
+      unless actionModifiable notification.action
+        setStyle notificationElement, style.notificationNotModifiable
+      notificationElement
+
+  notificationsActive = false
+  onEvent notificationsIcon, 'click', ->
+    notificationsActive = !notificationsActive
+    if notificationsActive
+      setStyle notificationsIcon, style.iconActive
+      setStyle notifications, style.notificationsActive
+    else
+      setStyle notificationsIcon, style.icon
+      setStyle notifications, style.notifications
+
+  onEvent clearAllNotifications, 'click', ->
+    state.notifications.set []
+    service.clearAllNotifications()
 
   view

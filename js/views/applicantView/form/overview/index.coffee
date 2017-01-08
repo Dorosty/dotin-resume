@@ -30,7 +30,7 @@ module.exports = component 'applicantFormOverview', ({dom, state}) ->
     birthdayString[1] = monthToString birthdayString[1]
     birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join ' '
 
-    setStyle profileImg, src: if user.personalPic then "/webApi/image?address=#{personalPic}" else 'assets/img/default-avatar-small.png'
+    setStyle profileImg, src: if user.personalPic then "/webApi/image?address=#{user.personalPic}" else 'assets/img/default-avatar-small.png'
     setStyle name, text: "#{user.firstName} #{user.lastName}"
     setStyle birthday, text: 'متولد ' + birthdayString
     setStyle identificationCode, text: 'کد ملی: ' + user.identificationCode

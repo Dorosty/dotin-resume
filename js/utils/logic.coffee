@@ -28,3 +28,18 @@ exports.getApplicantStatus = ({applicantsHRStatus, applicantData}) ->
         'جذب شده'
   else
     'ثبت شده'
+
+exports.actionToText = (action) ->
+  #############################################
+  switch action
+    when 0
+      'درخواست مصاحبه فنی'
+    when 1
+      'تغییر وضعیت به مصاحبه فنی'
+
+exports.actionModifiable = (action) ->
+  switch action
+    when 0
+      true
+    when 1
+      false

@@ -58,6 +58,12 @@ exports.toDate = (timestamp) ->
   year = j.jy
   "#{year}/#{month}/#{day}"
 
+exports.toTime = (timestamp) ->
+  date = new Date timestamp
+  hours = date.getHours()
+  minutes = date.getMinutes()
+  "#{hours}:#{minutes}"
+
 exports.toTimestamp = (dateString) ->
   dateString = exports.toEnglish dateString
   [year, month, day] = dateString.split '/'

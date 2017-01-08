@@ -4337,6 +4337,14 @@ exports.toDate = function(timestamp) {
   return year + "/" + month + "/" + day;
 };
 
+exports.toTime = function(timestamp) {
+  var date, hours, minutes;
+  date = new Date(timestamp);
+  hours = date.getHours();
+  minutes = date.getMinutes();
+  return hours + ":" + minutes;
+};
+
 exports.toTimestamp = function(dateString) {
   var day, g, month, ref, year;
   dateString = exports.toEnglish(dateString);
@@ -4782,6 +4790,24 @@ exports.getApplicantStatus = function(arg) {
   }
 };
 
+exports.actionToText = function(action) {
+  switch (action) {
+    case 0:
+      return 'درخواست مصاحبه فنی';
+    case 1:
+      return 'تغییر وضعیت به مصاحبه فنی';
+  }
+};
+
+exports.actionModifiable = function(action) {
+  switch (action) {
+    case 0:
+      return true;
+    case 1:
+      return false;
+  }
+};
+
 
 },{}],38:[function(require,module,exports){
 var Q, mock;
@@ -4909,6 +4935,12 @@ exports.changeHRStatus = function(applicantId, status) {
       });
       return state.applicants.set(applicants);
     });
+  });
+};
+
+exports.clearAllNotifications = function() {
+  return post('clearAllNotifications').then(function() {
+    return state.notifications.set([]);
   });
 };
 
@@ -5133,7 +5165,7 @@ exports.autoPing = function() {
 
 
 },{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
-var Q, applicants, extend, user;
+var Q, applicants, extend, notifications, user;
 
 return;
 
@@ -5338,12 +5370,47 @@ applicants.forEach(function(applicant) {
   });
 });
 
-user.applicantData = null;
+notifications = [
+  {
+    userName: 'علی فرخی',
+    userPersonalPic: null,
+    action: 0,
+    time: 1373132854116,
+    applicantName: 'مسعود فرخی',
+    applicantResume: null
+  }, {
+    userName: 'سجاد افشاریان',
+    userPersonalPic: null,
+    action: 0,
+    time: 1373132854116,
+    applicantName: 'امیر شجاعی',
+    applicantResume: null
+  }, {
+    userName: 'سجاد افشاریان',
+    userPersonalPic: null,
+    action: 1,
+    time: 1373132854116,
+    applicantName: 'سمیه جلالی',
+    applicantResume: null
+  }, {
+    userName: 'سجاد افشاریان',
+    userPersonalPic: null,
+    action: 1,
+    time: 1373132854116,
+    applicantName: 'مهشید رسولی',
+    applicantResume: null
+  }
+];
+
+notifications = [].concat.apply([], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function() {
+  return notifications;
+}));
 
 exports.ping = function() {
   return Q({
     user: user,
-    applicants: applicants
+    applicants: applicants,
+    notifications: notifications
   });
 };
 
@@ -5424,6 +5491,13 @@ exports.changeHRStatus = function() {
   });
 };
 
+exports.clearAllNotifications = function() {
+  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+    notifications = [];
+    return {};
+  });
+};
+
 
 },{"../../q":27,"../../utils":35}],43:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
@@ -5437,9 +5511,9 @@ exports.cruds = [
   }
 ];
 
-exports.others = ['logout', 'submitProfileData', 'changeHRStatus'];
+exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'clearAllNotifications'];
 
-exports.states = ['user', 'applicants'];
+exports.states = ['user', 'applicants', 'notifications'];
 
 
 },{}],44:[function(require,module,exports){
@@ -5455,6 +5529,9 @@ module.exports = {
   },
   login: {
     stateName: 'user'
+  },
+  clearAllNotifications: {
+    stateName: 'notifications'
   }
 };
 
@@ -5678,7 +5755,7 @@ exports.instance = function(thisComponent) {
 
 
 },{"../log":36,"./names":46}],46:[function(require,module,exports){
-module.exports = ['user', 'applicants'];
+module.exports = ['user', 'applicants', 'notifications'];
 
 
 },{}],47:[function(require,module,exports){
@@ -7169,7 +7246,7 @@ module.exports = component('applicantFormOverview', function(arg) {
     birthdayString[1] = monthToString(birthdayString[1]);
     birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');
     setStyle(profileImg, {
-      src: user.personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/default-avatar-small.png'
+      src: user.personalPic ? "/webApi/image?address=" + user.personalPic : 'assets/img/default-avatar-small.png'
     });
     setStyle(name, {
       text: user.firstName + " " + user.lastName
@@ -10311,18 +10388,61 @@ exports.addHover = {
 
 
 },{"../../../utils":35}],93:[function(require,module,exports){
-var component, style;
+var actionModifiable, actionToText, component, extend, ref, ref1, style, toDate, toTime;
 
 component = require('../../../utils/component');
 
 style = require('./style');
 
+ref = require('../../../utils'), extend = ref.extend, toDate = ref.toDate, toTime = ref.toTime;
+
+ref1 = require('../../../utils/logic'), actionToText = ref1.actionToText, actionModifiable = ref1.actionModifiable;
+
 module.exports = component('sidebar', function(arg) {
-  var E, dom, events, logout, name, onEvent, onResize, position, profileImg, resize, service, setStyle, state, view;
+  var E, append, clearAllNotifications, dom, empty, events, linkIndex, links, logout, name, notifications, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
   dom = arg.dom, state = arg.state, events = arg.events, service = arg.service;
-  E = dom.E, setStyle = dom.setStyle;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, empty = dom.empty, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
-  view = E(style.sidebar, E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(style.logout), E(style.settings), E(style.notifications), E(style.divider), E(style.links), E(style.linkActive, 'رزومه‌ها'), E(style.link, 'تقویم'), E(style.link, 'فرصت‌های شغلی'), E(style.link, 'بایگانی'));
+  view = E(style.sidebar, notifications = E(style.notifications, E(style.notificationsHeader, clearAllNotifications = E(style.clearAllNotifications, 'پاک شدن همه')), notificationsPanel = E()), E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(extend({
+    "class": 'fa fa-power-off'
+  }, style.icon, {
+    marginRight: 30
+  })), E(extend({
+    "class": 'fa fa-sliders'
+  }, style.icon)), notificationsIcon = E(extend({
+    "class": 'fa fa-bell-o'
+  }, style.icon), notificationsBadge = E(style.badge)), E(style.divider), E(style.links), links = [
+    E(style.link, E(extend({
+      "class": 'fa fa-file-text-o'
+    }, style.linkIcon)), text('رزومه‌ها')), E(style.link, E(extend({
+      "class": 'fa fa-calendar'
+    }, style.linkIcon)), text('تقویم')), E(style.link, E(extend({
+      "class": 'fa fa-database'
+    }, style.linkIcon)), text('فرصت‌های شغلی')), E(style.link, E(extend({
+      "class": 'fa fa-folder'
+    }, style.linkIcon)), text('بایگانی'))
+  ]);
+  linkIndex = 0;
+  links.forEach(function(link, i) {
+    if (linkIndex === i) {
+      setStyle(link, style.linkActive);
+    }
+    onEvent(link, 'click', function() {
+      linkIndex = i;
+      setStyle(links, style.link);
+      return setStyle(link, style.linkActive);
+    });
+    onEvent(link, 'mouseover', function() {
+      if (linkIndex !== i) {
+        return setStyle(link, style.linkHover);
+      }
+    });
+    return onEvent(link, 'mouseout', function() {
+      if (linkIndex !== i) {
+        return setStyle(link, style.link);
+      }
+    });
+  });
   resize = function() {
     var body, height, html;
     body = document.body;
@@ -10335,8 +10455,8 @@ module.exports = component('sidebar', function(arg) {
   onResize(resize);
   setTimeout(resize);
   onEvent(profileImg, 'load', function() {
-    var height, isPortriat, ref, right, top, width;
-    ref = profileImg.fn.element, width = ref.width, height = ref.height;
+    var height, isPortriat, ref2, right, top, width;
+    ref2 = profileImg.fn.element, width = ref2.width, height = ref2.height;
     right = top = 0;
     isPortriat = height > width;
     if (isPortriat) {
@@ -10378,12 +10498,59 @@ module.exports = component('sidebar', function(arg) {
       })()
     });
   });
+  state.notifications.on(function(notifications) {
+    if (notifications != null ? notifications.length : void 0) {
+      setStyle(notificationsBadge, style.badgeActive);
+      setStyle(notificationsBadge, {
+        text: notifications.length
+      });
+    } else {
+      setStyle(notificationsBadge, style.badge);
+      setStyle(notificationsBadge, {
+        text: ''
+      });
+    }
+    empty(notificationsPanel);
+    return append(notificationsPanel, notifications.map(function(notification) {
+      var notificationElement;
+      notificationElement = E(style.notification, E('img', extend({
+        src: notification.userPersonalPic ? '/webApi/image?address=' + notification.userPersonalPic : 'assets/img/default-avatar-small.png'
+      }, style.notificationPersonalPic)), E(style.notificationUserName, notification.userName), E(style.notificationAction, actionToText(notification.action)), E(style.notificationTime, (toDate(notification.time)) + " " + (toTime(notification.time))), E('a', extend({
+        href: '/webApi/resume?address=' + notification.applicantResume
+      }, style.notificationResume), E(style.notificationIcon), text(notification.applicantName)));
+      onEvent(notificationElement, 'mouseover', function() {
+        return setStyle(notificationElement, style.notificationHover);
+      });
+      onEvent(notificationElement, 'mouseout', function() {
+        return setStyle(notificationElement, style.notification);
+      });
+      if (!actionModifiable(notification.action)) {
+        setStyle(notificationElement, style.notificationNotModifiable);
+      }
+      return notificationElement;
+    }));
+  });
+  notificationsActive = false;
+  onEvent(notificationsIcon, 'click', function() {
+    notificationsActive = !notificationsActive;
+    if (notificationsActive) {
+      setStyle(notificationsIcon, style.iconActive);
+      return setStyle(notifications, style.notificationsActive);
+    } else {
+      setStyle(notificationsIcon, style.icon);
+      return setStyle(notifications, style.notifications);
+    }
+  });
+  onEvent(clearAllNotifications, 'click', function() {
+    state.notifications.set([]);
+    return service.clearAllNotifications();
+  });
   return view;
 });
 
 
-},{"../../../utils/component":31,"./style":94}],94:[function(require,module,exports){
-var extend, icon;
+},{"../../../utils":35,"../../../utils/component":31,"../../../utils/logic":37,"./style":94}],94:[function(require,module,exports){
+var extend;
 
 extend = require('../../../utils').extend;
 
@@ -10424,29 +10591,43 @@ exports.title = {
   marginTop: 10
 };
 
-icon = {
+exports.icon = {
   color: 'white',
   float: 'right',
   cursor: 'pointer',
-  margin: 20,
-  fontSize: 20
+  margin: 10,
+  padding: 10,
+  fontSize: 20,
+  borderRadius: 100,
+  transition: '0.2s',
+  backgroundColor: '#2b2e33',
+  position: 'relative'
 };
 
-exports.logout = extend({}, icon, {
-  "class": 'fa fa-power-off',
-  marginRight: 30
-});
+exports.iconActive = {
+  backgroundColor: 'black'
+};
 
-exports.settings = extend({}, icon, {
-  "class": 'fa fa-sliders'
-});
+exports.badge = {
+  position: 'absolute',
+  top: 5,
+  left: 5,
+  width: 15,
+  height: 15,
+  fontSize: 10,
+  lineHeight: 15,
+  borderRadius: 100,
+  textAlign: 'center',
+  transition: '0.2s',
+  backgroundColor: 'transparent'
+};
 
-exports.notifications = extend({}, icon, {
-  "class": 'fa fa-bell-o'
-});
+exports.badgeActive = {
+  backgroundColor: 'red'
+};
 
 exports.divider = {
-  marginTop: 80,
+  marginTop: 100,
   height: 2,
   backgroundColor: '#1c1e21'
 };
@@ -10459,13 +10640,122 @@ exports.link = {
   cursor: 'pointer',
   height: 65,
   lineHeight: 65,
-  textAlign: 'center',
-  color: 'white'
+  color: 'white',
+  paddingRight: 10,
+  transition: '0.2s',
+  borderLeft: '0px solid #449e73',
+  backgroundColor: '#2b2e33'
 };
 
-exports.linkActive = extend({}, exports.link, {
+exports.linkIcon = {
+  fontSize: 20,
+  margin: '0 10px',
+  position: 'relative',
+  top: 3
+};
+
+exports.linkHover = {
+  borderLeftWidth: 10
+};
+
+exports.linkActive = {
   backgroundColor: '#449e73'
-});
+};
+
+exports.notifications = {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  right: 200,
+  zIndex: 1000,
+  backgroundColor: 'white',
+  boxShadow: '-10px 0px 15px 0px #aaa',
+  overflowX: 'hidden',
+  transition: '0.2s',
+  opacity: 0,
+  width: 0
+};
+
+exports.notificationsActive = {
+  opacity: 1,
+  width: 350
+};
+
+exports.notificationsHeader = {
+  height: 30,
+  backgroundColor: '#ddd',
+  textAlign: 'left'
+};
+
+exports.clearAllNotifications = {
+  backgroundColor: 'red',
+  color: 'white',
+  fontSize: 10,
+  padding: 3,
+  margin: 5,
+  borderRadius: 3,
+  display: 'inline-block',
+  cursor: 'pointer'
+};
+
+exports.notification = {
+  height: 80,
+  position: 'relative',
+  cursor: 'pointer',
+  borderBottom: '1px solid #eee',
+  transition: '0.2s',
+  backgroundColor: 'white'
+};
+
+exports.notificationNotModifiable = {
+  opacity: 0.5
+};
+
+exports.notificationHover = {
+  backgroundColor: '#eee'
+};
+
+exports.notificationPersonalPic = {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  width: 30,
+  height: 30,
+  borderRadius: 100
+};
+
+exports.notificationUserName = {
+  position: 'absolute',
+  top: 10,
+  right: 50
+};
+
+exports.notificationAction = {
+  position: 'absolute',
+  top: 45,
+  right: 50
+};
+
+exports.notificationTime = {
+  position: 'absolute',
+  top: 10,
+  left: 10,
+  fontSize: 10,
+  direction: 'ltr'
+};
+
+exports.notificationResume = {
+  position: 'absolute',
+  top: 45,
+  left: 10,
+  fontSize: 10,
+  color: '#449e73'
+};
+
+exports.notificationIcon = {
+  "class": 'fa fa-user',
+  marginLeft: 5
+};
 
 
 },{"../../../utils":35}],95:[function(require,module,exports){

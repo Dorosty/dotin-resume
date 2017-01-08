@@ -2,8 +2,9 @@
 {uppercaseFirst} = require '..'
 
 module.exports =
-  logout: stateName: 'user'
-  login:  stateName: 'user'
+  logout:                stateName: 'user'
+  login:                 stateName: 'user'
+  clearAllNotifications: stateName: 'notifications'
 
 cruds.forEach ({name}) ->
   ['create', 'update'].forEach (method) ->
