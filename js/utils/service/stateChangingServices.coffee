@@ -5,6 +5,8 @@ module.exports =
   logout:                stateName: 'user'
   login:                 stateName: 'user'
   clearAllNotifications: stateName: 'notifications'
+  changeHRStatus:        stateName: 'applicants'
+  changeManagerStatus:   stateName: 'applicants'
 
 cruds.forEach ({name}) ->
   ['create', 'update'].forEach (method) ->

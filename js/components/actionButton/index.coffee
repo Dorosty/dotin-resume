@@ -58,5 +58,6 @@ module.exports = component 'actionButton', ({dom, events, returnObject}, {getId,
 
   returnObject
     onSelect: (listener) -> selectListeners.push listener
+    items: itemsList.items
 
   actionButton

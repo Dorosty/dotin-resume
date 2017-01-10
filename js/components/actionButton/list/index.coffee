@@ -29,12 +29,13 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
     value: -> value
     set: (x) -> value = x
     reset: -> value = null
-    update: (_entities) ->
+    update: (_entities, styleItem) ->
       highlightIndex = 0
       empty list
       entities = _entities
       append list, items = entities.map (entity, i) ->
         item = E englishText: getTitle entity
+        styleItem? item, entity
         onEvent item, 'mousemove', ->
           highlightIndex = i
           highlightCurrentItem()
@@ -55,6 +56,7 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
       if highlightIndex >= entities.length
         highlightIndex = entities.length - 1
       highlightCurrentItem()
+    items: -> items
     select: select
     show: show
     hide: hide

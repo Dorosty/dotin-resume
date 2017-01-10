@@ -5,7 +5,7 @@ tests = require './tests'
 {extend} = require '../../utils'
 
 tabNames = [
-  'اطلاعات تکمیلی',
+  'اطلاعات تکمیلی'
   'آزمون'
 ]
 

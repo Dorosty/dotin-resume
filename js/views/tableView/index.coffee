@@ -3,6 +3,7 @@ style = require './style'
 sidebar = require './sidebar'
 table = require './table'
 search = require './search'
+profile = require './profile'
 actionButton = require '../../components/actionButton'
 {extend, toDate} = require '../../utils'
 {getApplicantStatus} = require '../../utils/logic'
@@ -11,11 +12,19 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   {E, text, setStyle, append, empty, hide} = dom
   {onEvent} = events
 
+  gotoApplicant = (applicant) ->
+    setStyle profilePlaceholder, style.profileVisible
+    empty profilePlaceholder
+    append profilePlaceholder, E profile, {applicant, gotoIndex}
+
+  gotoIndex = ->
+    setStyle profilePlaceholder, style.profile
+
   selectedApplicants = []
 
   view = E 'span', null,
-    E sidebar
-    E style.contents,
+    E sidebar, {gotoApplicant}
+    contents = E style.contents,
       E style.action,
         actionButtonInstance = E actionButton, items: ['دعوت به مصاحبه', 'چاپ']
       searchInstance = E search
@@ -73,9 +82,11 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           }
         ]
         handlers:
+          select: gotoApplicant
           update: (descriptors) ->
             selectedApplicants = descriptors.filter(({selected}) -> selected).map ({entity}) -> entity
-          select: (applicant) ->
+      profilePlaceholder = E style.profile
+
 
   ######################
   state.user.on once: true, (user) ->

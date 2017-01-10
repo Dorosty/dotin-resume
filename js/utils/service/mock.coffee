@@ -1,4 +1,4 @@
-return
+# return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -17,6 +17,8 @@ applicants = [{
   personalPic: null
   modificationTime: 1473132854116
   notes: []
+  applicantsHRStatus: [{status: 1}, {status: 3}]
+  applicantsManagerStatus: []
 }, {
   applicantsHRStatus: []
   userId: 1
@@ -31,21 +33,25 @@ applicants = [{
   personalPic: null
   modificationTime: 1373132854116
   notes: ['aaaaaaaaaaaa']
+  applicantsHRStatus: [{status: 2}]
+  applicantsManagerStatus: []
 }]
 
 user =
+  userId: 110
   applicantsHRStatus: []
   identificationCode: '0016503368'
-  personalPic: null
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 2
+  userType: 1
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
   personalPic: null
   modificationTime: 1473132854116
   notes: []
+  applicantsHRStatus: []
+  applicantsManagerStatus: []
   selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
   resume: null
   applicantData: JSON.stringify {
@@ -190,29 +196,25 @@ notifications = [{
   userPersonalPic: null
   action: 0
   time: 1373132854116
-  applicantName: 'مسعود فرخی'
-  applicantResume: null
+  applicantId: 0
 }, {
   userName: 'سجاد افشاریان'
   userPersonalPic: null
   action: 0
   time: 1373132854116
-  applicantName: 'امیر شجاعی'
-  applicantResume: null
+  applicantId: 1
 }, {
   userName: 'سجاد افشاریان'
   userPersonalPic: null
   action: 1
   time: 1373132854116
-  applicantName: 'سمیه جلالی'
-  applicantResume: null
+  applicantId: 0
 }, {
   userName: 'سجاد افشاریان'
   userPersonalPic: null
   action: 1
   time: 1373132854116
-  applicantName: 'مهشید رسولی'
-  applicantResume: null
+  applicantId: 1
 }]
 
 notifications = [].concat.apply [], [1..10].map -> notifications
@@ -221,10 +223,10 @@ exports.ping = ->
   Q {user, applicants, notifications}
 
 exports.getUser = ->
-  Q {user}
+  Q {user, notifications}
 
 exports.login = ({email}) ->
-  Q.delay 1000 + 2000 * Math.floor Math.random()
+  Q.delay 1000 + Math.floor 2000 * Math.random()
   .then ->
     switch email
       when 'hosseininejad@dotin.ir'
@@ -246,29 +248,41 @@ exports.login = ({email}) ->
 
 exports.logout = ->
   user = undefined
-  Q.delay 1000 + 2000 * Math.floor Math.random()
+  Q.delay 1000 + Math.floor 2000 * Math.random()
   .then ->
     loggedOut: true
 
 exports.addJob = ->
-  Q.delay 1000 + 2000 * Math.floor Math.random()
+  Q.delay 1000 + Math.floor 2000 * Math.random()
   .then -> {}
 
 exports.getCaptcha = ->
-  Q.delay 1000 + 2000 * Math.floor Math.random()
+  Q.delay 1000 + Math.floor 2000 * Math.random()
   .then -> '12*x=48'
 
 exports.submitProfileData = ({data}) ->
-  Q.delay 1000 + 2000 * Math.floor Math.random()
+  Q.delay 1000 + Math.floor 2000 * Math.random()
   .then ->
     user = extend {}, user, applicantData: data
 
-exports.changeHRStatus = ->
-  Q.delay 1000 + 2000 * Math.floor Math.random()
-  .then -> {}
+exports.changeHRStatus = ({applicantId, status}) ->
+  Q.delay 1000 + Math.floor 2000 * Math.random()
+  .then ->
+    applicants = JSON.parse JSON.stringify applicants
+    [applicant] = applicants.filter ({userId}) -> userId is applicantId
+    applicant.applicantsHRStatus.push {status}
+    {}
+
+exports.changeManagerStatus = ({applicantId, status}) ->
+  Q.delay 1000 + Math.floor 2000 * Math.random()
+  .then ->
+    applicants = JSON.parse JSON.stringify applicants
+    [applicant] = applicants.filter ({userId}) -> userId is applicantId
+    applicant.applicantsManagerStatus.push {status, managerId: user.userId}
+    {}
 
 exports.clearAllNotifications = ->
-  Q.delay 1000 + 2000 * Math.floor Math.random()
+  Q.delay 1000 + Math.floor 2000 * Math.random()
   .then ->
     notifications = []
     {}

@@ -2,7 +2,7 @@ exports.actionButton =
   position: 'relative'
   
 exports.button =
-  width: 130
+  width: 180
   display: 'inline-block'
   height: 30
   lineHeight: 30

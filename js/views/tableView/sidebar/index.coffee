@@ -3,12 +3,12 @@ style = require './style'
 {extend, toDate, toTime} = require '../../../utils'
 {actionToText, actionModifiable} = require '../../../utils/logic'
 
-module.exports = component 'sidebar', ({dom, state, events, service}) ->
+module.exports = component 'sidebar', ({dom, state, events, service}, {gotoApplicant}) ->
   {E, text, setStyle, empty, append} = dom
   {onEvent, onResize} = events
   
   view = E style.sidebar,
-    notifications = E style.notifications,
+    notificationsPlaceholder = E style.notifications,
       E style.notificationsHeader,
         clearAllNotifications = E style.clearAllNotifications, 'پاک شدن همه'
       notificationsPanel = E()
@@ -88,6 +88,8 @@ module.exports = component 'sidebar', ({dom, state, events, service}) ->
       when 2
         'کارشناس واحد منابع انسانی'
 
+  notificationsActive = false
+  
   state.notifications.on (notifications) ->
     if notifications?.length
       setStyle notificationsBadge, style.badgeActive
@@ -97,31 +99,38 @@ module.exports = component 'sidebar', ({dom, state, events, service}) ->
       setStyle notificationsBadge, text: ''
     empty notificationsPanel
     append notificationsPanel, notifications.map (notification) ->
+      applicant = undefined
+      state.applicants.on once: true, (applicants) ->
+        [applicant] = applicants.filter ({userId}) -> notification.applicantId is userId
       notificationElement = E style.notification,
         E 'img', extend {src: if notification.userPersonalPic then '/webApi/image?address=' + notification.userPersonalPic else 'assets/img/default-avatar-small.png'}, style.notificationPersonalPic
         E style.notificationUserName, notification.userName
         E style.notificationAction, actionToText notification.action
         E style.notificationTime, "#{toDate notification.time} #{toTime notification.time}"
-        E 'a', extend({href: '/webApi/resume?address=' + notification.applicantResume}, style.notificationResume),
+        E 'a', extend({href: '/webApi/resume?address=' + applicant.resume}, style.notificationResume),
           E style.notificationIcon
-          text notification.applicantName
+          text applicant.firstName + ' ' + applicant.lastName
       onEvent notificationElement, 'mouseover', ->
         setStyle notificationElement, style.notificationHover
       onEvent notificationElement, 'mouseout', ->
         setStyle notificationElement, style.notification
       unless actionModifiable notification.action
         setStyle notificationElement, style.notificationNotModifiable
+      onEvent notificationElement, 'click', ->
+        gotoApplicant applicant
+        notificationsActive = false
+        setStyle notificationsIcon, style.icon
+        setStyle notificationsPlaceholder, style.notifications
       notificationElement
 
-  notificationsActive = false
   onEvent notificationsIcon, 'click', ->
     notificationsActive = !notificationsActive
     if notificationsActive
       setStyle notificationsIcon, style.iconActive
-      setStyle notifications, style.notificationsActive
+      setStyle notificationsPlaceholder, style.notificationsActive
     else
       setStyle notificationsIcon, style.icon
-      setStyle notifications, style.notifications
+      setStyle notificationsPlaceholder, style.notifications
 
   onEvent clearAllNotifications, 'click', ->
     state.notifications.set []

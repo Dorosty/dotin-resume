@@ -38,6 +38,19 @@ exports.changeHRStatus = (applicantId, status) ->
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
+exports.changeManagerStatus = (applicantId, status) ->
+  post 'changeManagerStatus', {applicantId, status}
+  .then ->
+    state.user.on once: true, (user) ->
+      state.applicants.on once: true, (applicants) ->
+        [applicant] = applicants.filter ({userId}) -> userId is applicantId
+        {applicantsManagerStatus} = applicant
+        applicants = applicants.slice()
+        applicantsManagerStatus = applicantsManagerStatus.slice()
+        applicantsManagerStatus.push {status, managerId: user.userId}
+        applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsManagerStatus}
+        state.applicants.set applicants
+
 exports.clearAllNotifications = ->
   post 'clearAllNotifications'
   .then ->

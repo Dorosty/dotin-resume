@@ -342,7 +342,8 @@ module.exports = component('actionButton', function(arg, arg1) {
   returnObject({
     onSelect: function(listener) {
       return selectListeners.push(listener);
-    }
+    },
+    items: itemsList.items
   });
   return actionButton;
 });
@@ -393,7 +394,7 @@ module.exports = component('dropdownList', function(arg, arg1) {
     reset: function() {
       return value = null;
     },
-    update: function(_entities) {
+    update: function(_entities, styleItem) {
       highlightIndex = 0;
       empty(list);
       entities = _entities;
@@ -402,6 +403,9 @@ module.exports = component('dropdownList', function(arg, arg1) {
         item = E({
           englishText: getTitle(entity)
         });
+        if (typeof styleItem === "function") {
+          styleItem(item, entity);
+        }
         onEvent(item, 'mousemove', function() {
           highlightIndex = i;
           return highlightCurrentItem();
@@ -430,6 +434,9 @@ module.exports = component('dropdownList', function(arg, arg1) {
         highlightIndex = entities.length - 1;
       }
       return highlightCurrentItem();
+    },
+    items: function() {
+      return items;
     },
     select: select,
     show: show,
@@ -480,7 +487,7 @@ exports.actionButton = {
 };
 
 exports.button = {
-  width: 130,
+  width: 180,
   display: 'inline-block',
   height: 30,
   lineHeight: 30,
@@ -807,8 +814,97 @@ module.exports = component('dropdown', function(arg, arg1) {
 
 
 },{"../../utils":35,"../../utils/component":31,"./list":12,"./style":14}],12:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"../../../utils/component":31,"./style":13,"dup":4}],13:[function(require,module,exports){
+var component, style;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('dropdownList', function(arg, arg1) {
+  var E, append, dom, empty, entities, events, getTitle, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
+  onSelect = arg1.onSelect, getTitle = arg1.getTitle;
+  E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle;
+  onEvent = events.onEvent;
+  list = E(style.list);
+  entities = items = highlightIndex = value = void 0;
+  highlightCurrentItem = function() {
+    if (!(items != null ? items.length : void 0)) {
+      return;
+    }
+    setStyle(items, style.item);
+    if (highlightIndex != null) {
+      return setStyle(items[highlightIndex], style.highlightedItem);
+    }
+  };
+  show = function() {
+    return setStyle(list, style.visibleList);
+  };
+  hide = function() {
+    return setStyle(list, style.list);
+  };
+  select = function() {
+    value = entities[highlightIndex];
+    onSelect(value);
+    return hide();
+  };
+  returnObject({
+    value: function() {
+      return value;
+    },
+    set: function(x) {
+      return value = x;
+    },
+    reset: function() {
+      return value = null;
+    },
+    update: function(_entities) {
+      highlightIndex = 0;
+      empty(list);
+      entities = _entities;
+      append(list, items = entities.map(function(entity, i) {
+        var item;
+        item = E({
+          englishText: getTitle(entity)
+        });
+        onEvent(item, 'mousemove', function() {
+          highlightIndex = i;
+          return highlightCurrentItem();
+        });
+        onEvent(item, 'mouseout', function() {
+          return setStyle(item, style.item);
+        });
+        onEvent(item, 'mousedown', function(e) {
+          return e.preventDefault();
+        });
+        onEvent(item, 'click', select);
+        return item;
+      }));
+      return highlightCurrentItem();
+    },
+    goUp: function() {
+      highlightIndex--;
+      if (highlightIndex < 0) {
+        highlightIndex = 0;
+      }
+      return highlightCurrentItem();
+    },
+    goDown: function() {
+      highlightIndex++;
+      if (highlightIndex >= entities.length) {
+        highlightIndex = entities.length - 1;
+      }
+      return highlightCurrentItem();
+    },
+    select: select,
+    show: show,
+    hide: hide
+  });
+  return list;
+});
+
+
+},{"../../../utils/component":31,"./style":13}],13:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],14:[function(require,module,exports){
 exports.dropdown = {
@@ -4938,6 +5034,39 @@ exports.changeHRStatus = function(applicantId, status) {
   });
 };
 
+exports.changeManagerStatus = function(applicantId, status) {
+  return post('changeManagerStatus', {
+    applicantId: applicantId,
+    status: status
+  }).then(function() {
+    return state.user.on({
+      once: true
+    }, function(user) {
+      return state.applicants.on({
+        once: true
+      }, function(applicants) {
+        var applicant, applicantsManagerStatus;
+        applicant = applicants.filter(function(arg) {
+          var userId;
+          userId = arg.userId;
+          return userId === applicantId;
+        })[0];
+        applicantsManagerStatus = applicant.applicantsManagerStatus;
+        applicants = applicants.slice();
+        applicantsManagerStatus = applicantsManagerStatus.slice();
+        applicantsManagerStatus.push({
+          status: status,
+          managerId: user.userId
+        });
+        applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
+          applicantsManagerStatus: applicantsManagerStatus
+        });
+        return state.applicants.set(applicants);
+      });
+    });
+  });
+};
+
 exports.clearAllNotifications = function() {
   return post('clearAllNotifications').then(function() {
     return state.notifications.set([]);
@@ -5167,8 +5296,6 @@ exports.autoPing = function() {
 },{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
 var Q, applicants, extend, notifications, user;
 
-return;
-
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -5193,7 +5320,15 @@ applicants = [
     resume: null,
     personalPic: null,
     modificationTime: 1473132854116,
-    notes: []
+    notes: [],
+    applicantsHRStatus: [
+      {
+        status: 1
+      }, {
+        status: 3
+      }
+    ],
+    applicantsManagerStatus: []
   }, {
     applicantsHRStatus: [],
     userId: 1,
@@ -5211,23 +5346,31 @@ applicants = [
     resume: null,
     personalPic: null,
     modificationTime: 1373132854116,
-    notes: ['aaaaaaaaaaaa']
+    notes: ['aaaaaaaaaaaa'],
+    applicantsHRStatus: [
+      {
+        status: 2
+      }
+    ],
+    applicantsManagerStatus: []
   }
 ];
 
 user = {
+  userId: 110,
   applicantsHRStatus: [],
   identificationCode: '0016503368',
-  personalPic: null,
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 1,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
   personalPic: null,
   modificationTime: 1473132854116,
   notes: [],
+  applicantsHRStatus: [],
+  applicantsManagerStatus: [],
   selectedJobs: [
     {
       jobName: 'Java developer'
@@ -5376,29 +5519,25 @@ notifications = [
     userPersonalPic: null,
     action: 0,
     time: 1373132854116,
-    applicantName: 'مسعود فرخی',
-    applicantResume: null
+    applicantId: 0
   }, {
     userName: 'سجاد افشاریان',
     userPersonalPic: null,
     action: 0,
     time: 1373132854116,
-    applicantName: 'امیر شجاعی',
-    applicantResume: null
+    applicantId: 1
   }, {
     userName: 'سجاد افشاریان',
     userPersonalPic: null,
     action: 1,
     time: 1373132854116,
-    applicantName: 'سمیه جلالی',
-    applicantResume: null
+    applicantId: 0
   }, {
     userName: 'سجاد افشاریان',
     userPersonalPic: null,
     action: 1,
     time: 1373132854116,
-    applicantName: 'مهشید رسولی',
-    applicantResume: null
+    applicantId: 1
   }
 ];
 
@@ -5416,14 +5555,15 @@ exports.ping = function() {
 
 exports.getUser = function() {
   return Q({
-    user: user
+    user: user,
+    notifications: notifications
   });
 };
 
 exports.login = function(arg) {
   var email;
   email = arg.email;
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
     switch (email) {
       case 'hosseininejad@dotin.ir':
         return {
@@ -5456,7 +5596,7 @@ exports.login = function(arg) {
 
 exports.logout = function() {
   user = void 0;
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
     return {
       loggedOut: true
     };
@@ -5464,13 +5604,13 @@ exports.logout = function() {
 };
 
 exports.addJob = function() {
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
     return {};
   });
 };
 
 exports.getCaptcha = function() {
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
     return '12*x=48';
   });
 };
@@ -5478,21 +5618,52 @@ exports.getCaptcha = function() {
 exports.submitProfileData = function(arg) {
   var data;
   data = arg.data;
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
     return user = extend({}, user, {
       applicantData: data
     });
   });
 };
 
-exports.changeHRStatus = function() {
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+exports.changeHRStatus = function(arg) {
+  var applicantId, status;
+  applicantId = arg.applicantId, status = arg.status;
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
+    var applicant;
+    applicants = JSON.parse(JSON.stringify(applicants));
+    applicant = applicants.filter(function(arg1) {
+      var userId;
+      userId = arg1.userId;
+      return userId === applicantId;
+    })[0];
+    applicant.applicantsHRStatus.push({
+      status: status
+    });
+    return {};
+  });
+};
+
+exports.changeManagerStatus = function(arg) {
+  var applicantId, status;
+  applicantId = arg.applicantId, status = arg.status;
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
+    var applicant;
+    applicants = JSON.parse(JSON.stringify(applicants));
+    applicant = applicants.filter(function(arg1) {
+      var userId;
+      userId = arg1.userId;
+      return userId === applicantId;
+    })[0];
+    applicant.applicantsManagerStatus.push({
+      status: status,
+      managerId: user.userId
+    });
     return {};
   });
 };
 
 exports.clearAllNotifications = function() {
-  return Q.delay(1000 + 2000 * Math.floor(Math.random())).then(function() {
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
     notifications = [];
     return {};
   });
@@ -5511,7 +5682,7 @@ exports.cruds = [
   }
 ];
 
-exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'clearAllNotifications'];
+exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'changeManagerStatus', 'clearAllNotifications'];
 
 exports.states = ['user', 'applicants', 'notifications'];
 
@@ -5532,6 +5703,12 @@ module.exports = {
   },
   clearAllNotifications: {
     stateName: 'notifications'
+  },
+  changeHRStatus: {
+    stateName: 'applicants'
+  },
+  changeManagerStatus: {
+    stateName: 'applicants'
   }
 };
 
@@ -9726,7 +9903,7 @@ module.exports = component('views', function(arg, userId) {
 
 
 },{"../../utils":35,"../../utils/component":31}],88:[function(require,module,exports){
-var actionButton, component, extend, getApplicantStatus, ref, search, sidebar, style, table, toDate;
+var actionButton, component, extend, getApplicantStatus, profile, ref, search, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
 
@@ -9738,6 +9915,8 @@ table = require('./table');
 
 search = require('./search');
 
+profile = require('./profile');
+
 actionButton = require('../../components/actionButton');
 
 ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
@@ -9745,12 +9924,25 @@ ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 getApplicantStatus = require('../../utils/logic').getApplicantStatus;
 
 module.exports = component('tableView', function(arg) {
-  var E, actionButtonInstance, append, applicants, dom, empty, events, hide, onEvent, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  var E, actionButtonInstance, append, applicants, contents, dom, empty, events, gotoApplicant, gotoIndex, hide, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
+  gotoApplicant = function(applicant) {
+    setStyle(profilePlaceholder, style.profileVisible);
+    empty(profilePlaceholder);
+    return append(profilePlaceholder, E(profile, {
+      applicant: applicant,
+      gotoIndex: gotoIndex
+    }));
+  };
+  gotoIndex = function() {
+    return setStyle(profilePlaceholder, style.profile);
+  };
   selectedApplicants = [];
-  view = E('span', null, E(sidebar), E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
+  view = E('span', null, E(sidebar, {
+    gotoApplicant: gotoApplicant
+  }), contents = E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
     items: ['دعوت به مصاحبه', 'چاپ']
   })), searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
@@ -9842,6 +10034,7 @@ module.exports = component('tableView', function(arg) {
       }
     ],
     handlers: {
+      select: gotoApplicant,
       update: function(descriptors) {
         return selectedApplicants = descriptors.filter(function(arg1) {
           var selected;
@@ -9852,10 +10045,9 @@ module.exports = component('tableView', function(arg) {
           entity = arg1.entity;
           return entity;
         });
-      },
-      select: function(applicant) {}
+      }
     }
-  })));
+  }), profilePlaceholder = E(style.profile)));
   state.user.on({
     once: true
   }, function(user) {
@@ -9896,7 +10088,528 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../components/actionButton":3,"../../utils":35,"../../utils/component":31,"../../utils/logic":37,"./search":91,"./sidebar":93,"./style":95,"./table":97}],89:[function(require,module,exports){
+},{"../../components/actionButton":3,"../../utils":35,"../../utils/component":31,"../../utils/logic":37,"./profile":89,"./search":105,"./sidebar":107,"./style":109,"./table":111}],89:[function(require,module,exports){
+var actionButton, component, extend, style, tab0, tab1, tab2, tab3, tab4, tab5, tabContents, tabNames;
+
+component = require('../../../utils/component');
+
+style = require('./style');
+
+tab0 = require('./tab0');
+
+tab1 = require('./tab1');
+
+tab2 = require('./tab2');
+
+tab3 = require('./tab3');
+
+tab4 = require('./tab4');
+
+tab5 = require('./tab5');
+
+actionButton = require('../../../components/actionButton');
+
+extend = require('../../../utils').extend;
+
+tabNames = ['اطلاعات اولیه', 'اطلاعات تکمیلی', 'آزمون', 'یادداشت', 'سوابق', 'نتایج مصاحبه'];
+
+tabContents = [tab0, tab1, tab2, tab3, tab4, tab5];
+
+module.exports = component('profile', function(arg, arg1) {
+  var E, actionButtonInstance, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, indexLink, onEvent, service, setStyle, state, statusPlaceholder, tabs, text, view;
+  dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
+  applicant = arg1.applicant, gotoIndex = arg1.gotoIndex;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, empty = dom.empty;
+  onEvent = events.onEvent;
+  content = void 0;
+  currentTabIndex = 0;
+  view = E('span', null, indexLink = E('a', style.indexLink, 'رزومه‌ها'), E('span', style.profileBreadCrumb, ' › پروفایل'), actionButtonPlaceholder = E(style.action, actionLegendButton = E(style.actionLegendButton), actionLegend = E(style.actionLegend, E(style.actionLegendArrow), E(style.actionLegendRow, E(extend({
+    backgroundColor: 'green'
+  }, style.actionLegendCircle)), text('ثبت شده')), E(style.actionLegendRow, E(extend({
+    backgroundColor: '#c5c5c5'
+  }, style.actionLegendCircle)), text('قفل شده')), E(style.actionLegendRow, E(extend({
+    backgroundColor: 'black'
+  }, style.actionLegendCircle)), text('فعال'))), actionButtonInstance = E(actionButton, {
+    items: ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
+  })), statusPlaceholder = E(style.status), E(style.tabs, tabs = tabNames.map(function(tabName, index) {
+    var tab;
+    tab = E(style.tab, tabName);
+    onEvent(tab, 'click', function() {
+      return changeTabIndex(index);
+    });
+    onEvent(tab, 'mouseover', function() {
+      return setStyle(tab, style.tabActive);
+    });
+    onEvent(tab, 'mouseout', function() {
+      if (currentTabIndex !== index) {
+        return setStyle(tab, style.tab);
+      }
+    });
+    return tab;
+  })), contents = E(style.contents));
+  state.user.on({
+    once: true
+  }, function(user) {
+    if (user.userType !== 1) {
+      return hide(actionButtonPlaceholder);
+    }
+  });
+  state.all(['applicants', 'user'], function(arg2) {
+    var applicants, fn, t1, t2, t3, user;
+    applicants = arg2[0], user = arg2[1];
+    applicant = applicants.filter(function(arg3) {
+      var userId;
+      userId = arg3.userId;
+      return userId === applicant.userId;
+    })[0];
+    fn = function(i) {
+      var item;
+      item = actionButtonInstance.items()[i - 1];
+      if (applicant.applicantsHRStatus.filter(function(arg3) {
+        var status;
+        status = arg3.status;
+        return status === i;
+      }).length) {
+        return setStyle(item, {
+          color: '#c5c5c5'
+        });
+      } else if (applicant.applicantsManagerStatus.filter(function(arg3) {
+        var managerId, status;
+        managerId = arg3.managerId, status = arg3.status;
+        return status === i && managerId === user.userId;
+      }).length) {
+        return setStyle(item, {
+          color: 'green'
+        });
+      } else {
+        return setStyle(item, {
+          color: 'black'
+        });
+      }
+    };
+    fn(1);
+    fn(2);
+    fn(3);
+    empty(statusPlaceholder);
+    append(statusPlaceholder, [
+      E(style.statusSegment, E(style.statusCircle), E(extend({
+        "class": 'fa fa-check'
+      }, style.statusIcon)), t1 = E(style.statusText, 'ثبت')), E(style.statusConnector), E(style.statusSegment, E(style.statusCircle), E(extend({
+        "class": 'fa fa-check'
+      }, style.statusIcon)), t2 = E(style.statusText, 'مصاحبه تلفنی')), E(style.statusConnectorActive), E(style.statusSegment, E(style.statusCircleActive), E(extend({
+        "class": 'fa fa-question'
+      }, style.statusIcon)), t3 = E(style.statusTextActive, 'در انتظار تکمیل اطلاعات'))
+    ]);
+    return setTimeout(function() {
+      return [t1, t2, t3].forEach(function(t) {
+        return setStyle(t, {
+          marginRight: -t.fn.element.offsetWidth / 2 + 15
+        });
+      });
+    });
+  });
+  actionButtonInstance.onSelect(function(value) {
+    var i;
+    i = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی'].indexOf(value) + 1;
+    return state.user.on({
+      once: true
+    }, function(user) {
+      if (!(applicant.applicantsHRStatus.filter(function(arg2) {
+        var status;
+        status = arg2.status;
+        return status === i;
+      }).length || applicant.applicantsManagerStatus.filter(function(arg2) {
+        var managerId, status;
+        managerId = arg2.managerId, status = arg2.status;
+        return status === i && managerId === user.userId;
+      }).length)) {
+        return service.changeManagerStatus(applicant.userId, i);
+      }
+    });
+  });
+  actionLegendVisible = false;
+  onEvent(actionLegendButton, 'click', function() {
+    actionLegendVisible = !actionLegendVisible;
+    if (actionLegendVisible) {
+      return setStyle(actionLegend, style.actionLegendVisible);
+    } else {
+      return setStyle(actionLegend, style.actionLegend);
+    }
+  });
+  changeTabIndex = function(index) {
+    if (content) {
+      destroy(content);
+    }
+    setStyle(tabs[currentTabIndex], style.tab);
+    currentTabIndex = index;
+    append(contents, content = E(tabContents[currentTabIndex], {
+      applicant: applicant
+    }));
+    return setStyle(tabs[currentTabIndex], style.tabActive);
+  };
+  changeTabIndex(0);
+  onEvent(indexLink, 'click', gotoIndex);
+  return view;
+});
+
+
+},{"../../../components/actionButton":3,"../../../utils":35,"../../../utils/component":31,"./style":90,"./tab0":91,"./tab1":93,"./tab2":95,"./tab3":97,"./tab4":99,"./tab5":101}],90:[function(require,module,exports){
+var extend;
+
+extend = require('../../../utils').extend;
+
+exports.indexLink = {
+  color: '#449e73',
+  cursor: 'pointer'
+};
+
+exports.profileBreadCrumb = {};
+
+exports.action = {
+  position: 'absolute',
+  top: 0,
+  left: 0
+};
+
+exports.actionLegendButton = {
+  position: 'absolute',
+  top: 7,
+  left: 217,
+  width: 20,
+  height: 20,
+  borderRadius: 100,
+  backgroundColor: '#c5c5c5',
+  cursor: 'pointer',
+  "class": 'fa fa-info',
+  color: 'white',
+  textAlign: 'center',
+  lineHeight: 20
+};
+
+exports.actionLegend = {
+  boxShadow: '0px 0px 15px 0px #aaa',
+  position: 'absolute',
+  left: 250,
+  width: 150,
+  height: 100,
+  backgroundColor: '#c5c5c5',
+  borderRadius: 3,
+  transition: '0.2s',
+  opacity: 0,
+  visibility: 'hidden'
+};
+
+exports.actionLegendVisible = {
+  opacity: 1,
+  visibility: 'visible'
+};
+
+exports.actionLegendArrow = {
+  position: 'absolute',
+  width: 0,
+  height: 0,
+  borderStyle: 'solid',
+  borderColor: 'transparent',
+  left: -7,
+  top: 10,
+  borderWidth: '7px 7px 7px 0',
+  borderRightColor: '#c5c5c5'
+};
+
+exports.actionLegendRow = {
+  paddingTop: 13,
+  paddingRight: 58,
+  height: 30,
+  position: 'relative'
+};
+
+exports.actionLegendCircle = {
+  position: 'absolute',
+  top: 15,
+  right: 15,
+  width: 15,
+  height: 15,
+  borderRadius: 100,
+  border: '1px solid white'
+};
+
+exports.status = {
+  marginTop: 20,
+  height: 100
+};
+
+exports.statusSegment = {
+  position: 'relative',
+  display: 'inline-block',
+  width: 30
+};
+
+exports.statusCircle = {
+  width: 30,
+  height: 30,
+  borderRadius: 100,
+  backgroundColor: '#ccc',
+  position: 'relative'
+};
+
+exports.statusCircleActive = extend({}, exports.statusCircle, {
+  backgroundColor: '#449e73'
+});
+
+exports.statusIcon = {
+  position: 'absolute',
+  color: 'white',
+  top: 7,
+  left: 7,
+  fontSize: 16,
+  width: 16,
+  height: 16,
+  lineHeight: 16,
+  textAlign: 'center'
+};
+
+exports.statusText = {
+  position: 'absolute',
+  display: 'inline-block',
+  color: '#ccc',
+  top: 30,
+  fontSize: 13,
+  marginTop: 2,
+  textAlign: 'center',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden'
+};
+
+exports.statusTextActive = extend({}, exports.statusText, {
+  color: '#449e73'
+});
+
+exports.statusConnector = {
+  display: 'inline-block',
+  position: 'relative',
+  top: -13,
+  width: 100,
+  height: 4,
+  backgroundColor: '#ccc'
+};
+
+exports.statusConnectorActive = extend({}, exports.statusConnector, {
+  backgroundColor: '#449e73'
+});
+
+exports.tabs = {
+  borderBottom: '1px solid #ccc'
+};
+
+exports.tab = {
+  display: 'inline-block',
+  cursor: 'pointer',
+  marginLeft: 20,
+  padding: 5,
+  transition: '0.2s',
+  color: '#5c5555',
+  borderBottom: '3px solid white'
+};
+
+exports.tabActive = {
+  color: '#449e73',
+  borderColor: '#449e73'
+};
+
+exports.contents = {
+  marginTop: 30
+};
+
+
+},{"../../../utils":35}],91:[function(require,module,exports){
+var component, extend, monthToString, ref, style, toDate;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+ref = require('../../../../utils'), extend = ref.extend, monthToString = ref.monthToString, toDate = ref.toDate;
+
+module.exports = component('tab0', function(arg, arg1) {
+  var E, applicant, birthdayString, dom;
+  dom = arg.dom;
+  applicant = arg1.applicant;
+  E = dom.E;
+  birthdayString = applicant.birthday.split('/');
+  birthdayString[1] = monthToString(birthdayString[1]);
+  birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');
+  return E(null, E(style.column, E(style.section, E('img', extend({
+    src: applicant.personalPic ? "/webApi/image?address=" + applicant.personalPic : 'assets/img/default-avatar-small.png'
+  }, style.sectionCircle)), E(style.sectionText, E(style.sectionTitle, applicant.firstName + " " + applicant.lastName), E(style.regular, 'متولد ' + birthdayString), E(style.regular, 'کد ملی: ' + applicant.identificationCode), E(style.regular, 'تاریخ ثبت: ' + toDate(applicant.modificationTime)))), E(style.section, E(style.sectionCircle, E(extend({
+    "class": 'fa fa-suitcase'
+  }, style.sectionIcon))), E(style.sectionText, E(style.sectionTitle, 'شغل‌های درخواستی'), applicant.selectedJobs.map(function(arg2) {
+    var jobName;
+    jobName = arg2.jobName;
+    return E(style.job, jobName);
+  })))), E(style.column, E(style.section, E(style.sectionCircle, E(extend({
+    "class": 'fa fa-phone'
+  }, style.sectionIcon))), E(style.sectionText, E(style.sectionTitle, 'شماره تماس: ' + applicant.phoneNumber), E(style.regular, 'رایانامه: ' + applicant.email))), E(style.section, E(style.sectionCircle, E(extend({
+    "class": 'fa fa-download'
+  }, style.sectionIcon))), E(style.sectionText, E(style.sectionTitle, 'دریافت رزومه متقاضی'), E('a', extend({
+    href: '/webApi/resume?address=' + applicant.resume
+  }, style.resumeLink), 'دریافت رزومه')))));
+});
+
+
+},{"../../../../utils":35,"../../../../utils/component":31,"./style":92}],92:[function(require,module,exports){
+exports.column = {
+  display: 'inline-block',
+  width: '50%'
+};
+
+exports.section = {
+  height: 200
+};
+
+exports.sectionCircle = {
+  float: 'right',
+  width: 80,
+  height: 80,
+  borderRadius: 100,
+  marginLeft: 20,
+  backgroundColor: '#ccc',
+  position: 'relative'
+};
+
+exports.sectionIcon = {
+  fontSize: 50,
+  width: 50,
+  height: 50,
+  position: 'absolute',
+  top: 15,
+  right: 15
+};
+
+exports.sectionText = {
+  float: 'right'
+};
+
+exports.sectionTitle = {
+  marginTop: 20,
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#5c5555',
+  marginBottom: 5
+};
+
+exports.regular = {
+  margin: '5px 0',
+  color: '#5c5555'
+};
+
+exports.job = {
+  width: 160,
+  height: 30,
+  lineHeight: 20,
+  fontSize: 12,
+  borderRadius: 2,
+  margin: '10px 0',
+  padding: 5,
+  backgroundColor: '#449e73',
+  color: 'white'
+};
+
+exports.resumeLink = {
+  target: '_blank',
+  color: '#449e73',
+  textDecoration: 'underline',
+  cursor: 'pointer'
+};
+
+
+},{}],93:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('tab1', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(null, 'اطلاعات تکمیلی');
+});
+
+
+},{"../../../../utils/component":31,"./style":94}],94:[function(require,module,exports){
+
+
+
+},{}],95:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('tab2', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(null, 'آزمون');
+});
+
+
+},{"../../../../utils/component":31,"./style":96}],96:[function(require,module,exports){
+arguments[4][94][0].apply(exports,arguments)
+},{"dup":94}],97:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('tab3', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(null, 'یادداشت');
+});
+
+
+},{"../../../../utils/component":31,"./style":98}],98:[function(require,module,exports){
+arguments[4][94][0].apply(exports,arguments)
+},{"dup":94}],99:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('tab4', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(null, 'سوابق');
+});
+
+
+},{"../../../../utils/component":31,"./style":100}],100:[function(require,module,exports){
+arguments[4][94][0].apply(exports,arguments)
+},{"dup":94}],101:[function(require,module,exports){
+var component, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+module.exports = component('tab5', function(arg) {
+  var E, dom;
+  dom = arg.dom;
+  E = dom.E;
+  return E(null, 'نتایج مصاحبه');
+});
+
+
+},{"../../../../utils/component":31,"./style":102}],102:[function(require,module,exports){
+arguments[4][94][0].apply(exports,arguments)
+},{"dup":94}],103:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -10117,7 +10830,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../utils":35,"../../../../utils/component":31,"./style":90}],90:[function(require,module,exports){
+},{"../../../../components/dateInput":9,"../../../../components/dropdown":11,"../../../../utils":35,"../../../../utils/component":31,"./style":104}],104:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -10160,7 +10873,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":35}],91:[function(require,module,exports){
+},{"../../../../utils":35}],105:[function(require,module,exports){
 var component, criterion, ref, remove, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -10266,7 +10979,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":35,"../../../utils/component":31,"./criterion":89,"./style":92}],92:[function(require,module,exports){
+},{"../../../utils":35,"../../../utils/component":31,"./criterion":103,"./style":106}],106:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -10387,7 +11100,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":35}],93:[function(require,module,exports){
+},{"../../../utils":35}],107:[function(require,module,exports){
 var actionModifiable, actionToText, component, extend, ref, ref1, style, toDate, toTime;
 
 component = require('../../../utils/component');
@@ -10398,12 +11111,13 @@ ref = require('../../../utils'), extend = ref.extend, toDate = ref.toDate, toTim
 
 ref1 = require('../../../utils/logic'), actionToText = ref1.actionToText, actionModifiable = ref1.actionModifiable;
 
-module.exports = component('sidebar', function(arg) {
-  var E, append, clearAllNotifications, dom, empty, events, linkIndex, links, logout, name, notifications, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
+module.exports = component('sidebar', function(arg, arg1) {
+  var E, append, clearAllNotifications, dom, empty, events, gotoApplicant, linkIndex, links, logout, name, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, notificationsPlaceholder, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
   dom = arg.dom, state = arg.state, events = arg.events, service = arg.service;
+  gotoApplicant = arg1.gotoApplicant;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, empty = dom.empty, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
-  view = E(style.sidebar, notifications = E(style.notifications, E(style.notificationsHeader, clearAllNotifications = E(style.clearAllNotifications, 'پاک شدن همه')), notificationsPanel = E()), E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(extend({
+  view = E(style.sidebar, notificationsPlaceholder = E(style.notifications, E(style.notificationsHeader, clearAllNotifications = E(style.clearAllNotifications, 'پاک شدن همه')), notificationsPanel = E()), E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(extend({
     "class": 'fa fa-power-off'
   }, style.icon, {
     marginRight: 30
@@ -10498,6 +11212,7 @@ module.exports = component('sidebar', function(arg) {
       })()
     });
   });
+  notificationsActive = false;
   state.notifications.on(function(notifications) {
     if (notifications != null ? notifications.length : void 0) {
       setStyle(notificationsBadge, style.badgeActive);
@@ -10512,12 +11227,23 @@ module.exports = component('sidebar', function(arg) {
     }
     empty(notificationsPanel);
     return append(notificationsPanel, notifications.map(function(notification) {
-      var notificationElement;
+      var applicant, notificationElement;
+      applicant = void 0;
+      state.applicants.on({
+        once: true
+      }, function(applicants) {
+        var ref2;
+        return ref2 = applicants.filter(function(arg2) {
+          var userId;
+          userId = arg2.userId;
+          return notification.applicantId === userId;
+        }), applicant = ref2[0], ref2;
+      });
       notificationElement = E(style.notification, E('img', extend({
         src: notification.userPersonalPic ? '/webApi/image?address=' + notification.userPersonalPic : 'assets/img/default-avatar-small.png'
       }, style.notificationPersonalPic)), E(style.notificationUserName, notification.userName), E(style.notificationAction, actionToText(notification.action)), E(style.notificationTime, (toDate(notification.time)) + " " + (toTime(notification.time))), E('a', extend({
-        href: '/webApi/resume?address=' + notification.applicantResume
-      }, style.notificationResume), E(style.notificationIcon), text(notification.applicantName)));
+        href: '/webApi/resume?address=' + applicant.resume
+      }, style.notificationResume), E(style.notificationIcon), text(applicant.firstName + ' ' + applicant.lastName)));
       onEvent(notificationElement, 'mouseover', function() {
         return setStyle(notificationElement, style.notificationHover);
       });
@@ -10527,18 +11253,23 @@ module.exports = component('sidebar', function(arg) {
       if (!actionModifiable(notification.action)) {
         setStyle(notificationElement, style.notificationNotModifiable);
       }
+      onEvent(notificationElement, 'click', function() {
+        gotoApplicant(applicant);
+        notificationsActive = false;
+        setStyle(notificationsIcon, style.icon);
+        return setStyle(notificationsPlaceholder, style.notifications);
+      });
       return notificationElement;
     }));
   });
-  notificationsActive = false;
   onEvent(notificationsIcon, 'click', function() {
     notificationsActive = !notificationsActive;
     if (notificationsActive) {
       setStyle(notificationsIcon, style.iconActive);
-      return setStyle(notifications, style.notificationsActive);
+      return setStyle(notificationsPlaceholder, style.notificationsActive);
     } else {
       setStyle(notificationsIcon, style.icon);
-      return setStyle(notifications, style.notifications);
+      return setStyle(notificationsPlaceholder, style.notifications);
     }
   });
   onEvent(clearAllNotifications, 'click', function() {
@@ -10549,7 +11280,7 @@ module.exports = component('sidebar', function(arg) {
 });
 
 
-},{"../../../utils":35,"../../../utils/component":31,"../../../utils/logic":37,"./style":94}],94:[function(require,module,exports){
+},{"../../../utils":35,"../../../utils/component":31,"../../../utils/logic":37,"./style":108}],108:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -10758,7 +11489,7 @@ exports.notificationIcon = {
 };
 
 
-},{"../../../utils":35}],95:[function(require,module,exports){
+},{"../../../utils":35}],109:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -10783,8 +11514,25 @@ exports.action = {
   left: 0
 };
 
+exports.profile = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  minHeight: '100%',
+  backgroundColor: 'white',
+  transition: '0.5s',
+  opacity: 0,
+  visibility: 'hidden'
+};
 
-},{}],96:[function(require,module,exports){
+exports.profileVisible = {
+  opacity: 1,
+  visibility: 'visible'
+};
+
+
+},{}],110:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -11006,7 +11754,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":35,"./style":98}],97:[function(require,module,exports){
+},{"../../../utils":35,"./style":112}],111:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -11130,7 +11878,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":35,"../../../utils/component":31,"./functions":96,"./style":98}],98:[function(require,module,exports){
+},{"../../../utils":35,"../../../utils/component":31,"./functions":110,"./style":112}],112:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -11221,7 +11969,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":35}],99:[function(require,module,exports){
+},{"../../../utils":35}],113:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, alertMessages, page, ref, service;
 
 Q = require('./q');
@@ -11255,4 +12003,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./alertMessages":2,"./page":26,"./q":27,"./utils/dom":33,"./utils/service":41}]},{},[99]);
+},{"./alertMessages":2,"./page":26,"./q":27,"./utils/dom":33,"./utils/service":41}]},{},[113]);
