@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
