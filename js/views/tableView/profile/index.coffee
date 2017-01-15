@@ -28,7 +28,7 @@ tabContents = [
 ]
 
 module.exports = component 'profile', ({dom, events, state, service}, {applicant, gotoIndex}) ->
-  {E, text, setStyle, append, destroy, empty} = dom
+  {E, text, setStyle, append, destroy, empty, hide} = dom
   {onEvent} = events
 
   content = undefined

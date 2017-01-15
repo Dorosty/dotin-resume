@@ -52,7 +52,7 @@ exports.changeManagerStatus = (applicantId, status) ->
         state.applicants.set applicants
 
 exports.clearAllNotifications = ->
-  post 'clearAllNotifications'
+  get 'clearAllNotifications'
   .then ->
     state.notifications.set []
 

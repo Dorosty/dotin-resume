@@ -5068,7 +5068,7 @@ exports.changeManagerStatus = function(applicantId, status) {
 };
 
 exports.clearAllNotifications = function() {
-  return post('clearAllNotifications').then(function() {
+  return get('clearAllNotifications').then(function() {
     return state.notifications.set([]);
   });
 };
@@ -5295,6 +5295,8 @@ exports.autoPing = function() {
 
 },{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
 var Q, applicants, extend, notifications, user;
+
+return;
 
 Q = require('../../q');
 
@@ -9876,11 +9878,11 @@ module.exports = component('views', function(arg, userId) {
         return E(null, ' - ' + jobName);
       }), E('h1', null, 'مشخصات فردی'), E(null, 'جنسیت: ' + applicantData['مشخصات فردی']['جنسیت']), E(null, 'نام پدر: ' + applicantData['مشخصات فردی']['نام پدر']), E(null, 'شماره شناسنامه: ' + applicantData['مشخصات فردی']['شماره شناسنامه']), E(null, 'محل تولد: ' + applicantData['مشخصات فردی']['محل تولد']), E(null, 'محل صدور: ' + applicantData['مشخصات فردی']['محل صدور']), E(null, 'ملیت: ' + applicantData['مشخصات فردی']['ملیت']), E(null, 'تابعیت: ' + applicantData['مشخصات فردی']['تابعیت']), E(null, 'دین: ' + applicantData['مشخصات فردی']['دین']), E(null, 'تاریخ تولد: ' + applicantData['مشخصات فردی']['تاریخ تولد']), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [E(null, 'وضعیت نظام وظیفه: ' + applicantData['مشخصات فردی']['وضعیت نظام وظیفه']), ((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E(null, 'نوع معافیت: ' + applicantData['مشخصات فردی']['نوع معافیت']), ((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E(null, 'دلیل معافیت: ' + applicantData['مشخصات فردی']['دلیل معافیت']) : void 0] : void 0] : void 0, E(null, 'وضعیت تاهل: ' + applicantData['مشخصات فردی']['وضعیت تاهل']), ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? E(null, 'تعداد فرزندان: ' + applicantData['مشخصات فردی']['تعداد فرزندان']) : void 0, E(null, 'تعداد افراد تحت تکفل: ' + applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']), E(null, 'نام معرف: ' + applicantData['مشخصات فردی']['نام معرف']), E('h4', null, 'ایمیل'), E({
         englishText: ' - ' + applicant.email
-      }), applicantData['مشخصات فردی']['ایمیل'].map(function(x) {
+      }), (applicantData['مشخصات فردی']['ایمیل'] || []).map(function(x) {
         return E({
           englishText: ' - ' + x
         });
-      }), E('h4', null, 'تلفن همراه'), E(null, ' - ' + applicant.phoneNumber), applicantData['مشخصات فردی']['تلفن همراه'].map(function(x) {
+      }), E('h4', null, 'تلفن همراه'), E(null, ' - ' + applicant.phoneNumber), (applicantData['مشخصات فردی']['تلفن همراه'] || []).map(function(x) {
         return E(null, ' - ' + x);
       }), E(null, 'آدرس محل سکونت دائم: ' + applicantData['مشخصات فردی']['آدرس محل سکونت دائم']), E(null, 'تلفن محل ثابت سکونت دائم: ' + applicantData['مشخصات فردی']['تلفن ثابت محل سکونت دائم']), E(null, 'آدرس محل سکونت فعلی: ' + applicantData['مشخصات فردی']['آدرس محل سکونت فعلی']), E(null, 'تلفن محل ثابت سکونت فعلی: ' + applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی']), E('h1', null, 'سوابق تحصیلی'), applicantData['سوابق تحصیلی']['سوابق تحصیلی'].map(function(x) {
         return [E(null, 'مقطع: ' + x['مقطع']), E(null, 'رشته تحصیلی: ' + x['رشته تحصیلی']), E(null, 'نام دانشگاه و شهر محل تحصیل: ' + x['نام دانشگاه و شهر محل تحصیل']), E(null, 'سال ورود: ' + x['سال ورود']), E(null, 'سال اخذ مدرک: ' + x['سال اخذ مدرک']), E(null, 'معدل: ' + x['معدل']), E(null, 'عنوان پایان‌نامه: ' + x['عنوان پایان‌نامه']), E(null, '------------------------------')];
@@ -10116,10 +10118,10 @@ tabNames = ['اطلاعات اولیه', 'اطلاعات تکمیلی', 'آزم�
 tabContents = [tab0, tab1, tab2, tab3, tab4, tab5];
 
 module.exports = component('profile', function(arg, arg1) {
-  var E, actionButtonInstance, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, indexLink, onEvent, service, setStyle, state, statusPlaceholder, tabs, text, view;
+  var E, actionButtonInstance, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, hide, indexLink, onEvent, service, setStyle, state, statusPlaceholder, tabs, text, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   applicant = arg1.applicant, gotoIndex = arg1.gotoIndex;
-  E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, empty = dom.empty;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
   content = void 0;
   currentTabIndex = 0;

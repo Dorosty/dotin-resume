@@ -52,11 +52,11 @@ module.exports = component 'views', ({dom, state}, userId) ->
       E null, 'نام معرف: ' + applicantData['مشخصات فردی']['نام معرف']
       E 'h4', null, 'ایمیل'
       E englishText: ' - ' + applicant.email
-      applicantData['مشخصات فردی']['ایمیل'].map (x) ->
+      (applicantData['مشخصات فردی']['ایمیل'] || []).map (x) ->
         E englishText: ' - ' + x
       E 'h4', null, 'تلفن همراه'
       E null, ' - ' + applicant.phoneNumber
-      applicantData['مشخصات فردی']['تلفن همراه'].map (x) ->
+      (applicantData['مشخصات فردی']['تلفن همراه'] || []).map (x) ->
         E null, ' - ' + x
       E null, 'آدرس محل سکونت دائم: ' + applicantData['مشخصات فردی']['آدرس محل سکونت دائم']
       E null, 'تلفن محل ثابت سکونت دائم: ' + applicantData['مشخصات فردی']['تلفن ثابت محل سکونت دائم']
