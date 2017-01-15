@@ -4,7 +4,6 @@ Q = require '../../q'
 {extend} = require '../../utils'
 
 applicants = [{
-  applicantsHRStatus: []
   userId: 0
   identificationCode: '0016503368'
   firstName: 'علی'
@@ -20,7 +19,6 @@ applicants = [{
   applicantsHRStatus: [{status: 1}, {status: 3}]
   applicantsManagerStatus: []
 }, {
-  applicantsHRStatus: []
   userId: 1
   identificationCode: '0016503368'
   firstName: 'سعید'
@@ -39,7 +37,6 @@ applicants = [{
 
 user =
   userId: 110
-  applicantsHRStatus: []
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
