@@ -469,19 +469,19 @@ module.exports = function(element) {
     E = dom.E, append = dom.append, destroy = dom.destroy, setStyle = dom.setStyle;
     onEvent = events.onEvent;
     defer(5)(function() {
-      append(E(body), [shade = E(style.shade), alert = E(style.alert, element)]);
+      append(E(body), [shade = E(style.shade), alert = E(style.alert, E(style.header), E(style.contents, element))]);
       onEvent(shade, 'click', close);
-      return setTimeout((function() {
+      return setTimeout(function() {
         setStyle(shade, style.shadeActive);
         return setStyle(alert, style.alertActive);
-      }));
+      });
     });
     close = function() {
       setStyle(shade, style.shade);
       setStyle(alert, style.alert);
       return setTimeout((function() {
         return destroy([shade, alert]);
-      }));
+      }), 500);
     };
     return close;
   })();
@@ -490,7 +490,7 @@ module.exports = function(element) {
 
 },{"../../utils":34,"../../utils/component":30,"../../utils/dom":32,"./style":7}],7:[function(require,module,exports){
 exports.shade = {
-  position: 'absolute',
+  position: 'fixed',
   top: 0,
   left: 0,
   right: 0,
@@ -507,13 +507,14 @@ exports.shadeActive = {
 };
 
 exports.alert = {
-  backgroundColor: 'red',
-  position: 'absolute',
+  overflow: 'hidden',
+  position: 'fixed',
   top: 100,
   left: '50%',
   marginLeft: -300,
   width: 600,
   height: 400,
+  borderRadius: 5,
   transition: '0.5s',
   opacity: 0,
   visibility: 'hidden'
@@ -522,6 +523,24 @@ exports.alert = {
 exports.alertActive = {
   opacity: 1,
   visibility: 'visible'
+};
+
+exports.header = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  height: 50,
+  backgroundColor: '#459d73'
+};
+
+exports.contents = {
+  position: 'absolute',
+  top: 50,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'white'
 };
 
 

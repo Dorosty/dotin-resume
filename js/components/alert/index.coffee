@@ -12,17 +12,17 @@ module.exports = (element) ->
       append E(body), [
         shade = E style.shade
         alert = E style.alert,
-          element
+          E style.header
+          E style.contents, element
       ]
       onEvent shade, 'click', close
-      setTimeout (->
+      setTimeout ->
         setStyle shade, style.shadeActive
         setStyle alert, style.alertActive
-      )#, 10
     close = ->
       setStyle shade, style.shade
       setStyle alert, style.alert
-      setTimeout (-> destroy [shade, alert])#, 500
+      setTimeout (-> destroy [shade, alert]), 500
 
 
     close
