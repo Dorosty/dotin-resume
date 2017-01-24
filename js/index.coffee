@@ -1,7 +1,6 @@
 Q = require './q'
 service = require './utils/service'
 page = require './page'
-alertMessages = require './alertMessages'
 {addPageCSS, addPageStyle} = require './utils/dom'
 
 Q.longStackSupport = true
@@ -47,7 +46,7 @@ addPageStyle "
 
 document.title = 'سامانه جذب داتین'
 
-alertMessages.do()
+# alertMessages.do()
 
 service.autoPing()
 
