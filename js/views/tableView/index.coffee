@@ -5,6 +5,7 @@ table = require './table'
 search = require './search'
 profile = require './profile'
 actionButton = require '../../components/actionButton'
+alert = require '../../components/alert'
 {extend, toDate} = require '../../utils'
 {getApplicantStatus} = require '../../utils/logic'
 
@@ -123,5 +124,8 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
       applicant.lastName ?= ''
     #################################
     update()
+
+
+  alert E null, 'salam'
 
   view
