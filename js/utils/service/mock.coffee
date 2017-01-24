@@ -1,4 +1,4 @@
-return
+# return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -186,8 +186,6 @@ user =
 applicants.forEach (applicant) ->
   extend applicant, applicantData: user.applicantData
 
-# user.applicantData = null
-
 notifications = [{
   userName: 'علی فرخی'
   userPersonalPic: null
@@ -213,8 +211,6 @@ notifications = [{
   time: 1373132854116
   applicantId: 1
 }]
-
-notifications = [].concat.apply [], [1..10].map -> notifications
 
 exports.ping = ->
   Q {user, applicants, notifications}

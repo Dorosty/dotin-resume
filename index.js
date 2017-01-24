@@ -5296,15 +5296,12 @@ exports.autoPing = function() {
 },{"../../q":27,"../log":36,"./ex":39,"./getPost":40,"./names":43}],42:[function(require,module,exports){
 var Q, applicants, extend, notifications, user;
 
-return;
-
 Q = require('../../q');
 
 extend = require('../../utils').extend;
 
 applicants = [
   {
-    applicantsHRStatus: [],
     userId: 0,
     identificationCode: '0016503368',
     firstName: 'علی',
@@ -5332,7 +5329,6 @@ applicants = [
     ],
     applicantsManagerStatus: []
   }, {
-    applicantsHRStatus: [],
     userId: 1,
     identificationCode: '0016503368',
     firstName: 'سعید',
@@ -5360,7 +5356,6 @@ applicants = [
 
 user = {
   userId: 110,
-  applicantsHRStatus: [],
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
@@ -5542,10 +5537,6 @@ notifications = [
     applicantId: 1
   }
 ];
-
-notifications = [].concat.apply([], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function() {
-  return notifications;
-}));
 
 exports.ping = function() {
   return Q({
@@ -9688,7 +9679,7 @@ module.exports = component('login', function(arg) {
   E = dom.E, empty = dom.empty, append = dom.append, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, enable = dom.enable, disable = dom.disable;
   onEvent = events.onEvent, onEnter = events.onEnter;
   component = E(null, E('img', style.bg), E(style.form, E('img', style.logo), E(style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'), E(style.formInputs, email = E('input', extend({
-    placeholder: 'کد ملی'
+    placeholder: 'کد ملی / نام کاربری'
   }, style.input)), password = E('input', extend({
     type: 'password',
     placeholder: 'رمز عبور'
@@ -9926,7 +9917,7 @@ ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 getApplicantStatus = require('../../utils/logic').getApplicantStatus;
 
 module.exports = component('tableView', function(arg) {
-  var E, actionButtonInstance, append, applicants, contents, dom, empty, events, gotoApplicant, gotoIndex, hide, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  var E, actionButtonInstance, append, applicants, contents, dom, empty, events, gotoApplicant, gotoIndex, headers, hide, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
@@ -9951,7 +9942,7 @@ module.exports = component('tableView', function(arg) {
     properties: {
       multiSelect: true
     },
-    headers: [
+    headers: headers = [
       {
         name: 'نام',
         getValue: function(arg1) {
@@ -10035,6 +10026,10 @@ module.exports = component('tableView', function(arg) {
         }
       }
     ],
+    sort: {
+      header: headers[1],
+      direction: 'down'
+    },
     handlers: {
       select: gotoApplicant,
       update: function(descriptors) {

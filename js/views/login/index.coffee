@@ -14,7 +14,7 @@ module.exports = component 'login', ({dom, events, service}) ->
       E 'img', style.logo
       E style.title, 'شرکت نرم‌افزاری داتیس آرین قشم'
       E style.formInputs,
-        email = E 'input', extend {placeholder: 'کد ملی'}, style.input
+        email = E 'input', extend {placeholder: 'کد ملی / نام کاربری'}, style.input
         password = E 'input', extend {type: 'password', placeholder: 'رمز عبور'}, style.input
         captchaPlaceholder = E style.captchaSection
         E style.submitSection,

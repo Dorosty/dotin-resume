@@ -32,7 +32,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
         entityId: 'userId'
         properties:
           multiSelect: true
-        headers: [
+        headers: headers = [
           {
             name: 'نام'
             getValue: ({firstName, lastName}) ->
@@ -81,6 +81,10 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
               append td, E 'a', extend {href: '/webApi/resume?address=' + resume}, style.icon, target: '_blank', class: 'fa fa-download', color: '#449e73'
           }
         ]
+        sort: {
+          header: headers[1]
+          direction: 'down'
+        }
         handlers:
           select: gotoApplicant
           update: (descriptors) ->
