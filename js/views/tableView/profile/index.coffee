@@ -7,7 +7,9 @@ tab3 = require './tab3'
 tab4 = require './tab4'
 tab5 = require './tab5'
 actionButton = require '../../../components/actionButton'
+changeStatus = require './changeStatus'
 {extend} = require '../../../utils'
+logic = require '../../../utils/logic'
 
 tabNames = [
   'اطلاعات اولیه'
@@ -84,25 +86,40 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     fn 1
     fn 2
     fn 3
+    ts = []
     empty statusPlaceholder
+    append statusPlaceholder, 
+      E style.statusSegment,
+        E style.statusCircle
+        E extend {class: 'fa fa-check'}, style.statusIcon
+        do ->
+          t = E style.statusText, 'ثبت'
+          ts.push t
+          t
+    append statusPlaceholder,
+      applicant.applicantsHRStatus.map ({status}, i, arr) -> [
+        E style.statusConnector
+        E style.statusSegment,
+          E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
+          E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
+          do ->
+            t = E style.statusText, logic.hrStatusToText status
+            ts.push t
+            t
+      ]
     append statusPlaceholder, [
-      E style.statusSegment,
-        E style.statusCircle
-        E extend {class: 'fa fa-check'}, style.statusIcon
-        t1 = E style.statusText, 'ثبت'
-      E style.statusConnector
-      E style.statusSegment,
-        E style.statusCircle
-        E extend {class: 'fa fa-check'}, style.statusIcon
-        t2 = E style.statusText, 'مصاحبه تلفنی'
       E style.statusConnectorActive
-      E style.statusSegment,
-        E style.statusCircleActive
-        E extend {class: 'fa fa-question'}, style.statusIcon
-        t3 = E style.statusTextActive, 'در انتظار تکمیل اطلاعات'
-    ]
+      changeStatusButton = E extend({cursor: 'pointer'}, style.statusSegment),
+        E style.statusCirclePlus
+        E style.statusIconPlus
+        do ->
+          t = E style.statusText, 'ایجاد وضعیت'
+          ts.push t
+          t
+      ]
+    onEvent changeStatusButton, 'click', -> changeStatus applicant
     setTimeout ->
-      [t1, t2, t3].forEach (t) ->
+      ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
 
   actionButtonInstance.onSelect (value) ->

@@ -86,6 +86,10 @@ exports.statusCircle =
 exports.statusCircleActive = extend {}, exports.statusCircle,
   backgroundColor: '#449e73'
 
+exports.statusCirclePlus = extend {}, exports.statusCircle,
+  backgroundColor: 'white'
+  border: '2px solid #449e73'
+
 exports.statusIcon =
   position: 'absolute'
   color: 'white'
@@ -96,6 +100,10 @@ exports.statusIcon =
   height: 16
   lineHeight: 16
   textAlign: 'center'
+
+exports.statusIconPlus = extend {}, exports.statusIcon,
+  class: 'fa fa-plus'
+  color: '#ccc'
 
 exports.statusText =
   position: 'absolute'

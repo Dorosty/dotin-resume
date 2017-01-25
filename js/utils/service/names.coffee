@@ -24,4 +24,6 @@ exports.states = [
   'user'
   'applicants'
   'notifications'
+  'managers'
+  'jobs'
 ]

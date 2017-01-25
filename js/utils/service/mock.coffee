@@ -16,7 +16,7 @@ applicants = [{
   personalPic: null
   modificationTime: 1473132854116
   notes: []
-  applicantsHRStatus: [{status: 1}, {status: 3}]
+  applicantsHRStatus: [{status: 0}, {status: 2}]
   applicantsManagerStatus: []
 }, {
   userId: 1
@@ -31,9 +31,19 @@ applicants = [{
   personalPic: null
   modificationTime: 1373132854116
   notes: ['aaaaaaaaaaaa']
-  applicantsHRStatus: [{status: 2}]
+  applicantsHRStatus: [{status: 1}]
   applicantsManagerStatus: []
 }]
+
+managers = [{
+  firstName: 'روح‌الله'
+  lastName: 'محمد‌خانی'
+}, {
+  firstName: 'حامد'
+  lastName: 'حسینی‌نژاد'
+}]
+
+jobs = [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}, {jobName: 'UX designer'}]
 
 user =
   userId: 110
@@ -213,7 +223,7 @@ notifications = [{
 }]
 
 exports.ping = ->
-  Q {user, applicants, notifications}
+  Q {user, notifications, applicants, managers, jobs}
 
 exports.getUser = ->
   Q {user, notifications}

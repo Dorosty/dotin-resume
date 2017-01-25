@@ -1,11 +1,13 @@
 component = require '../../utils/component'
-style = require './style'
+_style = require './style'
 list = require './list'
-{toPersian, textIsInSearch} = require '../../utils'
+{toPersian, textIsInSearch, extend} = require '../../utils'
 
-module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex}) ->
+module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex, extendStyle = {}}) ->
   {E, setStyle} = dom
   {onEvent, onEnter} = events
+
+  style = extend {}, _style, extendStyle
 
   getId ?= (x) -> x
   getTitle ?= (x) -> x

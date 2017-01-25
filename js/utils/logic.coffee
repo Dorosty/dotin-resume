@@ -1,33 +1,36 @@
 exports.passwordIsValid = (password) -> password.length >= 6
 
-exports.getApplicantStatus = ({applicantsHRStatus, applicantData}) ->
+exports.getApplicantStatus = ({applicantsHRStatus, applicantsManagerStatus, applicantData}) ->
   if applicantsHRStatus.length
     switch applicantsHRStatus[applicantsHRStatus.length - 1].status
       when -1
         'بایگانی'
-      when 0
+      else
         if applicantData && applicantData.trim()
           try
             JSON.parse applicantData
-            'اطلاعات تکمیل شده'
+            switch applicantsHRStatus[applicantsHRStatus.length - 1].status
+              when 0
+                'در انتظار مصاحبه تلفنی'
+              when 1
+                'در انتظار مصاحبه فنی'
+              when 2
+                'در انتظار مصاحبه عمومی'
           catch
             'در انتظار تکمیل اطلاعات'
         else
           'در انتظار تکمیل اطلاعات'
-      when 1
-        'در انتظار مصاحبه تلفنی'
-      when 2
-        'در انتظار مصاحبه فنی'
-      when 3
-        'در انتظار مصاحبه عمومی'
-      when 4
-        'در انتظار تصمیم‌گیری'
-      when 5
-        'مراحل اداری '
-      when 6
-        'جذب شده'
   else
     'ثبت شده'
+
+exports.hrStatusToText = (status) ->
+  switch status
+    when 0
+      'مصاحبه تلفنی'
+    when 1
+      'مصاحبه فنی'
+    when 2
+      'مصاحبه عمومی'
 
 exports.actionToText = (action) ->
   #############################################

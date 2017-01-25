@@ -36,7 +36,7 @@ module.exports = component 'applicantFormEducation', ({dom, events}, {setData, r
       entries.push entry = {}
       rows.push row = E 'tr', null,
         E 'td', style.td, 
-          i0 = do ->          
+          i0 = do ->
             i0 = f = E dropdown, items: ['دیپلم', 'کاردانی', 'کارشناسی', 'کارشناسی ارشد', 'دکتری']
             setStyle f.input, extend {}, style.input, width: 150
             i0

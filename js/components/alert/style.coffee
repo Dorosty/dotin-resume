@@ -19,8 +19,7 @@ exports.alert =
   top: 100
   left: '50%'
   marginLeft: -300
-  width: 600
-  height: 400
+  width: 700
   borderRadius: 5
   transition: '0.5s'
   opacity: 0
@@ -35,15 +34,23 @@ exports.header =
   top: 0
   left: 0
   right: 0
-  height: 70
-  lineHeight: 70
+  height: 55
+  lineHeight: 55
+  paddingRight: 20
   color: 'white'
   backgroundColor: '#459d73'
 
-exports.contents =
+exports.close =
   position: 'absolute'
-  top: 70
-  left: 0
-  right: 0
-  bottom: 0
+  top: 20
+  left: 20
+  width: 15
+  height: 15
+  lineHeight: 15
+  fontSize: 15
+  class: 'fa fa-times'
+  cursor: 'pointer'
+
+exports.contents =
+  marginTop: 55
   backgroundColor: 'white'
