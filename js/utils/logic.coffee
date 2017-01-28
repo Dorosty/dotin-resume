@@ -10,11 +10,11 @@ exports.getApplicantStatus = ({applicantsHRStatus, applicantsManagerStatus, appl
           try
             JSON.parse applicantData
             switch applicantsHRStatus[applicantsHRStatus.length - 1].status
-              when 0
-                'در انتظار مصاحبه تلفنی'
-              when 1
-                'در انتظار مصاحبه فنی'
               when 2
+                'در انتظار مصاحبه تلفنی'
+              when 7
+                'در انتظار مصاحبه فنی'
+              when 8
                 'در انتظار مصاحبه عمومی'
           catch
             'در انتظار تکمیل اطلاعات'
@@ -25,23 +25,23 @@ exports.getApplicantStatus = ({applicantsHRStatus, applicantsManagerStatus, appl
 
 exports.hrStatusToText = (status) ->
   switch status
-    when 0
-      'مصاحبه تلفنی'
-    when 1
-      'مصاحبه فنی'
     when 2
+      'مصاحبه تلفنی'
+    when 7
+      'مصاحبه فنی'
+    when 8
       'مصاحبه عمومی'
 exports.textToHrStatus = (status) ->
   switch status
     when 'مصاحبه تلفنی'
-      0
-    when 'مصاحبه فنی'
-      1
-    when 'مصاحبه عمومی'
       2
+    when 'مصاحبه فنی'
+      7
+    when 'مصاحبه عمومی'
+      8
 
 exports.actionToText = (action) ->
-  #############################################
+  return 'to be implemented'
   switch action
     when 0
       'درخواست مصاحبه فنی'
@@ -49,6 +49,7 @@ exports.actionToText = (action) ->
       'تغییر وضعیت به مصاحبه فنی'
 
 exports.actionModifiable = (action) ->
+  return true
   switch action
     when 0
       true

@@ -75,17 +75,17 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   state.all ['applicants', 'user'], ([applicants, user]) ->
     [applicant] = applicants.filter ({userId}) -> userId is applicant.userId
-    fn = (i) ->
+    fn = (i, s) ->
       item = actionButtonInstance.items()[i - 1]
-      if applicant.applicantsHRStatus.filter(({status}) -> status is i).length
+      if applicant.applicantsHRStatus.filter(({status}) -> status is s).length
         setStyle item, color: '#c5c5c5'
-      else if applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is i && managerId is user.userId).length
+      else if applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is s && managerId is user.userId).length
         setStyle item, color: 'green'
       else
         setStyle item, color: 'black'
-    fn 1
-    fn 2
-    fn 3
+    fn 1, 1
+    fn 2, 5
+    fn 3, 4
     ts = []
     editStatusButton = undefined
     telephoniSeen = omoomiSeen = fanniLast = false
@@ -147,6 +147,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   actionButtonInstance.onSelect (value) ->
     i = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی'].indexOf(value) + 1
+    i = [1, 5, 4][i]
     state.user.on once: true, (user) ->
       unless applicant.applicantsHRStatus.filter(({status}) -> status is i).length || applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is i && managerId is user.userId).length
         service.changeManagerStatus applicant.userId, i

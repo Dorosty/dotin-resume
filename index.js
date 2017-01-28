@@ -4889,11 +4889,11 @@ exports.getApplicantStatus = function(arg) {
           try {
             JSON.parse(applicantData);
             switch (applicantsHRStatus[applicantsHRStatus.length - 1].status) {
-              case 0:
-                return 'در انتظار مصاحبه تلفنی';
-              case 1:
-                return 'در انتظار مصاحبه فنی';
               case 2:
+                return 'در انتظار مصاحبه تلفنی';
+              case 7:
+                return 'در انتظار مصاحبه فنی';
+              case 8:
                 return 'در انتظار مصاحبه عمومی';
             }
           } catch (error) {
@@ -4910,11 +4910,11 @@ exports.getApplicantStatus = function(arg) {
 
 exports.hrStatusToText = function(status) {
   switch (status) {
-    case 0:
-      return 'مصاحبه تلفنی';
-    case 1:
-      return 'مصاحبه فنی';
     case 2:
+      return 'مصاحبه تلفنی';
+    case 7:
+      return 'مصاحبه فنی';
+    case 8:
       return 'مصاحبه عمومی';
   }
 };
@@ -4922,15 +4922,16 @@ exports.hrStatusToText = function(status) {
 exports.textToHrStatus = function(status) {
   switch (status) {
     case 'مصاحبه تلفنی':
-      return 0;
-    case 'مصاحبه فنی':
-      return 1;
-    case 'مصاحبه عمومی':
       return 2;
+    case 'مصاحبه فنی':
+      return 7;
+    case 'مصاحبه عمومی':
+      return 8;
   }
 };
 
 exports.actionToText = function(action) {
+  return 'to be implemented';
   switch (action) {
     case 0:
       return 'درخواست مصاحبه فنی';
@@ -4940,6 +4941,7 @@ exports.actionToText = function(action) {
 };
 
 exports.actionModifiable = function(action) {
+  return true;
   switch (action) {
     case 0:
       return true;
@@ -5051,10 +5053,9 @@ exports.submitProfileData = function(data) {
 };
 
 exports.changeHRStatus = function(applicantId, status) {
-  return post('changeHRStatus', {
-    applicantId: applicantId,
-    status: status.status
-  }).then(function() {
+  return post('changeHRStatus', extend({
+    applicantId: applicantId
+  }, status)).then(function() {
     return state.applicants.on({
       once: true
     }, function(applicants) {
@@ -5338,6 +5339,8 @@ exports.autoPing = function() {
 },{"../../q":28,"../log":35,"./ex":38,"./getPost":39,"./names":42}],41:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
 
+return;
+
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -5398,9 +5401,11 @@ applicants = [
 
 managers = [
   {
+    userId: 10,
     firstName: 'روح‌الله',
     lastName: 'محمد‌خانی'
   }, {
+    userId: 11,
     firstName: 'حامد',
     lastName: 'حسینی‌نژاد'
   }
@@ -5408,10 +5413,13 @@ managers = [
 
 jobs = [
   {
+    jobId: 0,
     jobName: 'Java developer'
   }, {
+    jobId: 1,
     jobName: 'Javascript developer'
   }, {
+    jobId: 2,
     jobName: 'UX designer'
   }
 ];
@@ -10041,7 +10049,7 @@ module.exports = component('tableView', function(arg) {
 
 
 },{"../../components/actionButton":2,"../../utils":34,"../../utils/component":30,"../../utils/logic":36,"./profile":90,"./search":106,"./sidebar":108,"./style":110,"./table":112}],88:[function(require,module,exports){
-var alert, component, dateInput, dropdown, logic, style;
+var alert, component, dateInput, dropdown, logic, style, toTimestamp;
 
 style = require('./style');
 
@@ -10055,13 +10063,15 @@ dateInput = require('../../../../components/dateInput');
 
 logic = require('../../../../utils/logic');
 
+toTimestamp = require('../../../../utils').toTimestamp;
+
 module.exports = function(applicant) {
   return component('changeStatus', function(arg) {
-    var E, alertInstance, append, close, disable, dom, enable, enabled, events, headerInput, hide, onEvent, p1, p2, p2Input, p2Input0, p2Input1, p2Input2, service, setStyle, show, state, submit, update;
+    var E, alertInstance, append, close, disable, dom, enable, enabled, events, headerInput, hide, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, service, setStyle, show, state, submit, update;
     dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
     E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
     onEvent = events.onEvent;
-    p2Input0 = p2Input1 = p2Input2 = void 0;
+    p1Input0 = p1Input1 = p1Input2 = void 0;
     alertInstance = alert('تغییر وضعیت به ...', E(style.alert, headerInput = (function() {
       var f;
       f = E(dropdown, {
@@ -10101,7 +10111,7 @@ module.exports = function(applicant) {
           return enable();
         case 'مصاحبه فنی':
           show(p1);
-          if (p2Input0.value() && p2Input1.value() && p2Input2.valid()) {
+          if (p1Input0.value() && p1Input1.value() && p1Input2.valid()) {
             return enable();
           }
           break;
@@ -10118,7 +10128,7 @@ module.exports = function(applicant) {
       var jobs, managers;
       jobs = arg1[0], managers = arg1[1];
       return append(p1, [
-        p2Input0 = (function() {
+        p1Input0 = (function() {
           var f;
           f = E(dropdown, {
             items: jobs,
@@ -10134,7 +10144,7 @@ module.exports = function(applicant) {
             return update();
           });
           return f;
-        })(), p2Input1 = (function() {
+        })(), p1Input1 = (function() {
           var f;
           f = E(dropdown, {
             items: managers,
@@ -10150,7 +10160,7 @@ module.exports = function(applicant) {
             return update();
           });
           return f;
-        })(), p2Input2 = (function() {
+        })(), p1Input2 = (function() {
           var f;
           f = E(dateInput);
           setStyle(f, style.dateInput);
@@ -10167,9 +10177,26 @@ module.exports = function(applicant) {
       if (!enabled) {
         return;
       }
-      service.changeHRStatus(applicant.userId, {
-        status: logic.textToHrStatus(headerInput.value())
-      });
+      switch (headerInput.value()) {
+        case 'مصاحبه تلفنی':
+          service.changeHRStatus(applicant.userId, {
+            status: logic.textToHrStatus(headerInput.value())
+          });
+          break;
+        case 'مصاحبه فنی':
+          service.changeHRStatus(applicant.userId, {
+            status: logic.textToHrStatus(headerInput.value()),
+            jobId: p1Input0.value().jobId,
+            managerId: p1Input1.value().userId,
+            interViewTime: toTimestamp(p1Input2.value())
+          });
+          break;
+        case 'مصاحبه عمومی':
+          service.changeHRStatus(applicant.userId, {
+            status: logic.textToHrStatus(headerInput.value()),
+            interViewTime: toTimestamp(p2Input.value())
+          });
+      }
       return alertInstance.close();
     });
     return alertInstance;
@@ -10177,7 +10204,7 @@ module.exports = function(applicant) {
 };
 
 
-},{"../../../../components/alert":6,"../../../../components/dateInput":10,"../../../../components/dropdown":12,"../../../../utils/component":30,"../../../../utils/logic":36,"./style":89}],89:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../components/dateInput":10,"../../../../components/dropdown":12,"../../../../utils":34,"../../../../utils/component":30,"../../../../utils/logic":36,"./style":89}],89:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -10390,13 +10417,13 @@ module.exports = component('profile', function(arg, arg1) {
       userId = arg3.userId;
       return userId === applicant.userId;
     })[0];
-    fn = function(i) {
+    fn = function(i, s) {
       var item;
       item = actionButtonInstance.items()[i - 1];
       if (applicant.applicantsHRStatus.filter(function(arg3) {
         var status;
         status = arg3.status;
-        return status === i;
+        return status === s;
       }).length) {
         return setStyle(item, {
           color: '#c5c5c5'
@@ -10404,7 +10431,7 @@ module.exports = component('profile', function(arg, arg1) {
       } else if (applicant.applicantsManagerStatus.filter(function(arg3) {
         var managerId, status;
         managerId = arg3.managerId, status = arg3.status;
-        return status === i && managerId === user.userId;
+        return status === s && managerId === user.userId;
       }).length) {
         return setStyle(item, {
           color: 'green'
@@ -10415,9 +10442,9 @@ module.exports = component('profile', function(arg, arg1) {
         });
       }
     };
-    fn(1);
-    fn(2);
-    fn(3);
+    fn(1, 1);
+    fn(2, 5);
+    fn(3, 4);
     ts = [];
     editStatusButton = void 0;
     telephoniSeen = omoomiSeen = fanniLast = false;
@@ -10498,6 +10525,7 @@ module.exports = component('profile', function(arg, arg1) {
   actionButtonInstance.onSelect(function(value) {
     var i;
     i = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی'].indexOf(value) + 1;
+    i = [1, 5, 4][i];
     return state.user.on({
       once: true
     }, function(user) {

@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -36,14 +36,16 @@ applicants = [{
 }]
 
 managers = [{
+  userId: 10
   firstName: 'روح‌الله'
   lastName: 'محمد‌خانی'
 }, {
+  userId: 11
   firstName: 'حامد'
   lastName: 'حسینی‌نژاد'
 }]
 
-jobs = [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}, {jobName: 'UX designer'}]
+jobs = [{jobId: 0, jobName: 'Java developer'}, {jobId: 1, jobName: 'Javascript developer'}, {jobId: 2, jobName: 'UX designer'}]
 
 user =
   userId: 110

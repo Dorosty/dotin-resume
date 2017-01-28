@@ -4,12 +4,13 @@ alert = require '../../../../components/alert'
 dropdown = require '../../../../components/dropdown'
 dateInput = require '../../../../components/dateInput'
 logic = require '../../../../utils/logic'
+{toTimestamp} = require '../../../../utils'
 
 module.exports = (applicant) ->
   do component 'changeStatus', ({dom, events, state, service}) ->
     {E, setStyle, show, hide, append} = dom
     {onEvent} = events
-    p2Input0 = p2Input1 = p2Input2 = undefined
+    p1Input0 = p1Input1 = p1Input2 = undefined
     alertInstance = alert 'تغییر وضعیت به ...',
       E style.alert,
         headerInput = do ->
@@ -48,26 +49,26 @@ module.exports = (applicant) ->
           enable()
         when 'مصاحبه فنی'
           show p1
-          enable() if p2Input0.value() && p2Input1.value() && p2Input2.valid()
+          enable() if p1Input0.value() && p1Input1.value() && p1Input2.valid()
         when 'مصاحبه عمومی'
           show p2
           enable() if p2Input.valid()
 
     state.all ['jobs', 'managers'], once: true, ([jobs, managers]) ->
       append p1, [
-        p2Input0 = do ->
+        p1Input0 = do ->
           f = E dropdown, items: jobs, getTitle: ({jobName}) -> jobName
           setStyle f, style.dropdown
           setStyle f.input, style.dropdownInput
           f.onChange -> update()
           f
-        p2Input1 = do ->
+        p1Input1 = do ->
           f = E dropdown, items: managers, getTitle: ({firstName, lastName}) -> "#{firstName} #{lastName}"
           setStyle f, style.dropdown
           setStyle f.input, style.dropdownInput
           f.onChange -> update()
           f
-        p2Input2 = do ->
+        p1Input2 = do ->
           f = E dateInput
           setStyle f, style.dateInput
           setStyle f.input, style.dateInputInput
@@ -78,8 +79,20 @@ module.exports = (applicant) ->
     onEvent close, 'click', alertInstance.close
     onEvent submit, 'click', ->
       return unless enabled
-      ######################
-      service.changeHRStatus applicant.userId, status: logic.textToHrStatus headerInput.value()
+      switch headerInput.value()
+        when 'مصاحبه تلفنی'
+          service.changeHRStatus applicant.userId,
+            status: logic.textToHrStatus headerInput.value()
+        when 'مصاحبه فنی'
+          service.changeHRStatus applicant.userId,
+            status: logic.textToHrStatus headerInput.value()
+            jobId: p1Input0.value().jobId
+            managerId: p1Input1.value().userId
+            interViewTime: toTimestamp p1Input2.value()
+        when 'مصاحبه عمومی'
+          service.changeHRStatus applicant.userId,
+            status: logic.textToHrStatus headerInput.value()
+            interViewTime: toTimestamp p2Input.value()
       alertInstance.close()
 
 
