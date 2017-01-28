@@ -97,9 +97,9 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           ts.push t
           t
     append statusPlaceholder,
-      applicant.applicantsHRStatus.map ({status}, i, arr) -> [
+      applicant.applicantsHRStatus.map ({statusId, status}, i, arr) -> [
         E style.statusConnector
-        E style.statusSegment,
+        x = E extend({cursor: 'pointer'}, style.statusSegment),
           E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
           E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
           do ->

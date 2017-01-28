@@ -3,7 +3,7 @@ style = require './style'
 {extend, toDate, toTime} = require '../../../utils'
 {actionToText, actionModifiable} = require '../../../utils/logic'
 
-module.exports = component 'sidebar', ({dom, state, events, service}, {gotoApplicant}) ->
+module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex, gotoApplicant}) ->
   {E, text, setStyle, empty, append} = dom
   {onEvent, onResize} = events
   
@@ -42,6 +42,8 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoAppli
     if linkIndex is i
       setStyle link, style.linkActive
     onEvent link, 'click', ->
+      if i is 0
+        gotoIndex()
       linkIndex = i
       setStyle links, style.link
       setStyle link, style.linkActive

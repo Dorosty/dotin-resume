@@ -23,7 +23,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   selectedApplicants = []
 
   view = E 'span', null,
-    E sidebar, {gotoApplicant}
+    E sidebar, {gotoIndex, gotoApplicant}
     contents = E style.contents,
       E style.action,
         actionButtonInstance = E actionButton, items: ['دعوت به مصاحبه', 'چاپ']

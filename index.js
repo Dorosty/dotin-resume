@@ -9881,6 +9881,7 @@ module.exports = component('tableView', function(arg) {
   };
   selectedApplicants = [];
   view = E('span', null, E(sidebar, {
+    gotoIndex: gotoIndex,
     gotoApplicant: gotoApplicant
   }), contents = E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
     items: ['دعوت به مصاحبه', 'چاپ']
@@ -11353,9 +11354,9 @@ ref = require('../../../utils'), extend = ref.extend, toDate = ref.toDate, toTim
 ref1 = require('../../../utils/logic'), actionToText = ref1.actionToText, actionModifiable = ref1.actionModifiable;
 
 module.exports = component('sidebar', function(arg, arg1) {
-  var E, append, clearAllNotifications, dom, empty, events, gotoApplicant, linkIndex, links, logout, name, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, notificationsPlaceholder, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
+  var E, append, clearAllNotifications, dom, empty, events, gotoApplicant, gotoIndex, linkIndex, links, logout, name, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, notificationsPlaceholder, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
   dom = arg.dom, state = arg.state, events = arg.events, service = arg.service;
-  gotoApplicant = arg1.gotoApplicant;
+  gotoIndex = arg1.gotoIndex, gotoApplicant = arg1.gotoApplicant;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, empty = dom.empty, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
   view = E(style.sidebar, notificationsPlaceholder = E(style.notifications, E(style.notificationsHeader, clearAllNotifications = E(style.clearAllNotifications, 'پاک شدن همه')), notificationsPanel = E()), E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(extend({
@@ -11383,6 +11384,9 @@ module.exports = component('sidebar', function(arg, arg1) {
       setStyle(link, style.linkActive);
     }
     onEvent(link, 'click', function() {
+      if (i === 0) {
+        gotoIndex();
+      }
       linkIndex = i;
       setStyle(links, style.link);
       return setStyle(link, style.linkActive);
