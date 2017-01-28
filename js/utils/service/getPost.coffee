@@ -4,6 +4,7 @@ ex = require './ex'
 {states} = require './names'
 {eraseCookie} = require '../cookies'
 state = require '../state'
+map = require './map'
 
 handle = (isGet) -> (serviceName, params) ->
   stateChangingServices[serviceName]?.running = true
@@ -33,8 +34,8 @@ handle = (isGet) -> (serviceName, params) ->
         else
           false
       unless dontSetState
-        if response[name]
-          responseValue = response[name]
+        if response[name] || (map[name] && response[map[name]])
+          responseValue = response[name] || response[map[name]]
           setTimeout ->
             state[name].set responseValue
         if name is 'user' && response.loggedOut
