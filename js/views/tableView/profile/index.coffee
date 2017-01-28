@@ -87,6 +87,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     fn 2
     fn 3
     ts = []
+    editStatusButton = undefined
+    telephoniSeen = omoomiSeen = fanniLast = false
     empty statusPlaceholder
     append statusPlaceholder, 
       E style.statusSegment,
@@ -97,16 +99,37 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           ts.push t
           t
     append statusPlaceholder,
-      applicant.applicantsHRStatus.map ({statusId, status}, i, arr) -> [
-        E style.statusConnector
-        x = E extend({cursor: 'pointer'}, style.statusSegment),
-          E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
-          E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
+      applicant.applicantsHRStatus.map ({statusId, status}, i, arr) ->
+        logicText = logic.hrStatusToText status
+        switch logicText
+          when 'مصاحبه تلفنی'
+            fanniLast = false
+            if telephoniSeen
+              return
+            telephoniSeen = true
+          when 'مصاحبه عمومی'
+            fanniLast = false
+            if omoomiSeen
+              return
+            omoomiSeen = true
+          when 'مصاحبه فنی'
+            if fanniLast
+              return
+            fanniLast = true
+        [
+          E style.statusConnector
           do ->
-            t = E style.statusText, logic.hrStatusToText status
-            ts.push t
-            t
-      ]
+            x = E extend({cursor: 'pointer'}, style.statusSegment),
+              E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
+              E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
+              do ->
+                t = E style.statusText, logic.hrStatusToText status
+                ts.push t
+                t
+            if i is arr.length - 1
+              editStatusButton = x
+            x
+        ]
     append statusPlaceholder, [
       E style.statusConnectorActive
       changeStatusButton = E extend({cursor: 'pointer'}, style.statusSegment),
@@ -118,6 +141,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           t
       ]
     onEvent changeStatusButton, 'click', -> changeStatus applicant
+    onEvent editStatusButton, 'click', -> changeStatus applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15

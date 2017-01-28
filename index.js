@@ -10360,7 +10360,7 @@ module.exports = component('profile', function(arg, arg1) {
     }
   });
   state.all(['applicants', 'user'], function(arg2) {
-    var applicants, changeStatusButton, fn, ts, user;
+    var applicants, changeStatusButton, editStatusButton, fanniLast, fn, omoomiSeen, telephoniSeen, ts, user;
     applicants = arg2[0], user = arg2[1];
     applicant = applicants.filter(function(arg3) {
       var userId;
@@ -10396,6 +10396,8 @@ module.exports = component('profile', function(arg, arg1) {
     fn(2);
     fn(3);
     ts = [];
+    editStatusButton = void 0;
+    telephoniSeen = omoomiSeen = fanniLast = false;
     empty(statusPlaceholder);
     append(statusPlaceholder, E(style.statusSegment, E(style.statusCircle), E(extend({
       "class": 'fa fa-check'
@@ -10406,17 +10408,48 @@ module.exports = component('profile', function(arg, arg1) {
       return t;
     })()));
     append(statusPlaceholder, applicant.applicantsHRStatus.map(function(arg3, i, arr) {
-      var status;
-      status = arg3.status;
+      var logicText, status, statusId;
+      statusId = arg3.statusId, status = arg3.status;
+      logicText = logic.hrStatusToText(status);
+      switch (logicText) {
+        case 'مصاحبه تلفنی':
+          fanniLast = false;
+          if (telephoniSeen) {
+            return;
+          }
+          telephoniSeen = true;
+          break;
+        case 'مصاحبه عمومی':
+          fanniLast = false;
+          if (omoomiSeen) {
+            return;
+          }
+          omoomiSeen = true;
+          break;
+        case 'مصاحبه فنی':
+          if (fanniLast) {
+            return;
+          }
+          fanniLast = true;
+      }
       return [
-        E(style.statusConnector), E(style.statusSegment, E(i === arr.length - 1 ? style.statusCircleActive : style.statusCircle), E(extend({
-          "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
-        }, style.statusIcon)), (function() {
-          var t;
-          t = E(style.statusText, logic.hrStatusToText(status));
-          ts.push(t);
-          return t;
-        })())
+        E(style.statusConnector), (function() {
+          var x;
+          x = E(extend({
+            cursor: 'pointer'
+          }, style.statusSegment), E(i === arr.length - 1 ? style.statusCircleActive : style.statusCircle), E(extend({
+            "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
+          }, style.statusIcon)), (function() {
+            var t;
+            t = E(style.statusText, logic.hrStatusToText(status));
+            ts.push(t);
+            return t;
+          })());
+          if (i === arr.length - 1) {
+            editStatusButton = x;
+          }
+          return x;
+        })()
       ];
     }));
     append(statusPlaceholder, [
@@ -10431,6 +10464,9 @@ module.exports = component('profile', function(arg, arg1) {
     ]);
     onEvent(changeStatusButton, 'click', function() {
       return changeStatus(applicant);
+    });
+    onEvent(editStatusButton, 'click', function() {
+      return changeStatus(applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]);
     });
     return setTimeout(function() {
       return ts.forEach(function(t) {
