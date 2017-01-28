@@ -5056,9 +5056,7 @@ exports.changeHRStatus = function(applicantId, status) {
       applicantsHRStatus = applicant.applicantsHRStatus;
       applicants = applicants.slice();
       applicantsHRStatus = applicantsHRStatus.slice();
-      applicantsHRStatus.push({
-        status: status
-      });
+      applicantsHRStatus.push(status);
       applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
         applicantsHRStatus: applicantsHRStatus
       });
@@ -9884,7 +9882,7 @@ module.exports = component('tableView', function(arg) {
     gotoIndex: gotoIndex,
     gotoApplicant: gotoApplicant
   }), contents = E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
-    items: ['دعوت به مصاحبه', 'چاپ']
+    items: ['چاپ']
   })), searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
@@ -10008,8 +10006,6 @@ module.exports = component('tableView', function(arg) {
     }
     selectedApplicant = selectedApplicants[0];
     switch (value) {
-      case 'دعوت به مصاحبه':
-        return service.changeHRStatus(selectedApplicant.userId, 0);
       case 'چاپ':
         return window.open('#print_' + selectedApplicant.userId, '_blank');
     }
@@ -10048,8 +10044,8 @@ dateInput = require('../../../../components/dateInput');
 
 module.exports = function(applicant) {
   return component('changeStatus', function(arg) {
-    var E, alertInstance, append, close, disable, dom, enable, events, headerInput, hide, onEvent, p1, p2, p2Input, p2Input0, p2Input1, p2Input2, setStyle, show, state, submit, update;
-    dom = arg.dom, events = arg.events, state = arg.state;
+    var E, alertInstance, append, close, disable, dom, enable, events, headerInput, hide, onEvent, p1, p2, p2Input, p2Input0, p2Input1, p2Input2, service, setStyle, show, state, submit, update;
+    dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
     E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
     onEvent = events.onEvent;
     p2Input0 = p2Input1 = p2Input2 = void 0;
@@ -10149,6 +10145,9 @@ module.exports = function(applicant) {
       ]);
     });
     onEvent(close, 'click', alertInstance.close);
+    onEvent(submit, 'click', function() {
+      return service.changeHRStatus;
+    });
     return alertInstance;
   })();
 };
@@ -10408,10 +10407,9 @@ module.exports = component('profile', function(arg, arg1) {
       return t;
     })()));
     append(statusPlaceholder, applicant.applicantsHRStatus.map(function(arg3, i, arr) {
-      var logicText, status, statusId;
-      statusId = arg3.statusId, status = arg3.status;
-      logicText = logic.hrStatusToText(status);
-      switch (logicText) {
+      var logicText, status, statusHRId;
+      statusHRId = arg3.statusHRId, status = arg3.status;
+      switch (logicText = logic.hrStatusToText(status)) {
         case 'مصاحبه تلفنی':
           fanniLast = false;
           if (telephoniSeen) {
@@ -10441,7 +10439,7 @@ module.exports = component('profile', function(arg, arg1) {
             "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
           }, style.statusIcon)), (function() {
             var t;
-            t = E(style.statusText, logic.hrStatusToText(status));
+            t = E(style.statusText, logicText);
             ts.push(t);
             return t;
           })());
@@ -10464,9 +10462,6 @@ module.exports = component('profile', function(arg, arg1) {
     ]);
     onEvent(changeStatusButton, 'click', function() {
       return changeStatus(applicant);
-    });
-    onEvent(editStatusButton, 'click', function() {
-      return changeStatus(applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]);
     });
     return setTimeout(function() {
       return ts.forEach(function(t) {

@@ -26,7 +26,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     E sidebar, {gotoIndex, gotoApplicant}
     contents = E style.contents,
       E style.action,
-        actionButtonInstance = E actionButton, items: ['دعوت به مصاحبه', 'چاپ']
+        actionButtonInstance = E actionButton, items: ['چاپ']
       searchInstance = E search
       tableInstance = E table,
         entityId: 'userId'
@@ -104,8 +104,6 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
       return
     selectedApplicant = selectedApplicants[0]
     switch value
-      when 'دعوت به مصاحبه'
-        service.changeHRStatus selectedApplicant.userId, 0
       when 'چاپ'
         window.open '#print_' + selectedApplicant.userId, '_blank'
 

@@ -34,7 +34,7 @@ exports.changeHRStatus = (applicantId, status) ->
       {applicantsHRStatus} = applicant
       applicants = applicants.slice()
       applicantsHRStatus = applicantsHRStatus.slice()
-      applicantsHRStatus.push {status}
+      applicantsHRStatus.push status
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 

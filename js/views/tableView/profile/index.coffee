@@ -99,9 +99,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           ts.push t
           t
     append statusPlaceholder,
-      applicant.applicantsHRStatus.map ({statusId, status}, i, arr) ->
-        logicText = logic.hrStatusToText status
-        switch logicText
+      applicant.applicantsHRStatus.map ({statusHRId, status}, i, arr) ->
+        switch logicText = logic.hrStatusToText status
           when 'مصاحبه تلفنی'
             fanniLast = false
             if telephoniSeen
@@ -123,7 +122,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
               E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
               do ->
-                t = E style.statusText, logic.hrStatusToText status
+                t = E style.statusText, logicText
                 ts.push t
                 t
             if i is arr.length - 1
@@ -141,7 +140,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           t
       ]
     onEvent changeStatusButton, 'click', -> changeStatus applicant
-    onEvent editStatusButton, 'click', -> changeStatus applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
+    # onEvent editStatusButton, 'click', -> changeStatus applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15

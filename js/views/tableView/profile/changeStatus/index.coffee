@@ -5,7 +5,7 @@ dropdown = require '../../../../components/dropdown'
 dateInput = require '../../../../components/dateInput'
 
 module.exports = (applicant) ->
-  do component 'changeStatus', ({dom, events, state}) ->
+  do component 'changeStatus', ({dom, events, state, service}) ->
     {E, setStyle, show, hide, append} = dom
     {onEvent} = events
     p2Input0 = p2Input1 = p2Input2 = undefined
@@ -73,5 +73,9 @@ module.exports = (applicant) ->
       ]
 
     onEvent close, 'click', alertInstance.close
+    onEvent submit, 'click', ->
+      service.changeHRStatus
+      ######################
+
 
     alertInstance
