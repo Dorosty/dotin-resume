@@ -27,7 +27,7 @@ exports.submitProfileData = (data) ->
       state.user.set extend {}, user, applicantData: data
 
 exports.changeHRStatus = (applicantId, status) ->
-  post 'changeHRStatus', {applicantId, status}
+  post 'changeHRStatus', {applicantId, status: status.status}
   .then ->
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({userId}) -> userId is applicantId

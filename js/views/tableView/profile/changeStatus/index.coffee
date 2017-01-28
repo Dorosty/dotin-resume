@@ -3,6 +3,7 @@ component = require '../../../../utils/component'
 alert = require '../../../../components/alert'
 dropdown = require '../../../../components/dropdown'
 dateInput = require '../../../../components/dateInput'
+logic = require '../../../../utils/logic'
 
 module.exports = (applicant) ->
   do component 'changeStatus', ({dom, events, state, service}) ->
@@ -29,11 +30,13 @@ module.exports = (applicant) ->
         submit = E style.submit, 'ذخیره'
         close = E style.close, 'لغو'
 
+    enabled = false
     enable = ->
+      enabled = true
       setStyle submit, style.submit
       # setStyle close, style.close
-
     do disable = ->
+      enabled = false
       setStyle submit, style.submitDisabled
       # setStyle close, style.closeDisabled
 
@@ -53,13 +56,13 @@ module.exports = (applicant) ->
     state.all ['jobs', 'managers'], once: true, ([jobs, managers]) ->
       append p1, [
         p2Input0 = do ->
-          f = E dropdown, items: jobs.map ({jobName}) -> jobName
+          f = E dropdown, items: jobs, getTitle: ({jobName}) -> jobName
           setStyle f, style.dropdown
           setStyle f.input, style.dropdownInput
           f.onChange -> update()
           f
         p2Input1 = do ->
-          f = E dropdown, items: managers.map ({firstName, lastName}) -> "#{firstName} #{lastName}"
+          f = E dropdown, items: managers, getTitle: ({firstName, lastName}) -> "#{firstName} #{lastName}"
           setStyle f, style.dropdown
           setStyle f.input, style.dropdownInput
           f.onChange -> update()
@@ -74,8 +77,10 @@ module.exports = (applicant) ->
 
     onEvent close, 'click', alertInstance.close
     onEvent submit, 'click', ->
-      service.changeHRStatus
+      return unless enabled
       ######################
+      service.changeHRStatus applicant.userId, status: logic.textToHrStatus headerInput.value()
+      alertInstance.close()
 
 
     alertInstance

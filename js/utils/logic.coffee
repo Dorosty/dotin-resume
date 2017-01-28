@@ -31,6 +31,14 @@ exports.hrStatusToText = (status) ->
       'مصاحبه فنی'
     when 2
       'مصاحبه عمومی'
+exports.textToHrStatus = (status) ->
+  switch status
+    when 'مصاحبه تلفنی'
+      0
+    when 'مصاحبه فنی'
+      1
+    when 'مصاحبه عمومی'
+      2
 
 exports.actionToText = (action) ->
   #############################################

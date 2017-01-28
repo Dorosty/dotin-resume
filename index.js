@@ -4919,6 +4919,17 @@ exports.hrStatusToText = function(status) {
   }
 };
 
+exports.textToHrStatus = function(status) {
+  switch (status) {
+    case 'مصاحبه تلفنی':
+      return 0;
+    case 'مصاحبه فنی':
+      return 1;
+    case 'مصاحبه عمومی':
+      return 2;
+  }
+};
+
 exports.actionToText = function(action) {
   switch (action) {
     case 0:
@@ -5042,7 +5053,7 @@ exports.submitProfileData = function(data) {
 exports.changeHRStatus = function(applicantId, status) {
   return post('changeHRStatus', {
     applicantId: applicantId,
-    status: status
+    status: status.status
   }).then(function() {
     return state.applicants.on({
       once: true
@@ -10030,7 +10041,7 @@ module.exports = component('tableView', function(arg) {
 
 
 },{"../../components/actionButton":2,"../../utils":34,"../../utils/component":30,"../../utils/logic":36,"./profile":90,"./search":106,"./sidebar":108,"./style":110,"./table":112}],88:[function(require,module,exports){
-var alert, component, dateInput, dropdown, style;
+var alert, component, dateInput, dropdown, logic, style;
 
 style = require('./style');
 
@@ -10042,9 +10053,11 @@ dropdown = require('../../../../components/dropdown');
 
 dateInput = require('../../../../components/dateInput');
 
+logic = require('../../../../utils/logic');
+
 module.exports = function(applicant) {
   return component('changeStatus', function(arg) {
-    var E, alertInstance, append, close, disable, dom, enable, events, headerInput, hide, onEvent, p1, p2, p2Input, p2Input0, p2Input1, p2Input2, service, setStyle, show, state, submit, update;
+    var E, alertInstance, append, close, disable, dom, enable, enabled, events, headerInput, hide, onEvent, p1, p2, p2Input, p2Input0, p2Input1, p2Input2, service, setStyle, show, state, submit, update;
     dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
     E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
     onEvent = events.onEvent;
@@ -10071,10 +10084,13 @@ module.exports = function(applicant) {
       });
       return f;
     })())), submit = E(style.submit, 'ذخیره'), close = E(style.close, 'لغو')));
+    enabled = false;
     enable = function() {
+      enabled = true;
       return setStyle(submit, style.submit);
     };
     (disable = function() {
+      enabled = false;
       return setStyle(submit, style.submitDisabled);
     })();
     update = function() {
@@ -10105,11 +10121,12 @@ module.exports = function(applicant) {
         p2Input0 = (function() {
           var f;
           f = E(dropdown, {
-            items: jobs.map(function(arg2) {
+            items: jobs,
+            getTitle: function(arg2) {
               var jobName;
               jobName = arg2.jobName;
               return jobName;
-            })
+            }
           });
           setStyle(f, style.dropdown);
           setStyle(f.input, style.dropdownInput);
@@ -10120,11 +10137,12 @@ module.exports = function(applicant) {
         })(), p2Input1 = (function() {
           var f;
           f = E(dropdown, {
-            items: managers.map(function(arg2) {
+            items: managers,
+            getTitle: function(arg2) {
               var firstName, lastName;
               firstName = arg2.firstName, lastName = arg2.lastName;
               return firstName + " " + lastName;
-            })
+            }
           });
           setStyle(f, style.dropdown);
           setStyle(f.input, style.dropdownInput);
@@ -10146,14 +10164,20 @@ module.exports = function(applicant) {
     });
     onEvent(close, 'click', alertInstance.close);
     onEvent(submit, 'click', function() {
-      return service.changeHRStatus;
+      if (!enabled) {
+        return;
+      }
+      service.changeHRStatus(applicant.userId, {
+        status: logic.textToHrStatus(headerInput.value())
+      });
+      return alertInstance.close();
     });
     return alertInstance;
   })();
 };
 
 
-},{"../../../../components/alert":6,"../../../../components/dateInput":10,"../../../../components/dropdown":12,"../../../../utils/component":30,"./style":89}],89:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../components/dateInput":10,"../../../../components/dropdown":12,"../../../../utils/component":30,"../../../../utils/logic":36,"./style":89}],89:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -10407,8 +10431,8 @@ module.exports = component('profile', function(arg, arg1) {
       return t;
     })()));
     append(statusPlaceholder, applicant.applicantsHRStatus.map(function(arg3, i, arr) {
-      var logicText, status, statusHRId;
-      statusHRId = arg3.statusHRId, status = arg3.status;
+      var logicText, status;
+      status = arg3.status;
       switch (logicText = logic.hrStatusToText(status)) {
         case 'مصاحبه تلفنی':
           fanniLast = false;
@@ -10433,9 +10457,9 @@ module.exports = component('profile', function(arg, arg1) {
       return [
         E(style.statusConnector), (function() {
           var x;
-          x = E(extend({
+          x = E((i === arr.length - 1 ? extend({
             cursor: 'pointer'
-          }, style.statusSegment), E(i === arr.length - 1 ? style.statusCircleActive : style.statusCircle), E(extend({
+          }, style.statusSegment) : style.statusSegment), E(i === arr.length - 1 ? style.statusCircleActive : style.statusCircle), E(extend({
             "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
           }, style.statusIcon)), (function() {
             var t;
