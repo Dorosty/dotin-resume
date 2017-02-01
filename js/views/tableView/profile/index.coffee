@@ -113,6 +113,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
             if fanniLast
               return
             fanniLast = true
+          else
+            return
         [
           E style.statusConnector
           do ->

@@ -10441,6 +10441,9 @@ module.exports = component('profile', function(arg, arg1) {
             return;
           }
           fanniLast = true;
+          break;
+        default:
+          return;
       }
       return [
         E(style.statusConnector), (function() {
