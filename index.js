@@ -4877,58 +4877,7 @@ exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
 
-exports.getApplicantStatus = function(arg) {
-  var applicantData, applicantsHRStatus, applicantsManagerStatus, error;
-  applicantsHRStatus = arg.applicantsHRStatus, applicantsManagerStatus = arg.applicantsManagerStatus, applicantData = arg.applicantData;
-  if (applicantsHRStatus.length) {
-    switch (applicantsHRStatus[applicantsHRStatus.length - 1].status) {
-      case -1:
-        return 'بایگانی';
-      default:
-        if (applicantData && applicantData.trim()) {
-          try {
-            JSON.parse(applicantData);
-            switch (applicantsHRStatus[applicantsHRStatus.length - 1].status) {
-              case 2:
-                return 'در انتظار مصاحبه تلفنی';
-              case 7:
-                return 'در انتظار مصاحبه فنی';
-              case 8:
-                return 'در انتظار مصاحبه عمومی';
-            }
-          } catch (error) {
-            return 'در انتظار تکمیل اطلاعات';
-          }
-        } else {
-          return 'در انتظار تکمیل اطلاعات';
-        }
-    }
-  } else {
-    return 'ثبت شده';
-  }
-};
-
-exports.hrStatusToText = function(status) {
-  switch (status) {
-    case 2:
-      return 'مصاحبه تلفنی';
-    case 7:
-      return 'مصاحبه فنی';
-    case 8:
-      return 'مصاحبه عمومی';
-  }
-};
-
-exports.textToHrStatus = function(status) {
-  switch (status) {
-    case 'مصاحبه تلفنی':
-      return 2;
-    case 'مصاحبه فنی':
-      return 7;
-    case 'مصاحبه عمومی':
-      return 8;
-  }
-};
+exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مکالمه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'جذب', 'بایگانی'];
 
 exports.actionToText = function(action) {
   return 'to be implemented';
@@ -4964,7 +4913,9 @@ module.exports = function(isGet, serviceName, params) {
     params = {};
   }
   if (mock[serviceName]) {
-    return mock[serviceName](params);
+    return mock[serviceName](params).then(function(x) {
+      return JSON.parse(JSON.stringify(x));
+    });
   }
   url = "/webApi/" + serviceName;
   if (isGet) {
@@ -5373,9 +5324,9 @@ applicants = [
     notes: [],
     applicantsHRStatus: [
       {
-        status: 0
-      }, {
         status: 2
+      }, {
+        status: 8
       }
     ],
     applicantsManagerStatus: []
@@ -5398,7 +5349,7 @@ applicants = [
     notes: ['aaaaaaaaaaaa'],
     applicantsHRStatus: [
       {
-        status: 1
+        status: 7
       }
     ],
     applicantsManagerStatus: []
@@ -5435,7 +5386,7 @@ user = {
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 1,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -9866,7 +9817,7 @@ module.exports = component('views', function(arg, userId) {
 
 
 },{"../../utils":34,"../../utils/component":30}],88:[function(require,module,exports){
-var actionButton, component, extend, getApplicantStatus, profile, ref, search, sidebar, style, table, toDate;
+var actionButton, component, extend, logic, profile, ref, search, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
 
@@ -9884,7 +9835,7 @@ actionButton = require('../../components/actionButton');
 
 ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 
-getApplicantStatus = require('../../utils/logic').getApplicantStatus;
+logic = require('../../utils/logic');
 
 module.exports = component('tableView', function(arg) {
   var E, actionButtonInstance, append, applicants, contents, dom, empty, events, gotoApplicant, gotoIndex, headers, hide, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
@@ -9962,7 +9913,11 @@ module.exports = component('tableView', function(arg) {
         }
       }, {
         name: 'وضعیت',
-        getValue: getApplicantStatus
+        getValue: function(arg1) {
+          var applicantsHRStatus, ref1;
+          applicantsHRStatus = arg1.applicantsHRStatus;
+          return logic.statuses[(ref1 = applicantsHRStatus[applicantsHRStatus.length - 1]) != null ? ref1.status : void 0] || 'ثبت شده';
+        }
       }, {
         name: 'یادداشت',
         width: 50,
@@ -10099,7 +10054,7 @@ module.exports = function(applicant) {
         return update();
       });
       return f;
-    })())), submit = E(style.submit, 'ذخیره'), close = E(style.close, 'لغو')));
+    })())), submit = E(style.submit, 'ذخیره'), hide(close = E(style.close, 'لغو'))));
     enabled = false;
     enable = function() {
       enabled = true;
@@ -10180,18 +10135,20 @@ module.exports = function(applicant) {
     });
     onEvent(close, 'click', alertInstance.close);
     onEvent(submit, 'click', function() {
+      var status;
       if (!enabled) {
         return;
       }
+      status = logic.statuses.indexOf('در انتظار ' + headerInput.value());
       switch (headerInput.value()) {
         case 'مصاحبه تلفنی':
           service.changeHRStatus(applicant.userId, {
-            status: logic.textToHrStatus(headerInput.value())
+            status: status
           });
           break;
         case 'مصاحبه فنی':
           service.changeHRStatus(applicant.userId, {
-            status: logic.textToHrStatus(headerInput.value()),
+            status: status,
             jobId: p1Input0.value().jobId,
             managerId: p1Input1.value().userId,
             interViewTime: toTimestamp(p1Input2.value())
@@ -10199,7 +10156,7 @@ module.exports = function(applicant) {
           break;
         case 'مصاحبه عمومی':
           service.changeHRStatus(applicant.userId, {
-            status: logic.textToHrStatus(headerInput.value()),
+            status: status,
             interViewTime: toTimestamp(p2Input.value())
           });
       }
@@ -10377,7 +10334,7 @@ tabNames = ['اطلاعات اولیه', 'اطلاعات تکمیلی', 'آزم�
 tabContents = [tab0, tab1, tab2, tab3, tab4, tab5];
 
 module.exports = component('profile', function(arg, arg1) {
-  var E, actionButtonInstance, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, hide, indexLink, onEvent, service, setStyle, state, statusPlaceholder, tabs, text, view;
+  var E, actionButtonInstance, actionButtonItemTexts, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, hide, indexLink, onEvent, service, setStyle, state, statusPlaceholder, tabs, text, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   applicant = arg1.applicant, gotoIndex = arg1.gotoIndex;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, empty = dom.empty, hide = dom.hide;
@@ -10391,7 +10348,7 @@ module.exports = component('profile', function(arg, arg1) {
   }, style.actionLegendCircle)), text('قفل شده')), E(style.actionLegendRow, E(extend({
     backgroundColor: 'black'
   }, style.actionLegendCircle)), text('فعال'))), actionButtonInstance = E(actionButton, {
-    items: ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
+    items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
   })), statusPlaceholder = E(style.status), E(style.tabs, tabs = tabNames.map(function(tabName, index) {
     var tab;
     tab = E(style.tab, tabName);
@@ -10416,16 +10373,17 @@ module.exports = component('profile', function(arg, arg1) {
     }
   });
   state.all(['applicants', 'user'], function(arg2) {
-    var applicants, changeStatusButton, editStatusButton, fanniLast, fn, omoomiSeen, telephoniSeen, ts, user;
+    var applicants, editStatusButton, fanniLast, omoomiSeen, telephoniSeen, ts, user;
     applicants = arg2[0], user = arg2[1];
     applicant = applicants.filter(function(arg3) {
       var userId;
       userId = arg3.userId;
       return userId === applicant.userId;
     })[0];
-    fn = function(i, s) {
+    actionButtonItemTexts.forEach(function(s, i) {
       var item;
-      item = actionButtonInstance.items()[i - 1];
+      s = logic.statuses.indexOf(s);
+      item = actionButtonInstance.items()[i];
       if (applicant.applicantsHRStatus.filter(function(arg3) {
         var status;
         status = arg3.status;
@@ -10447,10 +10405,7 @@ module.exports = component('profile', function(arg, arg1) {
           color: 'black'
         });
       }
-    };
-    fn(1, 1);
-    fn(2, 5);
-    fn(3, 4);
+    });
     ts = [];
     editStatusButton = void 0;
     telephoniSeen = omoomiSeen = fanniLast = false;
@@ -10464,24 +10419,24 @@ module.exports = component('profile', function(arg, arg1) {
       return t;
     })()));
     append(statusPlaceholder, applicant.applicantsHRStatus.map(function(arg3, i, arr) {
-      var logicText, status;
+      var status;
       status = arg3.status;
-      switch (logicText = logic.hrStatusToText(status)) {
-        case 'مصاحبه تلفنی':
+      switch (logic.statuses[status]) {
+        case 'در انتظار مصاحبه تلفنی':
           fanniLast = false;
           if (telephoniSeen) {
             return;
           }
           telephoniSeen = true;
           break;
-        case 'مصاحبه عمومی':
+        case 'در انتظار مصاحبه عمومی':
           fanniLast = false;
           if (omoomiSeen) {
             return;
           }
           omoomiSeen = true;
           break;
-        case 'مصاحبه فنی':
+        case 'در انتظار مصاحبه فنی':
           if (fanniLast) {
             return;
           }
@@ -10496,7 +10451,11 @@ module.exports = component('profile', function(arg, arg1) {
             "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
           }, style.statusIcon)), (function() {
             var t;
-            t = E(style.statusText, logicText);
+            t = logic.statuses[status];
+            if (t.indexOf('در انتظار ' === 0)) {
+              t = t.substr('در انتظار '.length);
+            }
+            t = E(style.statusText, t);
             ts.push(t);
             return t;
           })());
@@ -10507,18 +10466,25 @@ module.exports = component('profile', function(arg, arg1) {
         })()
       ];
     }));
-    append(statusPlaceholder, [
-      E(style.statusConnectorActive), changeStatusButton = E(extend({
-        cursor: 'pointer'
-      }, style.statusSegment), E(style.statusCirclePlus), E(style.statusIconPlus), (function() {
-        var t;
-        t = E(style.statusText, 'ایجاد وضعیت');
-        ts.push(t);
-        return t;
-      })())
-    ]);
-    onEvent(changeStatusButton, 'click', function() {
-      return changeStatus(applicant);
+    state.user.on({
+      once: true
+    }, function(user) {
+      var changeStatusButton;
+      if (user.userType === 2) {
+        append(statusPlaceholder, [
+          E(style.statusConnectorActive), changeStatusButton = E(extend({
+            cursor: 'pointer'
+          }, style.statusSegment), E(style.statusCirclePlus), E(style.statusIconPlus), (function() {
+            var t;
+            t = E(style.statusText, 'ایجاد وضعیت');
+            ts.push(t);
+            return t;
+          })())
+        ]);
+        return onEvent(changeStatusButton, 'click', function() {
+          return changeStatus(applicant);
+        });
+      }
     });
     return setTimeout(function() {
       return ts.forEach(function(t) {
@@ -10530,8 +10496,7 @@ module.exports = component('profile', function(arg, arg1) {
   });
   actionButtonInstance.onSelect(function(value) {
     var i;
-    i = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی'].indexOf(value) + 1;
-    i = [1, 5, 4][i];
+    i = logic.statuses.indexOf(value);
     return state.user.on({
       once: true
     }, function(user) {

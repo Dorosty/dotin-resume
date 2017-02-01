@@ -16,7 +16,7 @@ applicants = [{
   personalPic: null
   modificationTime: 1473132854116
   notes: []
-  applicantsHRStatus: [{status: 0}, {status: 2}]
+  applicantsHRStatus: [{status: 2}, {status: 8}]
   applicantsManagerStatus: []
 }, {
   userId: 1
@@ -31,7 +31,7 @@ applicants = [{
   personalPic: null
   modificationTime: 1373132854116
   notes: ['aaaaaaaaaaaa']
-  applicantsHRStatus: [{status: 1}]
+  applicantsHRStatus: [{status: 7}]
   applicantsManagerStatus: []
 }]
 
@@ -52,7 +52,7 @@ user =
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 2
+  userType: 1
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'

@@ -52,7 +52,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         E style.actionLegendRow,
           E extend {backgroundColor: 'black'}, style.actionLegendCircle
           text 'فعال'
-      actionButtonInstance = E actionButton, items: ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
+      actionButtonInstance = E actionButton, items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
     statusPlaceholder = E style.status
     E style.tabs,
       tabs = tabNames.map (tabName, index) ->
@@ -75,17 +75,15 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   state.all ['applicants', 'user'], ([applicants, user]) ->
     [applicant] = applicants.filter ({userId}) -> userId is applicant.userId
-    fn = (i, s) ->
-      item = actionButtonInstance.items()[i - 1]
+    actionButtonItemTexts.forEach (s, i) ->
+      s = logic.statuses.indexOf s
+      item = actionButtonInstance.items()[i]
       if applicant.applicantsHRStatus.filter(({status}) -> status is s).length
         setStyle item, color: '#c5c5c5'
       else if applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is s && managerId is user.userId).length
         setStyle item, color: 'green'
       else
         setStyle item, color: 'black'
-    fn 1, 1
-    fn 2, 5
-    fn 3, 4
     ts = []
     editStatusButton = undefined
     telephoniSeen = omoomiSeen = fanniLast = false
@@ -100,18 +98,18 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           t
     append statusPlaceholder,
       applicant.applicantsHRStatus.map ({status}, i, arr) ->
-        switch logicText = logic.hrStatusToText status
-          when 'مصاحبه تلفنی'
+        switch logic.statuses[status]
+          when 'در انتظار مصاحبه تلفنی'
             fanniLast = false
             if telephoniSeen
               return
             telephoniSeen = true
-          when 'مصاحبه عمومی'
+          when 'در انتظار مصاحبه عمومی'
             fanniLast = false
             if omoomiSeen
               return
             omoomiSeen = true
-          when 'مصاحبه فنی'
+          when 'در انتظار مصاحبه فنی'
             if fanniLast
               return
             fanniLast = true
@@ -122,32 +120,37 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
               E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
               do ->
-                t = E style.statusText, logicText
+                t = logic.statuses[status]
+                if t.indexOf 'در انتظار ' is 0
+                  t = t.substr 'در انتظار '.length
+                t = E style.statusText, t
                 ts.push t
                 t
             if i is arr.length - 1
               editStatusButton = x
             x
         ]
-    append statusPlaceholder, [
-      E style.statusConnectorActive
-      changeStatusButton = E extend({cursor: 'pointer'}, style.statusSegment),
-        E style.statusCirclePlus
-        E style.statusIconPlus
-        do ->
-          t = E style.statusText, 'ایجاد وضعیت'
-          ts.push t
-          t
-      ]
-    onEvent changeStatusButton, 'click', -> changeStatus applicant
-    # onEvent editStatusButton, 'click', -> changeStatus applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
+
+    state.user.on once: true, (user) ->
+      if user.userType is 2
+        append statusPlaceholder, [
+          E style.statusConnectorActive
+          changeStatusButton = E extend({cursor: 'pointer'}, style.statusSegment),
+            E style.statusCirclePlus
+            E style.statusIconPlus
+            do ->
+              t = E style.statusText, 'ایجاد وضعیت'
+              ts.push t
+              t
+          ]
+        onEvent changeStatusButton, 'click', -> changeStatus applicant
+        # onEvent editStatusButton, 'click', -> changeStatus applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
 
   actionButtonInstance.onSelect (value) ->
-    i = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی'].indexOf(value) + 1
-    i = [1, 5, 4][i]
+    i = logic.statuses.indexOf value
     state.user.on once: true, (user) ->
       unless applicant.applicantsHRStatus.filter(({status}) -> status is i).length || applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is i && managerId is user.userId).length
         service.changeManagerStatus applicant.userId, i

@@ -6,7 +6,7 @@ search = require './search'
 profile = require './profile'
 actionButton = require '../../components/actionButton'
 {extend, toDate} = require '../../utils'
-{getApplicantStatus} = require '../../utils/logic'
+logic = require '../../utils/logic'
 
 module.exports = component 'tableView', ({dom, events, state, service}) ->
   {E, text, setStyle, append, empty, hide} = dom
@@ -59,7 +59,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           }
           {
             name: 'وضعیت'
-            getValue: getApplicantStatus
+            getValue: ({applicantsHRStatus}) -> logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1]?.status] || 'ثبت شده'
           }
           {
             name: 'یادداشت'

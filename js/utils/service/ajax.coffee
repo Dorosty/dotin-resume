@@ -5,6 +5,7 @@ module.exports = (isGet, serviceName, params = {}) ->
 
   if mock[serviceName]
     return mock[serviceName] params
+    .then (x) -> JSON.parse JSON.stringify x
 
   url = "/webApi/#{serviceName}"
   if isGet

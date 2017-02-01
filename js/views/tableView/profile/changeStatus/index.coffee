@@ -29,7 +29,7 @@ module.exports = (applicant) ->
             onEvent f.input, 'input', -> update()
             f
         submit = E style.submit, 'ذخیره'
-        close = E style.close, 'لغو'
+        hide close = E style.close, 'لغو'########################
 
     enabled = false
     enable = ->
@@ -79,19 +79,20 @@ module.exports = (applicant) ->
     onEvent close, 'click', alertInstance.close
     onEvent submit, 'click', ->
       return unless enabled
+      status = logic.statuses.indexOf 'در انتظار ' + headerInput.value()
       switch headerInput.value()
         when 'مصاحبه تلفنی'
           service.changeHRStatus applicant.userId,
-            status: logic.textToHrStatus headerInput.value()
+            status: status
         when 'مصاحبه فنی'
           service.changeHRStatus applicant.userId,
-            status: logic.textToHrStatus headerInput.value()
+            status: status
             jobId: p1Input0.value().jobId
             managerId: p1Input1.value().userId
             interViewTime: toTimestamp p1Input2.value()
         when 'مصاحبه عمومی'
           service.changeHRStatus applicant.userId,
-            status: logic.textToHrStatus headerInput.value()
+            status: status
             interViewTime: toTimestamp p2Input.value()
       alertInstance.close()
 
