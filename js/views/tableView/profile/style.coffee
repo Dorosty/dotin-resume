@@ -142,6 +142,10 @@ exports.tab =
   color: '#5c5555'
   borderBottom: '3px solid white'
 
+exports.tabUser = extend {}, exports.tab,
+  backgroundColor: '#eee'
+  borderBottom: '3px solid #eee'
+
 exports.tabActive =
   color: '#449e73'
   borderColor: '#449e73'

@@ -5296,8 +5296,6 @@ exports.jobs = 'allRecordedJobs';
 },{}],42:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
 
-return;
-
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -10351,7 +10349,14 @@ module.exports = component('profile', function(arg, arg1) {
     items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
   })), statusPlaceholder = E(style.status), E(style.tabs, tabs = tabNames.map(function(tabName, index) {
     var tab;
-    tab = E(style.tab, tabName);
+    if (index === 0) {
+      tab = E(style.tabUser, E({
+        "class": 'fa fa-user-o',
+        marginLeft: 5
+      }), text(applicant.firstName + " " + applicant.lastName));
+    } else {
+      tab = E(style.tab, tabName);
+    }
     onEvent(tab, 'click', function() {
       return changeTabIndex(index);
     });
@@ -10360,7 +10365,11 @@ module.exports = component('profile', function(arg, arg1) {
     });
     onEvent(tab, 'mouseout', function() {
       if (currentTabIndex !== index) {
-        return setStyle(tab, style.tab);
+        if (index === 0) {
+          return setStyle(tab, style.tabUser);
+        } else {
+          return setStyle(tab, style.tab);
+        }
       }
     });
     return tab;
@@ -10529,7 +10538,11 @@ module.exports = component('profile', function(arg, arg1) {
     if (content) {
       destroy(content);
     }
-    setStyle(tabs[currentTabIndex], style.tab);
+    if (currentTabIndex === 0) {
+      setStyle(tabs[currentTabIndex], style.tabUser);
+    } else {
+      setStyle(tabs[currentTabIndex], style.tab);
+    }
     currentTabIndex = index;
     append(contents, content = E(tabContents[currentTabIndex], {
       applicant: applicant
@@ -10709,6 +10722,11 @@ exports.tab = {
   color: '#5c5555',
   borderBottom: '3px solid white'
 };
+
+exports.tabUser = extend({}, exports.tab, {
+  backgroundColor: '#eee',
+  borderBottom: '3px solid #eee'
+});
 
 exports.tabActive = {
   color: '#449e73',

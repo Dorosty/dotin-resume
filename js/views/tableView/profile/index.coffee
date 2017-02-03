@@ -56,14 +56,22 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     statusPlaceholder = E style.status
     E style.tabs,
       tabs = tabNames.map (tabName, index) ->
-        tab = E style.tab, tabName
+        if index is 0          
+          tab = E style.tabUser,
+            E class: 'fa fa-user-o', marginLeft: 5
+            text "#{applicant.firstName} #{applicant.lastName}"
+        else
+          tab = E style.tab, tabName
         onEvent tab, 'click', ->
           changeTabIndex index
         onEvent tab, 'mouseover', ->
           setStyle tab, style.tabActive
         onEvent tab, 'mouseout', ->
           unless currentTabIndex is index
-            setStyle tab, style.tab
+            if index is 0
+              setStyle tab, style.tabUser
+            else
+              setStyle tab, style.tab
         tab
     contents = E style.contents
 
@@ -169,7 +177,10 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
   changeTabIndex = (index) ->
     if content
       destroy content
-    setStyle tabs[currentTabIndex], style.tab
+    if currentTabIndex is 0
+      setStyle tabs[currentTabIndex], style.tabUser
+    else
+      setStyle tabs[currentTabIndex], style.tab
     currentTabIndex = index
     append contents, content = E tabContents[currentTabIndex], {applicant}
     setStyle tabs[currentTabIndex], style.tabActive
