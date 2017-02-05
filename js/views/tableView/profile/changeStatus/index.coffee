@@ -6,7 +6,7 @@ dateInput = require '../../../../components/dateInput'
 logic = require '../../../../utils/logic'
 {toTimestamp} = require '../../../../utils'
 
-module.exports = (applicant) ->
+module.exports = (loadbarInstance, applicant) ->
   do component 'changeStatus', ({dom, events, state, service}) ->
     {E, setStyle, show, hide, append} = dom
     {onEvent} = events
@@ -80,7 +80,8 @@ module.exports = (applicant) ->
     onEvent submit, 'click', ->
       return unless enabled
       status = logic.statuses.indexOf 'در انتظار ' + headerInput.value()
-      switch headerInput.value()
+      loadbarInstance.set()
+      s = switch headerInput.value()
         when 'مصاحبه تلفنی'
           service.changeHRStatus applicant.userId,
             status: status
@@ -94,6 +95,7 @@ module.exports = (applicant) ->
           service.changeHRStatus applicant.userId,
             status: status
             interViewTime: toTimestamp p2Input.value()
+      s.then loadbarInstance.reset
       alertInstance.close()
 
 

@@ -1,5 +1,9 @@
 {extend} = require '../../../utils'
 
+exports.loadbar =
+  width: '100%'
+  height: 10
+
 exports.indexLink =
   color: '#449e73'
   cursor: 'pointer'

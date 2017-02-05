@@ -7,6 +7,7 @@ tab3 = require './tab3'
 tab4 = require './tab4'
 tab5 = require './tab5'
 actionButton = require '../../../components/actionButton'
+loadbar = require '../../../components/loadbar'
 changeStatus = require './changeStatus'
 {extend} = require '../../../utils'
 logic = require '../../../utils/logic'
@@ -37,6 +38,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
   currentTabIndex = 0
 
   view = E 'span', null,
+    loadbarInstance = E loadbar, style.loadbar
     indexLink = E 'a', style.indexLink, 'رزومه‌ها'
     E 'span', style.profileBreadCrumb, ' › پروفایل'
     actionButtonPlaceholder = E style.action,
@@ -153,8 +155,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               ts.push t
               t
           ]
-        onEvent changeStatusButton, 'click', -> changeStatus applicant
-        # onEvent editStatusButton, 'click', -> changeStatus applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
+        onEvent changeStatusButton, 'click', -> changeStatus loadbarInstance, applicant
+        # onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
@@ -163,7 +165,10 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     i = logic.statuses.indexOf value
     state.user.on once: true, (user) ->
       unless applicant.applicantsHRStatus.filter(({status}) -> status is i).length || applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is i && managerId is user.userId).length
+        loadbarInstance.set()
         service.changeManagerStatus applicant.userId, i
+        .then loadbarInstance.reset
+
 
   actionLegendVisible = false
   onEvent actionLegendButton, 'click', ->
