@@ -1,5 +1,6 @@
 component = require '../../utils/component'
 style = require './style'
+calendar = require './calendar'
 {toEnglish} = require '../../utils'
 
 module.exports = component 'dateInput', ({dom, events, returnObject}) ->  
@@ -9,6 +10,7 @@ module.exports = component 'dateInput', ({dom, events, returnObject}) ->
   view = E style.view,
     input = E 'input', style.input
     E 'i', style.calendar
+    E calendar, input
 
   prevValue = ''
 
@@ -23,7 +25,15 @@ module.exports = component 'dateInput', ({dom, events, returnObject}) ->
       when 3
         /^13[0-9][0-9]$/.test(parts[0]) && /^([1-9]|1[0-2])$/.test(parts[1]) && /^([1-9]?|[1-2][0-9]|3[0-1])$/.test parts[2]
     if valid
-      prevValue = value
+      if /^13[0-9][0-9]\/([1-9]|1[0-2])\/([1-9]|[1-2][0-9]|3[0-1])$/.test value
+        [y, m, d] = value.split '/'
+        [y, m, d] = [+y, +m, +d]
+        if jalali.isValidJalaaliDate y, m, d
+          prevValue = value
+        else
+          value = prevValue
+      else    
+        prevValue = value
     else
       value = prevValue
     setStyle input, {value}

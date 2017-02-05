@@ -4,7 +4,7 @@ module.exports = component 'loadbar', ({dom, returnObject}, style = {}) ->
   {E, setStyle} = dom
 
   c = E style,
-    bar = E backgroundColor: '#449e73', position: 'absolute', top: 0, right: 0, height: 5, width: '0%'
+    bar = E backgroundColor: '#449e73', position: 'absolute', top: 0, right: 0, height: 5, transition: '0.2s', width: '0%'
 
   returnObject
     reset: ->
