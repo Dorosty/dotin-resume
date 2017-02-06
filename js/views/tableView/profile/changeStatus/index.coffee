@@ -4,9 +4,9 @@ alert = require '../../../../components/alert'
 dropdown = require '../../../../components/dropdown'
 dateInput = require '../../../../components/dateInput'
 logic = require '../../../../utils/logic'
-{toTimestamp} = require '../../../../utils'
+{toTimestamp, toDate} = require '../../../../utils'
 
-module.exports = (loadbarInstance, applicant) ->
+module.exports = (loadbarInstance, applicant, status) ->
   do component 'changeStatus', ({dom, events, state, service}) ->
     {E, setStyle, show, hide, append} = dom
     {onEvent} = events
@@ -26,20 +26,19 @@ module.exports = (loadbarInstance, applicant) ->
             f = E dateInput
             setStyle f, style.dateInput
             setStyle f.input, style.dateInputInput
-            onEvent f.input, 'input', -> update()
+            onEvent f.input, ['input', 'pInput'], -> update()
             f
         submit = E style.submit, 'ذخیره'
-        hide close = E style.close, 'لغو'########################
+        remove = E style.remove, 'حذف'
+
 
     enabled = false
     enable = ->
       enabled = true
       setStyle submit, style.submit
-      # setStyle close, style.close
     do disable = ->
       enabled = false
       setStyle submit, style.submitDisabled
-      # setStyle close, style.closeDisabled
 
     update = ->
       disable()
@@ -72,30 +71,53 @@ module.exports = (loadbarInstance, applicant) ->
           f = E dateInput
           setStyle f, style.dateInput
           setStyle f.input, style.dateInputInput
-          onEvent f.input, 'input', -> update()
+          onEvent f.input, ['input', 'pInput'], -> update()
           f
       ]
 
-    onEvent close, 'click', alertInstance.close
+    unless status
+      hide remove
+    else
+      headerInput.setValue logic.statuses[status.status].substr 'در انتظار '.length
+      switch headerInput.value()
+        when 'مصاحبه فنی'
+          state.all ['jobs', 'managers'], once: true, ([jobs, managers]) ->
+            [job] = jobs.filter ({jobId}) -> jobId is status.jobId
+            [manager] = managers.filter ({userId}) -> userId is status.managerId
+            setStyle p1Input0.setValue job
+            setStyle p1Input1.setValue manager
+            setStyle p1Input2.input, value: toDate status.interViewTime
+        when 'مصاحبه عمومی'
+          setStyle p2Input.input, value: toDate status.interViewTime
+
+    onEvent remove, 'click', ->
+      loadbarInstance.set()
+      service.deleteHRStatus DeleteHrApplicantStatus: status.statusHRId
+      .then loadbarInstance.reset
+      alertInstance.close()
     onEvent submit, 'click', ->
       return unless enabled
-      status = logic.statuses.indexOf 'در انتظار ' + headerInput.value()
+      f = if status
+        service.changeHRStatus.bind null, applicant.userId
+      else
+        service.changeHRStatus.bind null, applicant.userId, status.statusHRId
+      s = logic.statuses.indexOf 'در انتظار ' + headerInput.value()
       loadbarInstance.set()
-      s = switch headerInput.value()
+      se = switch headerInput.value()
         when 'مصاحبه تلفنی'
-          service.changeHRStatus applicant.userId,
-            status: status
+          f
+            status: s
         when 'مصاحبه فنی'
-          service.changeHRStatus applicant.userId,
-            status: status
+          f
+            status: s
             jobId: p1Input0.value().jobId
             managerId: p1Input1.value().userId
             interViewTime: toTimestamp p1Input2.value()
         when 'مصاحبه عمومی'
-          service.changeHRStatus applicant.userId,
-            status: status
+          f
+            status: s
             interViewTime: toTimestamp p2Input.value()
-      s.then loadbarInstance.reset
+      se.then loadbarInstance.reset
       alertInstance.close()
 
 

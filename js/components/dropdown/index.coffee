@@ -94,6 +94,10 @@ module.exports = component 'dropdown', ({dom, events, returnObject}, {getId, get
     onChange: (listener) -> changeListeners.push listener
     value: itemsList.value
     input: input
+    setValue: (item) ->
+      setInputValue getTitle item
+      itemsList.update [item]
+      itemsList.select()
     clear: ->
       if selectedIndex
         clear()

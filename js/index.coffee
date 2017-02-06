@@ -46,8 +46,6 @@ addPageStyle "
 
 document.title = 'سامانه جذب داتین'
 
-# alertMessages.do()
-
 service.autoPing()
 
 service.getUser()

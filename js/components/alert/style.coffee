@@ -14,7 +14,6 @@ exports.shadeActive =
   visibility: 'visible'
 
 exports.alert =
-  overflow: 'hidden'
   position: 'fixed'
   top: 100
   left: '50%'
@@ -39,6 +38,7 @@ exports.header =
   paddingRight: 20
   color: 'white'
   backgroundColor: '#459d73'
+  borderRadius: '5px 5px 0 0'
 
 exports.close =
   position: 'absolute'
@@ -54,3 +54,4 @@ exports.close =
 exports.contents =
   marginTop: 55
   backgroundColor: 'white'
+  borderRadius: '0 0 5px 5px'

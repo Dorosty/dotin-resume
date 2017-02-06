@@ -3,6 +3,18 @@
 Q = require '../../q'
 {extend} = require '../../utils'
 
+managers = [{
+  userId: 10
+  firstName: 'روح‌الله'
+  lastName: 'محمد‌خانی'
+}, {
+  userId: 11
+  firstName: 'حامد'
+  lastName: 'حسینی‌نژاد'
+}]
+
+jobs = [{jobId: 0, jobName: 'Java developer'}, {jobId: 1, jobName: 'Javascript developer'}, {jobId: 2, jobName: 'UX designer'}]
+
 applicants = [{
   userId: 0
   identificationCode: '0016503368'
@@ -16,7 +28,14 @@ applicants = [{
   personalPic: null
   modificationTime: 1473132854116
   notes: []
-  applicantsHRStatus: [{status: 2}, {status: 8}]
+  applicantsHRStatus: [{
+    statusHRId: 0
+    status: 2
+  }, {
+    statusHRId: 1
+    status: 8
+    interViewTime: 1486369082850
+  }]
   applicantsManagerStatus: []
 }, {
   userId: 1
@@ -31,21 +50,15 @@ applicants = [{
   personalPic: null
   modificationTime: 1373132854116
   notes: ['aaaaaaaaaaaa']
-  applicantsHRStatus: [{status: 7}]
+  applicantsHRStatus: [{
+    statusHRId: 2
+    status: 7
+    interViewTime: 1486369082850
+    jobId: jobs[1].jobId
+    managerId: managers[0].userId
+  }]
   applicantsManagerStatus: []
 }]
-
-managers = [{
-  userId: 10
-  firstName: 'روح‌الله'
-  lastName: 'محمد‌خانی'
-}, {
-  userId: 11
-  firstName: 'حامد'
-  lastName: 'حسینی‌نژاد'
-}]
-
-jobs = [{jobId: 0, jobName: 'Java developer'}, {jobId: 1, jobName: 'Javascript developer'}, {jobId: 2, jobName: 'UX designer'}]
 
 user =
   userId: 110

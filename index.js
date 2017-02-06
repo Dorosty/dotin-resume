@@ -274,7 +274,7 @@ module.exports = component('actionButton', function(arg, arg1) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./list":3,"./style":5}],3:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./list":3,"./style":5}],3:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -371,7 +371,7 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":33,"./style":4}],4:[function(require,module,exports){
+},{"../../../utils/component":34,"./style":4}],4:[function(require,module,exports){
 exports.list = {
   cursor: 'pointer',
   position: 'absolute',
@@ -493,7 +493,7 @@ module.exports = function() {
 };
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./style":7}],7:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./style":7}],7:[function(require,module,exports){
 exports.shade = {
   position: 'fixed',
   top: 0,
@@ -512,7 +512,6 @@ exports.shadeActive = {
 };
 
 exports.alert = {
-  overflow: 'hidden',
   position: 'fixed',
   top: 100,
   left: '50%',
@@ -538,7 +537,8 @@ exports.header = {
   lineHeight: 55,
   paddingRight: 20,
   color: 'white',
-  backgroundColor: '#459d73'
+  backgroundColor: '#459d73',
+  borderRadius: '5px 5px 0 0'
 };
 
 exports.close = {
@@ -555,7 +555,8 @@ exports.close = {
 
 exports.contents = {
   marginTop: 55,
-  backgroundColor: 'white'
+  backgroundColor: 'white',
+  borderRadius: '0 0 5px 5px'
 };
 
 
@@ -597,7 +598,7 @@ module.exports = component('checkbox', function(arg, text) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./style":9}],9:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./style":9}],9:[function(require,module,exports){
 exports.view = {};
 
 exports.text = {
@@ -630,13 +631,13 @@ exports.checkboxChecked = {
 
 
 },{}],10:[function(require,module,exports){
-var component, extend, getNextMonth, getPrevMonth, jalali;
+var component, getNextMonth, getPrevMonth, jalali, style;
 
 component = require('../../../utils/component');
 
-jalali = require('../../../jalali');
+style = require('./style');
 
-extend = require('../../../utils').extend;
+jalali = require('../../../jalali');
 
 getPrevMonth = function(year, month) {
   if (month === 1) {
@@ -665,8 +666,8 @@ getNextMonth = function(year, month) {
 };
 
 module.exports = component('calendar', function(arg, textbox) {
-  var E, append, boxStyle, calendar, calendarStyle, cellStyle, chevronStyle, date, dateCells, displayMonth, displayYear, dom, empty, events, gotoDate, gotoMonth, headerText, month, nextMonth, nextYear, onEvent, prevMonth, prevYear, ref, ref1, setStyle, year;
-  dom = arg.dom, events = arg.events;
+  var E, append, calendar, date, dateCells, displayMonth, displayYear, dom, empty, events, gotoDate, gotoMonth, headerText, month, nextMonth, nextYear, onEvent, prevMonth, prevYear, ref, ref1, returnObject, setStyle, year;
+  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   E = dom.E, setStyle = dom.setStyle, append = dom.append, empty = dom.empty;
   onEvent = events.onEvent;
   date = new Date();
@@ -675,65 +676,12 @@ module.exports = component('calendar', function(arg, textbox) {
   date = date.getDate();
   ref = jalali.toJalaali(year, month, date), year = ref.jy, month = ref.jm, date = ref.jd;
   ref1 = [year, month], displayYear = ref1[0], displayMonth = ref1[1];
-  boxStyle = {
-    width: 40,
-    height: 40,
-    lineHeight: 40,
-    textAlign: 'center'
-  };
-  cellStyle = extend({
-    display: 'inline-block',
-    border: '1px solid #41698a',
-    marginLeft: -1,
-    marginBottom: -1
-  }, boxStyle);
-  chevronStyle = {
-    position: 'absolute',
-    cursor: 'pointer',
-    top: 7,
-    color: '#aaa',
-    width: 40,
-    height: 30,
-    lineHeight: 30,
-    fontSize: 25
-  };
-  calendar = E(calendarStyle = {
-    position: 'absolute',
-    fontSize: 20,
-    width: 7 * cellStyle.width + 6,
-    height: 8 * cellStyle.width + 17,
-    border: '1px solid transparent',
-    cursor: 'default'
-  }, nextYear = E(extend({
-    left: 0,
-    textAlign: 'left'
-  }, chevronStyle), '‹‹'), nextMonth = E(extend({
-    left: 30,
-    textAlign: 'left'
-  }, chevronStyle), '‹'), headerText = E({
-    marginTop: 10,
-    width: '100%',
-    height: 30,
-    lineHeight: 30,
-    textAlign: 'center',
-    color: '#41698a'
-  }), prevMonth = E(extend({
-    right: 30,
-    textAlign: 'right'
-  }, chevronStyle), '›'), prevYear = E(extend({
-    right: 0,
-    textAlign: 'right'
-  }, chevronStyle), '››'), E({
+  calendar = E(style.calendar, nextYear = E(style.nextYear, '››'), nextMonth = E(style.nextMonth, '›'), headerText = E(style.headerText), prevMonth = E(style.prevMonth, '‹'), prevYear = E(style.prevYear, '‹‹'), E({
     direction: 'rtl'
-  }, E(extend({
-    marginRight: -1,
-    backgroundColor: '#41698a',
-    color: 'white'
-  }, cellStyle), 'ش'), ['ی', 'د', 'س', 'چ', 'پ', 'ج'].map(function(day, i) {
-    return E(extend({
-      backgroundColor: '#41698a',
-      color: 'white'
-    }, cellStyle), day);
+  }, ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'].map(function(day, i) {
+    var cell;
+    cell = E(style.dayCell, day);
+    return cell;
   }), dateCells = E()));
   gotoMonth = function(y, m) {
     var day, gd, gm, gy, j, k, l, monthLength, nm, ny, pm, prevMonthLength, py, ref2, ref3, ref4, ref5, ref6, ref7, results, results1, results2, selectedDate;
@@ -754,15 +702,7 @@ module.exports = component('calendar', function(arg, textbox) {
       return results;
     }).apply(this).map(function(date) {
       var cell;
-      cell = E(extend({
-        color: '#ccc',
-        cursor: 'pointer'
-      }, cellStyle), date);
-      if (date === prevMonthLength - day + 1) {
-        setStyle(cell, {
-          marginRight: -1
-        });
-      }
+      cell = E(style.grayCell, date);
       onEvent(cell, 'click', function() {
         return gotoDate(py, pm, date);
       });
@@ -775,19 +715,9 @@ module.exports = component('calendar', function(arg, textbox) {
       return results1;
     }).apply(this).map(function(date) {
       var cell;
-      cell = E(extend({
-        color: '#41698a',
-        cursor: 'pointer'
-      }, cellStyle), date);
-      if (((day + date) % 7) === 1) {
-        setStyle(cell, {
-          marginRight: -1
-        });
-      }
+      cell = E(style.cell, date);
       if (selectedDate === date && month === displayMonth && year === displayYear) {
-        setStyle(cell, {
-          backgroundColor: '#ff6b6b'
-        });
+        setStyle(cell, style.todayCell);
       }
       onEvent(cell, 'click', function() {
         return gotoDate(displayYear, displayMonth, date);
@@ -800,30 +730,24 @@ module.exports = component('calendar', function(arg, textbox) {
       return results2;
     }).apply(this).map(function(date) {
       var cell;
-      cell = E(extend({
-        color: '#ccc',
-        cursor: 'pointer'
-      }, cellStyle), date);
-      if (((day + date + monthLength) % 7) === 1) {
-        setStyle(cell, {
-          marginRight: -1
-        });
-      }
+      cell = E(style.grayCell, date);
       onEvent(cell, 'click', function() {
         return gotoDate(ny, nm, date);
       });
       return cell;
     }));
   };
-  gotoDate = function(y, m, d) {
+  gotoDate = function(y, m, d, omitTextbox) {
     var ref2;
     ref2 = [y, m, d], year = ref2[0], month = ref2[1], date = ref2[2];
     gotoMonth(year, month);
-    return setStyle(textbox, {
-      value: year + "/" + month + "/" + date
-    });
+    if (!omitTextbox) {
+      return setStyle(textbox, {
+        value: year + "/" + month + "/" + date
+      });
+    }
   };
-  gotoDate(year, month, date);
+  gotoDate(year, month, date, true);
   onEvent(prevYear, 'click', function() {
     return gotoMonth(displayYear - 1, displayMonth);
   });
@@ -840,12 +764,107 @@ module.exports = component('calendar', function(arg, textbox) {
     ref2 = getNextMonth(displayYear, displayMonth), y = ref2.year, m = ref2.month;
     return gotoMonth(y, m);
   });
+  returnObject({
+    gotoDate: gotoDate
+  });
   return calendar;
 });
 
 
-},{"../../../jalali":29,"../../../utils":37,"../../../utils/component":33}],11:[function(require,module,exports){
-var calendar, component, style, toEnglish;
+},{"../../../jalali":30,"../../../utils/component":34,"./style":11}],11:[function(require,module,exports){
+var chevron, extend;
+
+extend = require('../../../utils').extend;
+
+exports.cell = {
+  width: 30,
+  height: 30,
+  lineHeight: 30,
+  margin: 10,
+  borderRadius: 100,
+  textAlign: 'center',
+  display: 'inline-block',
+  border: '1px solid transparent',
+  marginLeft: -1,
+  marginBottom: -1,
+  backgroundColor: '#eee',
+  color: '#555',
+  cursor: 'pointer',
+  fontSize: 13
+};
+
+exports.dayCell = extend({}, exports.cell, {
+  cursor: 'default',
+  fontSize: 16,
+  fontWeight: 'bold'
+});
+
+exports.grayCell = extend({}, exports.cell, {
+  color: '#ccc'
+});
+
+exports.todayCell = extend({}, exports.cell, {
+  backgroundColor: '#d71d24',
+  color: 'white'
+});
+
+exports.calendar = {
+  position: 'absolute',
+  borderRadius: 5,
+  backgroundColor: '#eee',
+  fontSize: 20,
+  width: 7 * (exports.cell.width + exports.cell.margin) + 6,
+  height: 8 * (exports.cell.width + exports.cell.margin) + 17,
+  border: '1px solid transparent',
+  cursor: 'default'
+};
+
+chevron = {
+  position: 'absolute',
+  cursor: 'pointer',
+  top: 10,
+  color: '#449e73',
+  height: 30,
+  lineHeight: 30,
+  fontSize: 25,
+  fontWeight: 'bold'
+};
+
+exports.nextYear = extend({}, chevron, {
+  left: 30,
+  textAlign: 'left'
+});
+
+exports.nextMonth = extend({}, chevron, {
+  left: 60,
+  textAlign: 'left'
+});
+
+exports.headerText = {
+  marginTop: 10,
+  width: '100%',
+  height: 30,
+  lineHeight: 30,
+  fontSize: 16,
+  fontWeight: 'bold',
+  textAlign: 'center',
+  color: '#555'
+};
+
+exports.prevMonth = extend({}, chevron, {
+  right: 60,
+  textAlign: 'right'
+});
+
+exports.prevYear = extend({}, chevron, {
+  right: 30,
+  textAlign: 'right'
+});
+
+
+},{"../../../utils":38}],12:[function(require,module,exports){
+var body, calendar, component, jalali, style, toEnglish,
+  slice = [].slice;
 
 component = require('../../utils/component');
 
@@ -853,14 +872,24 @@ style = require('./style');
 
 calendar = require('./calendar');
 
+jalali = require('../../jalali');
+
 toEnglish = require('../../utils').toEnglish;
 
+body = require('../../utils/dom').body;
+
 module.exports = component('dateInput', function(arg) {
-  var E, dom, events, input, onEvent, prevValue, returnObject, setStyle, view;
+  var E, calendarIcon, calendarInstance, calendarPlaceholder, dom, events, input, onEvent, prevValue, returnObject, setStyle, view;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
-  view = E(style.view, input = E('input', style.input), E('i', style.calendar), E(calendar, input));
+  view = E(style.view, input = E('input', style.input), calendarIcon = E('i', style.calendarIcon), calendarPlaceholder = E(style.calendarPlaceholder, E(style.calendarArrow), calendarInstance = E(calendar, input)));
+  onEvent(calendarIcon, 'click', function() {
+    return setStyle(calendarPlaceholder, style.calendarPlaceholderVisible);
+  });
+  onEvent(E(body), 'click', view, function() {
+    return setStyle(calendarPlaceholder, style.calendarPlaceholder);
+  });
   prevValue = '';
   onEvent(input, 'input', function() {
     var d, m, parts, ref, ref1, valid, value, y;
@@ -882,6 +911,9 @@ module.exports = component('dateInput', function(arg) {
         ref1 = [+y, +m, +d], y = ref1[0], m = ref1[1], d = ref1[2];
         if (jalali.isValidJalaaliDate(y, m, d)) {
           prevValue = value;
+          calendarInstance.gotoDate.apply(calendarInstance, slice.call(parts.map(function(x) {
+            return +x;
+          })).concat([true]));
         } else {
           value = prevValue;
         }
@@ -908,7 +940,7 @@ module.exports = component('dateInput', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./calendar":10,"./style":12}],12:[function(require,module,exports){
+},{"../../jalali":30,"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./calendar":10,"./style":13}],13:[function(require,module,exports){
 exports.view = {
   position: 'relative'
 };
@@ -918,7 +950,7 @@ exports.input = {
   direction: 'ltr'
 };
 
-exports.calendar = {
+exports.calendarIcon = {
   "class": 'fa fa-calendar',
   position: 'absolute',
   top: 8,
@@ -927,8 +959,36 @@ exports.calendar = {
   color: 'gray'
 };
 
+exports.calendarPlaceholder = {
+  position: 'absolute',
+  top: 30 + 10,
+  left: 160,
+  zIndex: 1000,
+  backgroundColor: '#eee',
+  transition: '0.2s',
+  opacity: 0,
+  visibility: 'hidden'
+};
 
-},{}],13:[function(require,module,exports){
+exports.calendarPlaceholderVisible = {
+  opacity: 1,
+  visibility: 'visible'
+};
+
+exports.calendarArrow = {
+  position: 'absolute',
+  width: 0,
+  height: 0,
+  borderStyle: 'solid',
+  borderColor: 'transparent',
+  top: -10,
+  right: (286 - 10) / 2,
+  borderWidth: '0 10px 10px',
+  borderBottomColor: '#eee'
+};
+
+
+},{}],14:[function(require,module,exports){
 var _style, component, extend, list, ref, textIsInSearch, toPersian;
 
 component = require('../../utils/component');
@@ -1060,6 +1120,11 @@ module.exports = component('dropdown', function(arg, arg1) {
     },
     value: itemsList.value,
     input: input,
+    setValue: function(item) {
+      setInputValue(getTitle(item));
+      itemsList.update([item]);
+      return itemsList.select();
+    },
     clear: function() {
       if (selectedIndex) {
         return clear();
@@ -1076,7 +1141,7 @@ module.exports = component('dropdown', function(arg, arg1) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./list":14,"./style":16}],14:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./list":15,"./style":17}],15:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -1167,9 +1232,9 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":33,"./style":15}],15:[function(require,module,exports){
+},{"../../../utils/component":34,"./style":16}],16:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],16:[function(require,module,exports){
+},{"dup":4}],17:[function(require,module,exports){
 exports.dropdown = {
   position: 'relative'
 };
@@ -1201,7 +1266,7 @@ exports.arrowHover = {
 };
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var component;
 
 component = require('../utils/component');
@@ -1243,7 +1308,7 @@ module.exports = component('loadbar', function(arg, style) {
 });
 
 
-},{"../utils/component":33}],18:[function(require,module,exports){
+},{"../utils/component":34}],19:[function(require,module,exports){
 var component, style;
 
 component = require('../../utils/component');
@@ -1295,7 +1360,7 @@ module.exports = component('radioSwitch', function(arg, arg1) {
 });
 
 
-},{"../../utils/component":33,"./style":19}],19:[function(require,module,exports){
+},{"../../utils/component":34,"./style":20}],20:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -1328,7 +1393,7 @@ exports.optionActive = {
 };
 
 
-},{"../../utils":37}],20:[function(require,module,exports){
+},{"../../utils":38}],21:[function(require,module,exports){
 var component, emailIsValid;
 
 component = require('../../utils/component');
@@ -1351,7 +1416,7 @@ module.exports = component('emailInput', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33}],21:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34}],22:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1376,7 +1441,7 @@ module.exports = component('gradeInput', function(arg) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],22:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],23:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -1411,7 +1476,7 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33}],23:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34}],24:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1436,7 +1501,7 @@ module.exports = component('numberInput', function(arg, isFraction) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],24:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],25:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1461,7 +1526,7 @@ module.exports = component('phoneNumberInput', function(arg) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],25:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],26:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1486,7 +1551,7 @@ module.exports = component('yearInput', function(arg) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],26:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],27:[function(require,module,exports){
 var component, window;
 
 component = require('../utils/component');
@@ -1566,7 +1631,7 @@ module.exports = component('scrollViewer', function(arg) {
 });
 
 
-},{"../utils/component":33,"../utils/dom":35}],27:[function(require,module,exports){
+},{"../utils/component":34,"../utils/dom":36}],28:[function(require,module,exports){
 var body, component, defer, extend, ref, style;
 
 component = require('../../utils/component');
@@ -1616,7 +1681,7 @@ module.exports = function(element, text) {
 };
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./style":28}],28:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./style":29}],29:[function(require,module,exports){
 exports.tooltip = {
   position: 'absolute',
   textAlign: 'center',
@@ -1650,7 +1715,7 @@ exports.arrow = {
 };
 
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /*
   Expose functions.
 */
@@ -1904,7 +1969,7 @@ function div(a, b) {
 function mod(a, b) {
   return a - ~~(a / b) * b
 }
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var body, component, views;
 
 component = require('./utils/component');
@@ -1938,7 +2003,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":33,"./utils/dom":35,"./views":86}],31:[function(require,module,exports){
+},{"./utils/component":34,"./utils/dom":36,"./views":87}],32:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3990,7 +4055,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":1}],32:[function(require,module,exports){
+},{"_process":1}],33:[function(require,module,exports){
 var linear, spring, timeStep;
 
 linear = function(rawCallback, wrapCallback) {
@@ -4105,7 +4170,7 @@ module.exports = {
 };
 
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var _dom, _events, _service, _state, extend, log,
   slice = [].slice;
 
@@ -4174,7 +4239,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":37,"./dom":35,"./events":36,"./log":38,"./service":43,"./state":48}],34:[function(require,module,exports){
+},{".":38,"./dom":36,"./events":37,"./log":39,"./service":44,"./state":49}],35:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -4215,7 +4280,7 @@ module.exports = {
 };
 
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -4616,7 +4681,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":37,"./log":38}],36:[function(require,module,exports){
+},{".":38,"./log":39}],37:[function(require,module,exports){
 var body, isIn, log, ref, remove, window,
   slice = [].slice;
 
@@ -4892,7 +4957,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":37,"./dom":35,"./log":38}],37:[function(require,module,exports){
+},{".":38,"./dom":36,"./log":39}],38:[function(require,module,exports){
 var slice = [].slice;
 
 exports.emailIsValid = function(email) {
@@ -5082,7 +5147,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -5395,7 +5460,7 @@ exports.service = {
 };
 
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
@@ -5423,7 +5488,7 @@ exports.actionModifiable = function(action) {
 };
 
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -5477,7 +5542,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":31,"./mock":45}],41:[function(require,module,exports){
+},{"../../q":32,"./mock":46}],42:[function(require,module,exports){
 var Q, cruds, eraseCookie, extend, get, gets, post, posts, ref, ref1, ref2, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -5668,7 +5733,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":37,"../../q":31,"../cookies":34,"../state":48,"./getPost":42,"./names":46,"./stateChangingServices":47}],42:[function(require,module,exports){
+},{"..":38,"../../q":32,"../cookies":35,"../state":49,"./getPost":43,"./names":47,"./stateChangingServices":48}],43:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, map, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -5762,7 +5827,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":34,"../state":48,"./ajax":40,"./ex":41,"./map":44,"./names":46,"./stateChangingServices":47}],43:[function(require,module,exports){
+},{"../cookies":35,"../state":49,"./ajax":41,"./ex":42,"./map":45,"./names":47,"./stateChangingServices":48}],44:[function(require,module,exports){
 var Q, ex, get, gets, log, others, post, posts, ref, ref1,
   slice = [].slice;
 
@@ -5812,16 +5877,41 @@ exports.autoPing = function() {
 };
 
 
-},{"../../q":31,"../log":38,"./ex":41,"./getPost":42,"./names":46}],44:[function(require,module,exports){
+},{"../../q":32,"../log":39,"./ex":42,"./getPost":43,"./names":47}],45:[function(require,module,exports){
 exports.jobs = 'allRecordedJobs';
 
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
 
 Q = require('../../q');
 
 extend = require('../../utils').extend;
+
+managers = [
+  {
+    userId: 10,
+    firstName: 'روح‌الله',
+    lastName: 'محمد‌خانی'
+  }, {
+    userId: 11,
+    firstName: 'حامد',
+    lastName: 'حسینی‌نژاد'
+  }
+];
+
+jobs = [
+  {
+    jobId: 0,
+    jobName: 'Java developer'
+  }, {
+    jobId: 1,
+    jobName: 'Javascript developer'
+  }, {
+    jobId: 2,
+    jobName: 'UX designer'
+  }
+];
 
 applicants = [
   {
@@ -5847,7 +5937,8 @@ applicants = [
       {
         status: 2
       }, {
-        status: 8
+        status: 8,
+        interViewTime: 1486369082850
       }
     ],
     applicantsManagerStatus: []
@@ -5870,35 +5961,13 @@ applicants = [
     notes: ['aaaaaaaaaaaa'],
     applicantsHRStatus: [
       {
-        status: 7
+        status: 7,
+        interViewTime: 1486369082850,
+        jobId: jobs[1].jobId,
+        managerId: managers[0].userId
       }
     ],
     applicantsManagerStatus: []
-  }
-];
-
-managers = [
-  {
-    userId: 10,
-    firstName: 'روح‌الله',
-    lastName: 'محمد‌خانی'
-  }, {
-    userId: 11,
-    firstName: 'حامد',
-    lastName: 'حسینی‌نژاد'
-  }
-];
-
-jobs = [
-  {
-    jobId: 0,
-    jobName: 'Java developer'
-  }, {
-    jobId: 1,
-    jobName: 'Javascript developer'
-  }, {
-    jobId: 2,
-    jobName: 'UX designer'
   }
 ];
 
@@ -6213,7 +6282,7 @@ exports.clearAllNotifications = function() {
 };
 
 
-},{"../../q":31,"../../utils":37}],46:[function(require,module,exports){
+},{"../../q":32,"../../utils":38}],47:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
 exports.posts = ['login', 'addJob'];
@@ -6230,7 +6299,7 @@ exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'changeManage
 exports.states = ['user', 'applicants', 'notifications', 'managers', 'jobs'];
 
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -6269,7 +6338,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":37,"./names":46}],48:[function(require,module,exports){
+},{"..":38,"./names":47}],49:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -6474,11 +6543,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":38,"./names":49}],49:[function(require,module,exports){
+},{"../log":39,"./names":50}],50:[function(require,module,exports){
 module.exports = ['user', 'applicants', 'notifications', 'managers', 'jobs'];
 
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var checkbox, component, dropdown, extend, gradeInput, ref, remove, style, yearInput;
 
 component = require('../../../../utils/component');
@@ -6647,7 +6716,7 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":8,"../../../../components/dropdown":13,"../../../../components/restrictedInput/grade":21,"../../../../components/restrictedInput/year":25,"../../../../utils":37,"../../../../utils/component":33,"./style":51}],51:[function(require,module,exports){
+},{"../../../../components/checkbox":8,"../../../../components/dropdown":14,"../../../../components/restrictedInput/grade":22,"../../../../components/restrictedInput/year":26,"../../../../utils":38,"../../../../utils/component":34,"./style":52}],52:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -6724,7 +6793,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":37}],52:[function(require,module,exports){
+},{"../../../../utils":38}],53:[function(require,module,exports){
 var component, dropdown, style;
 
 component = require('../../../../utils/component');
@@ -6769,7 +6838,7 @@ module.exports = component('applicantFormEnglish', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":13,"../../../../utils/component":33,"./style":53}],53:[function(require,module,exports){
+},{"../../../../components/dropdown":14,"../../../../utils/component":34,"./style":54}],54:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -6811,7 +6880,7 @@ exports.input = {
 };
 
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 var checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, talents, tooltip;
 
 component = require('../../../utils/component');
@@ -7048,7 +7117,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":8,"../../../components/scrollViewer":26,"../../../components/tooltip":27,"../../../utils":37,"../../../utils/animation":32,"../../../utils/component":33,"../../../utils/dom":35,"./education":50,"./english":52,"./others":55,"./overview":68,"./personalInfo":70,"./reputation":74,"./style":76,"./talents":77}],55:[function(require,module,exports){
+},{"../../../components/checkbox":8,"../../../components/scrollViewer":27,"../../../components/tooltip":28,"../../../utils":38,"../../../utils/animation":33,"../../../utils/component":34,"../../../utils/dom":36,"./education":51,"./english":53,"./others":56,"./overview":69,"./personalInfo":71,"./reputation":75,"./style":77,"./talents":78}],56:[function(require,module,exports){
 var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
@@ -7094,7 +7163,7 @@ module.exports = component('applicantFormOthers', function(arg, arg1) {
 });
 
 
-},{"../../../../utils/component":33,"./part0":56,"./part1":58,"./part2":60,"./part3":62,"./part4":64,"./part5":66}],56:[function(require,module,exports){
+},{"../../../../utils/component":34,"./part0":57,"./part1":59,"./part2":61,"./part3":63,"./part4":65,"./part5":67}],57:[function(require,module,exports){
 var component, dateInput, dropdown, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7236,7 +7305,7 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/dateInput":11,"../../../../../components/dropdown":13,"../../../../../components/restrictedInput/number":23,"../../../../../utils":37,"../../../../../utils/component":33,"./style":57}],57:[function(require,module,exports){
+},{"../../../../../components/dateInput":12,"../../../../../components/dropdown":14,"../../../../../components/restrictedInput/number":24,"../../../../../utils":38,"../../../../../utils/component":34,"./style":58}],58:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../../utils').extend;
@@ -7317,7 +7386,7 @@ exports.descriptionInput = extend({}, exports.input, {
 });
 
 
-},{"../../../../../utils":37}],58:[function(require,module,exports){
+},{"../../../../../utils":38}],59:[function(require,module,exports){
 var component, radioSwitch, style;
 
 component = require('../../../../../utils/component');
@@ -7380,7 +7449,7 @@ module.exports = component('applicantFormOthersPart1', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":18,"../../../../../utils/component":33,"./style":59}],59:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":19,"../../../../../utils/component":34,"./style":60}],60:[function(require,module,exports){
 exports.mainLabel = {
   fontSize: 12,
   lineHeight: 30,
@@ -7404,7 +7473,7 @@ exports.radioSwitch = {
 };
 
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 var component, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7516,7 +7585,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/number":23,"../../../../../utils":37,"../../../../../utils/component":33,"./style":61}],61:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":24,"../../../../../utils":38,"../../../../../utils/component":34,"./style":62}],62:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -7581,7 +7650,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":37}],62:[function(require,module,exports){
+},{"../../../../../utils":38}],63:[function(require,module,exports){
 var component, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7683,7 +7752,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/number":23,"../../../../../utils":37,"../../../../../utils/component":33,"./style":63}],63:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":24,"../../../../../utils":38,"../../../../../utils/component":34,"./style":64}],64:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -7757,7 +7826,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":37}],64:[function(require,module,exports){
+},{"../../../../../utils":38}],65:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../../utils/component');
@@ -7781,7 +7850,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils/component":33,"./style":65}],65:[function(require,module,exports){
+},{"../../../../../utils/component":34,"./style":66}],66:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -7823,7 +7892,7 @@ exports.textarea = {
 };
 
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 var component, extend, radioSwitch, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7915,7 +7984,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":18,"../../../../../utils":37,"../../../../../utils/component":33,"./style":67}],67:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":19,"../../../../../utils":38,"../../../../../utils/component":34,"./style":68}],68:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -7942,7 +8011,7 @@ exports.input = {
 };
 
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -7994,7 +8063,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"./style":69}],69:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":70}],70:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -8057,7 +8126,7 @@ exports.resumeLink = {
 };
 
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
 
 component = require('../../../../utils/component');
@@ -8445,7 +8514,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":8,"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../components/radioSwitch":18,"../../../../components/restrictedInput/email":20,"../../../../components/restrictedInput/number":23,"../../../../components/restrictedInput/phoneNumber":24,"../../../../utils":37,"../../../../utils/component":33,"./multivalue":71,"./style":73}],71:[function(require,module,exports){
+},{"../../../../components/checkbox":8,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../components/radioSwitch":19,"../../../../components/restrictedInput/email":21,"../../../../components/restrictedInput/number":24,"../../../../components/restrictedInput/phoneNumber":25,"../../../../utils":38,"../../../../utils/component":34,"./multivalue":72,"./style":74}],72:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -8518,7 +8587,7 @@ module.exports = component('personalInfoMultivalue', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils":37,"../../../../../utils/component":33,"./style":72}],72:[function(require,module,exports){
+},{"../../../../../utils":38,"../../../../../utils/component":34,"./style":73}],73:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -8572,7 +8641,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":37}],73:[function(require,module,exports){
+},{"../../../../../utils":38}],74:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -8662,7 +8731,7 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":37}],74:[function(require,module,exports){
+},{"../../../../utils":38}],75:[function(require,module,exports){
 var component, dateInput, dropdown, extend, monthToString, numberInput, ref, remove, style, toEnglish;
 
 component = require('../../../../utils/component');
@@ -8838,7 +8907,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../components/restrictedInput/number":23,"../../../../utils":37,"../../../../utils/component":33,"./style":75}],75:[function(require,module,exports){
+},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../components/restrictedInput/number":24,"../../../../utils":38,"../../../../utils/component":34,"./style":76}],76:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -9024,7 +9093,7 @@ exports.jobColumnHeader = {
 };
 
 
-},{"../../../../utils":37}],76:[function(require,module,exports){
+},{"../../../../utils":38}],77:[function(require,module,exports){
 exports.valid = {
   color: '#5c5555',
   borderColor: '#ccc'
@@ -9097,7 +9166,7 @@ exports.submitSubmitting = {
 };
 
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var component, dropdown, remove, style, yearInput;
 
 component = require('../../../../utils/component');
@@ -9308,7 +9377,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":13,"../../../../components/restrictedInput/year":25,"../../../../utils":37,"../../../../utils/component":33,"./style":78}],78:[function(require,module,exports){
+},{"../../../../components/dropdown":14,"../../../../components/restrictedInput/year":26,"../../../../utils":38,"../../../../utils/component":34,"./style":79}],79:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -9392,7 +9461,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":37}],79:[function(require,module,exports){
+},{"../../../../utils":38}],80:[function(require,module,exports){
 var component, extend, form, style, tabContents, tabNames, tests;
 
 component = require('../../utils/component');
@@ -9462,7 +9531,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./form":54,"./style":80,"./tests":81}],80:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./form":55,"./style":81,"./tests":82}],81:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -9575,7 +9644,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":37}],81:[function(require,module,exports){
+},{"../../utils":38}],82:[function(require,module,exports){
 var component;
 
 component = require('../../../utils/component');
@@ -9588,7 +9657,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":33}],82:[function(require,module,exports){
+},{"../../../utils/component":34}],83:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -9737,7 +9806,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./jobs":83,"./style":84}],83:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./jobs":84,"./style":85}],84:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -9819,7 +9888,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -10051,7 +10120,7 @@ exports.footerLink = {
 };
 
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -10059,7 +10128,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":91}],86:[function(require,module,exports){
+},{"../tableView":92}],87:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView, printView;
 
 component = require('../utils/component');
@@ -10110,7 +10179,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":33,"./applicantView":79,"./apply":82,"./hrView":85,"./login":87,"./managerView":89,"./printView":90}],87:[function(require,module,exports){
+},{"../utils/component":34,"./applicantView":80,"./apply":83,"./hrView":86,"./login":88,"./managerView":90,"./printView":91}],88:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -10181,7 +10250,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":23,"../../utils":37,"../../utils/component":33,"./style":88}],88:[function(require,module,exports){
+},{"../../components/restrictedInput/number":24,"../../utils":38,"../../utils/component":34,"./style":89}],89:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -10278,9 +10347,9 @@ exports.invalid = {
 };
 
 
-},{}],89:[function(require,module,exports){
-arguments[4][85][0].apply(exports,arguments)
-},{"../tableView":91,"dup":85}],90:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
+arguments[4][86][0].apply(exports,arguments)
+},{"../tableView":92,"dup":86}],91:[function(require,module,exports){
 var component, monthToString, ref, toDate;
 
 component = require('../../utils/component');
@@ -10337,7 +10406,7 @@ module.exports = component('views', function(arg, userId) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33}],91:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34}],92:[function(require,module,exports){
 var actionButton, component, extend, logic, profile, ref, search, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
@@ -10530,8 +10599,8 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../components/actionButton":2,"../../utils":37,"../../utils/component":33,"../../utils/logic":39,"./profile":94,"./search":110,"./sidebar":112,"./style":114,"./table":116}],92:[function(require,module,exports){
-var alert, component, dateInput, dropdown, logic, style, toTimestamp;
+},{"../../components/actionButton":2,"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"./profile":95,"./search":111,"./sidebar":113,"./style":115,"./table":117}],93:[function(require,module,exports){
+var alert, component, dateInput, dropdown, logic, ref, style, toDate, toTimestamp;
 
 style = require('./style');
 
@@ -10545,11 +10614,11 @@ dateInput = require('../../../../components/dateInput');
 
 logic = require('../../../../utils/logic');
 
-toTimestamp = require('../../../../utils').toTimestamp;
+ref = require('../../../../utils'), toTimestamp = ref.toTimestamp, toDate = ref.toDate;
 
-module.exports = function(loadbarInstance, applicant) {
+module.exports = function(loadbarInstance, applicant, status) {
   return component('changeStatus', function(arg) {
-    var E, alertInstance, append, close, disable, dom, enable, enabled, events, headerInput, hide, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, service, setStyle, show, state, submit, update;
+    var E, alertInstance, append, disable, dom, enable, enabled, events, headerInput, hide, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, remove, service, setStyle, show, state, submit, update;
     dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
     E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
     onEvent = events.onEvent;
@@ -10571,11 +10640,11 @@ module.exports = function(loadbarInstance, applicant) {
       f = E(dateInput);
       setStyle(f, style.dateInput);
       setStyle(f.input, style.dateInputInput);
-      onEvent(f.input, 'input', function() {
+      onEvent(f.input, ['input', 'pInput'], function() {
         return update();
       });
       return f;
-    })())), submit = E(style.submit, 'ذخیره'), hide(close = E(style.close, 'لغو'))));
+    })())), submit = E(style.submit, 'ذخیره'), remove = E(style.remove, 'حذف')));
     enabled = false;
     enable = function() {
       enabled = true;
@@ -10647,16 +10716,52 @@ module.exports = function(loadbarInstance, applicant) {
           f = E(dateInput);
           setStyle(f, style.dateInput);
           setStyle(f.input, style.dateInputInput);
-          onEvent(f.input, 'input', function() {
+          onEvent(f.input, ['input', 'pInput'], function() {
             return update();
           });
           return f;
         })()
       ]);
     });
-    onEvent(close, 'click', alertInstance.close);
+    if (!status) {
+      hide(remove);
+    } else {
+      headerInput.setValue(logic.statuses[status.status].substr('در انتظار '.length));
+      switch (headerInput.value()) {
+        case 'مصاحبه فنی':
+          state.all(['jobs', 'managers'], {
+            once: true
+          }, function(arg1) {
+            var job, jobs, manager, managers;
+            jobs = arg1[0], managers = arg1[1];
+            job = jobs.filter(function(arg2) {
+              var jobId;
+              jobId = arg2.jobId;
+              return jobId === status.jobId;
+            })[0];
+            manager = managers.filter(function(arg2) {
+              var userId;
+              userId = arg2.userId;
+              return userId === status.managerId;
+            })[0];
+            setStyle(p1Input0.setValue(job));
+            setStyle(p1Input1.setValue(manager));
+            return setStyle(p1Input2.input, {
+              value: toDate(status.interViewTime)
+            });
+          });
+          break;
+        case 'مصاحبه عمومی':
+          setStyle(p2Input.input, {
+            value: toDate(status.interViewTime)
+          });
+      }
+    }
+    onEvent(remove, 'click', function() {
+      return alertInstance.close();
+    });
     onEvent(submit, 'click', function() {
-      var s, status;
+      var s;
       if (!enabled) {
         return;
       }
@@ -10690,7 +10795,7 @@ module.exports = function(loadbarInstance, applicant) {
 };
 
 
-},{"../../../../components/alert":6,"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../utils":37,"../../../../utils/component":33,"../../../../utils/logic":39,"./style":93}],93:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":94}],94:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -10764,7 +10869,7 @@ exports.submitDisabled = {
   backgroundColor: '#a1ceb9'
 };
 
-exports.close = {
+exports.remove = {
   padding: 10,
   borderRadius: 5,
   position: 'absolute',
@@ -10778,7 +10883,7 @@ exports.close = {
   backgroundColor: '#d61d23'
 };
 
-exports.closeDisabled = {
+exports.removeDisabled = {
   backgroundColor: '#ccc'
 };
 
@@ -10825,7 +10930,7 @@ exports.dropdownInput = {
 };
 
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var actionButton, changeStatus, component, extend, loadbar, logic, style, tab0, tab1, tab2, tab3, tab4, tab5, tabContents, tabNames;
 
 component = require('../../../utils/component');
@@ -10994,7 +11099,7 @@ module.exports = component('profile', function(arg, arg1) {
             if (t.indexOf('در انتظار ' === 0)) {
               t = t.substr('در انتظار '.length);
             }
-            t = E(style.statusText, t);
+            t = E((i === arr.length - 1 ? style.statusTextActive : style.statusText), t);
             ts.push(t);
             return t;
           })());
@@ -11020,8 +11125,11 @@ module.exports = component('profile', function(arg, arg1) {
             return t;
           })())
         ]);
-        return onEvent(changeStatusButton, 'click', function() {
+        onEvent(changeStatusButton, 'click', function() {
           return changeStatus(loadbarInstance, applicant);
+        });
+        return onEvent(editStatusButton, 'click', function() {
+          return changeStatus(loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]);
         });
       }
     });
@@ -11083,7 +11191,7 @@ module.exports = component('profile', function(arg, arg1) {
 });
 
 
-},{"../../../components/actionButton":2,"../../../components/loadbar":17,"../../../utils":37,"../../../utils/component":33,"../../../utils/logic":39,"./changeStatus":92,"./style":95,"./tab0":96,"./tab1":98,"./tab2":100,"./tab3":102,"./tab4":104,"./tab5":106}],95:[function(require,module,exports){
+},{"../../../components/actionButton":2,"../../../components/loadbar":18,"../../../utils":38,"../../../utils/component":34,"../../../utils/logic":40,"./changeStatus":93,"./style":96,"./tab0":97,"./tab1":99,"./tab2":101,"./tab3":103,"./tab4":105,"./tab5":107}],96:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -11193,7 +11301,7 @@ exports.statusCircleActive = extend({}, exports.statusCircle, {
 
 exports.statusCirclePlus = extend({}, exports.statusCircle, {
   backgroundColor: 'white',
-  border: '2px solid #449e73'
+  border: '4px solid #449e73'
 });
 
 exports.statusIcon = {
@@ -11271,7 +11379,7 @@ exports.contents = {
 };
 
 
-},{"../../../utils":37}],96:[function(require,module,exports){
+},{"../../../utils":38}],97:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -11306,7 +11414,7 @@ module.exports = component('tab0', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"./style":97}],97:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":98}],98:[function(require,module,exports){
 exports.column = {
   display: 'inline-block',
   width: '50%'
@@ -11372,7 +11480,7 @@ exports.resumeLink = {
 };
 
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -11387,11 +11495,11 @@ module.exports = component('tab1', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":99}],99:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":100}],100:[function(require,module,exports){
 
 
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -11406,9 +11514,9 @@ module.exports = component('tab2', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":101}],101:[function(require,module,exports){
-arguments[4][99][0].apply(exports,arguments)
-},{"dup":99}],102:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":102}],102:[function(require,module,exports){
+arguments[4][100][0].apply(exports,arguments)
+},{"dup":100}],103:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -11423,9 +11531,9 @@ module.exports = component('tab3', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":103}],103:[function(require,module,exports){
-arguments[4][99][0].apply(exports,arguments)
-},{"dup":99}],104:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":104}],104:[function(require,module,exports){
+arguments[4][100][0].apply(exports,arguments)
+},{"dup":100}],105:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -11440,9 +11548,9 @@ module.exports = component('tab4', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":105}],105:[function(require,module,exports){
-arguments[4][99][0].apply(exports,arguments)
-},{"dup":99}],106:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":106}],106:[function(require,module,exports){
+arguments[4][100][0].apply(exports,arguments)
+},{"dup":100}],107:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -11457,9 +11565,9 @@ module.exports = component('tab5', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":107}],107:[function(require,module,exports){
-arguments[4][99][0].apply(exports,arguments)
-},{"dup":99}],108:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":108}],108:[function(require,module,exports){
+arguments[4][100][0].apply(exports,arguments)
+},{"dup":100}],109:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -11680,7 +11788,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../utils":37,"../../../../utils/component":33,"./style":109}],109:[function(require,module,exports){
+},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"./style":110}],110:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -11723,7 +11831,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":37}],110:[function(require,module,exports){
+},{"../../../../utils":38}],111:[function(require,module,exports){
 var component, criterion, ref, remove, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -11829,7 +11937,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":37,"../../../utils/component":33,"./criterion":108,"./style":111}],111:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"./criterion":109,"./style":112}],112:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -11950,7 +12058,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":37}],112:[function(require,module,exports){
+},{"../../../utils":38}],113:[function(require,module,exports){
 var actionModifiable, actionToText, component, extend, ref, ref1, style, toDate, toTime;
 
 component = require('../../../utils/component');
@@ -12133,7 +12241,7 @@ module.exports = component('sidebar', function(arg, arg1) {
 });
 
 
-},{"../../../utils":37,"../../../utils/component":33,"../../../utils/logic":39,"./style":113}],113:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"../../../utils/logic":40,"./style":114}],114:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -12342,7 +12450,7 @@ exports.notificationIcon = {
 };
 
 
-},{"../../../utils":37}],114:[function(require,module,exports){
+},{"../../../utils":38}],115:[function(require,module,exports){
 exports.contents = {
   marginRight: 250,
   marginTop: 50,
@@ -12385,7 +12493,7 @@ exports.profileVisible = {
 };
 
 
-},{}],115:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -12607,7 +12715,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":37,"./style":117}],116:[function(require,module,exports){
+},{"../../../utils":38,"./style":118}],117:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -12731,7 +12839,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":37,"../../../utils/component":33,"./functions":115,"./style":117}],117:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"./functions":116,"./style":118}],118:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -12822,7 +12930,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":37}],118:[function(require,module,exports){
+},{"../../../utils":38}],119:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, page, ref, service;
 
 Q = require('./q');
@@ -12852,4 +12960,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./page":30,"./q":31,"./utils/dom":35,"./utils/service":43}]},{},[118]);
+},{"./page":31,"./q":32,"./utils/dom":36,"./utils/service":44}]},{},[119]);

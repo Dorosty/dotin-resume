@@ -92,7 +92,7 @@ exports.statusCircleActive = extend {}, exports.statusCircle,
 
 exports.statusCirclePlus = extend {}, exports.statusCircle,
   backgroundColor: 'white'
-  border: '2px solid #449e73'
+  border: '4px solid #449e73'
 
 exports.statusIcon =
   position: 'absolute'

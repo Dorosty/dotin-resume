@@ -1,6 +1,6 @@
 component = require '../../../utils/component'
+style = require './style'
 jalali = require '../../../jalali'
-{extend} = require '../../../utils'
 
 getPrevMonth = (year, month) ->
   if month is 1
@@ -17,7 +17,7 @@ getNextMonth = (year, month) ->
     month++
   {year, month}
 
-module.exports = component 'calendar', ({dom, events}, textbox) ->
+module.exports = component 'calendar', ({dom, events, returnObject}, textbox) ->
   {E, setStyle, append, empty} = dom
   {onEvent} = events
 
@@ -28,19 +28,18 @@ module.exports = component 'calendar', ({dom, events}, textbox) ->
   {jy: year, jm: month, jd: date} = jalali.toJalaali year, month, date
   [displayYear, displayMonth] = [year, month]
 
-  boxStyle = width: 40, height: 40, lineHeight: 40, textAlign: 'center'
-  cellStyle = extend {display: 'inline-block', border: '1px solid #41698a', marginLeft: -1, marginBottom: -1}, boxStyle
-  chevronStyle = position: 'absolute', cursor: 'pointer', top: 7, color: '#aaa', width: 40, height: 30, lineHeight: 30, fontSize: 25
-  calendar = E calendarStyle = position: 'absolute', fontSize: 20, width: 7 * cellStyle.width + 6, height: 8 * cellStyle.width + 17, border: '1px solid transparent', cursor: 'default',
-    nextYear = E extend({left: 0, textAlign: 'left'}, chevronStyle), '‹‹'
-    nextMonth = E extend({left: 30, textAlign: 'left'}, chevronStyle), '‹'
-    headerText = E marginTop: 10, width: '100%', height: 30, lineHeight: 30, textAlign: 'center', color: '#41698a'
-    prevMonth = E extend({right: 30, textAlign: 'right'}, chevronStyle), '›'
-    prevYear = E extend({right: 0, textAlign: 'right'}, chevronStyle), '››'
+  calendar = E style.calendar,
+    nextYear = E style.nextYear, '››'
+    nextMonth = E style.nextMonth, '›'
+    headerText = E style.headerText
+    prevMonth = E style.prevMonth, '‹'
+    prevYear = E style.prevYear, '‹‹'
     E direction: 'rtl',
-      E extend({marginRight: -1, backgroundColor: '#41698a', color: 'white'}, cellStyle), 'ش'
-      ['ی', 'د', 'س', 'چ', 'پ', 'ج'].map (day, i) ->
-        E extend({backgroundColor: '#41698a', color: 'white'}, cellStyle), day
+      ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'].map (day, i) ->
+        cell = E style.dayCell, day
+        # if i is 0
+        #   setStyle cell, marginRight: -1
+        cell
       dateCells = E()
 
   gotoMonth = (y, m) ->
@@ -54,36 +53,37 @@ module.exports = component 'calendar', ({dom, events}, textbox) ->
     day = new Date(gy, gm - 1, gd).getDay() + 1
     empty dateCells
     append dateCells, [prevMonthLength - day + 1 .. prevMonthLength].map (date) ->
-      cell = E extend({color: '#ccc', cursor: 'pointer'}, cellStyle), date
-      if date is prevMonthLength - day + 1
-        setStyle cell, marginRight: -1
+      cell = E style.grayCell, date
+      # if date is prevMonthLength - day + 1
+      #   setStyle cell, marginRight: -1
       onEvent cell, 'click', ->
         gotoDate py, pm, date
       cell
     selectedDate = date
     append dateCells, [1 .. monthLength].map (date) ->
-      cell = E extend({color: '#41698a', cursor: 'pointer'}, cellStyle), date
-      if ((day + date) % 7) is 1
-        setStyle cell, marginRight: -1
+      cell = E style.cell, date
+      # if ((day + date) % 7) is 1
+      #   setStyle cell, marginRight: -1
       if selectedDate is date && month is displayMonth && year is displayYear
-        setStyle cell, backgroundColor: '#ff6b6b'        
+        setStyle cell, style.todayCell
       onEvent cell, 'click', ->
         gotoDate displayYear, displayMonth, date
       cell
     append dateCells, [1 .. 42 - monthLength - day].map (date) ->
-      cell = E extend({color: '#ccc', cursor: 'pointer'}, cellStyle), date
-      if ((day + date + monthLength) % 7) is 1
-        setStyle cell, marginRight: -1
+      cell = E style.grayCell, date
+      # if ((day + date + monthLength) % 7) is 1
+      #   setStyle cell, marginRight: -1
       onEvent cell, 'click', ->
         gotoDate ny, nm, date
       cell
 
-  gotoDate = (y, m, d) ->
+  gotoDate = (y, m, d, omitTextbox) ->
     [year, month, date] = [y, m, d]
     gotoMonth year, month
-    setStyle textbox, value: "#{year}/#{month}/#{date}"
+    unless omitTextbox
+      setStyle textbox, value: "#{year}/#{month}/#{date}"
 
-  gotoDate year, month, date
+  gotoDate year, month, date, true
 
   onEvent prevYear, 'click', -> gotoMonth displayYear - 1, displayMonth
   onEvent nextYear, 'click', -> gotoMonth displayYear + 1, displayMonth
@@ -93,5 +93,7 @@ module.exports = component 'calendar', ({dom, events}, textbox) ->
   onEvent nextMonth, 'click', ->
     {year: y, month: m} = getNextMonth displayYear, displayMonth
     gotoMonth y, m
+
+  returnObject {gotoDate}
 
   calendar

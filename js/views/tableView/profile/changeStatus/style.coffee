@@ -62,7 +62,7 @@ exports.submit =
 exports.submitDisabled =
   backgroundColor: '#a1ceb9'
 
-exports.close =
+exports.remove =
   padding: 10
   borderRadius: 5
   position: 'absolute'
@@ -75,7 +75,7 @@ exports.close =
   transition: '0.2s'
   backgroundColor: '#d61d23'
 
-exports.closeDisabled =
+exports.removeDisabled =
   backgroundColor: '#ccc'
 
 exports.dateInput =

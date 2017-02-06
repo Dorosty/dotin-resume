@@ -1,7 +1,9 @@
 component = require '../../utils/component'
 style = require './style'
 calendar = require './calendar'
+jalali = require '../../jalali'
 {toEnglish} = require '../../utils'
+{body} = require '../../utils/dom'
 
 module.exports = component 'dateInput', ({dom, events, returnObject}) ->  
   {E, setStyle} = dom
@@ -9,11 +11,17 @@ module.exports = component 'dateInput', ({dom, events, returnObject}) ->
 
   view = E style.view,
     input = E 'input', style.input
-    E 'i', style.calendar
-    E calendar, input
+    calendarIcon = E 'i', style.calendarIcon
+    calendarPlaceholder = E style.calendarPlaceholder,
+      E style.calendarArrow
+      calendarInstance = E calendar, input
+
+  onEvent calendarIcon, 'click', ->
+    setStyle calendarPlaceholder, style.calendarPlaceholderVisible
+  onEvent E(body), 'click', view, ->
+    setStyle calendarPlaceholder, style.calendarPlaceholder
 
   prevValue = ''
-
   onEvent input, 'input', ->
     value = toEnglish input.value()
     parts = value.split '/'
@@ -30,6 +38,7 @@ module.exports = component 'dateInput', ({dom, events, returnObject}) ->
         [y, m, d] = [+y, +m, +d]
         if jalali.isValidJalaaliDate y, m, d
           prevValue = value
+          calendarInstance.gotoDate parts.map((x) -> +x)..., true
         else
           value = prevValue
       else    

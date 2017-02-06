@@ -135,7 +135,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
                 t = logic.statuses[status]
                 if t.indexOf 'در انتظار ' is 0
                   t = t.substr 'در انتظار '.length
-                t = E style.statusText, t
+                t = E (if i is arr.length - 1 then style.statusTextActive else style.statusText), t
                 ts.push t
                 t
             if i is arr.length - 1
@@ -156,7 +156,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               t
           ]
         onEvent changeStatusButton, 'click', -> changeStatus loadbarInstance, applicant
-        # onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
+        onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
