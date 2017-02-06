@@ -37,6 +37,19 @@ applicants = [{
     interViewTime: 1486369082850
   }]
   applicantsManagerStatus: []
+  history: [{
+    firstName: 'aaa'
+    lastName: 'bbb'
+    personalPic: null
+    action: 0
+    time: 1486369082850
+  }, {
+    firstName: 'ddd'
+    lastName: 'ccc'
+    personalPic: null
+    action: 1
+    time: 1386369082850
+  }]
 }, {
   userId: 1
   identificationCode: '0016503368'
@@ -58,6 +71,7 @@ applicants = [{
     managerId: managers[0].userId
   }]
   applicantsManagerStatus: []
+  history: []
 }]
 
 user =
@@ -208,8 +222,7 @@ user =
     }
   }
 
-applicants.forEach (applicant) ->
-  extend applicant, applicantData: user.applicantData
+user.applicantData = undefined
 
 notifications = [{
   userName: 'علی فرخی'

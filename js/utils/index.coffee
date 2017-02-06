@@ -60,8 +60,12 @@ exports.toDate = (timestamp) ->
 
 exports.toTime = (timestamp) ->
   date = new Date timestamp
-  hours = date.getHours()
-  minutes = date.getMinutes()
+  hours = String date.getHours()
+  minutes = String date.getMinutes()
+  if hours.length is 1
+    hours = '0' + hours
+  if minutes.length is 1
+    minutes = '0' + minutes
   "#{hours}:#{minutes}"
 
 exports.toTimestamp = (dateString) ->

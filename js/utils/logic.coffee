@@ -14,13 +14,7 @@ exports.statuses = [
   'بایگانی'
 ]
 
-exports.actionToText = (action) ->
-  return 'to be implemented'
-  switch action
-    when 0
-      'درخواست مصاحبه فنی'
-    when 1
-      'تغییر وضعیت به مصاحبه فنی'
+exports.actions = [1 .. 100].map -> 'to be implemented'
 
 exports.actionModifiable = (action) ->
   return true

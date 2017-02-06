@@ -6,6 +6,9 @@ exports.invalid =
   color: '#c00'
   borderColor: '#c00'
 
+exports.form =
+  paddingRight: 20
+
 exports.cover =
   position: 'absolute'
   top: 0
@@ -24,8 +27,7 @@ exports.coverVisible =
 exports.header =
   color: '#449e73'
   fontSize: 18
-  marginTop: 50
-  marginBottom: 20
+  margin: '50px -20px 20px 0'
   height: 25
   lineHeight: 25
 

@@ -141,7 +141,7 @@ exports.tab =
   display: 'inline-block'
   cursor: 'pointer'
   marginLeft: 20
-  padding: 5
+  padding: '5px 20px'
   transition: '0.2s'
   color: '#5c5555'
   borderBottom: '3px solid white'

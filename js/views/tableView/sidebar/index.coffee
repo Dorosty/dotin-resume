@@ -1,7 +1,7 @@
 component = require '../../../utils/component'
 style = require './style'
 {extend, toDate, toTime} = require '../../../utils'
-{actionToText, actionModifiable} = require '../../../utils/logic'
+{actions, actionModifiable} = require '../../../utils/logic'
 
 module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex, gotoApplicant}) ->
   {E, text, setStyle, empty, append} = dom
@@ -107,7 +107,7 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex
       notificationElement = E style.notification,
         E 'img', extend {src: if notification.userPersonalPic then '/webApi/image?address=' + notification.userPersonalPic else 'assets/img/default-avatar-small.png'}, style.notificationPersonalPic
         E style.notificationUserName, notification.userName
-        E style.notificationAction, actionToText notification.action
+        E style.notificationAction, actions[notification.action]
         E style.notificationTime, "#{toDate notification.time} #{toTime notification.time}"
         E 'a', extend({href: '/webApi/resume?address=' + applicant.resume}, style.notificationResume),
           E style.notificationIcon
