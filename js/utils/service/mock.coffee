@@ -222,6 +222,9 @@ user =
     }
   }
 
+applicants.forEach (applicant) ->
+  applicant.applicantData = user.applicantData
+
 user.applicantData = undefined
 
 notifications = [{
