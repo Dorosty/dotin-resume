@@ -6225,6 +6225,10 @@ user = {
   })
 };
 
+applicants.forEach(function(applicant) {
+  return applicant.applicantData = user.applicantData;
+});
+
 user.applicantData = void 0;
 
 notifications = [
@@ -8996,7 +9000,9 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
     end = [end[1], end[0]].join(' ');
     append(jobItemsPlaceholder, jobItem = E(style.job, removeJob = E(style.remove), E(style.jobDate, "از " + start + " تا " + end), E(style.jobRow, E(style['نام'], job['نام']), E(style['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.jobRow, E(style['محدوده نشانی'], E(style.mapIcon), text(job['محدوده نشانی'])), E(style['تلفن'], E(style.phoneIcon), text(job['تلفن']))), E(extend({
       englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
-    }, style.jobRow)), E(style.jobRow, E(style.jobColumn, E(style.jobColumnHeader, 'آخرین خالص دریافتی'), E(null, toEnglish(job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان')), E(style.jobColumn, E(style.jobColumnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix))));
+    }, style.jobRow)), E(style.jobRow, E(style.jobColumn, E(style.jobColumnHeader, 'آخرین خالص دریافتی'), E({
+      englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+    })), E(style.jobColumn, E(style.jobColumnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix))));
     onEvent(removeJob, 'click', function() {
       destroy(jobItem);
       return remove(jobs, job);
@@ -11597,22 +11603,191 @@ exports.resumeLink = {
 
 
 },{}],99:[function(require,module,exports){
-var component, style;
+var component, extend, monthToString, ref, style, toDate, toEnglish;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
-module.exports = component('tab1', function(arg) {
-  var E, dom;
+ref = require('../../../../utils'), extend = ref.extend, monthToString = ref.monthToString, toDate = ref.toDate, toEnglish = ref.toEnglish;
+
+module.exports = component('tab1', function(arg, arg1) {
+  var E, applicant, applicantData, birthdayString, dom, ref1, ref10, ref11, ref12, ref13, ref14, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, text;
   dom = arg.dom;
-  E = dom.E;
-  return E(null, 'اطلاعات تکمیلی');
+  applicant = arg1.applicant;
+  E = dom.E, text = dom.text;
+  if (!applicant.applicantData) {
+    return E();
+  }
+  applicantData = applicant.applicantData;
+  applicantData = JSON.parse(applicantData);
+  birthdayString = applicant.birthday.split('/');
+  birthdayString[1] = monthToString(birthdayString[1]);
+  birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');
+  return E(style.form, E(style.header, 'مشخصات فردی'), E('table', style.table, E('thead', null, E('tr', style.tr, E('th', null, 'جنسیت'), E('th', null, 'نام پدر'), E('th', null, 'کد ملی'), E('th', null, 'شماره شناسنامه'), E('th', null, 'محل صدور'), E('th', null, 'محل تولد'), E('th', null, 'ملیت'), E('th', null, 'تابعیت'), E('th', null, 'دین'), E('th', null, 'تاریخ تولد'))), E('tbody', null, E('tr', style.tr, E('td', null, applicantData['مشخصات فردی']['جنسیت']), E('td', null, applicantData['مشخصات فردی']['نام پدر']), E('td', null, applicantData['مشخصات فردی']['کد ملی']), E('td', null, applicantData['مشخصات فردی']['شماره شناسنامه']), E('td', null, applicantData['مشخصات فردی']['محل صدور']), E('td', null, applicantData['مشخصات فردی']['محل تولد']), E('td', null, applicantData['مشخصات فردی']['ملیت']), E('td', null, applicantData['مشخصات فردی']['تابعیت']), E('td', null, applicantData['مشخصات فردی']['دین']), E('td', null, applicantData['مشخصات فردی']['تاریخ تولد'])))), E('table', style.table, E('thead', null, E('tr', style.tr, E('th', null, 'وضعیت تاهل'), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [E('th', null, 'وضعیت نظام وظیفه'), ((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E('th', null, 'نوع معافیت'), ((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E('th', null, 'دلیل معافیت') : void 0] : void 0] : void 0, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? E('th', null, 'تعداد فرزندان') : void 0, E('th', null, 'تعداد افراد تحت تکفل'), E('th', null, 'نام معرف'))), E('tbody', null, E('tr', style.tr, E('td', null, applicantData['مشخصات فردی']['وضعیت تاهل']), ((ref5 = applicantData['مشخصات فردی']) != null ? ref5['جنسیت'] : void 0) === 'مرد' ? [E('td', null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه']), ((ref6 = applicantData['مشخصات فردی']) != null ? ref6['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E('td', null, applicantData['مشخصات فردی']['نوع معافیت']), ((ref7 = applicantData['مشخصات فردی']) != null ? ref7['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E('td', null, applicantData['مشخصات فردی']['دلیل معافیت']) : void 0] : void 0] : void 0, ((ref8 = applicantData['مشخصات فردی']) != null ? ref8['وضعیت تاهل'] : void 0) !== 'مجرد' ? E('td', null, applicantData['مشخصات فردی']['تعداد فرزندان']) : void 0, E('td', null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']), E('td', null, applicantData['مشخصات فردی']['نام معرف'])))), E(style.bold, 'ایمیل'), E(style.indent, E(style.inline, E({
+    "class": 'fa fa-envelope'
+  }), E(style.afterIcon, applicant.email)), (applicantData['مشخصات فردی']['ایمیل'] || []).map(function(x) {
+    return E(style.inline, E({
+      "class": 'fa fa-envelope'
+    }), E(style.afterIcon, x));
+  })), E(style.bold, 'تلفن همراه'), E(style.indent, E(style.inline, E({
+    "class": 'fa fa-mobile'
+  }), E(style.afterIcon, applicant.email)), (applicantData['مشخصات فردی']['تلفن همراه'] || []).map(function(x) {
+    return E(style.inline, E({
+      "class": 'fa fa-mobile'
+    }), E(style.afterIcon, x));
+  })), E(style.bold, 'مشخصات سکونت دائم'), E(style.indent, E({
+    "class": 'fa fa-map-marker'
+  }), E(style.inline, applicantData['مشخصات فردی']['آدرس محل سکونت دائم'])), E(style.indent, E({
+    "class": 'fa fa-phone'
+  }), E(style.inline, applicantData['مشخصات فردی']['تلفن ثابت محل سکونت دائم'])), E(style.bold, 'مشخصات سکونت فعلی'), E(style.indent, E({
+    "class": 'fa fa-map-marker'
+  }), E(style.inline, applicantData['مشخصات فردی']['آدرس محل سکونت فعلی'])), E(style.indent, E({
+    "class": 'fa fa-phone'
+  }), E(style.inline, applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی'])), E(style.header, 'سوابق تحصیلی'), E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'مقطع'), E('th', null, 'رشته تحصیلی'), E('th', null, 'نام دانشگاه و شهر محل تحصیل'), E('th', null, 'سال ورود'), E('th', null, 'سال اخذ مدرک'), E('th', null, 'معدل'), E('th', null, 'عنوان پایان‌نامه'))), E('tbody', null, applicantData['سوابق تحصیلی']['سوابق تحصیلی'].map(function(x) {
+    return E('tr', style.tr, E('td', null, x['مقطع']), E('td', null, x['رشته تحصیلی']), E('td', null, x['نام دانشگاه و شهر محل تحصیل']), E('td', null, x['سال ورود']), E('td', null, x['سال اخذ مدرک']), E('td', null, x['معدل']), E('td', null, x['عنوان پایان‌نامه']));
+  }))), E(style.bold, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟'), E(null, applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? 'بله' : 'خیر'), ((ref9 = applicantData['سوابق تحصیلی']) != null ? ref9['مقطع و رشته‌ای که ادامه می‌دهید'] : void 0) ? [E(style.bold, 'مقطع و رشته‌ای که ادامه می‌دهید را ذکر کنید.'), E(null, applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'])] : void 0, E(style.header, 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), ((ref10 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref10['مهارت‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'شایستگی / مهارت'), E('th', null, 'علاقه به کار در این حوزه'), E('th', null, 'دانش و مهارت در این حوزه'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['مهارت‌ها'].map(function(x) {
+    return E('tr', style.tr, E('td', null, x['شایستگی / مهارت']), E('td', null, x['علاقه به کار در این حوزه']), E('td', null, x['دانش و مهارت در این حوزه']));
+  }))) : void 0, ((ref11 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref11['دوره‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'دوره'), E('th', null, 'برگزار کننده'), E('th', null, 'سال'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map(function(x) {
+    return E('tr', style.tr, E('td', null, x['دوره']), E('td', null, x['برگزار کننده']), E('td', null, x['سال']));
+  }))) : void 0, ((ref12 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref12['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref13 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref13['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), ((ref14 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref14['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
+    var end, start;
+    start = toEnglish(job['تاریخ شروع']).split('/');
+    start[1] = monthToString(start[1]);
+    start = [start[1], start[0]].join(' ');
+    end = toEnglish(job['تاریخ پایان']).split('/');
+    end[1] = monthToString(end[1]);
+    end = [end[1], end[0]].join(' ');
+    return E(style.job.job, E(style.job.date, "از " + start + " تا " + end), E(style.job.row, E(style.job['نام'], job['نام']), E(style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.job.row, E(style.job['محدوده نشانی'], E(style.job.mapIcon), text(job['محدوده نشانی'])), E(style.job['تلفن'], E(style.job.phoneIcon), text(job['تلفن']))), E(extend({
+      englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
+    }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
+      englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+    })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
+  }) : void 0);
 });
 
 
-},{"../../../../utils/component":34,"./style":100}],100:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":100}],100:[function(require,module,exports){
+exports.clearfix = {
+  clear: 'both'
+};
 
+exports.form = {
+  paddingRight: 20
+};
+
+exports.header = {
+  color: '#449e73',
+  fontSize: 18,
+  margin: '50px -20px 20px 0',
+  height: 25,
+  lineHeight: 25
+};
+
+exports.table = {
+  width: '100%',
+  marginBottom: 30
+};
+
+exports.tr = {
+  height: 30
+};
+
+exports.headerTr = {
+  height: 30,
+  borderBottom: '1px solid #ccc'
+};
+
+exports.bold = {
+  fontWeight: 'bold',
+  margin: '30px 0 5px'
+};
+
+exports.indent = {
+  marginRight: 15
+};
+
+exports.inline = {
+  display: 'inline-block',
+  margin: '5px 15px 0 5px'
+};
+
+exports.afterIcon = {
+  display: 'inline-block',
+  marginRight: 5
+};
+
+exports.column3 = {
+  display: 'inline-block',
+  width: '33%'
+};
+
+exports.job = {};
+
+exports.job.job = {
+  position: 'relative',
+  marginTop: 30,
+  paddingBottom: 15,
+  borderBottom: '1px solid #ccc'
+};
+
+exports.job.date = {
+  position: 'absolute',
+  top: 0,
+  left: 5
+};
+
+exports.job.row = {
+  margin: '20px 25px 0 20px'
+};
+
+exports.job['نام'] = {
+  display: 'inline-block',
+  marginRight: -15,
+  fontSize: 16,
+  fontWeight: 'bold'
+};
+
+exports.job['نوع فعالیت'] = {
+  display: 'inline-block',
+  marginRight: 10,
+  color: '#aaa'
+};
+
+exports.job['نام مدیر عامل'] = {
+  display: 'inline-block',
+  marginRight: 30
+};
+
+exports.job['محدوده نشانی'] = {
+  display: 'inline-block'
+};
+
+exports.job.mapIcon = {
+  "class": 'fa fa-map-marker',
+  marginLeft: 10
+};
+
+exports.job['تلفن'] = {
+  display: 'inline-block',
+  marginRight: 50
+};
+
+exports.job.phoneIcon = {
+  "class": 'fa fa-phone',
+  marginLeft: 10
+};
+
+exports.job.column = {
+  float: 'right',
+  width: '25%'
+};
+
+exports.job.columnHeader = {
+  fontSize: 14,
+  fontWeight: 'bold',
+  marginBottom: 10
+};
 
 
 },{}],101:[function(require,module,exports){
@@ -11631,8 +11806,10 @@ module.exports = component('tab2', function(arg) {
 
 
 },{"../../../../utils/component":34,"./style":102}],102:[function(require,module,exports){
-arguments[4][100][0].apply(exports,arguments)
-},{"dup":100}],103:[function(require,module,exports){
+
+
+
+},{}],103:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -11648,8 +11825,8 @@ module.exports = component('tab3', function(arg) {
 
 
 },{"../../../../utils/component":34,"./style":104}],104:[function(require,module,exports){
-arguments[4][100][0].apply(exports,arguments)
-},{"dup":100}],105:[function(require,module,exports){
+arguments[4][102][0].apply(exports,arguments)
+},{"dup":102}],105:[function(require,module,exports){
 var component, extend, ref, statuses, style, toDate, toTime;
 
 component = require('../../../../utils/component');
@@ -11752,8 +11929,8 @@ module.exports = component('tab5', function(arg) {
 
 
 },{"../../../../utils/component":34,"./style":108}],108:[function(require,module,exports){
-arguments[4][100][0].apply(exports,arguments)
-},{"dup":100}],109:[function(require,module,exports){
+arguments[4][102][0].apply(exports,arguments)
+},{"dup":102}],109:[function(require,module,exports){
 var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');

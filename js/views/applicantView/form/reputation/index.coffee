@@ -141,7 +141,7 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
       E style.jobRow,
         E style.jobColumn,
           E style.jobColumnHeader, 'آخرین خالص دریافتی'
-          E null, toEnglish(job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+          E englishText: (job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
         E style.jobColumn,
           E style.jobColumnHeader, 'علت خاتمه همکاری'
           E null, job['علت خاتمه همکاری']
