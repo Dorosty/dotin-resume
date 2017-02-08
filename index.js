@@ -11223,7 +11223,7 @@ module.exports = component('profile', function(arg, arg1) {
             "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
           }, style.statusIcon)), (function() {
             var t;
-            t = logic.statuses[status];
+            t = logic.statuses[status.status];
             if (t.indexOf('در انتظار ' === 0)) {
               t = t.substr('در انتظار '.length);
             }

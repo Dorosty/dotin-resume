@@ -136,7 +136,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
               E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
               do ->
-                t = logic.statuses[status]
+                t = logic.statuses[status.status]
                 if t.indexOf 'در انتظار ' is 0
                   t = t.substr 'در انتظار '.length
                 t = E (if i is arr.length - 1 then style.statusTextActive else style.statusText), t
