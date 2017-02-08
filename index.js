@@ -10479,6 +10479,7 @@ module.exports = component('views', function(arg, userId) {
     append(view, E(tab1, {
       applicant: applicant
     }));
+    window.print();
     return;
     applicantData = applicant.applicantData;
     applicantData = JSON.parse(applicantData);
@@ -10861,14 +10862,20 @@ module.exports = function(loadbarInstance, applicant, status) {
               setStyle(p1Input0.setValue(job));
               setStyle(p1Input1.setValue(manager));
               return setStyle(p1Input2.input, {
-                value: toDate(status.interViewTime)
+                value: toDate(interViewTime)
               });
             });
           });
           break;
         case 'مصاحبه عمومی':
-          setStyle(p2Input.input, {
-            value: toDate(status.interViewTime)
+          service.loadInterview({
+            statusId: status.statusHRId
+          }).then(function(arg1) {
+            var interViewTime;
+            interViewTime = arg1.interViewTime;
+            return setStyle(p2Input.input, {
+              value: toDate(interViewTime)
+            });
           });
       }
     }
@@ -11179,10 +11186,8 @@ module.exports = component('profile', function(arg, arg1) {
     })()));
     telephoniSeen = omoomiSeen = fanniLast = false;
     applicantsHRStatus = [];
-    applicant.applicantsHRStatus.map(function(arg3, i, arr) {
-      var status;
-      status = arg3.status;
-      switch (logic.statuses[status]) {
+    applicant.applicantsHRStatus.forEach(function(status, i, arr) {
+      switch (logic.statuses[status.status]) {
         case 'در انتظار مصاحبه تلفنی':
           fanniLast = false;
           if (telephoniSeen) {
