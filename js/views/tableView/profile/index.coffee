@@ -161,7 +161,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           ]
         onEvent changeStatusButton, 'click', -> changeStatus loadbarInstance, applicant
         if editStatusButton
-          onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
+          onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicantsHRStatus[applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15

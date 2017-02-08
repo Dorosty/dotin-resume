@@ -17,8 +17,8 @@ module.exports = component 'tab4', ({dom, state}, {applicant}) ->
   applicant.applicantsManagerStatus
   .forEach (status) ->
     state.managers.on once: true, (managers) ->
-      [{firstName, lastName, personalPic}] = managers.filter ({userId}) -> userId is status.managerId
-      {status, modificationTime} = status
+      [{firstName, lastName, personalPic}] = managers.filter ({userId}) -> userId is status.statusManagerId
+      {status, time: modificationTime} = status
       history.push {firstName, lastName, personalPic, status, modificationTime}
 
   E 'table', style.table,

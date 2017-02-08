@@ -1,13 +1,21 @@
 component = require '../../utils/component'
 {toDate, monthToString} = require '../../utils'
+tab1 = require '../tableView/profile/tab1'
 
 module.exports = component 'views', ({dom, state}, userId) ->
-  {E, append} = dom
+  {E, append, setStyle} = dom
 
   view = E()
 
   state.applicants.on once: true, (applicants) ->
     [applicant] = applicants.filter (applicant) -> applicant.userId is userId
+
+    ###############################################################################################
+    setStyle view, width: 1200, margin: '0 auto'
+    append view, E tab1, {applicant}
+    return
+    ###############################################################################################
+
     {applicantData} = applicant
     applicantData = JSON.parse applicantData
 

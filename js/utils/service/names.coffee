@@ -6,6 +6,7 @@ exports.gets = [
 exports.posts = [
   'login'
   'addJob'
+  'loadInterview'
 ]
 
 exports.cruds = [  

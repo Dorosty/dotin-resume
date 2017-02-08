@@ -6007,13 +6007,7 @@ applicants = [
     phoneNumber: '09121234567',
     email: 'dorosty@doin.ir',
     birthday: '1340/1/2',
-    selectedJobs: [
-      {
-        jobName: 'Java developer'
-      }, {
-        jobName: 'Javascript developer'
-      }
-    ],
+    selectedJobs: [jobs[0], jobs[1]],
     resume: null,
     personalPic: null,
     modificationTime: 1473132854116,
@@ -6052,11 +6046,7 @@ applicants = [
     phoneNumber: '09121234567',
     email: 'ghayoomi@dotin.ir',
     birthday: '1343/4/5',
-    selectedJobs: [
-      {
-        jobName: 'UX designer'
-      }
-    ],
+    selectedJobs: [jobs[2]],
     resume: null,
     personalPic: null,
     modificationTime: 1373132854116,
@@ -6229,31 +6219,29 @@ applicants.forEach(function(applicant) {
   return applicant.applicantData = user.applicantData;
 });
 
-user.applicantData = void 0;
-
 notifications = [
   {
     userName: 'علی فرخی',
     userPersonalPic: null,
-    action: 0,
+    status: 7,
     time: 1373132854116,
     applicantId: 0
   }, {
     userName: 'سجاد افشاریان',
     userPersonalPic: null,
-    action: 0,
+    status: 7,
     time: 1373132854116,
     applicantId: 1
   }, {
     userName: 'سجاد افشاریان',
     userPersonalPic: null,
-    action: 1,
+    status: 7,
     time: 1373132854116,
     applicantId: 0
   }, {
     userName: 'سجاد افشاریان',
     userPersonalPic: null,
-    action: 1,
+    status: 7,
     time: 1373132854116,
     applicantId: 1
   }
@@ -6389,7 +6377,7 @@ exports.clearAllNotifications = function() {
 },{"../../q":32,"../../utils":38}],47:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
-exports.posts = ['login', 'addJob'];
+exports.posts = ['login', 'addJob', 'loadInterview'];
 
 exports.cruds = [
   {
@@ -6985,7 +6973,7 @@ exports.input = {
 
 
 },{}],55:[function(require,module,exports){
-var checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, talents, tooltip;
+var checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, tab1, talents, tooltip;
 
 component = require('../../../utils/component');
 
@@ -7011,6 +6999,8 @@ others = require('./others');
 
 tooltip = require('../../../components/tooltip');
 
+tab1 = require('../../tableView/profile/tab1');
+
 ref = require('../../../utils'), extend = ref.extend, remove = ref.remove;
 
 spring = require('../../../utils/animation').spring;
@@ -7018,9 +7008,9 @@ spring = require('../../../utils/animation').spring;
 d = require('../../../utils/dom');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, cover, data, dom, errorSpring, errorSpringRunning, errors, events, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
+  var E, accept, append, cover, data, dom, errorSpring, errorSpringRunning, errors, events, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service, setOff = arg.setOff;
-  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
   (setSubmitStyle = function() {
     return setTimeout(function() {
@@ -7109,7 +7099,7 @@ module.exports = component('applicantForm', function(arg) {
     }
     return setSubmitStyle();
   };
-  view = E(null, cover = E(style.cover), hide(noData = E(null, 'اطلاعات شما ثبت شده‌است.')), yesData = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
+  view = E(null, cover = E(style.cover), hide(noData = E()), yesData = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
     setData: setData('مشخصات فردی'),
     registerErrorField: registerErrorField,
     setError: setError
@@ -7214,14 +7204,17 @@ module.exports = component('applicantForm', function(arg) {
   state.user.on(function(user) {
     if (user.applicantData) {
       hide(yesData);
-      return show(noData);
+      show(noData);
+      return append(noData, E(tab1, {
+        applicant: user
+      }));
     }
   });
   return view;
 });
 
 
-},{"../../../components/checkbox":8,"../../../components/scrollViewer":27,"../../../components/tooltip":28,"../../../utils":38,"../../../utils/animation":33,"../../../utils/component":34,"../../../utils/dom":36,"./education":51,"./english":53,"./others":56,"./overview":69,"./personalInfo":71,"./reputation":75,"./style":77,"./talents":78}],56:[function(require,module,exports){
+},{"../../../components/checkbox":8,"../../../components/scrollViewer":27,"../../../components/tooltip":28,"../../../utils":38,"../../../utils/animation":33,"../../../utils/component":34,"../../../utils/dom":36,"../../tableView/profile/tab1":99,"./education":51,"./english":53,"./others":56,"./overview":69,"./personalInfo":71,"./reputation":75,"./style":77,"./talents":78}],56:[function(require,module,exports){
 var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
@@ -10459,16 +10452,18 @@ exports.invalid = {
 },{}],90:[function(require,module,exports){
 arguments[4][86][0].apply(exports,arguments)
 },{"../tableView":92,"dup":86}],91:[function(require,module,exports){
-var component, monthToString, ref, toDate;
+var component, monthToString, ref, tab1, toDate;
 
 component = require('../../utils/component');
 
 ref = require('../../utils'), toDate = ref.toDate, monthToString = ref.monthToString;
 
+tab1 = require('../tableView/profile/tab1');
+
 module.exports = component('views', function(arg, userId) {
-  var E, append, dom, state, view;
+  var E, append, dom, setStyle, state, view;
   dom = arg.dom, state = arg.state;
-  E = dom.E, append = dom.append;
+  E = dom.E, append = dom.append, setStyle = dom.setStyle;
   view = E();
   state.applicants.on({
     once: true
@@ -10477,6 +10472,14 @@ module.exports = component('views', function(arg, userId) {
     applicant = applicants.filter(function(applicant) {
       return applicant.userId === userId;
     })[0];
+    setStyle(view, {
+      width: 1200,
+      margin: '0 auto'
+    });
+    append(view, E(tab1, {
+      applicant: applicant
+    }));
+    return;
     applicantData = applicant.applicantData;
     applicantData = JSON.parse(applicantData);
     birthdayString = applicant.birthday.split('/');
@@ -10515,7 +10518,7 @@ module.exports = component('views', function(arg, userId) {
 });
 
 
-},{"../../utils":38,"../../utils/component":34}],92:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../tableView/profile/tab1":99}],92:[function(require,module,exports){
 var actionButton, component, extend, logic, profile, ref, search, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
@@ -10782,19 +10785,17 @@ module.exports = function(loadbarInstance, applicant, status) {
           }
       }
     };
-    state.all(['jobs', 'managers'], {
+    state.managers.on({
       once: true
-    }, function(arg1) {
-      var jobs, managers;
-      jobs = arg1[0], managers = arg1[1];
+    }, function(managers) {
       return append(p1, [
         p1Input0 = (function() {
           var f;
           f = E(dropdown, {
-            items: jobs,
-            getTitle: function(arg2) {
+            items: applicant.selectedJobs,
+            getTitle: function(arg1) {
               var jobName;
-              jobName = arg2.jobName;
+              jobName = arg1.jobName;
               return jobName;
             }
           });
@@ -10808,9 +10809,9 @@ module.exports = function(loadbarInstance, applicant, status) {
           var f;
           f = E(dropdown, {
             items: managers,
-            getTitle: function(arg2) {
+            getTitle: function(arg1) {
               var firstName, lastName;
-              firstName = arg2.firstName, lastName = arg2.lastName;
+              firstName = arg1.firstName, lastName = arg1.lastName;
               return firstName + " " + lastName;
             }
           });
@@ -10838,25 +10839,30 @@ module.exports = function(loadbarInstance, applicant, status) {
       headerInput.setValue(logic.statuses[status.status].substr('در انتظار '.length));
       switch (headerInput.value()) {
         case 'مصاحبه فنی':
-          state.all(['jobs', 'managers'], {
-            once: true
-          }, function(arg1) {
-            var job, jobs, manager, managers;
-            jobs = arg1[0], managers = arg1[1];
-            job = jobs.filter(function(arg2) {
-              var jobId;
-              jobId = arg2.jobId;
-              return jobId === status.jobId;
-            })[0];
-            manager = managers.filter(function(arg2) {
-              var userId;
-              userId = arg2.userId;
-              return userId === status.managerId;
-            })[0];
-            setStyle(p1Input0.setValue(job));
-            setStyle(p1Input1.setValue(manager));
-            return setStyle(p1Input2.input, {
-              value: toDate(status.interViewTime)
+          service.loadInterview({
+            statusId: status.statusHRId
+          }).then(function(arg1) {
+            var interViewTime, interviewJob, interviewManager;
+            interViewTime = arg1.interViewTime, interviewJob = arg1.interviewJob, interviewManager = arg1.interviewManager;
+            return state.managers.on({
+              once: true
+            }, function(managers) {
+              var job, manager;
+              job = applicant.selectedJobs.filter(function(arg2) {
+                var jobId;
+                jobId = arg2.jobId;
+                return jobId === interviewJob.jobId;
+              })[0];
+              manager = managers.filter(function(arg2) {
+                var userId;
+                userId = arg2.userId;
+                return userId === interviewManager.userId;
+              })[0];
+              setStyle(p1Input0.setValue(job));
+              setStyle(p1Input1.setValue(manager));
+              return setStyle(p1Input2.input, {
+                value: toDate(status.interViewTime)
+              });
             });
           });
           break;
@@ -11247,7 +11253,7 @@ module.exports = component('profile', function(arg, arg1) {
         });
         if (editStatusButton) {
           return onEvent(editStatusButton, 'click', function() {
-            return changeStatus(loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]);
+            return changeStatus(loadbarInstance, applicant, applicantsHRStatus[applicantsHRStatus.length - 1]);
           });
         }
       }
@@ -11650,20 +11656,22 @@ module.exports = component('tab1', function(arg, arg1) {
     return E('tr', style.tr, E('td', null, x['شایستگی / مهارت']), E('td', null, x['علاقه به کار در این حوزه']), E('td', null, x['دانش و مهارت در این حوزه']));
   }))) : void 0, ((ref11 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref11['دوره‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'دوره'), E('th', null, 'برگزار کننده'), E('th', null, 'سال'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map(function(x) {
     return E('tr', style.tr, E('td', null, x['دوره']), E('td', null, x['برگزار کننده']), E('td', null, x['سال']));
-  }))) : void 0, ((ref12 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref12['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref13 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref13['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), ((ref14 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref14['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
-    var end, start;
-    start = toEnglish(job['تاریخ شروع']).split('/');
-    start[1] = monthToString(start[1]);
-    start = [start[1], start[0]].join(' ');
-    end = toEnglish(job['تاریخ پایان']).split('/');
-    end[1] = monthToString(end[1]);
-    end = [end[1], end[0]].join(' ');
-    return E(style.job.job, E(style.job.date, "از " + start + " تا " + end), E(style.job.row, E(style.job['نام'], job['نام']), E(style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.job.row, E(style.job['محدوده نشانی'], E(style.job.mapIcon), text(job['محدوده نشانی'])), E(style.job['تلفن'], E(style.job.phoneIcon), text(job['تلفن']))), E(extend({
-      englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
-    }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
-      englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-    })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
-  }) : void 0);
+  }))) : void 0, ((ref12 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref12['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref13 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref13['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), ((ref14 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref14['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? [
+    E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
+      var end, start;
+      start = toEnglish(job['تاریخ شروع']).split('/');
+      start[1] = monthToString(start[1]);
+      start = [start[1], start[0]].join(' ');
+      end = toEnglish(job['تاریخ پایان']).split('/');
+      end[1] = monthToString(end[1]);
+      end = [end[1], end[0]].join(' ');
+      return E(style.job.job, E(style.job.date, "از " + start + " تا " + end), E(style.job.row, E(style.job['نام'], job['نام']), E(style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.job.row, E(style.job['محدوده نشانی'], E(style.job.mapIcon), text(job['محدوده نشانی'])), E(style.job['تلفن'], E(style.job.phoneIcon), text(job['تلفن']))), E(extend({
+        englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
+      }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
+        englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+      })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
+    })
+  ] : void 0);
 });
 
 
@@ -11863,9 +11871,9 @@ module.exports = component('tab4', function(arg, arg1) {
       ref1 = managers.filter(function(arg2) {
         var userId;
         userId = arg2.userId;
-        return userId === status.managerId;
+        return userId === status.statusManagerId;
       })[0], firstName = ref1.firstName, lastName = ref1.lastName, personalPic = ref1.personalPic;
-      ref2 = status, status = ref2.status, modificationTime = ref2.modificationTime;
+      ref2 = status, status = ref2.status, modificationTime = ref2.time;
       return history.push({
         firstName: firstName,
         lastName: lastName,
@@ -12422,7 +12430,7 @@ exports.addHover = {
 
 
 },{"../../../utils":38}],113:[function(require,module,exports){
-var actionModifiable, actions, component, extend, ref, ref1, style, toDate, toTime;
+var actionModifiable, component, extend, ref, ref1, statuses, style, toDate, toTime;
 
 component = require('../../../utils/component');
 
@@ -12430,7 +12438,7 @@ style = require('./style');
 
 ref = require('../../../utils'), extend = ref.extend, toDate = ref.toDate, toTime = ref.toTime;
 
-ref1 = require('../../../utils/logic'), actions = ref1.actions, actionModifiable = ref1.actionModifiable;
+ref1 = require('../../../utils/logic'), statuses = ref1.statuses, actionModifiable = ref1.actionModifiable;
 
 module.exports = component('sidebar', function(arg, arg1) {
   var E, append, clearAllNotifications, dom, empty, events, gotoApplicant, gotoIndex, linkIndex, links, logout, name, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, notificationsPlaceholder, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
@@ -12537,7 +12545,9 @@ module.exports = component('sidebar', function(arg, arg1) {
     });
   });
   notificationsActive = false;
-  state.notifications.on(function(notifications) {
+  state.all(['notifications', 'applicants'], function(arg2) {
+    var applicants, notifications;
+    notifications = arg2[0], applicants = arg2[1];
     if (notifications != null ? notifications.length : void 0) {
       setStyle(notificationsBadge, style.badgeActive);
       setStyle(notificationsBadge, {
@@ -12552,20 +12562,14 @@ module.exports = component('sidebar', function(arg, arg1) {
     empty(notificationsPanel);
     return append(notificationsPanel, notifications.map(function(notification) {
       var applicant, notificationElement;
-      applicant = void 0;
-      state.applicants.on({
-        once: true
-      }, function(applicants) {
-        var ref2;
-        return ref2 = applicants.filter(function(arg2) {
-          var userId;
-          userId = arg2.userId;
-          return notification.applicantId === userId;
-        }), applicant = ref2[0], ref2;
-      });
+      applicant = applicants.filter(function(arg3) {
+        var userId;
+        userId = arg3.userId;
+        return notification.applicantId === userId;
+      })[0];
       notificationElement = E(style.notification, E('img', extend({
         src: notification.userPersonalPic ? '/webApi/image?address=' + notification.userPersonalPic : 'assets/img/default-avatar-small.png'
-      }, style.notificationPersonalPic)), E(style.notificationUserName, notification.userName), E(style.notificationAction, actions[notification.action]), E(style.notificationTime, (toDate(notification.time)) + " " + (toTime(notification.time))), E('a', extend({
+      }, style.notificationPersonalPic)), E(style.notificationUserName, notification.userName), E(style.notificationAction, statuses[notification.status]), E(style.notificationTime, (toDate(notification.time)) + " " + (toTime(notification.time))), E('a', extend({
         href: '/webApi/resume?address=' + applicant.resume
       }, style.notificationResume), E(style.notificationIcon), text(applicant.firstName + ' ' + applicant.lastName)));
       onEvent(notificationElement, 'mouseover', function() {
@@ -12574,9 +12578,6 @@ module.exports = component('sidebar', function(arg, arg1) {
       onEvent(notificationElement, 'mouseout', function() {
         return setStyle(notificationElement, style.notification);
       });
-      if (!actionModifiable(notification.action)) {
-        setStyle(notificationElement, style.notificationNotModifiable);
-      }
       onEvent(notificationElement, 'click', function() {
         gotoApplicant(applicant);
         notificationsActive = false;

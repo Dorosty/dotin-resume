@@ -81,12 +81,14 @@ module.exports = (loadbarInstance, applicant, status) ->
       headerInput.setValue logic.statuses[status.status].substr 'در انتظار '.length
       switch headerInput.value()
         when 'مصاحبه فنی'
-          state.managers.on once: true, (managers) ->
-            [job] = applicant.selectedJobs.filter ({jobId}) -> jobId is status.jobId
-            [manager] = managers.filter ({userId}) -> userId is status.managerId
-            setStyle p1Input0.setValue job
-            setStyle p1Input1.setValue manager
-            setStyle p1Input2.input, value: toDate status.interViewTime
+          service.loadInterview statusId: status.statusHRId
+          .then ({interViewTime, interviewJob, interviewManager}) ->
+            state.managers.on once: true, (managers) ->
+              [job] = applicant.selectedJobs.filter ({jobId}) -> jobId is interviewJob.jobId
+              [manager] = managers.filter ({userId}) -> userId is interviewManager.userId
+              setStyle p1Input0.setValue job
+              setStyle p1Input1.setValue manager
+              setStyle p1Input2.input, value: toDate status.interViewTime
         when 'مصاحبه عمومی'
           setStyle p2Input.input, value: toDate status.interViewTime
 

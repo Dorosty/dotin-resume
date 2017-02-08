@@ -184,43 +184,43 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
       E style.column3,
         E style.bold, 'خواندن'
         E null,applicantData['مهارت زبان انگلیسی']['خواندن']
-    E style.header, 'آخرین سوابق سازمانی و پروژه‌ای'
     if applicantData['آخرین سوابق سازمانی و پروژه‌ای']?['آخرین سوابق سازمانی و پروژه‌ای']
-      applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map (job) ->
-        start = toEnglish(job['تاریخ شروع']).split '/'
-        start[1] = monthToString start[1]
-        start = [start[1], start[0]].join ' '
+      [
+        E style.header, 'آخرین سوابق سازمانی و پروژه‌ای'
+        applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map (job) ->
+          start = toEnglish(job['تاریخ شروع']).split '/'
+          start[1] = monthToString start[1]
+          start = [start[1], start[0]].join ' '
 
-        end = toEnglish(job['تاریخ پایان']).split '/'
-        end[1] = monthToString end[1]
-        end = [end[1], end[0]].join ' '
+          end = toEnglish(job['تاریخ پایان']).split '/'
+          end[1] = monthToString end[1]
+          end = [end[1], end[0]].join ' '
 
-        E style.job.job,
-          E style.job.date, "از #{start} تا #{end}"
-          E style.job.row,
-            E style.job['نام'], job['نام']
-            E style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']
-            E style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')'
-          E style.job.row,
-            E style.job['محدوده نشانی'],
-              E style.job.mapIcon
-              text job['محدوده نشانی']
-            E style.job['تلفن'],
-              E style.job.phoneIcon
-              text job['تلفن']
-          E extend {englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace /\n/g, '<br />'}, style.job.row
-          E style.job.row,
-            E style.job.column,
-              E style.job.columnHeader, 'آخرین خالص دریافتی'
-              E englishText: (job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-            E style.job.column,
-              E style.job.columnHeader, 'علت خاتمه همکاری'
-              E null, job['علت خاتمه همکاری']
-            E style.job.column,
-              E style.job.columnHeader, 'نوع همکاری'
-              E null, job['نوع همکاری']
-            E style.clearfix
-
-        # نام مدیر مستقیم
-        # نوع همکاری
-  
+          E style.job.job,
+            E style.job.date, "از #{start} تا #{end}"
+            E style.job.row,
+              E style.job['نام'], job['نام']
+              E style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']
+              E style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')'
+            E style.job.row,
+              E style.job['محدوده نشانی'],
+                E style.job.mapIcon
+                text job['محدوده نشانی']
+              E style.job['تلفن'],
+                E style.job.phoneIcon
+                text job['تلفن']
+            E extend {englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace /\n/g, '<br />'}, style.job.row
+            E style.job.row,
+              E style.job.column,
+                E style.job.columnHeader, 'آخرین خالص دریافتی'
+                E englishText: (job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+              E style.job.column,
+                E style.job.columnHeader, 'علت خاتمه همکاری'
+                E null, job['علت خاتمه همکاری']
+              E style.job.column,
+                E style.job.columnHeader, 'نوع همکاری'
+                E null, job['نوع همکاری']
+              E style.clearfix
+      ]
+# نام مدیر مستقیم
+# نوع همکاری

@@ -1,7 +1,7 @@
 component = require '../../../utils/component'
 style = require './style'
 {extend, toDate, toTime} = require '../../../utils'
-{actions, actionModifiable} = require '../../../utils/logic'
+{statuses, actionModifiable} = require '../../../utils/logic'
 
 module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex, gotoApplicant}) ->
   {E, text, setStyle, empty, append} = dom
@@ -92,7 +92,7 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex
 
   notificationsActive = false
   
-  state.notifications.on (notifications) ->
+  state.all ['notifications', 'applicants'], ([notifications, applicants]) ->
     if notifications?.length
       setStyle notificationsBadge, style.badgeActive
       setStyle notificationsBadge, text: notifications.length
@@ -101,13 +101,11 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex
       setStyle notificationsBadge, text: ''
     empty notificationsPanel
     append notificationsPanel, notifications.map (notification) ->
-      applicant = undefined
-      state.applicants.on once: true, (applicants) ->
-        [applicant] = applicants.filter ({userId}) -> notification.applicantId is userId
+      [applicant] = applicants.filter ({userId}) -> notification.applicantId is userId
       notificationElement = E style.notification,
         E 'img', extend {src: if notification.userPersonalPic then '/webApi/image?address=' + notification.userPersonalPic else 'assets/img/default-avatar-small.png'}, style.notificationPersonalPic
         E style.notificationUserName, notification.userName
-        E style.notificationAction, actions[notification.action]
+        E style.notificationAction, statuses[notification.status]
         E style.notificationTime, "#{toDate notification.time} #{toTime notification.time}"
         E 'a', extend({href: '/webApi/resume?address=' + applicant.resume}, style.notificationResume),
           E style.notificationIcon
@@ -116,8 +114,8 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex
         setStyle notificationElement, style.notificationHover
       onEvent notificationElement, 'mouseout', ->
         setStyle notificationElement, style.notification
-      unless actionModifiable notification.action
-        setStyle notificationElement, style.notificationNotModifiable
+      # unless actionModifiable notification.action
+      #   setStyle notificationElement, style.notificationNotModifiable
       onEvent notificationElement, 'click', ->
         gotoApplicant applicant
         notificationsActive = false

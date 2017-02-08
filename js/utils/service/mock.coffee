@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -225,30 +225,30 @@ user =
 applicants.forEach (applicant) ->
   applicant.applicantData = user.applicantData
 
-user.applicantData = undefined
+# user.applicantData = undefined
 
 notifications = [{
   userName: 'علی فرخی'
   userPersonalPic: null
-  action: 0
+  status: 7
   time: 1373132854116
   applicantId: 0
 }, {
   userName: 'سجاد افشاریان'
   userPersonalPic: null
-  action: 0
+  status: 7
   time: 1373132854116
   applicantId: 1
 }, {
   userName: 'سجاد افشاریان'
   userPersonalPic: null
-  action: 1
+  status: 7
   time: 1373132854116
   applicantId: 0
 }, {
   userName: 'سجاد افشاریان'
   userPersonalPic: null
-  action: 1
+  status: 7
   time: 1373132854116
   applicantId: 1
 }]

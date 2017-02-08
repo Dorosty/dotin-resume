@@ -10,12 +10,13 @@ english = require './english'
 reputation = require './reputation'
 others = require './others'
 tooltip = require '../../../components/tooltip'
+tab1 = require '../../tableView/profile/tab1'
 {extend, remove} = require '../../../utils'
 {spring} = require '../../../utils/animation'
 d = require '../../../utils/dom'
 
 module.exports = component 'applicantForm', ({dom, events, state, service, setOff}) ->
-  {E, text, setStyle, show, hide} = dom
+  {E, text, setStyle, show, hide, append} = dom
   {onEvent, onResize} = events
 
   do setSubmitStyle = ->
@@ -77,7 +78,7 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
 
   view = E null,
     cover = E style.cover
-    hide noData = E null, 'اطلاعات شما ثبت شده‌است.'
+    hide noData = E()
     yesData = E null,
       E overview
       scroll = E scrollViewer
@@ -156,5 +157,6 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
     if user.applicantData
       hide yesData
       show noData
+      append noData, E tab1, applicant: user
 
   view
