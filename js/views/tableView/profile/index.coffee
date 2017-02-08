@@ -107,8 +107,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           t
     telephoniSeen = omoomiSeen = fanniLast = false
     applicantsHRStatus = []
-    applicant.applicantsHRStatus.map ({status}, i, arr) ->
-      switch logic.statuses[status]
+    applicant.applicantsHRStatus.forEach (status, i, arr) ->
+      switch logic.statuses[status.status]
         when 'در انتظار مصاحبه تلفنی'
           fanniLast = false
           if telephoniSeen

@@ -88,9 +88,11 @@ module.exports = (loadbarInstance, applicant, status) ->
               [manager] = managers.filter ({userId}) -> userId is interviewManager.userId
               setStyle p1Input0.setValue job
               setStyle p1Input1.setValue manager
-              setStyle p1Input2.input, value: toDate status.interViewTime
+              setStyle p1Input2.input, value: toDate interViewTime
         when 'مصاحبه عمومی'
-          setStyle p2Input.input, value: toDate status.interViewTime
+          service.loadInterview statusId: status.statusHRId
+          .then ({interViewTime}) ->
+            setStyle p2Input.input, value: toDate interViewTime
 
     onEvent remove, 'click', ->
       loadbarInstance.set()

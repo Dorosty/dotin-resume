@@ -13,6 +13,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
     ###############################################################################################
     setStyle view, width: 1200, margin: '0 auto'
     append view, E tab1, {applicant}
+    window.print()
     return
     ###############################################################################################
 
