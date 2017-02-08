@@ -23,7 +23,7 @@ applicants = [{
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
-  selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
+  selectedJobs: [jobs[0], jobs[1]]
   resume: null
   personalPic: null
   modificationTime: 1473132854116
@@ -58,7 +58,7 @@ applicants = [{
   phoneNumber: '09121234567'
   email: 'ghayoomi@dotin.ir'
   birthday: '1343/4/5'
-  selectedJobs: [{jobName: 'UX designer'}]
+  selectedJobs: [jobs[2]]
   resume: null
   personalPic: null
   modificationTime: 1373132854116

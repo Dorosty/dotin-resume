@@ -53,10 +53,10 @@ module.exports = (loadbarInstance, applicant, status) ->
           show p2
           enable() if p2Input.valid()
 
-    state.all ['jobs', 'managers'], once: true, ([jobs, managers]) ->
+    state.managers.on once: true, (managers) ->
       append p1, [
         p1Input0 = do ->
-          f = E dropdown, items: jobs, getTitle: ({jobName}) -> jobName
+          f = E dropdown, items: applicant.selectedJobs, getTitle: ({jobName}) -> jobName
           setStyle f, style.dropdown
           setStyle f.input, style.dropdownInput
           f.onChange -> update()
@@ -81,8 +81,8 @@ module.exports = (loadbarInstance, applicant, status) ->
       headerInput.setValue logic.statuses[status.status].substr 'در انتظار '.length
       switch headerInput.value()
         when 'مصاحبه فنی'
-          state.all ['jobs', 'managers'], once: true, ([jobs, managers]) ->
-            [job] = jobs.filter ({jobId}) -> jobId is status.jobId
+          state.managers.on once: true, (managers) ->
+            [job] = applicant.selectedJobs.filter ({jobId}) -> jobId is status.jobId
             [manager] = managers.filter ({userId}) -> userId is status.managerId
             setStyle p1Input0.setValue job
             setStyle p1Input1.setValue manager
