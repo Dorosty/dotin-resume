@@ -54,7 +54,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         E style.actionLegendRow,
           E extend {backgroundColor: 'black'}, style.actionLegendCircle
           text 'فعال'
-      actionButtonInstance = E actionButton, items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
+      actionButtonInstance = E actionButton, noButtonFunctionality: true, items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
     statusPlaceholder = E style.status
     E style.tabs,
       tabs = tabNames.map (tabName, index) ->
@@ -96,7 +96,6 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         setStyle item, color: 'black'
     ts = []
     editStatusButton = undefined
-    telephoniSeen = omoomiSeen = fanniLast = false
     empty statusPlaceholder
     append statusPlaceholder, 
       E style.statusSegment,
@@ -106,25 +105,30 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           t = E style.statusText, 'ثبت'
           ts.push t
           t
-    append statusPlaceholder,
-      applicant.applicantsHRStatus.map ({status}, i, arr) ->
-        switch logic.statuses[status]
-          when 'در انتظار مصاحبه تلفنی'
-            fanniLast = false
-            if telephoniSeen
-              return
-            telephoniSeen = true
-          when 'در انتظار مصاحبه عمومی'
-            fanniLast = false
-            if omoomiSeen
-              return
-            omoomiSeen = true
-          when 'در انتظار مصاحبه فنی'
-            if fanniLast
-              return
-            fanniLast = true
-          else
+    telephoniSeen = omoomiSeen = fanniLast = false
+    applicantsHRStatus = []
+    applicant.applicantsHRStatus.map ({status}, i, arr) ->
+      switch logic.statuses[status]
+        when 'در انتظار مصاحبه تلفنی'
+          fanniLast = false
+          if telephoniSeen
             return
+          telephoniSeen = true
+        when 'در انتظار مصاحبه عمومی'
+          fanniLast = false
+          if omoomiSeen
+            return
+          omoomiSeen = true
+        when 'در انتظار مصاحبه فنی'
+          if fanniLast
+            return
+          fanniLast = true
+        else
+          return
+      applicantsHRStatus.push status
+
+    append statusPlaceholder,
+      applicantsHRStatus.map (status, i, arr) ->
         [
           E style.statusConnector
           do ->
@@ -156,7 +160,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               t
           ]
         onEvent changeStatusButton, 'click', -> changeStatus loadbarInstance, applicant
-        onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
+        if editStatusButton
+          onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
@@ -164,6 +169,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
   actionButtonInstance.onSelect (value) ->
     i = logic.statuses.indexOf value
     state.user.on once: true, (user) ->
+      return unless confirm 'بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟'
       unless applicant.applicantsHRStatus.filter(({status}) -> status is i).length || applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is i && managerId is user.userId).length
         loadbarInstance.set()
         service.changeManagerStatus applicant.userId, i

@@ -194,9 +194,9 @@ toPersian = require('../../utils').toPersian;
 window = require('../../utils/dom').window;
 
 module.exports = component('actionButton', function(arg, arg1) {
-  var E, actionButton, arrow, button, dom, english, events, getId, getTitle, items, itemsList, onEvent, onSelect, returnObject, selectListeners, selectedIndex, setStyle;
+  var E, actionButton, arrow, button, dom, english, events, getId, getTitle, items, itemsList, noButtonFunctionality, onEvent, onSelect, returnObject, selectListeners, selectedIndex, setStyle;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  getId = arg1.getId, getTitle = arg1.getTitle, english = arg1.english, items = arg1.items, selectedIndex = arg1.selectedIndex;
+  getId = arg1.getId, getTitle = arg1.getTitle, english = arg1.english, items = arg1.items, selectedIndex = arg1.selectedIndex, noButtonFunctionality = arg1.noButtonFunctionality;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
   if (getId == null) {
@@ -252,15 +252,21 @@ module.exports = component('actionButton', function(arg, arg1) {
   onEvent(button, 'mouseout', function() {
     return setStyle(button, style.button);
   });
-  onEvent(arrow, 'click', function() {
-    return itemsList.show();
+  onEvent((noButtonFunctionality ? [arrow, button] : arrow), 'click', function() {
+    if (itemsList.hidden()) {
+      return itemsList.show();
+    } else {
+      return itemsList.hide();
+    }
   });
-  onEvent(button, 'click', function() {
-    itemsList.hide();
-    return selectListeners.forEach(function(x) {
-      return x(itemsList.value() || items[selectedIndex]);
+  if (!noButtonFunctionality) {
+    onEvent(button, 'click', function() {
+      itemsList.hide();
+      return selectListeners.forEach(function(x) {
+        return x(itemsList.value() || items[selectedIndex]);
+      });
     });
-  });
+  }
   onEvent(E(window), 'click', actionButton, function() {
     return itemsList.hide();
   });
@@ -282,7 +288,7 @@ component = require('../../../utils/component');
 style = require('./style');
 
 module.exports = component('dropdownList', function(arg, arg1) {
-  var E, append, dom, empty, entities, events, getTitle, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
+  var E, append, dom, empty, entities, events, getTitle, hidden, hide, highlightCurrentItem, highlightIndex, items, list, onEvent, onSelect, returnObject, select, setStyle, show, value;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
   onSelect = arg1.onSelect, getTitle = arg1.getTitle;
   E = dom.E, empty = dom.empty, append = dom.append, setStyle = dom.setStyle;
@@ -298,10 +304,13 @@ module.exports = component('dropdownList', function(arg, arg1) {
       return setStyle(items[highlightIndex], style.highlightedItem);
     }
   };
+  hidden = true;
   show = function() {
+    hidden = false;
     return setStyle(list, style.visibleList);
   };
   hide = function() {
+    hidden = true;
     return setStyle(list, style.list);
   };
   select = function() {
@@ -362,6 +371,9 @@ module.exports = component('dropdownList', function(arg, arg1) {
     },
     items: function() {
       return items;
+    },
+    hidden: function() {
+      return hidden;
     },
     select: select,
     show: show,
@@ -5549,7 +5561,7 @@ module.exports = function(isGet, serviceName, params) {
 
 
 },{"../../q":32,"./mock":46}],42:[function(require,module,exports){
-var Q, cruds, eraseCookie, extend, get, gets, post, posts, ref, ref1, ref2, state, stateChangingServices, uppercaseFirst,
+var Q, cruds, eraseCookie, extend, get, gets, post, posts, ref, ref1, ref2, remove, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Q = require('../../q');
@@ -5564,7 +5576,7 @@ ref1 = require('./getPost'), get = ref1.get, post = ref1.post;
 
 eraseCookie = require('../cookies').eraseCookie;
 
-ref2 = require('..'), extend = ref2.extend, uppercaseFirst = ref2.uppercaseFirst;
+ref2 = require('..'), extend = ref2.extend, uppercaseFirst = ref2.uppercaseFirst, remove = ref2.remove;
 
 exports.logout = function(automatic) {
   if (automatic == null) {
@@ -5614,6 +5626,71 @@ exports.changeHRStatus = function(applicantId, status) {
       applicants = applicants.slice();
       applicantsHRStatus = applicantsHRStatus.slice();
       applicantsHRStatus.push(status);
+      if (!applicant.applicantData) {
+        applicantsHRStatus.push({
+          status: 6
+        });
+      }
+      applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
+        applicantsHRStatus: applicantsHRStatus
+      });
+      return state.applicants.set(applicants);
+    });
+  });
+};
+
+exports.editHRStatus = function(applicantId, statusId, status) {
+  return post('editHRStatus', extend({
+    applicantId: applicantId
+  }, status)).then(function() {
+    return state.applicants.on({
+      once: true
+    }, function(applicants) {
+      var applicant, applicantsHRStatus, s;
+      applicant = applicants.filter(function(arg) {
+        var userId;
+        userId = arg.userId;
+        return userId === applicantId;
+      })[0];
+      applicantsHRStatus = applicant.applicantsHRStatus;
+      applicants = applicants.slice();
+      applicantsHRStatus = applicantsHRStatus.slice();
+      s = applicantsHRStatus.filter(function(arg) {
+        var statusHRId;
+        statusHRId = arg.statusHRId;
+        return statusHRId === statusId;
+      })[0];
+      applicantsHRStatus[applicantsHRStatus.indexOf(s)] = extend({}, status);
+      applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
+        applicantsHRStatus: applicantsHRStatus
+      });
+      return state.applicants.set(applicants);
+    });
+  });
+};
+
+exports.deleteHRStatus = function(DeleteHrApplicantStatus) {
+  return post('deleteHRStatus', {
+    DeleteHrApplicantStatus: DeleteHrApplicantStatus
+  }).then(function() {
+    return state.applicants.on({
+      once: true
+    }, function(applicants) {
+      var applicant, applicantsHRStatus, status;
+      applicant = applicants.filter(function(arg) {
+        var userId;
+        userId = arg.userId;
+        return userId === applicantId;
+      })[0];
+      applicantsHRStatus = applicant.applicantsHRStatus;
+      applicants = applicants.slice();
+      applicantsHRStatus = applicantsHRStatus.slice().applicantsHRStatus;
+      status = applicantsHRStatus.filter(function(arg) {
+        var statusHRId;
+        statusHRId = arg.statusHRId;
+        return statusHRId === DeleteHrApplicantStatus;
+      })[0];
+      remove(applicantsHRStatus, status);
       applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
         applicantsHRStatus: applicantsHRStatus
       });
@@ -5889,6 +5966,8 @@ exports.jobs = 'allRecordedJobs';
 
 },{}],46:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
+
+return;
 
 Q = require('../../q');
 
@@ -10783,34 +10862,32 @@ module.exports = function(loadbarInstance, applicant, status) {
     }
     onEvent(remove, 'click', function() {
       loadbarInstance.set();
-      service.deleteHRStatus({
-        DeleteHrApplicantStatus: status.statusHRId
-      }).then(loadbarInstance.reset);
+      service.deleteHRStatus(status.statusHRId).then(loadbarInstance.reset);
       return alertInstance.close();
     });
     onEvent(submit, 'click', function() {
-      var f, s, se;
+      var fn, s, se;
       if (!enabled) {
         return;
       }
-      f = status ? service.changeHRStatus.bind(null, applicant.userId) : service.changeHRStatus.bind(null, applicant.userId, status.statusHRId);
+      fn = status ? service.editHRStatus.bind(null, applicant.userId, status.statusHRId) : service.changeHRStatus.bind(null, applicant.userId);
       s = logic.statuses.indexOf('در انتظار ' + headerInput.value());
       loadbarInstance.set();
       se = (function() {
         switch (headerInput.value()) {
           case 'مصاحبه تلفنی':
-            return f({
+            return fn({
               status: s
             });
           case 'مصاحبه فنی':
-            return f({
+            return fn({
               status: s,
               jobId: p1Input0.value().jobId,
               managerId: p1Input1.value().userId,
               interViewTime: toTimestamp(p1Input2.value())
             });
           case 'مصاحبه عمومی':
-            return f({
+            return fn({
               status: s,
               interViewTime: toTimestamp(p2Input.value())
             });
@@ -11007,6 +11084,7 @@ module.exports = component('profile', function(arg, arg1) {
   }, style.actionLegendCircle)), text('قفل شده')), E(style.actionLegendRow, E(extend({
     backgroundColor: 'black'
   }, style.actionLegendCircle)), text('فعال'))), actionButtonInstance = E(actionButton, {
+    noButtonFunctionality: true,
     items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
   })), statusPlaceholder = E(style.status), E(style.tabs, tabs = tabNames.map(function(tabName, index) {
     var tab;
@@ -11043,7 +11121,7 @@ module.exports = component('profile', function(arg, arg1) {
     }
   });
   state.all(['applicants', 'user'], function(arg2) {
-    var applicants, editStatusButton, fanniLast, omoomiSeen, telephoniSeen, ts, user;
+    var applicants, applicantsHRStatus, editStatusButton, fanniLast, omoomiSeen, telephoniSeen, ts, user;
     applicants = arg2[0], user = arg2[1];
     applicant = applicants.filter(function(arg3) {
       var userId;
@@ -11078,7 +11156,6 @@ module.exports = component('profile', function(arg, arg1) {
     });
     ts = [];
     editStatusButton = void 0;
-    telephoniSeen = omoomiSeen = fanniLast = false;
     empty(statusPlaceholder);
     append(statusPlaceholder, E(style.statusSegment, E(style.statusCircle), E(extend({
       "class": 'fa fa-check'
@@ -11088,7 +11165,9 @@ module.exports = component('profile', function(arg, arg1) {
       ts.push(t);
       return t;
     })()));
-    append(statusPlaceholder, applicant.applicantsHRStatus.map(function(arg3, i, arr) {
+    telephoniSeen = omoomiSeen = fanniLast = false;
+    applicantsHRStatus = [];
+    applicant.applicantsHRStatus.map(function(arg3, i, arr) {
       var status;
       status = arg3.status;
       switch (logic.statuses[status]) {
@@ -11115,6 +11194,9 @@ module.exports = component('profile', function(arg, arg1) {
         default:
           return;
       }
+      return applicantsHRStatus.push(status);
+    });
+    append(statusPlaceholder, applicantsHRStatus.map(function(status, i, arr) {
       return [
         E(style.statusConnector), (function() {
           var x;
@@ -11157,9 +11239,11 @@ module.exports = component('profile', function(arg, arg1) {
         onEvent(changeStatusButton, 'click', function() {
           return changeStatus(loadbarInstance, applicant);
         });
-        return onEvent(editStatusButton, 'click', function() {
-          return changeStatus(loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]);
-        });
+        if (editStatusButton) {
+          return onEvent(editStatusButton, 'click', function() {
+            return changeStatus(loadbarInstance, applicant, applicant.applicantsHRStatus[applicant.applicantsHRStatus.length - 1]);
+          });
+        }
       }
     });
     return setTimeout(function() {
@@ -11176,6 +11260,9 @@ module.exports = component('profile', function(arg, arg1) {
     return state.user.on({
       once: true
     }, function(user) {
+      if (!confirm('بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟')) {
+        return;
+      }
       if (!(applicant.applicantsHRStatus.filter(function(arg2) {
         var status;
         status = arg2.status;
@@ -11563,33 +11650,66 @@ module.exports = component('tab3', function(arg) {
 },{"../../../../utils/component":34,"./style":104}],104:[function(require,module,exports){
 arguments[4][100][0].apply(exports,arguments)
 },{"dup":100}],105:[function(require,module,exports){
-var actions, component, extend, ref, style, toDate, toTime;
+var component, extend, ref, statuses, style, toDate, toTime;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
-actions = require('../../../../utils/logic').actions;
+statuses = require('../../../../utils/logic').statuses;
 
 ref = require('../../../../utils'), extend = ref.extend, toDate = ref.toDate, toTime = ref.toTime;
 
 module.exports = component('tab4', function(arg, arg1) {
-  var E, applicant, dom, text;
-  dom = arg.dom;
+  var E, applicant, dom, history, state, text;
+  dom = arg.dom, state = arg.state;
   applicant = arg1.applicant;
   E = dom.E, text = dom.text;
-  return E('table', style.table, E('tbody', null, applicant.history.sort(function(a, b) {
-    return b.time - a.time;
+  history = [];
+  applicant.applicantsHRStatus.forEach(function(status) {
+    var firstName, lastName, modificationTime, personalPic, ref1, ref2;
+    ref1 = status.hrUser, firstName = ref1.firstName, lastName = ref1.lastName, personalPic = ref1.personalPic;
+    ref2 = status, status = ref2.status, modificationTime = ref2.modificationTime;
+    return history.push({
+      firstName: firstName,
+      lastName: lastName,
+      personalPic: personalPic,
+      status: status,
+      modificationTime: modificationTime
+    });
+  });
+  applicant.applicantsManagerStatus.forEach(function(status) {
+    return state.managers.on({
+      once: true
+    }, function(managers) {
+      var firstName, lastName, modificationTime, personalPic, ref1, ref2;
+      ref1 = managers.filter(function(arg2) {
+        var userId;
+        userId = arg2.userId;
+        return userId === status.managerId;
+      })[0], firstName = ref1.firstName, lastName = ref1.lastName, personalPic = ref1.personalPic;
+      ref2 = status, status = ref2.status, modificationTime = ref2.modificationTime;
+      return history.push({
+        firstName: firstName,
+        lastName: lastName,
+        personalPic: personalPic,
+        status: status,
+        modificationTime: modificationTime
+      });
+    });
+  });
+  return E('table', style.table, E('tbody', null, history.sort(function(a, b) {
+    return b.modificationTime - a.modificationTime;
   }).map(function(arg2, i) {
-    var action, firstName, lastName, personalPic, time;
-    firstName = arg2.firstName, lastName = arg2.lastName, personalPic = arg2.personalPic, action = arg2.action, time = arg2.time;
+    var firstName, lastName, modificationTime, personalPic, status;
+    firstName = arg2.firstName, lastName = arg2.lastName, personalPic = arg2.personalPic, status = arg2.status, modificationTime = arg2.modificationTime;
     return E('tr', (i % 2 === 0 ? style.evenRow : style.row), E('td', null, E('img', extend({
       src: personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/default-avatar-small.png'
-    }, style.profilePicture)), text(firstName + " " + lastName)), E('td', null, actions[action]), E('td', {
+    }, style.profilePicture)), text(firstName + " " + lastName)), E('td', null, statuses[status]), E('td', {
       width: 100
-    }, toTime(time)), E('td', {
+    }, toTime(modificationTime)), E('td', {
       width: 100
-    }, toDate(time)));
+    }, toDate(modificationTime)));
   })));
 });
 

@@ -4,7 +4,7 @@ stateChangingServices = require './stateChangingServices'
 {gets, posts, cruds} = require './names'
 {get, post} = require './getPost'
 {eraseCookie} = require '../cookies'
-{extend, uppercaseFirst} = require '..'
+{extend, uppercaseFirst, remove} = require '..'
 
 exports.logout = (automatic = false) ->
   [
@@ -35,6 +35,34 @@ exports.changeHRStatus = (applicantId, status) ->
       applicants = applicants.slice()
       applicantsHRStatus = applicantsHRStatus.slice()
       applicantsHRStatus.push status
+      unless applicant.applicantData
+        applicantsHRStatus.push {status: 6}
+      applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
+      state.applicants.set applicants
+
+exports.editHRStatus = (applicantId, statusId, status) ->
+  post 'editHRStatus', extend({applicantId}, status)
+  .then ->
+    state.applicants.on once: true, (applicants) ->
+      [applicant] = applicants.filter ({userId}) -> userId is applicantId
+      {applicantsHRStatus} = applicant
+      applicants = applicants.slice()
+      applicantsHRStatus = applicantsHRStatus.slice()
+      [s] = applicantsHRStatus.filter ({statusHRId}) -> statusHRId is statusId
+      applicantsHRStatus[applicantsHRStatus.indexOf s] = extend {}, status
+      applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
+      state.applicants.set applicants
+
+exports.deleteHRStatus = (DeleteHrApplicantStatus) ->
+  post 'deleteHRStatus', {DeleteHrApplicantStatus}
+  .then ->
+    state.applicants.on once: true, (applicants) ->
+      [applicant] = applicants.filter ({userId}) -> userId is applicantId
+      {applicantsHRStatus} = applicant
+      applicants = applicants.slice()
+      {applicantsHRStatus} = applicantsHRStatus.slice()
+      [status] = applicantsHRStatus.filter ({statusHRId}) -> statusHRId is DeleteHrApplicantStatus
+      remove applicantsHRStatus, status
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 

@@ -15,9 +15,12 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
     if highlightIndex?
       setStyle items[highlightIndex], style.highlightedItem
 
+  hidden = true
   show = ->
+    hidden = false
     setStyle list, style.visibleList
   hide = ->
+    hidden = true
     setStyle list, style.list
 
   select = ->
@@ -57,6 +60,7 @@ module.exports = component 'dropdownList', ({dom, events, returnObject}, {onSele
         highlightIndex = entities.length - 1
       highlightCurrentItem()
     items: -> items
+    hidden: -> hidden
     select: select
     show: show
     hide: hide

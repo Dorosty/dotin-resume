@@ -4,7 +4,7 @@ list = require './list'
 {toPersian} = require '../../utils'
 {window} = require '../../utils/dom'
 
-module.exports = component 'actionButton', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex}) ->
+module.exports = component 'actionButton', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex, noButtonFunctionality}) ->
   {E, setStyle} = dom
   {onEvent} = events
 
@@ -46,12 +46,16 @@ module.exports = component 'actionButton', ({dom, events, returnObject}, {getId,
   onEvent button, 'mouseout', ->
     setStyle button, style.button
 
-  onEvent arrow, 'click', ->
-    itemsList.show()
+  onEvent (if noButtonFunctionality then [arrow, button] else arrow), 'click', ->
+    if itemsList.hidden()
+      itemsList.show()
+    else
+      itemsList.hide()
 
-  onEvent button, 'click', ->
-    itemsList.hide()
-    selectListeners.forEach (x) -> x itemsList.value() || items[selectedIndex]
+  unless noButtonFunctionality
+    onEvent button, 'click', ->
+      itemsList.hide()
+      selectListeners.forEach (x) -> x itemsList.value() || items[selectedIndex]
 
   onEvent E(window), 'click', actionButton, ->
     itemsList.hide()

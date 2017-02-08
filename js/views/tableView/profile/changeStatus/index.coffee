@@ -92,29 +92,29 @@ module.exports = (loadbarInstance, applicant, status) ->
 
     onEvent remove, 'click', ->
       loadbarInstance.set()
-      service.deleteHRStatus DeleteHrApplicantStatus: status.statusHRId
+      service.deleteHRStatus status.statusHRId
       .then loadbarInstance.reset
       alertInstance.close()
     onEvent submit, 'click', ->
       return unless enabled
-      f = if status
-        service.changeHRStatus.bind null, applicant.userId
+      fn = if status
+        service.editHRStatus.bind null, applicant.userId, status.statusHRId
       else
-        service.changeHRStatus.bind null, applicant.userId, status.statusHRId
+        service.changeHRStatus.bind null, applicant.userId
       s = logic.statuses.indexOf 'در انتظار ' + headerInput.value()
       loadbarInstance.set()
       se = switch headerInput.value()
         when 'مصاحبه تلفنی'
-          f
+          fn
             status: s
         when 'مصاحبه فنی'
-          f
+          fn
             status: s
             jobId: p1Input0.value().jobId
             managerId: p1Input1.value().userId
             interViewTime: toTimestamp p1Input2.value()
         when 'مصاحبه عمومی'
-          f
+          fn
             status: s
             interViewTime: toTimestamp p2Input.value()
       se.then loadbarInstance.reset
