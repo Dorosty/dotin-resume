@@ -5967,8 +5967,6 @@ exports.jobs = 'allRecordedJobs';
 },{}],46:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
 
-return;
-
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -11623,7 +11621,7 @@ style = require('./style');
 ref = require('../../../../utils'), extend = ref.extend, monthToString = ref.monthToString, toDate = ref.toDate, toEnglish = ref.toEnglish;
 
 module.exports = component('tab1', function(arg, arg1) {
-  var E, applicant, applicantData, birthdayString, dom, ref1, ref10, ref11, ref12, ref13, ref14, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, text;
+  var E, applicant, applicantData, birthdayString, dom, ref1, ref10, ref11, ref12, ref13, ref14, ref15, ref16, ref17, ref18, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, text;
   dom = arg.dom;
   applicant = arg1.applicant;
   E = dom.E, text = dom.text;
@@ -11661,22 +11659,20 @@ module.exports = component('tab1', function(arg, arg1) {
     return E('tr', style.tr, E('td', null, x['شایستگی / مهارت']), E('td', null, x['علاقه به کار در این حوزه']), E('td', null, x['دانش و مهارت در این حوزه']));
   }))) : void 0, ((ref11 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref11['دوره‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'دوره'), E('th', null, 'برگزار کننده'), E('th', null, 'سال'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map(function(x) {
     return E('tr', style.tr, E('td', null, x['دوره']), E('td', null, x['برگزار کننده']), E('td', null, x['سال']));
-  }))) : void 0, ((ref12 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref12['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref13 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref13['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), ((ref14 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref14['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? [
-    E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
-      var end, start;
-      start = toEnglish(job['تاریخ شروع']).split('/');
-      start[1] = monthToString(start[1]);
-      start = [start[1], start[0]].join(' ');
-      end = toEnglish(job['تاریخ پایان']).split('/');
-      end[1] = monthToString(end[1]);
-      end = [end[1], end[0]].join(' ');
-      return E(style.job.job, E(style.job.date, "از " + start + " تا " + end), E(style.job.row, E(style.job['نام'], job['نام']), E(style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.job.row, E(style.job['محدوده نشانی'], E(style.job.mapIcon), text(job['محدوده نشانی'])), E(style.job['تلفن'], E(style.job.phoneIcon), text(job['تلفن']))), E(extend({
-        englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
-      }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
-        englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-      })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
-    })
-  ] : void 0);
+  }))) : void 0, ((ref12 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref12['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref13 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref13['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), ((ref14 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref14['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
+    var end, start;
+    start = toEnglish(job['تاریخ شروع']).split('/');
+    start[1] = monthToString(start[1]);
+    start = [start[1], start[0]].join(' ');
+    end = toEnglish(job['تاریخ پایان']).split('/');
+    end[1] = monthToString(end[1]);
+    end = [end[1], end[0]].join(' ');
+    return E(style.job.job, E(style.job.date, "از " + start + " تا " + end), E(style.job.row, E(style.job['نام'], job['نام']), E(style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.job.row, E(style.job['محدوده نشانی'], E(style.job.mapIcon), text(job['محدوده نشانی'])), E(style.job['تلفن'], E(style.job.phoneIcon), text(job['تلفن']))), E(extend({
+      englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
+    }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
+      englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+    })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
+  }) : void 0, E(style.header, 'سایر اطلاعات'), E(style.column3, E(style.bold, 'متقاضی چه نوع همکاری هستید؟'), E(null, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.column3, E(style.bold, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), E(null, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'])), ((ref15 = applicantData['سایر اطلاعات']) != null ? ref15['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] : void 0) ? [E(style.column3, E(style.bold, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), E(null, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']))] : void 0, ((ref16 = applicantData['سایر اطلاعات']) != null ? ref16['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] : void 0) ? [E(style.column3, E(style.bold, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(null, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']))] : void 0, E(style.column3, E(style.bold, 'مدت زمانی که بیمه بوده‌اید'), E(null, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'])), E(style.column3, E(style.bold, 'میزان دستمزد خالص درخواستی شما چقدر است؟'), E(null, (((ref17 = applicantData['سایر اطلاعات']) != null ? ref17['مقدار دستمزد'] : void 0) ? ((ref18 = applicantData['سایر اطلاعات']) != null ? ref18['مقدار دستمزد'] : void 0) + 'تومان - ' : '') + applicantData['سایر اطلاعات']['میزان دستمزد'])));
 });
 
 
