@@ -17,6 +17,8 @@ exports.others = [
   'logout'
   'submitProfileData'
   'changeHRStatus'
+  'editHRStatus'
+  'deleteHRStatus'
   'changeManagerStatus'
   'clearAllNotifications'
 ]

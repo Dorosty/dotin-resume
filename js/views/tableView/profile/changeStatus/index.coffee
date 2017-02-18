@@ -85,21 +85,27 @@ module.exports = (loadbarInstance, applicant, status) ->
     unless status
       hide removeButton
     else
-      if status is applicant.applicantsHRStatus.filter(({status}) -> logic.statuses[status] in ['مصاحبه تلفنی انجام شد', 'در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی'])[0]
+      if status is applicant.applicantsHRStatus.filter(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی'])[0]
         setStyle removeButton, style.removeDisabled
-      headerInput.setValue logic.statuses[status.status].substr 'در انتظار '.length
+      headerInput.setValue switch logic.statuses[status.status]
+        when 'مصاحبه تلفنی انجام شد'
+          'مصاحبه تلفنی انجام شد'
+        when 'در انتظار مصاحبه عمومی'
+          'مصاحبه عمومی'
+        when 'در انتظار مصاحبه فنی'
+          'مصاحبه فنی'
       switch headerInput.value()
         when 'مصاحبه فنی'
           show loading
           hide p1
           service.loadInterview statusId: status.statusHRId
-          .then ({interviewId, interViewTime, interviewJob, interviewManager}) ->
+          .then ({interviewId, interViewTime, jobId, managerId}) ->
             _interviewId = interviewId
             hide loading
             show p1
             state.managers.on once: true, (managers) ->
-              [job] = applicant.selectedJobs.filter ({jobId}) -> jobId is interviewJob.jobId
-              [manager] = managers.filter ({userId}) -> userId is interviewManager.userId
+              [job] = applicant.selectedJobs.filter ({jobId: j}) -> j is jobId
+              [manager] = managers.filter ({userId}) -> userId is managerId
               setStyle p1Input0.setValue job
               setStyle p1Input1.setValue manager
               setStyle p1Input2.input, value: toDate interViewTime
@@ -112,9 +118,11 @@ module.exports = (loadbarInstance, applicant, status) ->
             hide loading
             show p2
             setStyle p2Input.input, value: toDate interViewTime
+        when 'مصاحبه تلفنی انجام شد'
+          _interviewId = null
 
     onEvent removeButton, 'click', ->
-      return if status is applicant.applicantsHRStatus.filter(({status}) -> logic.statuses[status] in ['مصاحبه تلفنی انجام شد', 'در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی'])[0]
+      return if status is applicant.applicantsHRStatus.filter(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی'])[0]
       loadbarInstance.set()
       service.deleteHRStatus status.statusHRId, _interviewId
       .then loadbarInstance.reset

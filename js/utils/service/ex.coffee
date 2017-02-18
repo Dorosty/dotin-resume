@@ -42,7 +42,7 @@ exports.changeHRStatus = (applicantId, status) ->
       state.applicants.set applicants
 
 exports.editHRStatus = (applicantId, statusId, interviewId, status) ->
-  post 'editHRStatus', extend({applicantId, interviewId}, status)
+  post 'editHRStatus', if interviewId then extend({applicantId, interviewId}, status) else extend({applicantId}, status)
   .then ->
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({userId}) -> userId is applicantId
@@ -55,7 +55,7 @@ exports.editHRStatus = (applicantId, statusId, interviewId, status) ->
       state.applicants.set applicants
 
 exports.deleteHRStatus = (statusId, interviewId) ->
-  post 'deleteHRStatus', {statusId, interviewId}
+  post 'deleteHRStatus', if interviewId then {statusId, interviewId} else {statusId}
   .then ->
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({userId}) -> userId is applicantId

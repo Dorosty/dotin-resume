@@ -5493,7 +5493,7 @@ exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
 
-exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'جذب', 'بایگانی'];
+exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه عمومی', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'مراحل اداری', 'جذب', 'بایگانی'];
 
 exports.actions = (function() {
   results = [];
@@ -5643,9 +5643,11 @@ exports.changeHRStatus = function(applicantId, status) {
 };
 
 exports.editHRStatus = function(applicantId, statusId, interviewId, status) {
-  return post('editHRStatus', extend({
+  return post('editHRStatus', interviewId ? extend({
     applicantId: applicantId,
     interviewId: interviewId
+  }, status) : extend({
+    applicantId: applicantId
   }, status)).then(function() {
     return state.applicants.on({
       once: true
@@ -5674,9 +5676,11 @@ exports.editHRStatus = function(applicantId, statusId, interviewId, status) {
 };
 
 exports.deleteHRStatus = function(statusId, interviewId) {
-  return post('deleteHRStatus', {
+  return post('deleteHRStatus', interviewId ? {
     statusId: statusId,
     interviewId: interviewId
+  } : {
+    statusId: statusId
   }).then(function() {
     return state.applicants.on({
       once: true
@@ -6391,7 +6395,7 @@ exports.cruds = [
   }
 ];
 
-exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'changeManagerStatus', 'clearAllNotifications'];
+exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'editHRStatus', 'deleteHRStatus', 'changeManagerStatus', 'clearAllNotifications'];
 
 exports.states = ['user', 'applicants', 'notifications', 'managers', 'jobs'];
 
@@ -11023,11 +11027,20 @@ module.exports = function(loadbarInstance, applicant, status) {
       if (status === applicant.applicantsHRStatus.filter(function(arg1) {
         var ref1, status;
         status = arg1.status;
-        return (ref1 = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref1 === 'در انتظار مصاحبه عمومی' || ref1 === 'در انتظار مصاحبه فنی';
+        return (ref1 = logic.statuses[status]) === 'در انتظار مصاحبه عمومی' || ref1 === 'در انتظار مصاحبه فنی';
       })[0]) {
         setStyle(removeButton, style.removeDisabled);
       }
-      headerInput.setValue(logic.statuses[status.status].substr('در انتظار '.length));
+      headerInput.setValue((function() {
+        switch (logic.statuses[status.status]) {
+          case 'مصاحبه تلفنی انجام شد':
+            return 'مصاحبه تلفنی انجام شد';
+          case 'در انتظار مصاحبه عمومی':
+            return 'مصاحبه عمومی';
+          case 'در انتظار مصاحبه فنی':
+            return 'مصاحبه فنی';
+        }
+      })());
       switch (headerInput.value()) {
         case 'مصاحبه فنی':
           show(loading);
@@ -11035,8 +11048,8 @@ module.exports = function(loadbarInstance, applicant, status) {
           service.loadInterview({
             statusId: status.statusHRId
           }).then(function(arg1) {
-            var interViewTime, interviewId, interviewJob, interviewManager;
-            interviewId = arg1.interviewId, interViewTime = arg1.interViewTime, interviewJob = arg1.interviewJob, interviewManager = arg1.interviewManager;
+            var interViewTime, interviewId, jobId, managerId;
+            interviewId = arg1.interviewId, interViewTime = arg1.interViewTime, jobId = arg1.jobId, managerId = arg1.managerId;
             _interviewId = interviewId;
             hide(loading);
             show(p1);
@@ -11045,14 +11058,14 @@ module.exports = function(loadbarInstance, applicant, status) {
             }, function(managers) {
               var job, manager;
               job = applicant.selectedJobs.filter(function(arg2) {
-                var jobId;
-                jobId = arg2.jobId;
-                return jobId === interviewJob.jobId;
+                var j;
+                j = arg2.jobId;
+                return j === jobId;
               })[0];
               manager = managers.filter(function(arg2) {
                 var userId;
                 userId = arg2.userId;
-                return userId === interviewManager.userId;
+                return userId === managerId;
               })[0];
               setStyle(p1Input0.setValue(job));
               setStyle(p1Input1.setValue(manager));
@@ -11077,13 +11090,16 @@ module.exports = function(loadbarInstance, applicant, status) {
               value: toDate(interViewTime)
             });
           });
+          break;
+        case 'مصاحبه تلفنی انجام شد':
+          _interviewId = null;
       }
     }
     onEvent(removeButton, 'click', function() {
       if (status === applicant.applicantsHRStatus.filter(function(arg1) {
         var ref1, status;
         status = arg1.status;
-        return (ref1 = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref1 === 'در انتظار مصاحبه عمومی' || ref1 === 'در انتظار مصاحبه فنی';
+        return (ref1 = logic.statuses[status]) === 'در انتظار مصاحبه عمومی' || ref1 === 'در انتظار مصاحبه فنی';
       })[0]) {
         return;
       }
