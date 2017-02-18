@@ -19,11 +19,12 @@ module.exports = component 'login', ({dom, events, service}) ->
         captchaPlaceholder = E style.captchaSection
         E style.submitSection,
           submit = E 'button', style.submit, 'ورود'
-          E 'label', style.rememberLabel,
-            remember = E 'input', extend {type: 'checkbox'}, style.remember
-            text 'مرا به خاطر بسپار'
+          # E 'label', style.rememberLabel,
+          #   remember = E 'input', extend {type: 'checkbox'}, style.remember
+          #   text 'مرا به خاطر بسپار'
           spinner = E style.spinner, 'در حال بارگذاری...'
           hide invalid = E style.invalid, 'نام کاربری و یا رمز عبور اشتباه است.'
+          hide invalidCaptcha = E style.invalid, 'عدد وارد شده اشتباه است.'
 
   hide spinner
 
@@ -34,39 +35,44 @@ module.exports = component 'login', ({dom, events, service}) ->
       setStyle input, style.input
 
   captchaInput = undefined
-  service.getCaptcha().then (captcha) ->
-    [firstPart, lastPart] = captcha.split 'x'
-    firstPart += ' '
-    lastPart = ' ' + lastPart
-    empty captchaPlaceholder
-    append captchaPlaceholder, [
-      E 'span', null, firstPart
-      captchaInput = E numberInput, true
-      E 'span', null, lastPart
-    ]
-    onEnter captchaInput, doSubmit
-    setStyle captchaInput, style.captchaInput
+  do loadCaptcha = ->
+    service.getCaptcha().then (captcha) ->
+      [firstPart, lastPart] = captcha.split 'x'
+      firstPart += ' '
+      lastPart = ' ' + lastPart
+      empty captchaPlaceholder
+      append captchaPlaceholder, [
+        E 'span', null, firstPart
+        captchaInput = E numberInput, true
+        E 'span', null, lastPart
+      ]
+      onEnter captchaInput, doSubmit
+      setStyle captchaInput, style.captchaInput
 
   doSubmit = ->
     return unless captchaInput
 
-    disable [email, password, submit, remember]
-    hide invalid
+    disable [email, password, submit]#, remember]
+    hide [invalid, invalidCaptcha]
     show spinner
     service.login
       identificationCode: email.value()
       password: password.value()
       # remember: !!remember.checked()
       captcha: toEnglish captchaInput.value()
-    .catch ->
-      show invalid
+    .catch (response) ->
+      loadCaptcha()
+      if response is 'Captcha Answer Incorrect '
+        show invalidCaptcha
+      else
+        show invalid
     .fin ->
-      enable [email, password, submit, remember]
+      enable [email, password, submit]#, remember]
       hide spinner
     .done()
 
   onEvent [email, password], 'input', ->
-    hide invalid
+    hide [invalid, invalidCaptcha]
   onEnter [email, password], doSubmit
   onEvent submit, 'click', doSubmit
 

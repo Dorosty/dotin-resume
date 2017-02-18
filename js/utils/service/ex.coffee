@@ -41,11 +41,11 @@ exports.changeHRStatus = (applicantId, status) ->
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
-exports.editHRStatus = (applicantId, statusId, interviewId, status) ->
-  post 'editHRStatus', if interviewId then extend({applicantId, interviewId}, status) else extend({applicantId}, status)
+exports.editHRStatus = (statusId, interviewId, status) ->
+  post 'editHRStatus', if interviewId then extend({statusId, interviewId}, status) else extend({statusId}, status)
   .then ->
     state.applicants.on once: true, (applicants) ->
-      [applicant] = applicants.filter ({userId}) -> userId is applicantId
+      [applicant] = applicants.filter ({applicantsHRStatus}) -> applicantsHRStatus.some ({statusHRId}) -> statusHRId is statusId
       {applicantsHRStatus} = applicant
       applicants = applicants.slice()
       applicantsHRStatus = applicantsHRStatus.slice()
@@ -58,10 +58,10 @@ exports.deleteHRStatus = (statusId, interviewId) ->
   post 'deleteHRStatus', if interviewId then {statusId, interviewId} else {statusId}
   .then ->
     state.applicants.on once: true, (applicants) ->
-      [applicant] = applicants.filter ({userId}) -> userId is applicantId
+      [applicant] = applicants.filter ({applicantsHRStatus}) -> applicantsHRStatus.some ({statusHRId}) -> statusHRId is statusId
       {applicantsHRStatus} = applicant
       applicants = applicants.slice()
-      {applicantsHRStatus} = applicantsHRStatus.slice()
+      applicantsHRStatus = applicantsHRStatus.slice()
       [status] = applicantsHRStatus.filter ({statusHRId}) -> statusHRId is statusId
       remove applicantsHRStatus, status
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}

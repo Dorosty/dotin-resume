@@ -130,7 +130,7 @@ module.exports = (loadbarInstance, applicant, status) ->
     onEvent submit, 'click', ->
       return unless enabled
       fn = if status
-        service.editHRStatus.bind null, applicant.userId, status.statusHRId, _interviewId
+        service.editHRStatus.bind null, status.statusHRId, _interviewId
       else
         service.changeHRStatus.bind null, applicant.userId
       loadbarInstance.set()

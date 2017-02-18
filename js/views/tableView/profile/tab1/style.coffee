@@ -26,6 +26,10 @@ exports.bold =
   fontWeight: 'bold'
   margin: '30px 0 5px'
 
+exports.boldSection =
+  fontWeight: 'bold'
+  margin: '30px 0 15px'
+
 exports.indent =
   marginRight: 15
 

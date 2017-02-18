@@ -2,6 +2,7 @@ component = require '../../../utils/component'
 style = require './style'
 {extend, toDate, toTime} = require '../../../utils'
 {statuses, actionModifiable} = require '../../../utils/logic'
+{window} = require '../../../utils/dom'
 
 module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex, gotoApplicant}) ->
   {E, text, setStyle, empty, append} = dom
@@ -61,6 +62,7 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex
     setStyle view, {height}
   onResize resize
   setTimeout resize
+  onEvent E(window), 'scroll', resize
 
   onEvent profileImg, 'load', ->
     {width, height} = profileImg.fn.element
