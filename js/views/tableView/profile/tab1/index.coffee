@@ -245,6 +245,7 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
     E style.column3,
       E style.bold, 'میزان دستمزد خالص درخواستی شما چقدر است؟'
       E null, (if applicantData['سایر اطلاعات']?['مقدار دستمزد'] then applicantData['سایر اطلاعات']?['مقدار دستمزد'] + 'تومان - ' else '') + applicantData['سایر اطلاعات']['میزان دستمزد']
+    E style.seperator
 
 
 # نام مدیر مستقیم

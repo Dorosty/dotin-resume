@@ -100,3 +100,7 @@ exports.job.columnHeader =
   fontSize: 14
   fontWeight: 'bold'
   marginBottom: 10
+
+exports.seperator =
+  margin: '15px 0'
+  borderBottom: '1px solid #ccc'
