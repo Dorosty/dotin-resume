@@ -16,67 +16,67 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
 
   E style.form,
     E style.header, 'مشخصات فردی'
-    E 'table', style.table,
-      E 'thead', null,
-        E 'tr', style.tr,
-          E 'th', null, 'جنسیت'
-          E 'th', null, 'نام پدر'
-          E 'th', null, 'کد ملی'
-          E 'th', null, 'شماره شناسنامه'
-          E 'th', null, 'محل صدور'
-          E 'th', null, 'محل تولد'
-          E 'th', null, 'ملیت'
-          E 'th', null, 'تابعیت'
-          E 'th', null, 'دین'
-          E 'th', null, 'تاریخ تولد'
-      E 'tbody', null,
-        E 'tr', style.tr,
-          E 'td', null, applicantData['مشخصات فردی']['جنسیت']
-          E 'td', null, applicantData['مشخصات فردی']['نام پدر']
-          E 'td', null, applicantData['مشخصات فردی']['کد ملی']
-          E 'td', null, applicantData['مشخصات فردی']['شماره شناسنامه']
-          E 'td', null, applicantData['مشخصات فردی']['محل صدور']
-          E 'td', null, applicantData['مشخصات فردی']['محل تولد']
-          E 'td', null, applicantData['مشخصات فردی']['ملیت']
-          E 'td', null, applicantData['مشخصات فردی']['تابعیت']
-          E 'td', null, applicantData['مشخصات فردی']['دین']
-          E 'td', null, applicantData['مشخصات فردی']['تاریخ تولد']
-    E 'table', style.table,
-      E 'thead', null,
-        E 'tr', style.tr,
-          E 'th', null, 'وضعیت تاهل'
-          if applicantData['مشخصات فردی']?['جنسیت'] is 'مرد'
+    E null,
+      E style.inlineSection,
+        E style.bold, 'جنسیت'
+        E null, applicantData['مشخصات فردی']['جنسیت']
+      E style.inlineSection,
+        E style.bold, 'نام پدر'
+        E null, applicantData['مشخصات فردی']['نام پدر']
+      E style.inlineSection,
+        E style.bold, 'کد ملی'
+        E null, applicant.identificationCode
+      E style.inlineSection,
+        E style.bold, 'شماره شناسنامه'
+        E null, applicantData['مشخصات فردی']['شماره شناسنامه']
+      E style.inlineSection,
+        E style.bold, 'محل صدور'
+        E null, applicantData['مشخصات فردی']['محل صدور']
+      E style.inlineSection,
+        E style.bold, 'محل تولد'
+        E null, applicantData['مشخصات فردی']['محل تولد']
+      E style.inlineSection,
+        E style.bold, 'ملیت'
+        E null, applicantData['مشخصات فردی']['ملیت']
+      E style.inlineSection,
+        E style.bold, 'تابعیت'
+        E null, applicantData['مشخصات فردی']['تابعیت']
+      E style.inlineSection,
+        E style.bold, 'دین'
+        E null, applicantData['مشخصات فردی']['دین']
+      E style.inlineSection,
+        E style.bold, 'تاریخ تولد'
+        E null, applicantData['مشخصات فردی']['تاریخ تولد']
+    E null,
+      E style.inlineSection,
+        E style.bold, 'وضعیت تاهل'
+        E null, applicantData['مشخصات فردی']['وضعیت تاهل']
+      if applicantData['مشخصات فردی']?['جنسیت'] is 'مرد'
+        [
+          E style.inlineSection,
+            E style.bold, 'وضعیت نظام وظیفه'
+            E null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه']
+          if applicantData['مشخصات فردی']?['وضعیت نظام وظیفه'] is 'معاف'
             [
-              E 'th', null, 'وضعیت نظام وظیفه'
-              if applicantData['مشخصات فردی']?['وضعیت نظام وظیفه'] is 'معاف'
-                [
-                  E 'th', null, 'نوع معافیت'
-                  if applicantData['مشخصات فردی']?['نوع معافیت'] is 'معافیت پزشکی'
-                    E 'th', null, 'دلیل معافیت'
-                ]
+              E style.inlineSection,
+                E style.bold, 'نوع معافیت'
+                E null, applicantData['مشخصات فردی']['نوع معافیت']
+              if applicantData['مشخصات فردی']?['نوع معافیت'] is 'معافیت پزشکی'
+                E style.inlineSection,
+                  E style.bold, 'دلیل معافیت'
+                  E null, applicantData['مشخصات فردی']['دلیل معافیت']
             ]
-          unless applicantData['مشخصات فردی']?['وضعیت تاهل'] is 'مجرد'
-            E 'th', null, 'تعداد فرزندان'
-          E 'th', null, 'تعداد افراد تحت تکفل'
-          E 'th', null, 'نام معرف'
-
-      E 'tbody', null,
-        E 'tr', style.tr,
-          E 'td', null, applicantData['مشخصات فردی']['وضعیت تاهل']
-          if applicantData['مشخصات فردی']?['جنسیت'] is 'مرد'
-            [
-              E 'td', null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه']
-              if applicantData['مشخصات فردی']?['وضعیت نظام وظیفه'] is 'معاف'
-                [
-                  E 'td', null, applicantData['مشخصات فردی']['نوع معافیت']
-                  if applicantData['مشخصات فردی']?['نوع معافیت'] is 'معافیت پزشکی'
-                    E 'td', null, applicantData['مشخصات فردی']['دلیل معافیت']
-                ]
-            ]
-          unless applicantData['مشخصات فردی']?['وضعیت تاهل'] is 'مجرد'
-            E 'td', null, applicantData['مشخصات فردی']['تعداد فرزندان']
-          E 'td', null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']
-          E 'td', null, applicantData['مشخصات فردی']['نام معرف']
+        ]
+      unless applicantData['مشخصات فردی']?['وضعیت تاهل'] is 'مجرد'
+        E style.inlineSection,
+          E style.bold, 'تعداد فرزندان'
+          E null, applicantData['مشخصات فردی']['تعداد فرزندان']
+      E style.inlineSection,
+        E style.bold, 'تعداد افراد تحت تکفل'
+        E null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']
+      E style.inlineSection,
+        E style.bold, 'نام معرف'
+        E null, applicantData['مشخصات فردی']['نام معرف']
     E style.bold, 'ایمیل'
     E style.indent,
       E style.inline,
@@ -248,4 +248,3 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
 
 
 # نام مدیر مستقیم
-# نوع همکاری

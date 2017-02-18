@@ -12,6 +12,9 @@ exports.logout = (automatic = false) ->
   ].forEach (x) -> state[x].set null
   [
     'applicants'
+    'notifications'
+    'managers'
+    'jobs'
   ].forEach (stateName) ->
     state[stateName].set []
   
@@ -35,13 +38,11 @@ exports.changeHRStatus = (applicantId, status) ->
       applicants = applicants.slice()
       applicantsHRStatus = applicantsHRStatus.slice()
       applicantsHRStatus.push status
-      unless applicant.applicantData
-        applicantsHRStatus.push {status: 6}
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
-exports.editHRStatus = (applicantId, statusId, status) ->
-  post 'editHRStatus', extend({applicantId}, status)
+exports.editHRStatus = (applicantId, statusId, interviewId, status) ->
+  post 'editHRStatus', extend({applicantId, interviewId}, status)
   .then ->
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({userId}) -> userId is applicantId
@@ -53,15 +54,15 @@ exports.editHRStatus = (applicantId, statusId, status) ->
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
-exports.deleteHRStatus = (DeleteHrApplicantStatus) ->
-  post 'deleteHRStatus', {DeleteHrApplicantStatus}
+exports.deleteHRStatus = (statusId, interviewId) ->
+  post 'deleteHRStatus', {statusId, interviewId}
   .then ->
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({userId}) -> userId is applicantId
       {applicantsHRStatus} = applicant
       applicants = applicants.slice()
       {applicantsHRStatus} = applicantsHRStatus.slice()
-      [status] = applicantsHRStatus.filter ({statusHRId}) -> statusHRId is DeleteHrApplicantStatus
+      [status] = applicantsHRStatus.filter ({statusHRId}) -> statusHRId is statusId
       remove applicantsHRStatus, status
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants

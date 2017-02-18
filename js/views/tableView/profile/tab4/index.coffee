@@ -22,6 +22,12 @@ module.exports = component 'tab4', ({dom, state}, {applicant}) ->
       history.push {firstName, lastName, personalPic, status, modificationTime}
 
   E 'table', style.table,
+    E 'thead', null,
+      E 'tr', null,
+        E 'th', null, 'نام مسئول'
+        E 'th', null, 'تغییر'
+        E 'th', null, 'زمان تغییر'
+        E 'th', null, 'تاریخ تغییر'
     E 'tbody', null,
       history.sort((a, b) -> b.modificationTime - a.modificationTime).map ({firstName, lastName, personalPic, status, modificationTime}, i) ->
         E 'tr', (if i % 2 is 0 then style.evenRow else style.row),

@@ -59,7 +59,23 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           }
           {
             name: 'وضعیت'
-            getValue: ({applicantsHRStatus}) -> logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1]?.status] || 'ثبت شده'
+            getValue: ({applicantData, applicantsHRStatus}) ->
+              if applicantsHRStatus.length
+                switch logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status]
+                  when 'مصاحبه تلفنی انجام شد'
+                    'مصاحبه تلفنی انجام شد'
+                  when 'در انتظار مصاحبه فنی'
+                    if applicantData
+                      'در انتظار مصاحبه فنی'
+                    else
+                      'در انتظار تکمیل اطلاعات برای مصاحبه فنی'
+                  when 'در انتظار مصاحبه عمومی'
+                    if applicantData
+                      'در انتظار مصاحبه عمومی'
+                    else
+                      'در انتظار تکمیل اطلاعات برای مصاحبه عمومی'
+              else
+                'ثبت شده'
           }
           {
             name: 'یادداشت'

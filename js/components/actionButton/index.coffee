@@ -4,7 +4,7 @@ list = require './list'
 {toPersian} = require '../../utils'
 {window} = require '../../utils/dom'
 
-module.exports = component 'actionButton', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex, noButtonFunctionality}) ->
+module.exports = component 'actionButton', ({dom, events, returnObject}, {getId, getTitle, english, items, selectedIndex, noButtonFunctionality, placeholder}) ->
   {E, setStyle} = dom
   {onEvent} = events
 
@@ -20,7 +20,8 @@ module.exports = component 'actionButton', ({dom, events, returnObject}, {getId,
   selectListeners = []
 
   onSelect = (item) ->
-    setStyle button, englishText: getTitle item
+    unless placeholder
+      setStyle button, englishText: getTitle item
     selectListeners.forEach (x) -> x item
     itemsList.hide()
 
@@ -29,9 +30,12 @@ module.exports = component 'actionButton', ({dom, events, returnObject}, {getId,
     arrow = E 'i', style.arrow
     itemsList = E list, {getTitle, onSelect}
 
-  itemsList.update items
+  if placeholder
+    setStyle button, englishText: placeholder
+  else
+    setStyle button, englishText: getTitle items[selectedIndex]
 
-  setStyle button, englishText: getTitle items[selectedIndex]
+  itemsList.update items
 
   onEvent arrow, 'mouseover', ->
     setStyle arrow, style.hover

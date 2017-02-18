@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -30,7 +30,7 @@ applicants = [{
   notes: []
   applicantsHRStatus: [{
     statusHRId: 0
-    status: 2
+    status: 3
   }, {
     statusHRId: 1
     status: 8
@@ -79,7 +79,7 @@ user =
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 2
+  userType: 3
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'

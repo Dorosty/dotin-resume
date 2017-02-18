@@ -194,9 +194,9 @@ toPersian = require('../../utils').toPersian;
 window = require('../../utils/dom').window;
 
 module.exports = component('actionButton', function(arg, arg1) {
-  var E, actionButton, arrow, button, dom, english, events, getId, getTitle, items, itemsList, noButtonFunctionality, onEvent, onSelect, returnObject, selectListeners, selectedIndex, setStyle;
+  var E, actionButton, arrow, button, dom, english, events, getId, getTitle, items, itemsList, noButtonFunctionality, onEvent, onSelect, placeholder, returnObject, selectListeners, selectedIndex, setStyle;
   dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  getId = arg1.getId, getTitle = arg1.getTitle, english = arg1.english, items = arg1.items, selectedIndex = arg1.selectedIndex, noButtonFunctionality = arg1.noButtonFunctionality;
+  getId = arg1.getId, getTitle = arg1.getTitle, english = arg1.english, items = arg1.items, selectedIndex = arg1.selectedIndex, noButtonFunctionality = arg1.noButtonFunctionality, placeholder = arg1.placeholder;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
   if (getId == null) {
@@ -223,9 +223,11 @@ module.exports = component('actionButton', function(arg, arg1) {
   }
   selectListeners = [];
   onSelect = function(item) {
-    setStyle(button, {
-      englishText: getTitle(item)
-    });
+    if (!placeholder) {
+      setStyle(button, {
+        englishText: getTitle(item)
+      });
+    }
     selectListeners.forEach(function(x) {
       return x(item);
     });
@@ -235,10 +237,16 @@ module.exports = component('actionButton', function(arg, arg1) {
     getTitle: getTitle,
     onSelect: onSelect
   }));
+  if (placeholder) {
+    setStyle(button, {
+      englishText: placeholder
+    });
+  } else {
+    setStyle(button, {
+      englishText: getTitle(items[selectedIndex])
+    });
+  }
   itemsList.update(items);
-  setStyle(button, {
-    englishText: getTitle(items[selectedIndex])
-  });
   onEvent(arrow, 'mouseover', function() {
     return setStyle(arrow, style.hover);
   });
@@ -5485,7 +5493,7 @@ exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
 
-exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مکالمه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'جذب', 'بایگانی'];
+exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'جذب', 'بایگانی'];
 
 exports.actions = (function() {
   results = [];
@@ -5585,7 +5593,7 @@ exports.logout = function(automatic) {
   ['user'].forEach(function(x) {
     return state[x].set(null);
   });
-  ['applicants'].forEach(function(stateName) {
+  ['applicants', 'notifications', 'managers', 'jobs'].forEach(function(stateName) {
     return state[stateName].set([]);
   });
   eraseCookie('JSESSIONID');
@@ -5626,11 +5634,6 @@ exports.changeHRStatus = function(applicantId, status) {
       applicants = applicants.slice();
       applicantsHRStatus = applicantsHRStatus.slice();
       applicantsHRStatus.push(status);
-      if (!applicant.applicantData) {
-        applicantsHRStatus.push({
-          status: 6
-        });
-      }
       applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
         applicantsHRStatus: applicantsHRStatus
       });
@@ -5639,9 +5642,10 @@ exports.changeHRStatus = function(applicantId, status) {
   });
 };
 
-exports.editHRStatus = function(applicantId, statusId, status) {
+exports.editHRStatus = function(applicantId, statusId, interviewId, status) {
   return post('editHRStatus', extend({
-    applicantId: applicantId
+    applicantId: applicantId,
+    interviewId: interviewId
   }, status)).then(function() {
     return state.applicants.on({
       once: true
@@ -5669,9 +5673,10 @@ exports.editHRStatus = function(applicantId, statusId, status) {
   });
 };
 
-exports.deleteHRStatus = function(DeleteHrApplicantStatus) {
+exports.deleteHRStatus = function(statusId, interviewId) {
   return post('deleteHRStatus', {
-    DeleteHrApplicantStatus: DeleteHrApplicantStatus
+    statusId: statusId,
+    interviewId: interviewId
   }).then(function() {
     return state.applicants.on({
       once: true
@@ -5688,7 +5693,7 @@ exports.deleteHRStatus = function(DeleteHrApplicantStatus) {
       status = applicantsHRStatus.filter(function(arg) {
         var statusHRId;
         statusHRId = arg.statusHRId;
-        return statusHRId === DeleteHrApplicantStatus;
+        return statusHRId === statusId;
       })[0];
       remove(applicantsHRStatus, status);
       applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
@@ -5967,6 +5972,8 @@ exports.jobs = 'allRecordedJobs';
 },{}],46:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
 
+return;
+
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -6013,7 +6020,7 @@ applicants = [
     applicantsHRStatus: [
       {
         statusHRId: 0,
-        status: 2
+        status: 3
       }, {
         statusHRId: 1,
         status: 8,
@@ -6068,7 +6075,7 @@ user = {
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 3,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -6971,7 +6978,134 @@ exports.input = {
 
 
 },{}],55:[function(require,module,exports){
-var checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, tab1, talents, tooltip;
+var applicantData, checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, tab1, talents, tooltip;
+
+applicantData = JSON.stringify({
+  "مشخصات فردی": {
+    "جنسیت": "مرد",
+    "وضعیت تاهل": "سایر",
+    "نام پدر": "1",
+    "شماره شناسنامه": "۱",
+    "محل تولد": "1",
+    "محل صدور": "1",
+    "ملیت": "1",
+    "تابعیت": "1",
+    "دین": "1",
+    "تاریخ تولد": "۱۳۱۱/۱/۱",
+    "وضعیت نظام وظیفه": "معاف",
+    "تعداد فرزندان": "۱",
+    "تعداد افراد تحت تکفل": "۱",
+    "نوع معافیت": "معافیت پزشکی",
+    "دلیل معافیت": "1",
+    "نام معرف": "1",
+    "ایمیل": ["ma.dorosty@gmail.com"],
+    "تلفن همراه": ["۰۹۳۷۲۹۹۵۹۷۴"],
+    "آدرس محل سکونت دائم": "1",
+    "تلفن ثابت محل سکونت دائم": "۱",
+    "آدرس محل سکونت فعلی": "1",
+    "تلفن ثابت محل سکونت فعلی": "۱"
+  },
+  "سایر اطلاعات": {
+    "در ساعات اضافه کاری حضور داشته و کار کنید": "بلی",
+    "در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید": "بلی",
+    "در شیفت شب کار کنید": "بلی",
+    "در تعطیلات آخر هفته کار کنید": "بلی",
+    "در شهر تهران غیر از محل شرکت مشغول کار شوید": "بلی",
+    "آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید": "بلی",
+    "آیا دخانیات مصرف می‌کنید": "خیر",
+    "آیا سابقه محکومیت کیفری دارید": "بلی",
+    "متقاضی چه نوع همکاری هستید": "تمام وقت",
+    "از چه طریقی از فرصت شغلی در داتین مطلع شدید": "نمایشگاه/همایش/کنفرانس",
+    "از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید": "۱۳۱۱/۱/۱",
+    "نوع بیمه‌ای که تا‌به‌حال داشته‌اید": "1",
+    "مدت زمانی که بیمه بوده‌اید": "1",
+    "مقدار دستمزد": "۱",
+    "میزان دستمزد": "مقدار مشخص",
+    "مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند": [
+      {
+        "نام و نام خانوادگی": "1",
+        "نسبت با شما": "1",
+        "نام محل کار": "1",
+        "سمت": "1",
+        "شماره تماس": "۱"
+      }, {
+        "نام و نام خانوادگی": "1",
+        "نسبت با شما": "1",
+        "نام محل کار": "1",
+        "سمت": "1",
+        "شماره تماس": "۱"
+      }
+    ],
+    "در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید": [
+      {
+        "نام و نام خانوادگی": "1",
+        "سمت": "1",
+        "نام محل کار": "1",
+        "نسبت با شما": "1",
+        "شماره تماس": "۱"
+      }
+    ],
+    "ورزش‌های مورد علاقه": "1",
+    "زمینه‌های هنری مورد علاقه": "1",
+    "نوع آن را ذکر نمایید": "1",
+    "تاریخ، دلایل و مدت آن را توضیح دهید": "1"
+  },
+  "سوابق تحصیلی": {
+    "سوابق تحصیلی": [
+      {
+        "مقطع": "دیپلم",
+        "رشته تحصیلی": "1",
+        "نام دانشگاه و شهر محل تحصیل": "1",
+        "سال ورود": "۱۳۱۱",
+        "سال اخذ مدرک": "۱۳۱۱",
+        "معدل": "۱",
+        "عنوان پایان‌نامه": "1"
+      }
+    ],
+    "مقطع و رشته‌ای که ادامه می‌دهید": "1"
+  },
+  "توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها": {
+    "مهارت‌ها": [
+      {
+        "شایستگی / مهارت": "1",
+        "علاقه به کار در این حوزه": "کم",
+        "دانش و مهارت در این حوزه": "کم"
+      }
+    ],
+    "دوره‌ها": [
+      {
+        "دوره": "1",
+        "برگزار کننده": "1",
+        "سال": "۱۳۱۱"
+      }
+    ],
+    "نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده": "1",
+    "آثار علمی و عضویت در انجمن‌ها": "1"
+  },
+  "مهارت زبان انگلیسی": {
+    "مکالمه": "عالی",
+    "نوشتن": "عالی",
+    "خواندن": "عالی"
+  },
+  "آخرین سوابق سازمانی و پروژه‌ای": {
+    "آخرین سوابق سازمانی و پروژه‌ای": [
+      {
+        "نام": "1",
+        "نوع فعالیت": "1",
+        "نام مدیر عامل": "1",
+        "نام مدیر مستقیم": "1",
+        "تلفن": "۱",
+        "محدوده نشانی": "1",
+        "تاریخ شروع": "۱۳۱۱/۱/۱",
+        "تاریخ پایان": "۱۳۱۱/۱/۱",
+        "نوع همکاری": "تمام وقت",
+        "علت خاتمه همکاری": "1",
+        "آخرین خالص دریافتی": "۱",
+        "شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف": "1"
+      }
+    ]
+  }
+});
 
 component = require('../../../utils/component');
 
@@ -7006,7 +7140,7 @@ spring = require('../../../utils/animation').spring;
 d = require('../../../utils/dom');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, append, cover, data, dom, errorSpring, errorSpringRunning, errors, events, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
+  var E, accept, append, cover, data, dom, errorSpring, errorSpringRunning, errors, events, fillButton, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service, setOff = arg.setOff;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
@@ -7097,7 +7231,7 @@ module.exports = component('applicantForm', function(arg) {
     }
     return setSubmitStyle();
   };
-  view = E(null, cover = E(style.cover), hide(noData = E()), yesData = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
+  view = E(null, cover = E(style.cover), hide(noData = E()), yesData = E(null, E(overview), scroll = E(scrollViewer), fillButton = E('button', null, 'پر کردن صفحه (برای تست)'), E(style.header, 'مشخصات فردی'), E(personalInfo, {
     setData: setData('مشخصات فردی'),
     registerErrorField: registerErrorField,
     setError: setError
@@ -7123,6 +7257,23 @@ module.exports = component('applicantForm', function(arg) {
     setError: setError
   }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit = E(style.submit, 'ثبت نهایی اطلاعات')));
   accept.onChange(setSubmitStyle);
+  onEvent(fillButton, 'click', function() {
+    var submitting;
+    setStyle(cover, style.coverVisible);
+    setStyle(submit, {
+      text: 'در حال ثبت...'
+    });
+    setStyle(submit, style.submitSubmitting);
+    submitting = true;
+    return service.submitProfileData(applicantData).fin(function() {
+      setStyle(submit, style.submitSubmitting);
+      submitting = false;
+      setStyle(cover, style.cover);
+      return setStyle(submit, {
+        text: 'ثبت نهایی اطلاعات'
+      });
+    });
+  });
   resize = function() {
     var body, height, html;
     body = document.body;
@@ -10615,9 +10766,29 @@ module.exports = component('tableView', function(arg) {
       }, {
         name: 'وضعیت',
         getValue: function(arg1) {
-          var applicantsHRStatus, ref1;
-          applicantsHRStatus = arg1.applicantsHRStatus;
-          return logic.statuses[(ref1 = applicantsHRStatus[applicantsHRStatus.length - 1]) != null ? ref1.status : void 0] || 'ثبت شده';
+          var applicantData, applicantsHRStatus;
+          applicantData = arg1.applicantData, applicantsHRStatus = arg1.applicantsHRStatus;
+          if (applicantsHRStatus.length) {
+            switch (logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status]) {
+              case 'مصاحبه تلفنی انجام شد':
+                return 'مصاحبه تلفنی انجام شد';
+              case 'در انتظار مصاحبه فنی':
+                if (applicantData) {
+                  return 'در انتظار مصاحبه فنی';
+                } else {
+                  return 'در انتظار تکمیل اطلاعات برای مصاحبه فنی';
+                }
+                break;
+              case 'در انتظار مصاحبه عمومی':
+                if (applicantData) {
+                  return 'در انتظار مصاحبه عمومی';
+                } else {
+                  return 'در انتظار تکمیل اطلاعات برای مصاحبه عمومی';
+                }
+            }
+          } else {
+            return 'ثبت شده';
+          }
         }
       }, {
         name: 'یادداشت',
@@ -10711,7 +10882,7 @@ module.exports = component('tableView', function(arg) {
 
 
 },{"../../components/actionButton":2,"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"./profile":95,"./search":111,"./sidebar":113,"./style":115,"./table":117}],93:[function(require,module,exports){
-var alert, component, dateInput, dropdown, logic, ref, style, toDate, toTimestamp;
+var alert, component, dateInput, dropdown, logic, ref, remove, style, toDate, toTimestamp;
 
 style = require('./style');
 
@@ -10725,19 +10896,34 @@ dateInput = require('../../../../components/dateInput');
 
 logic = require('../../../../utils/logic');
 
-ref = require('../../../../utils'), toTimestamp = ref.toTimestamp, toDate = ref.toDate;
+ref = require('../../../../utils'), toTimestamp = ref.toTimestamp, toDate = ref.toDate, remove = ref.remove;
 
 module.exports = function(loadbarInstance, applicant, status) {
   return component('changeStatus', function(arg) {
-    var E, alertInstance, append, disable, dom, enable, enabled, events, headerInput, hide, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, remove, service, setStyle, show, state, submit, update;
+    var E, _interviewId, alertInstance, append, dom, enabled, events, headerInput, hide, loading, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, removeButton, service, setStyle, show, state, submit, update;
     dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
     E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
     onEvent = events.onEvent;
     p1Input0 = p1Input1 = p1Input2 = void 0;
     alertInstance = alert('تغییر وضعیت به ...', E(style.alert, headerInput = (function() {
-      var f;
+      var f, items;
+      if (status) {
+        items = ['مصاحبه فنی', 'مصاحبه عمومی'];
+      } else {
+        items = ['مصاحبه تلفنی انجام شد', 'مصاحبه فنی', 'مصاحبه عمومی'];
+        if (applicant.applicantsHRStatus.length) {
+          remove(items, 'مصاحبه تلفنی انجام شد');
+        }
+        if (applicant.applicantsHRStatus.some(function(arg1) {
+          var status;
+          status = arg1.status;
+          return logic.statuses[status] === 'در انتظار مصاحبه عمومی';
+        })) {
+          remove(items, 'مصاحبه عمومی');
+        }
+      }
       f = E(dropdown, {
-        items: ['مصاحبه تلفنی', 'مصاحبه فنی', 'مصاحبه عمومی'],
+        items: items,
         extendStyle: style.extendStyle
       });
       setStyle(f, style.headerDropdown);
@@ -10746,7 +10932,7 @@ module.exports = function(loadbarInstance, applicant, status) {
         return update();
       });
       return f;
-    })()), E(style.panel, hide(p1 = E(null)), hide(p2 = E(null, p2Input = (function() {
+    })()), E(style.panel, hide(loading = E(null, 'در حال بارگزاری...')), p1 = E(null), p2 = E(null, p2Input = (function() {
       var f;
       f = E(dateInput);
       setStyle(f, style.dateInput);
@@ -10755,21 +10941,19 @@ module.exports = function(loadbarInstance, applicant, status) {
         return update();
       });
       return f;
-    })())), submit = E(style.submit, 'ذخیره'), remove = E(style.remove, 'حذف')));
+    })()), submit = E(style.submit, 'ذخیره'), removeButton = E(style.remove, 'حذف')));
     enabled = false;
-    enable = function() {
-      enabled = true;
-      return setStyle(submit, style.submit);
-    };
-    (disable = function() {
+    (update = function() {
+      var enable;
       enabled = false;
-      return setStyle(submit, style.submitDisabled);
-    })();
-    update = function() {
-      disable();
+      setStyle(submit, style.submitDisabled);
+      enable = function() {
+        enabled = true;
+        return setStyle(submit, style.submit);
+      };
       hide([p1, p2]);
       switch (headerInput.value()) {
-        case 'مصاحبه تلفنی':
+        case 'مصاحبه تلفنی انجام شد':
           return enable();
         case 'مصاحبه فنی':
           show(p1);
@@ -10783,7 +10967,7 @@ module.exports = function(loadbarInstance, applicant, status) {
             return enable();
           }
       }
-    };
+    })();
     state.managers.on({
       once: true
     }, function(managers) {
@@ -10832,17 +11016,30 @@ module.exports = function(loadbarInstance, applicant, status) {
         })()
       ]);
     });
+    _interviewId = void 0;
     if (!status) {
-      hide(remove);
+      hide(removeButton);
     } else {
+      if (status === applicant.applicantsHRStatus.filter(function(arg1) {
+        var ref1, status;
+        status = arg1.status;
+        return (ref1 = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref1 === 'در انتظار مصاحبه عمومی' || ref1 === 'در انتظار مصاحبه فنی';
+      })[0]) {
+        setStyle(removeButton, style.removeDisabled);
+      }
       headerInput.setValue(logic.statuses[status.status].substr('در انتظار '.length));
       switch (headerInput.value()) {
         case 'مصاحبه فنی':
+          show(loading);
+          hide(p1);
           service.loadInterview({
             statusId: status.statusHRId
           }).then(function(arg1) {
-            var interViewTime, interviewJob, interviewManager;
-            interViewTime = arg1.interViewTime, interviewJob = arg1.interviewJob, interviewManager = arg1.interviewManager;
+            var interViewTime, interviewId, interviewJob, interviewManager;
+            interviewId = arg1.interviewId, interViewTime = arg1.interViewTime, interviewJob = arg1.interviewJob, interviewManager = arg1.interviewManager;
+            _interviewId = interviewId;
+            hide(loading);
+            show(p1);
             return state.managers.on({
               once: true
             }, function(managers) {
@@ -10866,46 +11063,57 @@ module.exports = function(loadbarInstance, applicant, status) {
           });
           break;
         case 'مصاحبه عمومی':
+          show(loading);
+          hide(p2);
           service.loadInterview({
             statusId: status.statusHRId
           }).then(function(arg1) {
-            var interViewTime;
-            interViewTime = arg1.interViewTime;
+            var interViewTime, interviewId;
+            interviewId = arg1.interviewId, interViewTime = arg1.interViewTime;
+            _interviewId = interviewId;
+            hide(loading);
+            show(p2);
             return setStyle(p2Input.input, {
               value: toDate(interViewTime)
             });
           });
       }
     }
-    onEvent(remove, 'click', function() {
+    onEvent(removeButton, 'click', function() {
+      if (status === applicant.applicantsHRStatus.filter(function(arg1) {
+        var ref1, status;
+        status = arg1.status;
+        return (ref1 = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref1 === 'در انتظار مصاحبه عمومی' || ref1 === 'در انتظار مصاحبه فنی';
+      })[0]) {
+        return;
+      }
       loadbarInstance.set();
-      service.deleteHRStatus(status.statusHRId).then(loadbarInstance.reset);
+      service.deleteHRStatus(status.statusHRId, _interviewId).then(loadbarInstance.reset);
       return alertInstance.close();
     });
     onEvent(submit, 'click', function() {
-      var fn, s, se;
+      var fn, se;
       if (!enabled) {
         return;
       }
-      fn = status ? service.editHRStatus.bind(null, applicant.userId, status.statusHRId) : service.changeHRStatus.bind(null, applicant.userId);
-      s = logic.statuses.indexOf('در انتظار ' + headerInput.value());
+      fn = status ? service.editHRStatus.bind(null, applicant.userId, status.statusHRId, _interviewId) : service.changeHRStatus.bind(null, applicant.userId);
       loadbarInstance.set();
       se = (function() {
         switch (headerInput.value()) {
-          case 'مصاحبه تلفنی':
+          case 'مصاحبه تلفنی انجام شد':
             return fn({
-              status: s
+              status: logic.statuses.indexOf('مصاحبه تلفنی انجام شد')
             });
           case 'مصاحبه فنی':
             return fn({
-              status: s,
+              status: logic.statuses.indexOf('در انتظار مصاحبه فنی'),
               jobId: p1Input0.value().jobId,
               managerId: p1Input1.value().userId,
               interViewTime: toTimestamp(p1Input2.value())
             });
           case 'مصاحبه عمومی':
             return fn({
-              status: s,
+              status: logic.statuses.indexOf('در انتظار مصاحبه عمومی'),
               interViewTime: toTimestamp(p2Input.value())
             });
         }
@@ -11102,6 +11310,7 @@ module.exports = component('profile', function(arg, arg1) {
     backgroundColor: 'black'
   }, style.actionLegendCircle)), text('فعال'))), actionButtonInstance = E(actionButton, {
     noButtonFunctionality: true,
+    placeholder: 'ارسال درخواست',
     items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
   })), statusPlaceholder = E(style.status), E(style.tabs, tabs = tabNames.map(function(tabName, index) {
     var tab;
@@ -11138,7 +11347,7 @@ module.exports = component('profile', function(arg, arg1) {
     }
   });
   state.all(['applicants', 'user'], function(arg2) {
-    var applicants, applicantsHRStatus, editStatusButton, fanniLast, omoomiSeen, telephoniSeen, ts, user;
+    var applicants, applicantsHRStatus, editStatusButton, ts, user;
     applicants = arg2[0], user = arg2[1];
     applicant = applicants.filter(function(arg3) {
       var userId;
@@ -11147,27 +11356,44 @@ module.exports = component('profile', function(arg, arg1) {
     })[0];
     actionButtonItemTexts.forEach(function(s, i) {
       var item;
-      s = logic.statuses.indexOf(s);
       item = actionButtonInstance.items()[i];
-      if (applicant.applicantsHRStatus.filter(function(arg3) {
-        var status;
+      setStyle(item, {
+        color: 'black'
+      });
+      if (applicant.applicantsHRStatus.some(function(arg3) {
+        var ref, status;
         status = arg3.status;
-        return status === s;
-      }).length) {
-        return setStyle(item, {
+        return (ref = logic.statuses[status]) === 'در انتظار مصاحبه فنی' || ref === 'در انتظار مصاحبه عمومی';
+      })) {
+        setStyle(item, {
           color: '#c5c5c5'
         });
-      } else if (applicant.applicantsManagerStatus.filter(function(arg3) {
+      }
+      if (s !== 'درخواست مصاحبه تلفنی' && !(applicant.applicantsHRStatus.some(function(arg3) {
+        var status;
+        status = arg3.status;
+        return logic.statuses[status] === 'مصاحبه تلفنی انجام دش';
+      }))) {
+        setStyle(item, {
+          color: '#c5c5c5'
+        });
+      }
+      if (applicant.applicantsManagerStatus.some(function(arg3) {
+        var managerId;
+        managerId = arg3.managerId;
+        return managerId === user.userId;
+      })) {
+        setStyle(item, {
+          color: '#c5c5c5'
+        });
+      }
+      if (applicant.applicantsManagerStatus.some(function(arg3) {
         var managerId, status;
         managerId = arg3.managerId, status = arg3.status;
-        return status === s && managerId === user.userId;
-      }).length) {
+        return logic.statuses[status] === s && managerId === user.userId;
+      })) {
         return setStyle(item, {
           color: 'green'
-        });
-      } else {
-        return setStyle(item, {
-          color: 'black'
         });
       }
     });
@@ -11182,34 +11408,10 @@ module.exports = component('profile', function(arg, arg1) {
       ts.push(t);
       return t;
     })()));
-    telephoniSeen = omoomiSeen = fanniLast = false;
-    applicantsHRStatus = [];
-    applicant.applicantsHRStatus.forEach(function(status, i, arr) {
-      switch (logic.statuses[status.status]) {
-        case 'در انتظار مصاحبه تلفنی':
-          fanniLast = false;
-          if (telephoniSeen) {
-            return;
-          }
-          telephoniSeen = true;
-          break;
-        case 'در انتظار مصاحبه عمومی':
-          fanniLast = false;
-          if (omoomiSeen) {
-            return;
-          }
-          omoomiSeen = true;
-          break;
-        case 'در انتظار مصاحبه فنی':
-          if (fanniLast) {
-            return;
-          }
-          fanniLast = true;
-          break;
-        default:
-          return;
-      }
-      return applicantsHRStatus.push(status);
+    applicantsHRStatus = applicant.applicantsHRStatus.filter(function(arg3) {
+      var ref, status;
+      status = arg3.status;
+      return (ref = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref === 'در انتظار مصاحبه عمومی' || ref === 'در انتظار مصاحبه فنی';
     });
     append(statusPlaceholder, applicantsHRStatus.map(function(status, i, arr) {
       return [
@@ -11222,9 +11424,16 @@ module.exports = component('profile', function(arg, arg1) {
           }, style.statusIcon)), (function() {
             var t;
             t = logic.statuses[status.status];
-            if (t.indexOf('در انتظار ' === 0)) {
-              t = t.substr('در انتظار '.length);
-            }
+            t = (function() {
+              switch (t) {
+                case 'مصاحبه تلفنی انجام شد':
+                  return 'مصاحبه تلفنی';
+                case 'در انتظار مصاحبه عمومی':
+                  return 'مصاحبه عمومی';
+                case 'در انتظار مصاحبه فنی':
+                  return 'مصاحبه فنی';
+              }
+            })();
             t = E((i === arr.length - 1 ? style.statusTextActive : style.statusText), t);
             ts.push(t);
             return t;
@@ -11270,26 +11479,35 @@ module.exports = component('profile', function(arg, arg1) {
     });
   });
   actionButtonInstance.onSelect(function(value) {
-    var i;
-    i = logic.statuses.indexOf(value);
     return state.user.on({
       once: true
     }, function(user) {
+      if (applicant.applicantsHRStatus.some(function(arg2) {
+        var ref, status;
+        status = arg2.status;
+        return (ref = logic.statuses[status]) === 'در انتظار مصاحبه فنی' || ref === 'در انتظار مصاحبه عمومی';
+      })) {
+        return;
+      }
+      if (value !== 'درخواست مصاحبه تلفنی' && !(applicant.applicantsHRStatus.some(function(arg2) {
+        var status;
+        status = arg2.status;
+        return logic.statuses[status] === 'مصاحبه تلفنی انجام دشه';
+      }))) {
+        return;
+      }
+      if (applicant.applicantsManagerStatus.some(function(arg2) {
+        var managerId;
+        managerId = arg2.managerId;
+        return managerId === user.userId;
+      })) {
+        return;
+      }
       if (!confirm('بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟')) {
         return;
       }
-      if (!(applicant.applicantsHRStatus.filter(function(arg2) {
-        var status;
-        status = arg2.status;
-        return status === i;
-      }).length || applicant.applicantsManagerStatus.filter(function(arg2) {
-        var managerId, status;
-        managerId = arg2.managerId, status = arg2.status;
-        return status === i && managerId === user.userId;
-      }).length)) {
-        loadbarInstance.set();
-        return service.changeManagerStatus(applicant.userId, i).then(loadbarInstance.reset);
-      }
+      loadbarInstance.set();
+      return service.changeManagerStatus(applicant.userId, logic.statuses.indexOf(value)).then(loadbarInstance.reset);
     });
   });
   actionLegendVisible = false;
@@ -11621,7 +11839,7 @@ style = require('./style');
 ref = require('../../../../utils'), extend = ref.extend, monthToString = ref.monthToString, toDate = ref.toDate, toEnglish = ref.toEnglish;
 
 module.exports = component('tab1', function(arg, arg1) {
-  var E, applicant, applicantData, birthdayString, dom, ref1, ref10, ref11, ref12, ref13, ref14, ref15, ref16, ref17, ref18, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, text;
+  var E, applicant, applicantData, birthdayString, dom, ref1, ref10, ref11, ref12, ref13, ref14, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, text;
   dom = arg.dom;
   applicant = arg1.applicant;
   E = dom.E, text = dom.text;
@@ -11633,7 +11851,7 @@ module.exports = component('tab1', function(arg, arg1) {
   birthdayString = applicant.birthday.split('/');
   birthdayString[1] = monthToString(birthdayString[1]);
   birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');
-  return E(style.form, E(style.header, 'مشخصات فردی'), E('table', style.table, E('thead', null, E('tr', style.tr, E('th', null, 'جنسیت'), E('th', null, 'نام پدر'), E('th', null, 'کد ملی'), E('th', null, 'شماره شناسنامه'), E('th', null, 'محل صدور'), E('th', null, 'محل تولد'), E('th', null, 'ملیت'), E('th', null, 'تابعیت'), E('th', null, 'دین'), E('th', null, 'تاریخ تولد'))), E('tbody', null, E('tr', style.tr, E('td', null, applicantData['مشخصات فردی']['جنسیت']), E('td', null, applicantData['مشخصات فردی']['نام پدر']), E('td', null, applicantData['مشخصات فردی']['کد ملی']), E('td', null, applicantData['مشخصات فردی']['شماره شناسنامه']), E('td', null, applicantData['مشخصات فردی']['محل صدور']), E('td', null, applicantData['مشخصات فردی']['محل تولد']), E('td', null, applicantData['مشخصات فردی']['ملیت']), E('td', null, applicantData['مشخصات فردی']['تابعیت']), E('td', null, applicantData['مشخصات فردی']['دین']), E('td', null, applicantData['مشخصات فردی']['تاریخ تولد'])))), E('table', style.table, E('thead', null, E('tr', style.tr, E('th', null, 'وضعیت تاهل'), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [E('th', null, 'وضعیت نظام وظیفه'), ((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E('th', null, 'نوع معافیت'), ((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E('th', null, 'دلیل معافیت') : void 0] : void 0] : void 0, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? E('th', null, 'تعداد فرزندان') : void 0, E('th', null, 'تعداد افراد تحت تکفل'), E('th', null, 'نام معرف'))), E('tbody', null, E('tr', style.tr, E('td', null, applicantData['مشخصات فردی']['وضعیت تاهل']), ((ref5 = applicantData['مشخصات فردی']) != null ? ref5['جنسیت'] : void 0) === 'مرد' ? [E('td', null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه']), ((ref6 = applicantData['مشخصات فردی']) != null ? ref6['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E('td', null, applicantData['مشخصات فردی']['نوع معافیت']), ((ref7 = applicantData['مشخصات فردی']) != null ? ref7['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E('td', null, applicantData['مشخصات فردی']['دلیل معافیت']) : void 0] : void 0] : void 0, ((ref8 = applicantData['مشخصات فردی']) != null ? ref8['وضعیت تاهل'] : void 0) !== 'مجرد' ? E('td', null, applicantData['مشخصات فردی']['تعداد فرزندان']) : void 0, E('td', null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']), E('td', null, applicantData['مشخصات فردی']['نام معرف'])))), E(style.bold, 'ایمیل'), E(style.indent, E(style.inline, E({
+  return E(style.form, E(style.header, 'مشخصات فردی'), E(null, E(style.inlineSection, E(style.bold, 'جنسیت'), E(null, applicantData['مشخصات فردی']['جنسیت'])), E(style.inlineSection, E(style.bold, 'نام پدر'), E(null, applicantData['مشخصات فردی']['نام پدر'])), E(style.inlineSection, E(style.bold, 'کد ملی'), E(null, applicant.identificationCode)), E(style.inlineSection, E(style.bold, 'شماره شناسنامه'), E(null, applicantData['مشخصات فردی']['شماره شناسنامه'])), E(style.inlineSection, E(style.bold, 'محل صدور'), E(null, applicantData['مشخصات فردی']['محل صدور'])), E(style.inlineSection, E(style.bold, 'محل تولد'), E(null, applicantData['مشخصات فردی']['محل تولد'])), E(style.inlineSection, E(style.bold, 'ملیت'), E(null, applicantData['مشخصات فردی']['ملیت'])), E(style.inlineSection, E(style.bold, 'تابعیت'), E(null, applicantData['مشخصات فردی']['تابعیت'])), E(style.inlineSection, E(style.bold, 'دین'), E(null, applicantData['مشخصات فردی']['دین'])), E(style.inlineSection, E(style.bold, 'تاریخ تولد'), E(null, applicantData['مشخصات فردی']['تاریخ تولد']))), E(null, E(style.inlineSection, E(style.bold, 'وضعیت تاهل'), E(null, applicantData['مشخصات فردی']['وضعیت تاهل'])), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [E(style.inlineSection, E(style.bold, 'وضعیت نظام وظیفه'), E(null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه'])), ((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E(style.inlineSection, E(style.bold, 'نوع معافیت'), E(null, applicantData['مشخصات فردی']['نوع معافیت'])), ((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E(style.inlineSection, E(style.bold, 'دلیل معافیت'), E(null, applicantData['مشخصات فردی']['دلیل معافیت'])) : void 0] : void 0] : void 0, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? E(style.inlineSection, E(style.bold, 'تعداد فرزندان'), E(null, applicantData['مشخصات فردی']['تعداد فرزندان'])) : void 0, E(style.inlineSection, E(style.bold, 'تعداد افراد تحت تکفل'), E(null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل'])), E(style.inlineSection, E(style.bold, 'نام معرف'), E(null, applicantData['مشخصات فردی']['نام معرف']))), E(style.bold, 'ایمیل'), E(style.indent, E(style.inline, E({
     "class": 'fa fa-envelope'
   }), E(style.afterIcon, applicant.email)), (applicantData['مشخصات فردی']['ایمیل'] || []).map(function(x) {
     return E(style.inline, E({
@@ -11655,11 +11873,11 @@ module.exports = component('tab1', function(arg, arg1) {
     "class": 'fa fa-phone'
   }), E(style.inline, applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی'])), E(style.header, 'سوابق تحصیلی'), E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'مقطع'), E('th', null, 'رشته تحصیلی'), E('th', null, 'نام دانشگاه و شهر محل تحصیل'), E('th', null, 'سال ورود'), E('th', null, 'سال اخذ مدرک'), E('th', null, 'معدل'), E('th', null, 'عنوان پایان‌نامه'))), E('tbody', null, applicantData['سوابق تحصیلی']['سوابق تحصیلی'].map(function(x) {
     return E('tr', style.tr, E('td', null, x['مقطع']), E('td', null, x['رشته تحصیلی']), E('td', null, x['نام دانشگاه و شهر محل تحصیل']), E('td', null, x['سال ورود']), E('td', null, x['سال اخذ مدرک']), E('td', null, x['معدل']), E('td', null, x['عنوان پایان‌نامه']));
-  }))), E(style.bold, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟'), E(null, applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? 'بله' : 'خیر'), ((ref9 = applicantData['سوابق تحصیلی']) != null ? ref9['مقطع و رشته‌ای که ادامه می‌دهید'] : void 0) ? [E(style.bold, 'مقطع و رشته‌ای که ادامه می‌دهید را ذکر کنید.'), E(null, applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'])] : void 0, E(style.header, 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), ((ref10 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref10['مهارت‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'شایستگی / مهارت'), E('th', null, 'علاقه به کار در این حوزه'), E('th', null, 'دانش و مهارت در این حوزه'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['مهارت‌ها'].map(function(x) {
+  }))), E(style.bold, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟'), E(null, applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? 'بله' : 'خیر'), ((ref5 = applicantData['سوابق تحصیلی']) != null ? ref5['مقطع و رشته‌ای که ادامه می‌دهید'] : void 0) ? [E(style.bold, 'مقطع و رشته‌ای که ادامه می‌دهید را ذکر کنید.'), E(null, applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'])] : void 0, E(style.header, 'توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها'), ((ref6 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref6['مهارت‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'شایستگی / مهارت'), E('th', null, 'علاقه به کار در این حوزه'), E('th', null, 'دانش و مهارت در این حوزه'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['مهارت‌ها'].map(function(x) {
     return E('tr', style.tr, E('td', null, x['شایستگی / مهارت']), E('td', null, x['علاقه به کار در این حوزه']), E('td', null, x['دانش و مهارت در این حوزه']));
-  }))) : void 0, ((ref11 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref11['دوره‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'دوره'), E('th', null, 'برگزار کننده'), E('th', null, 'سال'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map(function(x) {
+  }))) : void 0, ((ref7 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref7['دوره‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', style.headerTr, E('th', null, 'دوره'), E('th', null, 'برگزار کننده'), E('th', null, 'سال'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map(function(x) {
     return E('tr', style.tr, E('td', null, x['دوره']), E('td', null, x['برگزار کننده']), E('td', null, x['سال']));
-  }))) : void 0, ((ref12 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref12['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref13 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref13['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), ((ref14 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref14['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
+  }))) : void 0, ((ref8 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref8['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) ? [E(style.bold, 'نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])] : void 0, ((ref9 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref9['آثار علمی و عضویت در انجمن‌ها'] : void 0) ? [E(style.bold, 'آثار علمی و عضویت در انجمن‌ها'), E(null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])] : void 0, E(style.header, 'مهارت زبان انگلیسی'), E(style.column3, E(style.bold, 'مکالمه'), E(null, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.column3, E(style.bold, 'نوشتن'), E(null, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.column3, E(style.bold, 'خواندن'), E(null, applicantData['مهارت زبان انگلیسی']['خواندن'])), E(style.header, 'آخرین سوابق سازمانی و پروژه‌ای'), ((ref10 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref10['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) ? applicantData['آخرین سوابق سازمانی و پروژه‌ای']['آخرین سوابق سازمانی و پروژه‌ای'].map(function(job) {
     var end, start;
     start = toEnglish(job['تاریخ شروع']).split('/');
     start[1] = monthToString(start[1]);
@@ -11672,7 +11890,7 @@ module.exports = component('tab1', function(arg, arg1) {
     }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
       englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
     })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
-  }) : void 0, E(style.header, 'سایر اطلاعات'), E(style.column3, E(style.bold, 'متقاضی چه نوع همکاری هستید؟'), E(null, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.column3, E(style.bold, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), E(null, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'])), ((ref15 = applicantData['سایر اطلاعات']) != null ? ref15['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] : void 0) ? [E(style.column3, E(style.bold, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), E(null, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']))] : void 0, ((ref16 = applicantData['سایر اطلاعات']) != null ? ref16['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] : void 0) ? [E(style.column3, E(style.bold, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(null, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']))] : void 0, E(style.column3, E(style.bold, 'مدت زمانی که بیمه بوده‌اید'), E(null, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'])), E(style.column3, E(style.bold, 'میزان دستمزد خالص درخواستی شما چقدر است؟'), E(null, (((ref17 = applicantData['سایر اطلاعات']) != null ? ref17['مقدار دستمزد'] : void 0) ? ((ref18 = applicantData['سایر اطلاعات']) != null ? ref18['مقدار دستمزد'] : void 0) + 'تومان - ' : '') + applicantData['سایر اطلاعات']['میزان دستمزد'])));
+  }) : void 0, E(style.header, 'سایر اطلاعات'), E(style.column3, E(style.bold, 'متقاضی چه نوع همکاری هستید؟'), E(null, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.column3, E(style.bold, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), E(null, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'])), ((ref11 = applicantData['سایر اطلاعات']) != null ? ref11['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] : void 0) ? [E(style.column3, E(style.bold, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), E(null, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']))] : void 0, ((ref12 = applicantData['سایر اطلاعات']) != null ? ref12['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] : void 0) ? [E(style.column3, E(style.bold, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(null, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']))] : void 0, E(style.column3, E(style.bold, 'مدت زمانی که بیمه بوده‌اید'), E(null, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'])), E(style.column3, E(style.bold, 'میزان دستمزد خالص درخواستی شما چقدر است؟'), E(null, (((ref13 = applicantData['سایر اطلاعات']) != null ? ref13['مقدار دستمزد'] : void 0) ? ((ref14 = applicantData['سایر اطلاعات']) != null ? ref14['مقدار دستمزد'] : void 0) + 'تومان - ' : '') + applicantData['سایر اطلاعات']['میزان دستمزد'])));
 });
 
 
@@ -11719,6 +11937,12 @@ exports.indent = {
 exports.inline = {
   display: 'inline-block',
   margin: '5px 15px 0 5px'
+};
+
+exports.inlineSection = {
+  display: 'inline-block',
+  margin: '5px 0 0 40px',
+  height: 100
 };
 
 exports.afterIcon = {
@@ -11884,7 +12108,7 @@ module.exports = component('tab4', function(arg, arg1) {
       });
     });
   });
-  return E('table', style.table, E('tbody', null, history.sort(function(a, b) {
+  return E('table', style.table, E('thead', null, E('tr', null, E('th', null, 'نام مسئول'), E('th', null, 'تغییر'), E('th', null, 'زمان تغییر'), E('th', null, 'تاریخ تغییر'))), E('tbody', null, history.sort(function(a, b) {
     return b.modificationTime - a.modificationTime;
   }).map(function(arg2, i) {
     var firstName, lastName, modificationTime, personalPic, status;

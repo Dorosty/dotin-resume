@@ -33,6 +33,11 @@ exports.inline =
   display: 'inline-block'
   margin: '5px 15px 0 5px'
 
+exports.inlineSection =
+  display: 'inline-block'
+  margin: '5px 0 0 40px'
+  height: 100
+
 exports.afterIcon =
   display: 'inline-block'
   marginRight: 5

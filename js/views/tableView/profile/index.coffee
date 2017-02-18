@@ -54,7 +54,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         E style.actionLegendRow,
           E extend {backgroundColor: 'black'}, style.actionLegendCircle
           text 'فعال'
-      actionButtonInstance = E actionButton, noButtonFunctionality: true, items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
+      actionButtonInstance = E actionButton, noButtonFunctionality: true, placeholder: 'ارسال درخواست', items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
     statusPlaceholder = E style.status
     E style.tabs,
       tabs = tabNames.map (tabName, index) ->
@@ -86,14 +86,16 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
   state.all ['applicants', 'user'], ([applicants, user]) ->
     [applicant] = applicants.filter ({userId}) -> userId is applicant.userId
     actionButtonItemTexts.forEach (s, i) ->
-      s = logic.statuses.indexOf s
       item = actionButtonInstance.items()[i]
-      if applicant.applicantsHRStatus.filter(({status}) -> status is s).length
+      setStyle item, color: 'black'
+      if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
         setStyle item, color: '#c5c5c5'
-      else if applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is s && managerId is user.userId).length
+      if s isnt 'درخواست مصاحبه تلفنی' && !(applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دش'))
+        setStyle item, color: '#c5c5c5'
+      if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
+        setStyle item, color: '#c5c5c5'
+      if applicant.applicantsManagerStatus.some(({managerId, status}) -> logic.statuses[status] is s && managerId is user.userId)
         setStyle item, color: 'green'
-      else
-        setStyle item, color: 'black'
     ts = []
     editStatusButton = undefined
     empty statusPlaceholder
@@ -105,28 +107,8 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           t = E style.statusText, 'ثبت'
           ts.push t
           t
-    telephoniSeen = omoomiSeen = fanniLast = false
-    applicantsHRStatus = []
-    applicant.applicantsHRStatus.forEach (status, i, arr) ->
-      switch logic.statuses[status.status]
-        when 'در انتظار مصاحبه تلفنی'
-          fanniLast = false
-          if telephoniSeen
-            return
-          telephoniSeen = true
-        when 'در انتظار مصاحبه عمومی'
-          fanniLast = false
-          if omoomiSeen
-            return
-          omoomiSeen = true
-        when 'در انتظار مصاحبه فنی'
-          if fanniLast
-            return
-          fanniLast = true
-        else
-          return
-      applicantsHRStatus.push status
 
+    applicantsHRStatus = applicant.applicantsHRStatus.filter ({status}) -> logic.statuses[status] in ['مصاحبه تلفنی انجام شد', 'در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی']
     append statusPlaceholder,
       applicantsHRStatus.map (status, i, arr) ->
         [
@@ -137,8 +119,13 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
               E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
               do ->
                 t = logic.statuses[status.status]
-                if t.indexOf 'در انتظار ' is 0
-                  t = t.substr 'در انتظار '.length
+                t = switch t
+                  when 'مصاحبه تلفنی انجام شد'
+                    'مصاحبه تلفنی'
+                  when 'در انتظار مصاحبه عمومی'
+                    'مصاحبه عمومی'
+                  when 'در انتظار مصاحبه فنی'
+                    'مصاحبه فنی'
                 t = E (if i is arr.length - 1 then style.statusTextActive else style.statusText), t
                 ts.push t
                 t
@@ -167,13 +154,14 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
 
   actionButtonInstance.onSelect (value) ->
-    i = logic.statuses.indexOf value
     state.user.on once: true, (user) ->
+      return if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
+      return if value isnt 'درخواست مصاحبه تلفنی' && !(applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
+      return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
       return unless confirm 'بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟'
-      unless applicant.applicantsHRStatus.filter(({status}) -> status is i).length || applicant.applicantsManagerStatus.filter(({managerId, status}) -> status is i && managerId is user.userId).length
-        loadbarInstance.set()
-        service.changeManagerStatus applicant.userId, i
-        .then loadbarInstance.reset
+      loadbarInstance.set()
+      service.changeManagerStatus applicant.userId, logic.statuses.indexOf value
+      .then loadbarInstance.reset
 
 
   actionLegendVisible = false
