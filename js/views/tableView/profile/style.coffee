@@ -76,6 +76,7 @@ exports.status =
   height: 100
 
 exports.statusSegment =
+  cursor: 'pointer'
   position: 'relative'
   display: 'inline-block'
   width: 30

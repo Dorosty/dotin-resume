@@ -21,7 +21,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
     fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] = x = E dropdown, items: ['نمایشگاه/همایش/کنفرانس', 'آگهی', 'سایت داتین', 'دوستان و همکاران', 'سایر']
     setStyle x, style.dropdownPlaceholder
     setStyle x.input, style.dropdown
-    hide y = E 'input', extend {placeholder: 'توضیحات...'}, style.descriptionInput
+    hide y = fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] = E 'input', extend {placeholder: 'توضیحات...'}, style.descriptionInput
     x.onChange ->
       if x.value() is 'سایر'
         show y

@@ -29,7 +29,7 @@ module.exports = (loadbarInstance, applicant, status) ->
           f
       E style.panel,
         hide loading = E null, 'در حال بارگزاری...'
-        p1 = E null
+        p1 = E()
         p2 = E null,
           p2Input = do ->
             f = E dateInput

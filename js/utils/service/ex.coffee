@@ -31,26 +31,30 @@ exports.submitProfileData = (data) ->
 
 exports.changeHRStatus = (applicantId, status) ->
   post 'changeHRStatus', extend({applicantId}, status)
-  .then ->
+  .then (x) ->
+    return if x.indexOf('statusId = ') isnt 0
+    x = +x.substr('statusId = '.length)
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({userId}) -> userId is applicantId
       {applicantsHRStatus} = applicant
       applicants = applicants.slice()
       applicantsHRStatus = applicantsHRStatus.slice()
-      applicantsHRStatus.push status
+      applicantsHRStatus.push extend {}, status, statusHRId: x
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
 exports.editHRStatus = (statusId, interviewId, status) ->
   post 'editHRStatus', if interviewId then extend({statusId, interviewId}, status) else extend({statusId}, status)
-  .then ->
+  .then (x) ->
+    return if x.indexOf('statusId = ') isnt 0
+    x = +x.substr('statusId = '.length)
     state.applicants.on once: true, (applicants) ->
       [applicant] = applicants.filter ({applicantsHRStatus}) -> applicantsHRStatus.some ({statusHRId}) -> statusHRId is statusId
       {applicantsHRStatus} = applicant
       applicants = applicants.slice()
       applicantsHRStatus = applicantsHRStatus.slice()
       [s] = applicantsHRStatus.filter ({statusHRId}) -> statusHRId is statusId
-      applicantsHRStatus[applicantsHRStatus.indexOf s] = extend {}, status
+      applicantsHRStatus[applicantsHRStatus.indexOf s] = extend {}, status, statusHRId: x
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 

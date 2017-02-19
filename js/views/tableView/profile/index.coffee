@@ -9,6 +9,7 @@ tab5 = require './tab5'
 actionButton = require '../../../components/actionButton'
 loadbar = require '../../../components/loadbar'
 changeStatus = require './changeStatus'
+viewStatus = require './viewStatus'
 {extend} = require '../../../utils'
 logic = require '../../../utils/logic'
 
@@ -90,7 +91,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
       setStyle item, color: 'black'
       if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
         setStyle item, color: '#c5c5c5'
-      if s isnt 'درخواست مصاحبه تلفنی' && !(applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دش'))
+      if s is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دش'))
         setStyle item, color: '#c5c5c5'
       if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
         setStyle item, color: '#c5c5c5'
@@ -114,7 +115,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         [
           E style.statusConnector
           do ->
-            x = E (if i is arr.length - 1 then extend({cursor: 'pointer'}, style.statusSegment) else style.statusSegment),
+            x = E style.statusSegment,
               E if i is arr.length - 1 then style.statusCircleActive else style.statusCircle
               E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
               do ->
@@ -131,6 +132,9 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
                 t
             if i is arr.length - 1
               editStatusButton = x
+            else
+              onEvent x, 'click', ->
+                viewStatus applicant, status
             x
         ]
 
@@ -138,7 +142,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
       if user.userType is 2
         append statusPlaceholder, [
           E style.statusConnectorActive
-          changeStatusButton = E extend({cursor: 'pointer'}, style.statusSegment),
+          changeStatusButton = E style.statusSegment,
             E style.statusCirclePlus
             E style.statusIconPlus
             do ->
@@ -156,7 +160,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
   actionButtonInstance.onSelect (value) ->
     state.user.on once: true, (user) ->
       return if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
-      return if value isnt 'درخواست مصاحبه تلفنی' && !(applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
+      return if value is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
       return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
       return unless confirm 'بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟'
       loadbarInstance.set()

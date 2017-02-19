@@ -15,6 +15,9 @@ exports.instance = (thisComponent) ->
       .then (data) ->
         l data
         data
+      .catch (e) ->
+        console.log e
+        throw e
 
   exports
 

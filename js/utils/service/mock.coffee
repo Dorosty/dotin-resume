@@ -79,7 +79,7 @@ user =
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 3
+  userType: 2
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'

@@ -10,10 +10,10 @@ handle = (isGet) -> (serviceName, params) ->
   stateChangingServices[serviceName]?.running = true
   startedAt = +new Date()
   ajax isGet, serviceName, params
-  .catch (ex) ->
+  .catch (e) ->
     stateChangingServices[serviceName]?.running = false
     stateChangingServices[serviceName]?.endedAt = +new Date()
-    throw ex
+    throw e
   .then (response) ->
     unless response? && typeof(response) is 'object'
       response = value: response
