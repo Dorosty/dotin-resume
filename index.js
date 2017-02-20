@@ -5489,21 +5489,13 @@ exports.service = {
 
 
 },{}],40:[function(require,module,exports){
-var i, results;
-
 exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
 
 exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه عمومی', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'مراحل اداری', 'جذب', 'بایگانی'];
 
-exports.actions = (function() {
-  results = [];
-  for (i = 1; i <= 100; i++){ results.push(i); }
-  return results;
-}).apply(this).map(function() {
-  return 'to be implemented';
-});
+exports.actions = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'اطلاعات تکمیل شد', '', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'مراحل اداری', 'جذب', 'بایگانی', 'مصاحبه حذف شد', 'مصاحبه ویرایش شد'];
 
 exports.actionModifiable = function(action) {
   return true;
@@ -6411,7 +6403,7 @@ exports.clearAllNotifications = function() {
 },{"../../q":32,"../../utils":38}],47:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
-exports.posts = ['login', 'addJob', 'loadInterview'];
+exports.posts = ['login', 'addJob', 'loadInterview', 'loadApplicantHistory'];
 
 exports.cruds = [
   {
@@ -6422,7 +6414,7 @@ exports.cruds = [
 
 exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'editHRStatus', 'deleteHRStatus', 'changeManagerStatus', 'clearAllNotifications'];
 
-exports.states = ['user', 'applicants', 'notifications', 'managers', 'jobs'];
+exports.states = ['user', 'applicants', 'notifications', 'managers', 'hrUsers', 'jobs'];
 
 
 },{}],48:[function(require,module,exports){
@@ -6670,7 +6662,7 @@ exports.instance = function(thisComponent) {
 
 
 },{"../log":39,"./names":50}],50:[function(require,module,exports){
-module.exports = ['user', 'applicants', 'notifications', 'managers', 'jobs'];
+module.exports = ['user', 'applicants', 'notifications', 'hrUsers', 'managers', 'jobs'];
 
 
 },{}],51:[function(require,module,exports){
@@ -12236,67 +12228,105 @@ module.exports = component('tab3', function(arg) {
 },{"../../../../utils/component":34,"./style":105}],105:[function(require,module,exports){
 arguments[4][103][0].apply(exports,arguments)
 },{"dup":103}],106:[function(require,module,exports){
-var component, extend, ref, statuses, style, toDate, toTime;
+var component, extend, logic, ref, style, toDate, toTime;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
-statuses = require('../../../../utils/logic').statuses;
+logic = require('../../../../utils/logic');
 
 ref = require('../../../../utils'), extend = ref.extend, toDate = ref.toDate, toTime = ref.toTime;
 
 module.exports = component('tab4', function(arg, arg1) {
-  var E, applicant, dom, history, state, text;
-  dom = arg.dom, state = arg.state;
+  var E, append, applicant, body, dom, empty, service, state, text, view;
+  dom = arg.dom, state = arg.state, service = arg.service;
   applicant = arg1.applicant;
-  E = dom.E, text = dom.text;
-  history = [];
-  applicant.applicantsHRStatus.forEach(function(status) {
-    var firstName, lastName, modificationTime, personalPic, ref1, ref2;
-    ref1 = status.hrUser, firstName = ref1.firstName, lastName = ref1.lastName, personalPic = ref1.personalPic;
-    ref2 = status, status = ref2.status, modificationTime = ref2.modificationTime;
-    return history.push({
-      firstName: firstName,
-      lastName: lastName,
-      personalPic: personalPic,
-      status: status,
-      modificationTime: modificationTime
-    });
-  });
-  applicant.applicantsManagerStatus.forEach(function(status) {
-    return state.managers.on({
+  E = dom.E, text = dom.text, empty = dom.empty, append = dom.append;
+  view = E('table', style.table, E('thead', null, E('tr', null, E('th', null, 'نام مسئول'), E('th', null, 'تغییر'), E('th', null, 'زمان تغییر'), E('th', null, 'تاریخ تغییر'))), body = E('tbody'));
+  service.loadApplicantHistory({
+    applicantId: applicant.userId
+  }).then(function(history) {
+    empty(body);
+    return state.all(['hrUsers', 'managers', 'jobs'], {
       once: true
-    }, function(managers) {
-      var firstName, lastName, modificationTime, personalPic, ref1, ref2;
-      ref1 = managers.filter(function(arg2) {
-        var userId;
-        userId = arg2.userId;
-        return userId === status.statusManagerId;
-      })[0], firstName = ref1.firstName, lastName = ref1.lastName, personalPic = ref1.personalPic;
-      ref2 = status, status = ref2.status, modificationTime = ref2.time;
-      return history.push({
-        firstName: firstName,
-        lastName: lastName,
-        personalPic: personalPic,
-        status: status,
-        modificationTime: modificationTime
-      });
+    }, function(arg2) {
+      var hrUsers, jobs, managers;
+      hrUsers = arg2[0], managers = arg2[1], jobs = arg2[2];
+      return append(body, history.sort(function(a, b) {
+        return b.actionTime - a.actionTime;
+      }).map(function(arg3, i) {
+        var actionTime, actionType, chosenTime, hrUserId, job, jobId, manager, managerId, owner, txt;
+        actionTime = arg3.actionTime, actionType = arg3.actionType, hrUserId = arg3.hrUserId, managerId = arg3.managerId, jobId = arg3.jobId, chosenTime = arg3.chosenTime;
+        owner = (function() {
+          switch (logic.actions[actionType]) {
+            case 'ثبت شده':
+            case 'اطلاعات تکمیل شد':
+              return applicant;
+            case 'درخواست مصاحبه تلفنی':
+            case 'درخواست مصاحبه عمومی':
+            case 'درخواست مصاحبه فنی':
+              return managers.filter(function(arg4) {
+                var userId;
+                userId = arg4.userId;
+                return userId === managerId;
+              })[0];
+            case 'مصاحبه تلفنی انجام شد':
+            case 'در انتظار مصاحبه عمومی':
+            case 'در انتظار مصاحبه فنی':
+            case 'مراحل اداری':
+            case 'جذب':
+            case 'بایگانی':
+            case 'مصاحبه حذف شد':
+            case 'مصاحبه ویرایش شد':
+              return hrUsers.filter(function(arg4) {
+                var userId;
+                userId = arg4.userId;
+                return userId === hrUserId;
+              })[0];
+          }
+        })();
+        txt = logic.actions[actionType] + (function() {
+          switch (logic.actions[actionType]) {
+            case 'ثبت شده':
+            case 'اطلاعات تکمیل شد':
+            case 'مراحل اداری':
+            case 'جذب':
+            case 'بایگانی':
+            case 'مصاحبه حذف شد':
+            case 'مصاحبه ویرایش شد':
+            case 'درخواست مصاحبه تلفنی':
+            case 'درخواست مصاحبه عمومی':
+            case 'درخواست مصاحبه فنی':
+            case 'مصاحبه تلفنی انجام شد':
+              return '';
+            case 'در انتظار مصاحبه عمومی':
+              return ". زمان مصاحبه: " + (toDate(chosenTime));
+            case 'در انتظار مصاحبه فنی':
+              manager = managers.filter(function(arg4) {
+                var userId;
+                userId = arg4.userId;
+                return userId === managerId;
+              })[0];
+              job = jobs.filter(function(arg4) {
+                var j;
+                j = arg4.jobId;
+                return j === jobId;
+              })[0];
+              return ". نام مدیر: " + manager.firstName + " " + manager.lastName + " - شغل: " + job.jobName + " - زمان مصاحبه: " + (toDate(chosenTime));
+          }
+        })();
+        return E('tr', (i % 2 === 0 ? style.evenRow : style.row), E('td', null, E('img', extend({
+          src: owner.personalPic ? "/webApi/image?address=" + owner.personalPic : 'assets/img/default-avatar-small.png'
+        }, style.profilePicture)), text(owner.firstName + " " + owner.lastName)), E('td', null, txt), E('td', {
+          width: 100
+        }, toTime(actionTime)), E('td', {
+          width: 100
+        }, toDate(actionTime)));
+      }));
     });
   });
-  return E('table', style.table, E('thead', null, E('tr', null, E('th', null, 'نام مسئول'), E('th', null, 'تغییر'), E('th', null, 'زمان تغییر'), E('th', null, 'تاریخ تغییر'))), E('tbody', null, history.sort(function(a, b) {
-    return b.modificationTime - a.modificationTime;
-  }).map(function(arg2, i) {
-    var firstName, lastName, modificationTime, personalPic, status;
-    firstName = arg2.firstName, lastName = arg2.lastName, personalPic = arg2.personalPic, status = arg2.status, modificationTime = arg2.modificationTime;
-    return E('tr', (i % 2 === 0 ? style.evenRow : style.row), E('td', null, E('img', extend({
-      src: personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/default-avatar-small.png'
-    }, style.profilePicture)), text(firstName + " " + lastName)), E('td', null, statuses[status]), E('td', {
-      width: 100
-    }, toTime(modificationTime)), E('td', {
-      width: 100
-    }, toDate(modificationTime)));
-  })));
+  return view;
 });
 
 

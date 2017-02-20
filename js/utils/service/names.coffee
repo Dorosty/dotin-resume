@@ -7,6 +7,7 @@ exports.posts = [
   'login'
   'addJob'
   'loadInterview'
+  'loadApplicantHistory'
 ]
 
 exports.cruds = [  
@@ -28,5 +29,6 @@ exports.states = [
   'applicants'
   'notifications'
   'managers'
+  'hrUsers'
   'jobs'
 ]
