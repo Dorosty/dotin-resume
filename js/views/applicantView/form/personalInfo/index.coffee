@@ -203,7 +203,7 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
             setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
           else
             setError error, null
-        onEvent input, 'input', handleChange true
+        onEvent input, ['input', 'pInput'], handleChange true
         onEvent input, 'blur', handleChange false
 
   address2Checkbox.onChange ->

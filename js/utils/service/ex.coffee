@@ -27,7 +27,7 @@ exports.submitProfileData = (data) ->
   post 'submitProfileData', data: JSON.stringify data
   .then ->
     state.user.on once: true, (user) ->
-      state.user.set extend {}, user, applicantData: data
+      state.user.set extend {}, user, applicantData: JSON.stringify data
 
 exports.changeHRStatus = (applicantId, status) ->
   post 'changeHRStatus', extend({applicantId}, status)

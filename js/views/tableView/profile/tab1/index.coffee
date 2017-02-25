@@ -90,7 +90,7 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
     E style.indent,
       E style.inline,
         E class: 'fa fa-mobile'
-        E style.afterIcon, applicant.email
+        E style.afterIcon, applicant.phoneNumber
       (applicantData['مشخصات فردی']['تلفن همراه'] || []).map (x) ->
         E style.inline,
           E class: 'fa fa-mobile'

@@ -14,14 +14,12 @@ module.exports = (loadbarInstance, applicant, status) ->
     alertInstance = alert 'تغییر وضعیت به ...',
       E style.alert,
         headerInput = do ->
-          if status
+          if status || applicant.applicantsHRStatus.length
             items = ['مصاحبه فنی', 'مصاحبه عمومی']
           else
             items = ['مصاحبه تلفنی انجام شد', 'مصاحبه فنی', 'مصاحبه عمومی']
-            if applicant.applicantsHRStatus.length
-              remove items, 'مصاحبه تلفنی انجام شد'
-            if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'در انتظار مصاحبه عمومی')
-              remove items, 'مصاحبه عمومی'
+          if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'در انتظار مصاحبه عمومی')
+            remove items, 'مصاحبه عمومی'
           f = E dropdown, items: items, extendStyle: style.extendStyle
           setStyle f, style.headerDropdown
           setStyle f.input, style.headerDropdownInput

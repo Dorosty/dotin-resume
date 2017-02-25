@@ -41,8 +41,8 @@ module.exports = component 'views', ({dom, state}, userId) ->
         E style.box3, "تلفن محل سکونت دائم: #{applicantData['مشخصات فردی']['تلفن ثابت محل سکونت دائم']}"
         E style.box23, "نشانی محل سکونت دائم: #{applicantData['مشخصات فردی']['آدرس محل سکونت دائم']}"
         E (extend {}, style.box, borderBottomStyle: 'dashed'), 'مشخصات محل سکونت فعلی (درصورتیکه در محلی غیر از محل سکونت دائم خود اقامت دارید (خوابگاه / پانسیون / ...))'
-        E (extend {}, style.box3, borderBottomStyle: 'dashed', borderLeftStyle: 'dashed'), "تلفن محل سکونت فعلی: #{applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی']}"
-        E (extend {}, style.box23, borderBottomStyle: 'dashed'), "نشانی محل سکونت فعلی: #{applicantData['مشخصات فردی']['آدرس محل سکونت فعلی']}"
+        E (extend {}, style.box3, borderBottomStyle: 'dashed', borderLeftStyle: 'dashed'), "تلفن محل سکونت فعلی: #{applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی'] || ''}"
+        E (extend {}, style.box23, borderBottomStyle: 'dashed'), "نشانی محل سکونت فعلی: #{applicantData['مشخصات فردی']['آدرس محل سکونت فعلی'] || ''}"
         if applicantData['مشخصات فردی']?['جنسیت'] is 'مرد'
           [
             E style.box2, "وضعیت نظام وظیفه: #{applicantData['مشخصات فردی']['وضعیت نظام وظیفه']}"
@@ -61,8 +61,10 @@ module.exports = component 'views', ({dom, state}, userId) ->
         E style.box3,
           unless applicantData['مشخصات فردی']?['وضعیت تاهل'] is 'مجرد'
             "تعداد فرزندان: #{applicantData['مشخصات فردی']['تعداد فرزندان']}"
+          else
+            'تعداد فرزندان: 0'
         E style.box3, "تعداد افراد تحت تکفل: #{applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']}"
-        E style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): #{applicantData['مشخصات فردی']['نام معرف']}"
+        E style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): #{applicantData['مشخصات فردی']['نام معرف'] || ''}"
       E 'h1', null, '2. سوابق تحصیلی'
       E 'table', style.table,
         E 'thead', null,
@@ -75,7 +77,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
             E 'th', style.th, 'معدل'
             E 'th', style.th, 'عنوان پایان‌نامه'
         E 'tbody', null,
-          applicantData['سوابق تحصیلی']['سوابق تحصیلی'].map (x) ->
+          (applicantData['سوابق تحصیلی']['سوابق تحصیلی'] || []).map (x) ->
             E 'tr', null,
               E 'td', style.td, x['مقطع']
               E 'td', style.td, x['رشته تحصیلی']
@@ -88,37 +90,35 @@ module.exports = component 'views', ({dom, state}, userId) ->
         E null, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟ ' + if applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] then 'بلی' else 'خیر'
         if applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید']
           E null, "مقطع و رشته‌ای را که ادامه می‌دهید، ذکر کنید: #{applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید']}"
-      E 'h1', null, '3. توانمندیها، مهارتها، دانش و شایستگی‌ها'
-      if applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']?['مهارت‌ها']
-        E 'table', style.table,
-          E 'thead', null,
+      E 'h1', null, '3. توانمندیها، مهارت‌ها، دانش و شایستگی‌ها'
+      E 'table', style.table,
+        E 'thead', null,
+          E 'tr', null,
+            E 'th', style.th, 'شایستگی / مهارت'
+            E 'th', style.th, 'علاقه به کار در این حوزه'
+            E 'th', style.th, 'دانش و مهارت در این حوزه'
+        E 'tbody', null,
+          (applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']?['مهارت‌ها'] || []).map (x) ->
             E 'tr', null,
-              E 'th', style.th, 'شایستگی / مهارت'
-              E 'th', style.th, 'علاقه به کار در این حوزه'
-              E 'th', style.th, 'دانش و مهارت در این حوزه'
-          E 'tbody', null,
-            applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['مهارت‌ها'].map (x) ->
-              E 'tr', null,
-                E 'td', style.td, x['شایستگی / مهارت']
-                E 'td', style.td, x['علاقه به کار در این حوزه']
-                E 'td', style.td, x['دانش و مهارت در این حوزه']
-      if applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']?['دوره‌ها']
-        E 'table', extend({marginTop: -1}, style.table),
-          E 'thead', null,
+              E 'td', style.td, x['شایستگی / مهارت']
+              E 'td', style.td, x['علاقه به کار در این حوزه']
+              E 'td', style.td, x['دانش و مهارت در این حوزه']
+      E 'table', extend({marginTop: -1}, style.table),
+        E 'thead', null,
+          E 'tr', null,
+            E 'th', style.th, 'دوره'
+            E 'th', style.th, 'برگزار کننده'
+            E 'th', style.th, 'سال'
+        E 'tbody', null,
+          (applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']?['دوره‌ها'] || []).map (x) ->
             E 'tr', null,
-              E 'th', style.th, 'دوره'
-              E 'th', style.th, 'برگزار کننده'
-              E 'th', style.th, 'سال'
-          E 'tbody', null,
-            applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map (x) ->
-              E 'tr', null,
-                E 'td', style.td, x['دوره']
-                E 'td', style.td, x['برگزار کننده']
-                E 'td', style.td, x['سال']
+              E 'td', style.td, x['دوره']
+              E 'td', style.td, x['برگزار کننده']
+              E 'td', style.td, x['سال']
       E style.tableFooter,
-        E null, "نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده: #{applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده']}"
+        E null, "نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده: #{applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']?['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] || ''}"
       E style.tableFooter,
-        E null, "آثار علمی و عضویت در انجمن‌ها: #{applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها']}"
+        E null, "آثار علمی و عضویت در انجمن‌ها: #{applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']?['آثار علمی و عضویت در انجمن‌ها'] || ''}"
       E extend({marginTop: -1}, style.boxContainer),
         E extend(style.darkBox), 'مهارت زبان انگلیسی'
         E style.box3, "مکالمه: #{applicantData['مهارت زبان انگلیسی']['مکالمه']}"
@@ -132,7 +132,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
             E 'th', style.th, 'سمت'
             E 'th', style.th, 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'
         E 'tbody', null,
-          applicantData['آخرین سوابق سازمانی و پروژه‌ای']?['آخرین سوابق سازمانی و پروژه‌ای'].map (x) ->
+          (applicantData['آخرین سوابق سازمانی و پروژه‌ای']?['آخرین سوابق سازمانی و پروژه‌ای'] || []).map (x) ->
             [
               E 'tr', null,
                 E 'td', extend({rowSpan: 2}, style.td),
@@ -157,19 +157,19 @@ module.exports = component 'views', ({dom, state}, userId) ->
         E style.box,
           E style.bold, 'کار در داتین...'
         E style.box, "متقاضی چه نوع همکاری هستید؟ #{applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید']}"
-        E style.box, "از چه طریقی از فرصت شغلی در داتین مطلع شدید؟ #{applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید']}" +
+        E style.box, "از چه طریقی از فرصت شغلی در داتین مطلع شدید؟ #{applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] || ''}" +
           if applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] is 'سایر'
-            ' - ' + applicantData['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر']
+            ' - ' + (applicantData['سایر اطلاعات']?['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] || '')
           else
             ''
-        E style.box, "از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟ #{applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']}"
+        E style.box, "از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟ #{applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] || ''}"
         E style.box,
-          text "نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟ #{applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']}"
-          E style.boxMarginRight, "مدت زمانی که بیمه بوده‌اید؟ #{applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید']}"
+          text "نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟ #{applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] || ''}"
+          E style.boxMarginRight, "مدت زمانی که بیمه بوده‌اید؟ #{applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'] || ''}"
         E style.box,
           text 'میزان دستمزد '
           E style.boldUnderline, 'خالص'
-          text " درخواستی شما چقدر است؟ #{applicantData['سایر اطلاعات']['میزان دستمزد']}" +
+          text " درخواستی شما چقدر است؟ #{applicantData['سایر اطلاعات']['میزان دستمزد'] || ''}" +
           if applicantData['سایر اطلاعات']['مقدار دستمزد']
             ' - ' + applicantData['سایر اطلاعات']['مقدار دستمزد'] + ' تومان'
           else
@@ -192,7 +192,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
               E 'th', style.th, 'سمت'
               E 'th', style.th, 'شماره تماس'
           E 'tbody', null,
-            applicantData['سایر اطلاعات']['مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند'].map (x) ->
+            (applicantData['سایر اطلاعات']['مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند'] || []).map (x) ->
               E 'tr', null,
                 E 'td', style.td, x['نام و نام خانوادگی']
                 E 'td', style.td, x['نسبت با شما']
@@ -209,7 +209,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
               E 'th', style.th, 'نسبت با شما'
               E 'th', style.th, 'شماره تماس'
           E 'tbody', null,
-            applicantData['سایر اطلاعات']['در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید'].map (x) ->
+            (applicantData['سایر اطلاعات']['در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید'] || []).map (x) ->
               E 'tr', null,
                 E 'td', style.td, x['نام و نام خانوادگی']
                 E 'td', style.td, x['سمت']
@@ -219,18 +219,20 @@ module.exports = component 'views', ({dom, state}, userId) ->
       E extend({marginTop: 50}, style.boxContainer),
         E style.box,
           E style.bold, 'بیشتر درباره شما...'
-        E style.box2, "ورزش‌های مورد علاقه: #{applicantData['سایر اطلاعات']['ورزش‌های مورد علاقه']}"
-        E style.box2, "زمینه‌های هنری مورد علاقه: #{applicantData['سایر اطلاعات']['زمینه‌های هنری مورد علاقه']}"
-        E style.box, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟: ' +
-          applicantData['سایر اطلاعات']?['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] +
+        E style.box2, "ورزش‌های مورد علاقه: #{applicantData['سایر اطلاعات']['ورزش‌های مورد علاقه'] || []}"
+        E style.box2, "زمینه‌های هنری مورد علاقه: #{applicantData['سایر اطلاعات']['زمینه‌های هنری مورد علاقه'] || []}"
+        E style.box, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟ ' +
+          (applicantData['سایر اطلاعات']?['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] || '') +
           if applicantData['سایر اطلاعات']?['نوع آن را ذکر نمایید']
             ' - ' + applicantData['سایر اطلاعات']['نوع آن را ذکر نمایید']
           else
             ''
-        E style.box2, "'آیا دخانیات مصرف می‌کنید؟ #{applicantData['سایر اطلاعات']['آیا دخانیات مصرف می‌کنید']}"
-        E style.box2, "آیا سابقه محکومیت کیفری دارید؟ #{applicantData['سایر اطلاعات']['آیا سابقه محکومیت کیفری دارید']}" + 
+        E style.box2, "'آیا دخانیات مصرف می‌کنید؟ #{applicantData['سایر اطلاعات']['آیا دخانیات مصرف می‌کنید'] || []}"
+        E style.box2, "آیا سابقه محکومیت کیفری دارید؟ #{applicantData['سایر اطلاعات']['آیا سابقه محکومیت کیفری دارید'] || []}" + 
           if applicantData['سایر اطلاعات']?['تاریخ، دلایل و مدت آن را توضیح دهید']
             ' - ' + applicantData['سایر اطلاعات']['تاریخ، دلایل و مدت آن را توضیح دهید']
+          else
+            ''
     ]
 
     window.print()

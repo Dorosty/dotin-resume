@@ -11,7 +11,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
 
   labels = {}
   fields = {}
-  incomeError = undefined
+  incomeError = sayerError = undefined
 
   fields['متقاضی چه نوع همکاری هستید'] = f = E dropdown, items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
   setStyle f, style.dropdownPlaceholder
@@ -22,11 +22,17 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
     setStyle x, style.dropdownPlaceholder
     setStyle x.input, style.dropdown
     hide y = fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] = E 'input', extend {placeholder: 'توضیحات...'}, style.descriptionInput
+    labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] = E()
     x.onChange ->
       if x.value() is 'سایر'
         show y
+        setData 'از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر', y.value()
+        unless y.value()
+          setError sayerError, 'تکمیل این فیلد الزامیست.', true
       else
         hide y
+        setData 'از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر', null
+        setError sayerError, null
     [x, y]
 
   fields['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] = f = E dateInput
@@ -86,7 +92,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
           setData fieldName, field.value()
       else
         input = field.input || field
-        onEvent input, 'input', ->
+        onEvent input, ['input', 'pInput'], ->
           setData fieldName, field.value()
       return
     error = registerErrorField label, field
@@ -94,6 +100,8 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
       setError error, 'تکمیل این فیلد الزامیست.', true
     if fieldName is 'مقدار دستمزد'
       incomeError = error
+    if fieldName is 'از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'
+      sayerError = error
     if field.onChange
       field.onChange ->
         setData fieldName, field.value()
@@ -107,7 +115,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
             setError error, null
     else
       input = field.input || field
-      onEvent input, 'input', ->
+      onEvent input, ['input', 'pInput'], ->
         setData fieldName, field.value()
       handleChange = (hidden) -> ->
         if !field.value().trim()
@@ -116,7 +124,7 @@ module.exports = component 'applicantFormOthersPart0', ({dom, events}, {setData,
           setError error, 'مقدار وارد شده قابل قبول نیست.', hidden
         else
           setError error, null
-      onEvent input, 'input', handleChange true
+      onEvent input, ['input', 'pInput'], handleChange true
       onEvent input, 'blur', handleChange false
 
   view

@@ -1,5 +1,5 @@
 #################################################################
-applicantData = JSON.stringify {
+applicantData = {
   "مشخصات فردی": {
     "جنسیت": "مرد",
     "وضعیت تاهل": "سایر",
@@ -194,7 +194,7 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
     handleChange = ->
       setStyle [label, input], style.valid
       error.hideTooltip?()
-    onEvent input, 'input', handleChange
+    onEvent input, ['input', 'pInput'], handleChange
     field.onChange? handleChange
     onEvent input, 'blur', ->
       error.hideTooltip?()

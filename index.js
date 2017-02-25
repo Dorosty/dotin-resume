@@ -5605,7 +5605,7 @@ exports.submitProfileData = function(data) {
       once: true
     }, function(user) {
       return state.user.set(extend({}, user, {
-        applicantData: data
+        applicantData: JSON.stringify(data)
       }));
     });
   });
@@ -7001,7 +7001,7 @@ exports.input = {
 },{}],55:[function(require,module,exports){
 var applicantData, checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, tab1, talents, tooltip;
 
-applicantData = JSON.stringify({
+applicantData = {
   "مشخصات فردی": {
     "جنسیت": "مرد",
     "وضعیت تاهل": "سایر",
@@ -7126,7 +7126,7 @@ applicantData = JSON.stringify({
       }
     ]
   }
-});
+};
 
 component = require('../../../utils/component');
 
@@ -7233,7 +7233,7 @@ module.exports = component('applicantForm', function(arg) {
       setStyle([label, input], style.valid);
       return typeof error.hideTooltip === "function" ? error.hideTooltip() : void 0;
     };
-    onEvent(input, 'input', handleChange);
+    onEvent(input, ['input', 'pInput'], handleChange);
     if (typeof field.onChange === "function") {
       field.onChange(handleChange);
     }
@@ -7446,14 +7446,14 @@ numberInput = require('../../../../../components/restrictedInput/number');
 ref = require('../../../../../utils'), extend = ref.extend, remove = ref.remove;
 
 module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
-  var E, dom, events, f, f0, f1, fields, hide, hideTooltips, incomeError, labels, onEvent, registerErrorField, setData, setError, setStyle, show, text, view;
+  var E, dom, events, f, f0, f1, fields, hide, hideTooltips, incomeError, labels, onEvent, registerErrorField, sayerError, setData, setError, setStyle, show, text, view;
   dom = arg.dom, events = arg.events;
   setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
   labels = {};
   fields = {};
-  incomeError = void 0;
+  incomeError = sayerError = void 0;
   fields['متقاضی چه نوع همکاری هستید'] = f = E(dropdown, {
     items: ['تمام وقت', 'پاره وقت', 'مشاوره‌ای - ساعتی', 'پیمانکاری']
   });
@@ -7469,11 +7469,18 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
     hide(y = fields['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] = E('input', extend({
       placeholder: 'توضیحات...'
     }, style.descriptionInput)));
+    labels['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] = E();
     x.onChange(function() {
       if (x.value() === 'سایر') {
-        return show(y);
+        show(y);
+        setData('از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر', y.value());
+        if (!y.value()) {
+          return setError(sayerError, 'تکمیل این فیلد الزامیست.', true);
+        }
       } else {
-        return hide(y);
+        hide(y);
+        setData('از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر', null);
+        return setError(sayerError, null);
       }
     });
     return [x, y];
@@ -7519,7 +7526,7 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
         });
       } else {
         input = field.input || field;
-        onEvent(input, 'input', function() {
+        onEvent(input, ['input', 'pInput'], function() {
           return setData(fieldName, field.value());
         });
       }
@@ -7531,6 +7538,9 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
     }
     if (fieldName === 'مقدار دستمزد') {
       incomeError = error;
+    }
+    if (fieldName === 'از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر') {
+      sayerError = error;
     }
     if (field.onChange) {
       field.onChange(function() {
@@ -7550,7 +7560,7 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
       });
     } else {
       input = field.input || field;
-      onEvent(input, 'input', function() {
+      onEvent(input, ['input', 'pInput'], function() {
         return setData(fieldName, field.value());
       });
       handleChange = function(hidden) {
@@ -7564,7 +7574,7 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
           }
         };
       };
-      onEvent(input, 'input', handleChange(true));
+      onEvent(input, ['input', 'pInput'], handleChange(true));
       return onEvent(input, 'blur', handleChange(false));
     }
   });
@@ -8685,7 +8695,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
             }
           };
         };
-        onEvent(input, 'input', handleChange(true));
+        onEvent(input, ['input', 'pInput'], handleChange(true));
         return onEvent(input, 'blur', handleChange(false));
       }
     });
@@ -10643,7 +10653,7 @@ module.exports = component('views', function(arg, userId) {
   state.applicants.on({
     once: true
   }, function(applicants) {
-    var applicant, applicantData, birthdayString, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+    var applicant, applicantData, birthdayString, ref1, ref10, ref11, ref12, ref13, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
     applicant = applicants.filter(function(applicant) {
       return applicant.userId === userId;
     })[0];
@@ -10662,9 +10672,9 @@ module.exports = component('views', function(arg, userId) {
       }), 'مشخصات محل سکونت فعلی (درصورتیکه در محلی غیر از محل سکونت دائم خود اقامت دارید (خوابگاه / پانسیون / ...))'), E(extend({}, style.box3, {
         borderBottomStyle: 'dashed',
         borderLeftStyle: 'dashed'
-      }), "تلفن محل سکونت فعلی: " + applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی']), E(extend({}, style.box23, {
+      }), "تلفن محل سکونت فعلی: " + (applicantData['مشخصات فردی']['تلفن ثابت محل سکونت فعلی'] || '')), E(extend({}, style.box23, {
         borderBottomStyle: 'dashed'
-      }), "نشانی محل سکونت فعلی: " + applicantData['مشخصات فردی']['آدرس محل سکونت فعلی']), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [
+      }), "نشانی محل سکونت فعلی: " + (applicantData['مشخصات فردی']['آدرس محل سکونت فعلی'] || '')), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [
         E(style.box2, "وضعیت نظام وظیفه: " + applicantData['مشخصات فردی']['وضعیت نظام وظیفه']), E(extend({
           html: (((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? 'نوع معافیت: ' + applicantData['مشخصات فردی']['نوع معافیت'] + (((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? '<br />دلیل معافیت: ' + applicantData['مشخصات فردی']['دلیل معافیت'] : '') : '')
         }, style.box2, {
@@ -10672,17 +10682,17 @@ module.exports = component('views', function(arg, userId) {
           marginRight: -1,
           width: 601
         }))
-      ] : void 0, E(style.box3, "وضعیت تاهل: " + applicantData['مشخصات فردی']['وضعیت تاهل']), E(style.box3, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? "تعداد فرزندان: " + applicantData['مشخصات فردی']['تعداد فرزندان'] : void 0), E(style.box3, "تعداد افراد تحت تکفل: " + applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']), E(style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): " + applicantData['مشخصات فردی']['نام معرف'])), E('h1', null, '2. سوابق تحصیلی'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'))), E('tbody', null, applicantData['سوابق تحصیلی']['سوابق تحصیلی'].map(function(x) {
+      ] : void 0, E(style.box3, "وضعیت تاهل: " + applicantData['مشخصات فردی']['وضعیت تاهل']), E(style.box3, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? "تعداد فرزندان: " + applicantData['مشخصات فردی']['تعداد فرزندان'] : 'تعداد فرزندان: 0'), E(style.box3, "تعداد افراد تحت تکفل: " + applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']), E(style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): " + (applicantData['مشخصات فردی']['نام معرف'] || ''))), E('h1', null, '2. سوابق تحصیلی'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'))), E('tbody', null, (applicantData['سوابق تحصیلی']['سوابق تحصیلی'] || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['مقطع']), E('td', style.td, x['رشته تحصیلی']), E('td', style.td, x['نام دانشگاه و شهر محل تحصیل']), E('td', style.td, x['سال ورود']), E('td', style.td, x['سال اخذ مدرک']), E('td', style.td, x['معدل']), E('td', style.td, x['عنوان پایان‌نامه']));
-      }))), E(style.tableFooter, E(null, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟ ' + (applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? 'بلی' : 'خیر')), applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? E(null, "مقطع و رشته‌ای را که ادامه می‌دهید، ذکر کنید: " + applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید']) : void 0), E('h1', null, '3. توانمندیها، مهارتها، دانش و شایستگی‌ها'), ((ref5 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref5['مهارت‌ها'] : void 0) ? E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'شایستگی / مهارت'), E('th', style.th, 'علاقه به کار در این حوزه'), E('th', style.th, 'دانش و مهارت در این حوزه'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['مهارت‌ها'].map(function(x) {
+      }))), E(style.tableFooter, E(null, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟ ' + (applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? 'بلی' : 'خیر')), applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? E(null, "مقطع و رشته‌ای را که ادامه می‌دهید، ذکر کنید: " + applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید']) : void 0), E('h1', null, '3. توانمندیها، مهارت‌ها، دانش و شایستگی‌ها'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'شایستگی / مهارت'), E('th', style.th, 'علاقه به کار در این حوزه'), E('th', style.th, 'دانش و مهارت در این حوزه'))), E('tbody', null, (((ref5 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref5['مهارت‌ها'] : void 0) || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['شایستگی / مهارت']), E('td', style.td, x['علاقه به کار در این حوزه']), E('td', style.td, x['دانش و مهارت در این حوزه']));
-      }))) : void 0, ((ref6 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref6['دوره‌ها'] : void 0) ? E('table', extend({
+      }))), E('table', extend({
         marginTop: -1
-      }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'دوره'), E('th', style.th, 'برگزار کننده'), E('th', style.th, 'سال'))), E('tbody', null, applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['دوره‌ها'].map(function(x) {
+      }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'دوره'), E('th', style.th, 'برگزار کننده'), E('th', style.th, 'سال'))), E('tbody', null, (((ref6 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref6['دوره‌ها'] : void 0) || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['دوره']), E('td', style.td, x['برگزار کننده']), E('td', style.td, x['سال']));
-      }))) : void 0, E(style.tableFooter, E(null, "نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده: " + applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'])), E(style.tableFooter, E(null, "آثار علمی و عضویت در انجمن‌ها: " + applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']['آثار علمی و عضویت در انجمن‌ها'])), E(extend({
+      }))), E(style.tableFooter, E(null, "نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده: " + (((ref7 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref7['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) || ''))), E(style.tableFooter, E(null, "آثار علمی و عضویت در انجمن‌ها: " + (((ref8 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref8['آثار علمی و عضویت در انجمن‌ها'] : void 0) || ''))), E(extend({
         marginTop: -1
-      }, style.boxContainer), E(extend(style.darkBox), 'مهارت زبان انگلیسی'), E(style.box3, "مکالمه: " + applicantData['مهارت زبان انگلیسی']['مکالمه']), E(style.box3, "نوشتن: " + applicantData['مهارت زبان انگلیسی']['نوشتن']), E(style.box3, "خواندن: " + applicantData['مهارت زبان انگلیسی']['خواندن'])), E('h1', null, '5. آخرین سوابق سازمانی و پروژه‌ای'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مشخصات شرکت / سازمان محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'))), E('tbody', null, (ref7 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref7['آخرین سوابق سازمانی و پروژه‌ای'].map(function(x) {
+      }, style.boxContainer), E(extend(style.darkBox), 'مهارت زبان انگلیسی'), E(style.box3, "مکالمه: " + applicantData['مهارت زبان انگلیسی']['مکالمه']), E(style.box3, "نوشتن: " + applicantData['مهارت زبان انگلیسی']['نوشتن']), E(style.box3, "خواندن: " + applicantData['مهارت زبان انگلیسی']['خواندن'])), E('h1', null, '5. آخرین سوابق سازمانی و پروژه‌ای'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مشخصات شرکت / سازمان محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'))), E('tbody', null, (((ref9 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref9['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) || []).map(function(x) {
         return [
           E('tr', null, E('td', extend({
             rowSpan: 2
@@ -10690,21 +10700,21 @@ module.exports = component('views', function(arg, userId) {
             rowSpan: 2
           }, style.td), x['سمت']), E('td', style.td, x['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'])), E('tr', null, E('td', style.td, E(null, "تاریخ شروع: " + x['تاریخ شروع']), E(null, "تاریخ پایان: " + x['تاریخ پایان']), E(null, "آخرین خالص دریافتی (تومان): " + x['آخرین خالص دریافتی']), E(null, "نوع همکاری: " + x['نوع همکاری']), E(null, "علت خاتمه همکاری: " + x['علت خاتمه همکاری'])))
         ];
-      }) : void 0)), E('h1', null, '6. اطلاعات تکمیلی'), E(style.boxContainer, E(style.box, E(style.bold, 'کار در داتین...')), E(style.box, "متقاضی چه نوع همکاری هستید؟ " + applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید']), E(style.box, ("از چه طریقی از فرصت شغلی در داتین مطلع شدید؟ " + applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید']) + (applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] === 'سایر' ? ' - ' + applicantData['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] : '')), E(style.box, "از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟ " + applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']), E(style.box, text("نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟ " + applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']), E(style.boxMarginRight, "مدت زمانی که بیمه بوده‌اید؟ " + applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'])), E(style.box, text('میزان دستمزد '), E(style.boldUnderline, 'خالص'), text((" درخواستی شما چقدر است؟ " + applicantData['سایر اطلاعات']['میزان دستمزد']) + (applicantData['سایر اطلاعات']['مقدار دستمزد'] ? ' - ' + applicantData['سایر اطلاعات']['مقدار دستمزد'] + ' تومان' : ''))), E(extend({
+      }))), E('h1', null, '6. اطلاعات تکمیلی'), E(style.boxContainer, E(style.box, E(style.bold, 'کار در داتین...')), E(style.box, "متقاضی چه نوع همکاری هستید؟ " + applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید']), E(style.box, ("از چه طریقی از فرصت شغلی در داتین مطلع شدید؟ " + (applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] || '')) + (applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] === 'سایر' ? ' - ' + (((ref10 = applicantData['سایر اطلاعات']) != null ? ref10['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] : void 0) || '') : '')), E(style.box, "از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟ " + (applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] || '')), E(style.box, text("نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟ " + (applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] || '')), E(style.boxMarginRight, "مدت زمانی که بیمه بوده‌اید؟ " + (applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'] || ''))), E(style.box, text('میزان دستمزد '), E(style.boldUnderline, 'خالص'), text((" درخواستی شما چقدر است؟ " + (applicantData['سایر اطلاعات']['میزان دستمزد'] || '')) + (applicantData['سایر اطلاعات']['مقدار دستمزد'] ? ' - ' + applicantData['سایر اطلاعات']['مقدار دستمزد'] + ' تومان' : ''))), E(extend({
         html: 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:' + '<br />' + 'در ساعات اضافه کاری حضور داشته و کار کنید - ' + applicantData['سایر اطلاعات']['در ساعات اضافه کاری حضور داشته و کار کنید'] + '<br />' + 'در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید - ' + applicantData['سایر اطلاعات']['در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید'] + '<br />' + 'در شیفت شب کار کنید - ' + applicantData['سایر اطلاعات']['در شیفت شب کار کنید'] + '<br />' + 'در تعطیلات آخر هفته کار کنید - ' + applicantData['سایر اطلاعات']['در تعطیلات آخر هفته کار کنید'] + '<br />' + 'در شهر تهران غیر از محل شرکت مشغول کار شوید - ' + applicantData['سایر اطلاعات']['در شهر تهران غیر از محل شرکت مشغول کار شوید']
       }, style.box)), E(style.box, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', extend({
         marginTop: -1,
         marginRight: -1
-      }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شماره تماس'))), E('tbody', null, applicantData['سایر اطلاعات']['مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند'].map(function(x) {
+      }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شماره تماس'))), E('tbody', null, (applicantData['سایر اطلاعات']['مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند'] || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['نام و نام خانوادگی']), E('td', style.td, x['نسبت با شما']), E('td', style.td, x['نام محل کار']), E('td', style.td, x['سمت']), E('td', style.td, x['شماره تماس']));
       }))), E(style.box, 'در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید:'), E('table', extend({
         marginTop: -1,
         marginRight: -1
-      }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'سمت'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'شماره تماس'))), E('tbody', null, applicantData['سایر اطلاعات']['در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید'].map(function(x) {
+      }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'سمت'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'شماره تماس'))), E('tbody', null, (applicantData['سایر اطلاعات']['در صورتی که فردی از آشنایان و بستگان شما در شرکت داتین، گروه هولدینگ فناپ و یا گروه مالی پاسارگاد مشغول به کار هستند، نام ببرید'] || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['نام و نام خانوادگی']), E('td', style.td, x['سمت']), E('td', style.td, x['نام محل کار']), E('td', style.td, x['نسبت با شما']), E('td', style.td, x['شماره تماس']));
       })))), E(extend({
         marginTop: 50
-      }, style.boxContainer), E(style.box, E(style.bold, 'بیشتر درباره شما...')), E(style.box2, "ورزش‌های مورد علاقه: " + applicantData['سایر اطلاعات']['ورزش‌های مورد علاقه']), E(style.box2, "زمینه‌های هنری مورد علاقه: " + applicantData['سایر اطلاعات']['زمینه‌های هنری مورد علاقه']), E(style.box, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟: ' + ((ref8 = applicantData['سایر اطلاعات']) != null ? ref8['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] : void 0) + (((ref9 = applicantData['سایر اطلاعات']) != null ? ref9['نوع آن را ذکر نمایید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['نوع آن را ذکر نمایید'] : '')), E(style.box2, "'آیا دخانیات مصرف می‌کنید؟ " + applicantData['سایر اطلاعات']['آیا دخانیات مصرف می‌کنید']), E(style.box2, ("آیا سابقه محکومیت کیفری دارید؟ " + applicantData['سایر اطلاعات']['آیا سابقه محکومیت کیفری دارید']) + (((ref10 = applicantData['سایر اطلاعات']) != null ? ref10['تاریخ، دلایل و مدت آن را توضیح دهید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['تاریخ، دلایل و مدت آن را توضیح دهید'] : void 0)))
+      }, style.boxContainer), E(style.box, E(style.bold, 'بیشتر درباره شما...')), E(style.box2, "ورزش‌های مورد علاقه: " + (applicantData['سایر اطلاعات']['ورزش‌های مورد علاقه'] || [])), E(style.box2, "زمینه‌های هنری مورد علاقه: " + (applicantData['سایر اطلاعات']['زمینه‌های هنری مورد علاقه'] || [])), E(style.box, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟ ' + (((ref11 = applicantData['سایر اطلاعات']) != null ? ref11['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] : void 0) || '') + (((ref12 = applicantData['سایر اطلاعات']) != null ? ref12['نوع آن را ذکر نمایید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['نوع آن را ذکر نمایید'] : '')), E(style.box2, "'آیا دخانیات مصرف می‌کنید؟ " + (applicantData['سایر اطلاعات']['آیا دخانیات مصرف می‌کنید'] || [])), E(style.box2, ("آیا سابقه محکومیت کیفری دارید؟ " + (applicantData['سایر اطلاعات']['آیا سابقه محکومیت کیفری دارید'] || [])) + (((ref13 = applicantData['سایر اطلاعات']) != null ? ref13['تاریخ، دلایل و مدت آن را توضیح دهید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['تاریخ، دلایل و مدت آن را توضیح دهید'] : '')))
     ]);
     return window.print();
   });
@@ -11034,20 +11044,17 @@ module.exports = function(loadbarInstance, applicant, status) {
     p1Input0 = p1Input1 = p1Input2 = void 0;
     alertInstance = alert('تغییر وضعیت به ...', E(style.alert, headerInput = (function() {
       var f, items;
-      if (status) {
+      if (status || applicant.applicantsHRStatus.length) {
         items = ['مصاحبه فنی', 'مصاحبه عمومی'];
       } else {
         items = ['مصاحبه تلفنی انجام شد', 'مصاحبه فنی', 'مصاحبه عمومی'];
-        if (applicant.applicantsHRStatus.length) {
-          remove(items, 'مصاحبه تلفنی انجام شد');
-        }
-        if (applicant.applicantsHRStatus.some(function(arg1) {
-          var status;
-          status = arg1.status;
-          return logic.statuses[status] === 'در انتظار مصاحبه عمومی';
-        })) {
-          remove(items, 'مصاحبه عمومی');
-        }
+      }
+      if (applicant.applicantsHRStatus.some(function(arg1) {
+        var status;
+        status = arg1.status;
+        return logic.statuses[status] === 'در انتظار مصاحبه عمومی';
+      })) {
+        remove(items, 'مصاحبه عمومی');
       }
       f = E(dropdown, {
         items: items,
@@ -12001,7 +12008,7 @@ module.exports = component('tab1', function(arg, arg1) {
     }), E(style.afterIcon, x));
   })), E(style.bold, 'تلفن همراه'), E(style.indent, E(style.inline, E({
     "class": 'fa fa-mobile'
-  }), E(style.afterIcon, applicant.email)), (applicantData['مشخصات فردی']['تلفن همراه'] || []).map(function(x) {
+  }), E(style.afterIcon, applicant.phoneNumber)), (applicantData['مشخصات فردی']['تلفن همراه'] || []).map(function(x) {
     return E(style.inline, E({
       "class": 'fa fa-mobile'
     }), E(style.afterIcon, x));
