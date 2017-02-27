@@ -42,6 +42,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     loadbarInstance = E loadbar, style.loadbar
     indexLink = E 'a', style.indexLink, 'رزومه‌ها'
     E 'span', style.profileBreadCrumb, ' › پروفایل'
+    printButton = E style.printButton, 'چاپ'
     actionButtonPlaceholder = E style.action,
       actionLegendButton = E style.actionLegendButton
       actionLegend = E style.actionLegend,
@@ -80,9 +81,18 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   ######################
   state.user.on once: true, (user) ->
-    if user.userType isnt 1
+    if user.userType is 1
+      hide printButton
+    else
       hide actionButtonPlaceholder
   ######################
+
+  onEvent printButton, 'mouseover', ->
+    setStyle printButton, style.printButtonHover
+  onEvent printButton, 'mouseout', ->
+    setStyle printButton, style.printButton
+  onEvent printButton, 'click', ->
+    window.open '#print_' + applicant.userId, '_blank'
 
   state.all ['applicants', 'user'], ([applicants, user]) ->
     [applicant] = applicants.filter ({userId}) -> userId is applicant.userId
@@ -162,7 +172,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
       return if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
       return if value is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
       return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
-      return unless confirm 'بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟'
+      return unless confirm "بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از #{value} اطمینان دارید؟"
       loadbarInstance.set()
       service.changeManagerStatus applicant.userId, logic.statuses.indexOf value
       .then loadbarInstance.reset

@@ -2,6 +2,7 @@ component = require '../../../../utils/component'
 style = require './style'
 dropdown = require '../../../../components/dropdown'
 dateInput = require '../../../../components/dateInput'
+logic = require '../../../../utils/logic'
 {textIsInSearch, toEnglish, toTimestamp, toDate} = require '../../../../utils'
 
 module.exports = component 'search', ({dom, events, returnObject}) ->
@@ -79,29 +80,35 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
       when 2 then do ->
         jobsInput = E 'input', style.input
         onEvent jobsInput, 'input', -> changeListener?()
-        isInSearch = ({selectedJobsString}) ->
-          not jobsInput.value() || textIsInSearch selectedJobsString.toLowerCase(), jobsInput.value()
+        isInSearch = ({selectedJobs}) ->
+          not jobsInput.value() || selectedJobs.some ({jobName}) -> textIsInSearch jobName.toLowerCase(), jobsInput.value()
         jobsInput
       when 3 then do ->
-        stateDropdown = E dropdown, items: [0 .. 2], getTitle: (x) ->
+        stateDropdown = E dropdown, items: [0 .. 3], getTitle: (x) ->
           switch x
             when 0
               'ثبت شده'
             when 1
-              'در انتظار مصاحبه'
+              'مصاحبه تلفنی انجام شد'
             when 2
-              'غیره'
+              'در انتظار مصاحبه فنی'
+            when 3
+              'در انتظار مصاحبه عمومی'
         setStyle stateDropdown, style.inputPlaceholder
         setStyle stateDropdown.input, style.placeholderInput
         stateDropdown.onChange -> changeListener?()
-        isInSearch = ->
+        isInSearch = ({applicantsHRStatus}) ->
           unless stateDropdown.value()?
             return true
           switch stateDropdown.value()
             when 0
-              true
-            else
-              false
+              applicantsHRStatus.length is 0
+            when 1
+              logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status] is 'مصاحبه تلفنی انجام شد'
+            when 2
+              logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status] is 'در انتظار مصاحبه فنی'
+            when 3
+              logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status] is 'در انتظار مصاحبه عمومی'
         stateDropdown
       when 4 then do ->
         notesDropdown = E dropdown, items: [0 .. 1], getTitle: (x) ->

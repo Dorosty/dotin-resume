@@ -31,7 +31,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
           E style.boxMarginRight, "محل صدور: #{applicantData['مشخصات فردی']['محل صدور']}"
         E style.box3,
           text "دین: #{applicantData['مشخصات فردی']['دین']}"
-          # E style.boxMarginRight, # MAZHAB
+          E style.boxMarginRight, "مذهب: #{applicantData['مشخصات فردی']['مذهب'] || ''}"
         E style.box3,
           text "ملیت: #{applicantData['مشخصات فردی']['ملیت']}"
           E style.boxMarginRight, "تابعیت: #{applicantData['مشخصات فردی']['تابعیت']}"
@@ -63,7 +63,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
             "تعداد فرزندان: #{applicantData['مشخصات فردی']['تعداد فرزندان']}"
           else
             'تعداد فرزندان: 0'
-        E style.box3, "تعداد افراد تحت تکفل: #{applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']}"
+        E style.box3, "تعداد افراد تحت تکفل: #{applicantData['مشخصات فردی']['تعداد افراد تحت تکفل'] || ''}"
         E style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): #{applicantData['مشخصات فردی']['نام معرف'] || ''}"
       E 'h1', null, '2. سوابق تحصیلی'
       E 'table', style.table,
@@ -237,8 +237,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
 
     window.print()
 
-    # MAZHAB
-    # SHOGHL HA
+    # SHOGHL HAYE DARKHASTI
     # SEMAT (SAVABEGHE SHOGHLI)
 
   view

@@ -6080,7 +6080,7 @@ applicants = [
     applicantsHRStatus: [
       {
         statusHRId: 2,
-        status: 7,
+        status: 9,
         interViewTime: 1486369082850,
         jobId: jobs[1].jobId,
         managerId: managers[0].userId
@@ -6244,6 +6244,8 @@ user = {
 applicants.forEach(function(applicant) {
   return applicant.applicantData = user.applicantData;
 });
+
+user.applicantData = void 0;
 
 notifications = [
   {
@@ -8468,7 +8470,8 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   addTextField(0, 'ملیت');
   addTextField(0, 'تابعیت');
   addTextField(0, 'دین');
-  fieldCollections[0]['تاریخ تولد'] = f = E(dateInput);
+  addTextField(0, 'مذهب');
+  fieldCollections[1]['تاریخ تولد'] = f = E(dateInput);
   setStyle(f, style.dateInputPlaceholder);
   setStyle(f.input, style.specialInput);
   onEvent(f, ['input', 'pInput'], (function(f) {
@@ -8586,7 +8589,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     fieldArrays.push(fieldArray = []);
     return Object.keys(fieldCollection).forEach(function(labelText, j) {
       var field, group, label;
-      group = E(style.group, label = E(style.label, text(labelText), i === 1 && j === 6 ? E(style.optional, '(اختیاری)') : void 0, text(':')), field = fieldCollection[labelText], E(style.clearfix));
+      group = E(style.group, label = E(style.label, text(labelText), i === 1 && j === 7 ? E(style.optional, '(اختیاری)') : void 0, text(':')), field = fieldCollection[labelText], E(style.clearfix));
       textArray.push(labelText);
       groupArray.push(group);
       labelArray.push(label);
@@ -8632,10 +8635,10 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     labelArray = labelArrays[i];
     return fieldArray.forEach(function(field, j) {
       var error, handleChange, input, label, labelText;
-      if (i === 0 && j === 0) {
+      if (i === 0 && (j === 0 || j === 8)) {
         return;
       }
-      if (i === 1 && (j === 3 || j === 5 || j === 6)) {
+      if (i === 1 && (j === 4 || j === 6 || j === 7)) {
         return;
       }
       if (i === 2) {
@@ -8644,20 +8647,20 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       labelText = textArray[j];
       label = labelArray[j];
       error = registerErrorField(label, field);
-      if (!((i === 1 && (j === 1 || j === 2)) || (i === 3 && (j === 2 || j === 3)))) {
+      if (!((i === 1 && (j === 2 || j === 3)) || (i === 3 && (j === 3 || j === 4)))) {
         setError(error, 'تکمیل این فیلد الزامیست.', true);
       }
       if (i === 1) {
-        if (j === 0) {
+        if (j === 1) {
           errors['وضعیت نظام وظیفه'] = error;
         }
-        if (j === 1) {
+        if (j === 2) {
           errors['نوع معافیت'] = error;
         }
-        if (j === 2) {
+        if (j === 3) {
           errors['دلیل معافیت'] = error;
         }
-        if (j === 4) {
+        if (j === 5) {
           errors['تعداد فرزندان'] = error;
         }
       }
@@ -8721,29 +8724,29 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   });
   fieldCollections[1]['وضعیت تاهل'].onChange(function() {
     if (fieldCollections[1]['وضعیت تاهل'].value() !== 'مجرد') {
-      show(groupArrays[1][4]);
+      show(groupArrays[1][5]);
       setData('تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value());
       if (!fieldCollections[1]['تعداد فرزندان'].value()) {
         return setError(errors['تعداد فرزندان'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
-      hide(groupArrays[1][4]);
+      hide(groupArrays[1][5]);
       setData('تعداد فرزندان', null);
       return setError(errors['تعداد فرزندان'], null);
     }
   });
   fieldCollections[0]['جنسیت'].onChange(function() {
     if (fieldCollections[0]['جنسیت'].value() === 'مرد') {
-      show(groupArrays[1][0]);
+      show(groupArrays[1][1]);
       setData('وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value());
       if (!fieldCollections[1]['وضعیت نظام وظیفه'].value()) {
         setError(errors['وضعیت نظام وظیفه'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageMoaf();
     } else {
-      hide(groupArrays[1][0]);
       hide(groupArrays[1][1]);
       hide(groupArrays[1][2]);
+      hide(groupArrays[1][3]);
       setData('وضعیت نظام وظیفه', null);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
@@ -8754,15 +8757,15 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   });
   (manageMoaf = function() {
     if (fieldCollections[1]['وضعیت نظام وظیفه'].value() === 'معاف') {
-      show(groupArrays[1][1]);
+      show(groupArrays[1][2]);
       setData('نوع معافیت', fieldCollections[1]['نوع معافیت'].value());
       if (!fieldCollections[1]['نوع معافیت'].value()) {
         setError(errors['نوع معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageDalil();
     } else {
-      hide(groupArrays[1][1]);
       hide(groupArrays[1][2]);
+      hide(groupArrays[1][3]);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
       setError(errors['نوع معافیت'], null);
@@ -8771,13 +8774,13 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   })();
   manageDalil = function() {
     if (fieldCollections[1]['نوع معافیت'].value() === 'معافیت پزشکی') {
-      show(groupArrays[1][2]);
+      show(groupArrays[1][3]);
       setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
       if (!fieldCollections[1]['دلیل معافیت'].value()) {
         return setError(errors['دلیل معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
-      hide(groupArrays[1][2]);
+      hide(groupArrays[1][3]);
       setData('دلیل معافیت', null);
       return setError(errors['دلیل معافیت'], null);
     }
@@ -9175,7 +9178,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
       englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
     }, style.jobRow)), E(style.jobRow, E(style.jobColumn, E(style.jobColumnHeader, 'آخرین خالص دریافتی'), E({
       englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-    })), E(style.jobColumn, E(style.jobColumnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix))));
+    })), E(style.jobColumn, E(style.jobColumnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'مدیر مستقیم'), E(null, job['نام مدیر مستقیم'])), E(style.clearfix))));
     onEvent(removeJob, 'click', function() {
       destroy(jobItem);
       return remove(jobs, job);
@@ -10663,7 +10666,7 @@ module.exports = component('views', function(arg, userId) {
     birthdayString[1] = monthToString(birthdayString[1]);
     birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');
     append(view, [
-      E('h1', null, '1. مشخصات فردی'), E(style.boxContainer, E(style.box3, "نام و نام خانوادگی: " + applicant.firstName + " " + applicant.lastName), E(style.box3, "جنسیت: " + applicantData['مشخصات فردی']['جنسیت']), E(style.box3, "نام پدر: " + applicantData['مشخصات فردی']['نام پدر']), E(style.box3, "تاریخ تولد: " + birthdayString), E(style.box3, "شماره شناسنامه: " + applicantData['مشخصات فردی']['شماره شناسنامه']), E(style.box3, "کد ملی: " + applicant.identificationCode), E(style.box3, text("محل تولد: " + applicantData['مشخصات فردی']['محل تولد']), E(style.boxMarginRight, "محل صدور: " + applicantData['مشخصات فردی']['محل صدور'])), E(style.box3, text("دین: " + applicantData['مشخصات فردی']['دین'])), E(style.box3, text("ملیت: " + applicantData['مشخصات فردی']['ملیت']), E(style.boxMarginRight, "تابعیت: " + applicantData['مشخصات فردی']['تابعیت'])), E(style.box2, "تلفن همراه: " + applicant.phoneNumber + ((applicantData['مشخصات فردی']['تلفن همراه'] || []).map(function(x) {
+      E('h1', null, '1. مشخصات فردی'), E(style.boxContainer, E(style.box3, "نام و نام خانوادگی: " + applicant.firstName + " " + applicant.lastName), E(style.box3, "جنسیت: " + applicantData['مشخصات فردی']['جنسیت']), E(style.box3, "نام پدر: " + applicantData['مشخصات فردی']['نام پدر']), E(style.box3, "تاریخ تولد: " + birthdayString), E(style.box3, "شماره شناسنامه: " + applicantData['مشخصات فردی']['شماره شناسنامه']), E(style.box3, "کد ملی: " + applicant.identificationCode), E(style.box3, text("محل تولد: " + applicantData['مشخصات فردی']['محل تولد']), E(style.boxMarginRight, "محل صدور: " + applicantData['مشخصات فردی']['محل صدور'])), E(style.box3, text("دین: " + applicantData['مشخصات فردی']['دین']), E(style.boxMarginRight, "مذهب: " + (applicantData['مشخصات فردی']['مذهب'] || ''))), E(style.box3, text("ملیت: " + applicantData['مشخصات فردی']['ملیت']), E(style.boxMarginRight, "تابعیت: " + applicantData['مشخصات فردی']['تابعیت'])), E(style.box2, "تلفن همراه: " + applicant.phoneNumber + ((applicantData['مشخصات فردی']['تلفن همراه'] || []).map(function(x) {
         return ' - ' + x;
       }))), E(style.box2, text("پست الکترونیک: " + applicant.email + ((applicantData['مشخصات فردی']['ایمیل'] || []).map(function(x) {
         return ' - ' + x;
@@ -10682,7 +10685,7 @@ module.exports = component('views', function(arg, userId) {
           marginRight: -1,
           width: 601
         }))
-      ] : void 0, E(style.box3, "وضعیت تاهل: " + applicantData['مشخصات فردی']['وضعیت تاهل']), E(style.box3, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? "تعداد فرزندان: " + applicantData['مشخصات فردی']['تعداد فرزندان'] : 'تعداد فرزندان: 0'), E(style.box3, "تعداد افراد تحت تکفل: " + applicantData['مشخصات فردی']['تعداد افراد تحت تکفل']), E(style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): " + (applicantData['مشخصات فردی']['نام معرف'] || ''))), E('h1', null, '2. سوابق تحصیلی'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'))), E('tbody', null, (applicantData['سوابق تحصیلی']['سوابق تحصیلی'] || []).map(function(x) {
+      ] : void 0, E(style.box3, "وضعیت تاهل: " + applicantData['مشخصات فردی']['وضعیت تاهل']), E(style.box3, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? "تعداد فرزندان: " + applicantData['مشخصات فردی']['تعداد فرزندان'] : 'تعداد فرزندان: 0'), E(style.box3, "تعداد افراد تحت تکفل: " + (applicantData['مشخصات فردی']['تعداد افراد تحت تکفل'] || '')), E(style.box, "نام معرف (درصورتیکه کسی از دوستان و آشنایان شما را به شرکت معرفی کرده است): " + (applicantData['مشخصات فردی']['نام معرف'] || ''))), E('h1', null, '2. سوابق تحصیلی'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مقطع'), E('th', style.th, 'رشته تحصیلی'), E('th', style.th, 'نام دانشگاه و شهر محل تحصیل'), E('th', style.th, 'سال ورود'), E('th', style.th, 'سال اخذ مدرک'), E('th', style.th, 'معدل'), E('th', style.th, 'عنوان پایان‌نامه'))), E('tbody', null, (applicantData['سوابق تحصیلی']['سوابق تحصیلی'] || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['مقطع']), E('td', style.td, x['رشته تحصیلی']), E('td', style.td, x['نام دانشگاه و شهر محل تحصیل']), E('td', style.td, x['سال ورود']), E('td', style.td, x['سال اخذ مدرک']), E('td', style.td, x['معدل']), E('td', style.td, x['عنوان پایان‌نامه']));
       }))), E(style.tableFooter, E(null, 'آیا مایل به ادامه تحصیل در سال‌های آینده هستید؟ ' + (applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? 'بلی' : 'خیر')), applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید'] ? E(null, "مقطع و رشته‌ای را که ادامه می‌دهید، ذکر کنید: " + applicantData['سوابق تحصیلی']['مقطع و رشته‌ای که ادامه می‌دهید']) : void 0), E('h1', null, '3. توانمندیها، مهارت‌ها، دانش و شایستگی‌ها'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'شایستگی / مهارت'), E('th', style.th, 'علاقه به کار در این حوزه'), E('th', style.th, 'دانش و مهارت در این حوزه'))), E('tbody', null, (((ref5 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref5['مهارت‌ها'] : void 0) || []).map(function(x) {
         return E('tr', null, E('td', style.td, x['شایستگی / مهارت']), E('td', style.td, x['علاقه به کار در این حوزه']), E('td', style.td, x['دانش و مهارت در این حوزه']));
@@ -11019,13 +11022,13 @@ module.exports = component('tableView', function(arg) {
 
 
 },{"../../components/actionButton":2,"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"./profile":96,"./search":114,"./sidebar":116,"./style":118,"./table":120}],94:[function(require,module,exports){
-var alert, component, dateInput, dropdown, logic, ref, remove, style, toDate, toTimestamp;
+var component, dateInput, dropdown, logic, newAlert, ref, remove, style, toDate, toTimestamp;
 
 style = require('./style');
 
 component = require('../../../../utils/component');
 
-alert = require('../../../../components/alert');
+newAlert = require('../../../../components/alert');
 
 dropdown = require('../../../../components/dropdown');
 
@@ -11037,12 +11040,12 @@ ref = require('../../../../utils'), toTimestamp = ref.toTimestamp, toDate = ref.
 
 module.exports = function(loadbarInstance, applicant, status) {
   return component('changeStatus', function(arg) {
-    var E, _interviewId, alertInstance, append, dom, enabled, events, headerInput, hide, loading, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, removeButton, service, setStyle, show, state, submit, update;
+    var E, _interviewId, append, dom, enabled, events, headerInput, hide, loading, newAlertInstance, onEvent, p1, p1Input0, p1Input1, p1Input2, p2, p2Input, removeButton, service, setStyle, show, state, submit, update;
     dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
     E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
     onEvent = events.onEvent;
     p1Input0 = p1Input1 = p1Input2 = void 0;
-    alertInstance = alert('تغییر وضعیت به ...', E(style.alert, headerInput = (function() {
+    newAlertInstance = newAlert('تغییر وضعیت به ...', E(style.alert, headerInput = (function() {
       var f, items;
       if (status || applicant.applicantsHRStatus.length) {
         items = ['مصاحبه فنی', 'مصاحبه عمومی'];
@@ -11235,39 +11238,56 @@ module.exports = function(loadbarInstance, applicant, status) {
       }
       loadbarInstance.set();
       service.deleteHRStatus(status.statusHRId, _interviewId).then(loadbarInstance.reset);
-      return alertInstance.close();
+      return newAlertInstance.close();
     });
     onEvent(submit, 'click', function() {
-      var fn, se;
+      var checkInterviewTime, fn, se;
       if (!enabled) {
         return;
       }
       fn = status ? service.editHRStatus.bind(null, status.statusHRId, _interviewId) : service.changeHRStatus.bind(null, applicant.userId);
+      checkInterviewTime = function(value) {
+        var date, today;
+        date = new Date(toTimestamp(value));
+        today = new Date();
+        today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        return date >= today;
+      };
       loadbarInstance.set();
-      se = (function() {
-        switch (headerInput.value()) {
-          case 'مصاحبه تلفنی انجام شد':
-            return fn({
-              status: logic.statuses.indexOf('مصاحبه تلفنی انجام شد')
-            });
-          case 'مصاحبه فنی':
-            return fn({
-              status: logic.statuses.indexOf('در انتظار مصاحبه فنی'),
-              jobId: p1Input0.value().jobId,
-              managerId: p1Input1.value().userId,
-              interViewTime: toTimestamp(p1Input2.value())
-            });
-          case 'مصاحبه عمومی':
-            return fn({
-              status: logic.statuses.indexOf('در انتظار مصاحبه عمومی'),
-              interViewTime: toTimestamp(p2Input.value())
-            });
-        }
-      })();
+      switch (headerInput.value()) {
+        case 'مصاحبه تلفنی انجام شد':
+          se = fn({
+            status: logic.statuses.indexOf('مصاحبه تلفنی انجام شد')
+          });
+          break;
+        case 'مصاحبه فنی':
+          if (!checkInterviewTime(p1Input2.value())) {
+            alert('زمان مصاحبه نباید نباید قبل از روز جاری باشد.');
+            loadbarInstance.reset();
+            return;
+          }
+          se = fn({
+            status: logic.statuses.indexOf('در انتظار مصاحبه فنی'),
+            jobId: p1Input0.value().jobId,
+            managerId: p1Input1.value().userId,
+            interViewTime: toTimestamp(p1Input2.value())
+          });
+          break;
+        case 'مصاحبه عمومی':
+          if (!checkInterviewTime(p2Input.value())) {
+            alert('زمان مصاحبه نباید نباید قبل از روز جاری باشد.');
+            loadbarInstance.reset();
+            return;
+          }
+          se = fn({
+            status: logic.statuses.indexOf('در انتظار مصاحبه عمومی'),
+            interViewTime: toTimestamp(p2Input.value())
+          });
+      }
       se.then(loadbarInstance.reset);
-      return alertInstance.close();
+      return newAlertInstance.close();
     });
-    return alertInstance;
+    return newAlertInstance;
   })();
 };
 
@@ -11443,14 +11463,14 @@ tabNames = ['اطلاعات اولیه', 'اطلاعات تکمیلی', 'آزم�
 tabContents = [tab0, tab1, tab2, tab3, tab4, tab5];
 
 module.exports = component('profile', function(arg, arg1) {
-  var E, actionButtonInstance, actionButtonItemTexts, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, hide, indexLink, loadbarInstance, onEvent, service, setStyle, state, statusPlaceholder, tabs, text, view;
+  var E, actionButtonInstance, actionButtonItemTexts, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, hide, indexLink, loadbarInstance, onEvent, printButton, service, setStyle, state, statusPlaceholder, tabs, text, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   applicant = arg1.applicant, gotoIndex = arg1.gotoIndex;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
   content = void 0;
   currentTabIndex = 0;
-  view = E('span', null, loadbarInstance = E(loadbar, style.loadbar), indexLink = E('a', style.indexLink, 'رزومه‌ها'), E('span', style.profileBreadCrumb, ' › پروفایل'), actionButtonPlaceholder = E(style.action, actionLegendButton = E(style.actionLegendButton), actionLegend = E(style.actionLegend, E(style.actionLegendArrow), E(style.actionLegendRow, E(extend({
+  view = E('span', null, loadbarInstance = E(loadbar, style.loadbar), indexLink = E('a', style.indexLink, 'رزومه‌ها'), E('span', style.profileBreadCrumb, ' › پروفایل'), printButton = E(style.printButton, 'چاپ'), actionButtonPlaceholder = E(style.action, actionLegendButton = E(style.actionLegendButton), actionLegend = E(style.actionLegend, E(style.actionLegendArrow), E(style.actionLegendRow, E(extend({
     backgroundColor: 'green'
   }, style.actionLegendCircle)), text('ثبت شده')), E(style.actionLegendRow, E(extend({
     backgroundColor: '#c5c5c5'
@@ -11490,9 +11510,20 @@ module.exports = component('profile', function(arg, arg1) {
   state.user.on({
     once: true
   }, function(user) {
-    if (user.userType !== 1) {
+    if (user.userType === 1) {
+      return hide(printButton);
+    } else {
       return hide(actionButtonPlaceholder);
     }
+  });
+  onEvent(printButton, 'mouseover', function() {
+    return setStyle(printButton, style.printButtonHover);
+  });
+  onEvent(printButton, 'mouseout', function() {
+    return setStyle(printButton, style.printButton);
+  });
+  onEvent(printButton, 'click', function() {
+    return window.open('#print_' + applicant.userId, '_blank');
   });
   state.all(['applicants', 'user'], function(arg2) {
     var applicants, applicantsHRStatus, editStatusButton, ts, user;
@@ -11651,7 +11682,7 @@ module.exports = component('profile', function(arg, arg1) {
       })) {
         return;
       }
-      if (!confirm('بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از درخواست مصاحبه تلفنی اطمینان دارید؟')) {
+      if (!confirm("بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از " + value + " اطمینان دارید؟")) {
         return;
       }
       loadbarInstance.set();
@@ -11876,6 +11907,27 @@ exports.contents = {
   marginTop: 30
 };
 
+exports.printButton = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: 180,
+  height: 30,
+  lineHeight: 30,
+  fontSize: 14,
+  padding: '0 5px',
+  border: '1px solid #ddd',
+  cursor: 'pointer',
+  borderRadius: 3,
+  color: '#777',
+  transition: '0.2s',
+  backgroundColor: '#f5f5f5'
+};
+
+exports.printButtonHover = {
+  backgroundColor: '#e5e5e5'
+};
+
 
 },{"../../../utils":38}],98:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
@@ -12000,7 +12052,7 @@ module.exports = component('tab1', function(arg, arg1) {
   birthdayString = applicant.birthday.split('/');
   birthdayString[1] = monthToString(birthdayString[1]);
   birthdayString = [birthdayString[2], birthdayString[1], birthdayString[0]].join(' ');
-  return E(style.form, E(style.header, 'مشخصات فردی'), E(null, E(style.inlineSection, E(style.bold, 'جنسیت'), E(null, applicantData['مشخصات فردی']['جنسیت'])), E(style.inlineSection, E(style.bold, 'نام پدر'), E(null, applicantData['مشخصات فردی']['نام پدر'])), E(style.inlineSection, E(style.bold, 'کد ملی'), E(null, applicant.identificationCode)), E(style.inlineSection, E(style.bold, 'شماره شناسنامه'), E(null, applicantData['مشخصات فردی']['شماره شناسنامه'])), E(style.inlineSection, E(style.bold, 'محل صدور'), E(null, applicantData['مشخصات فردی']['محل صدور'])), E(style.inlineSection, E(style.bold, 'محل تولد'), E(null, applicantData['مشخصات فردی']['محل تولد'])), E(style.inlineSection, E(style.bold, 'ملیت'), E(null, applicantData['مشخصات فردی']['ملیت'])), E(style.inlineSection, E(style.bold, 'تابعیت'), E(null, applicantData['مشخصات فردی']['تابعیت'])), E(style.inlineSection, E(style.bold, 'دین'), E(null, applicantData['مشخصات فردی']['دین'])), E(style.inlineSection, E(style.bold, 'تاریخ تولد'), E(null, applicantData['مشخصات فردی']['تاریخ تولد']))), E(null, E(style.inlineSection, E(style.bold, 'وضعیت تاهل'), E(null, applicantData['مشخصات فردی']['وضعیت تاهل'])), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [E(style.inlineSection, E(style.bold, 'وضعیت نظام وظیفه'), E(null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه'])), ((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E(style.inlineSection, E(style.bold, 'نوع معافیت'), E(null, applicantData['مشخصات فردی']['نوع معافیت'])), ((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E(style.inlineSection, E(style.bold, 'دلیل معافیت'), E(null, applicantData['مشخصات فردی']['دلیل معافیت'])) : void 0] : void 0] : void 0, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? E(style.inlineSection, E(style.bold, 'تعداد فرزندان'), E(null, applicantData['مشخصات فردی']['تعداد فرزندان'])) : void 0, E(style.inlineSection, E(style.bold, 'تعداد افراد تحت تکفل'), E(null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل'])), E(style.inlineSection, E(style.bold, 'نام معرف'), E(null, applicantData['مشخصات فردی']['نام معرف']))), E(style.bold, 'ایمیل'), E(style.indent, E(style.inline, E({
+  return E(style.form, E(style.header, 'مشخصات فردی'), E(null, E(style.inlineSection, E(style.bold, 'جنسیت'), E(null, applicantData['مشخصات فردی']['جنسیت'])), E(style.inlineSection, E(style.bold, 'نام پدر'), E(null, applicantData['مشخصات فردی']['نام پدر'])), E(style.inlineSection, E(style.bold, 'کد ملی'), E(null, applicant.identificationCode)), E(style.inlineSection, E(style.bold, 'شماره شناسنامه'), E(null, applicantData['مشخصات فردی']['شماره شناسنامه'])), E(style.inlineSection, E(style.bold, 'محل صدور'), E(null, applicantData['مشخصات فردی']['محل صدور'])), E(style.inlineSection, E(style.bold, 'محل تولد'), E(null, applicantData['مشخصات فردی']['محل تولد'])), E(style.inlineSection, E(style.bold, 'ملیت'), E(null, applicantData['مشخصات فردی']['ملیت'])), E(style.inlineSection, E(style.bold, 'تابعیت'), E(null, applicantData['مشخصات فردی']['تابعیت'])), E(style.inlineSection, E(style.bold, 'دین'), E(null, applicantData['مشخصات فردی']['دین'])), E(style.inlineSection, E(style.bold, 'مذهب'), E(null, applicantData['مشخصات فردی']['مذهب'])), E(style.inlineSection, E(style.bold, 'تاریخ تولد'), E(null, applicantData['مشخصات فردی']['تاریخ تولد']))), E(null, E(style.inlineSection, E(style.bold, 'وضعیت تاهل'), E(null, applicantData['مشخصات فردی']['وضعیت تاهل'])), ((ref1 = applicantData['مشخصات فردی']) != null ? ref1['جنسیت'] : void 0) === 'مرد' ? [E(style.inlineSection, E(style.bold, 'وضعیت نظام وظیفه'), E(null, applicantData['مشخصات فردی']['وضعیت نظام وظیفه'])), ((ref2 = applicantData['مشخصات فردی']) != null ? ref2['وضعیت نظام وظیفه'] : void 0) === 'معاف' ? [E(style.inlineSection, E(style.bold, 'نوع معافیت'), E(null, applicantData['مشخصات فردی']['نوع معافیت'])), ((ref3 = applicantData['مشخصات فردی']) != null ? ref3['نوع معافیت'] : void 0) === 'معافیت پزشکی' ? E(style.inlineSection, E(style.bold, 'دلیل معافیت'), E(null, applicantData['مشخصات فردی']['دلیل معافیت'])) : void 0] : void 0] : void 0, ((ref4 = applicantData['مشخصات فردی']) != null ? ref4['وضعیت تاهل'] : void 0) !== 'مجرد' ? E(style.inlineSection, E(style.bold, 'تعداد فرزندان'), E(null, applicantData['مشخصات فردی']['تعداد فرزندان'])) : void 0, E(style.inlineSection, E(style.bold, 'تعداد افراد تحت تکفل'), E(null, applicantData['مشخصات فردی']['تعداد افراد تحت تکفل'])), E(style.inlineSection, E(style.bold, 'نام معرف'), E(null, applicantData['مشخصات فردی']['نام معرف']))), E(style.bold, 'ایمیل'), E(style.indent, E(style.inline, E({
     "class": 'fa fa-envelope'
   }), E(style.afterIcon, applicant.email)), (applicantData['مشخصات فردی']['ایمیل'] || []).map(function(x) {
     return E(style.inline, E({
@@ -12038,7 +12090,7 @@ module.exports = component('tab1', function(arg, arg1) {
       englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
     }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
       englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-    })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.clearfix)));
+    })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.job.column, E(style.job.columnHeader, 'مدیر مستقیم'), E(null, job['نام مدیر مستقیم'])), E(style.clearfix)));
   }) : void 0, E(style.header, 'سایر اطلاعات'), E(style.column3, E(style.bold, 'متقاضی چه نوع همکاری هستید؟'), E(null, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.column3, E(style.bold, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), E(null, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'])), ((ref11 = applicantData['سایر اطلاعات']) != null ? ref11['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] : void 0) ? [E(style.column3, E(style.bold, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), E(null, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']))] : void 0, ((ref12 = applicantData['سایر اطلاعات']) != null ? ref12['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] : void 0) ? [E(style.column3, E(style.bold, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(null, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']))] : void 0, E(style.column3, E(style.bold, 'مدت زمانی که بیمه بوده‌اید'), E(null, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'])), E(style.column3, E(style.bold, 'میزان دستمزد خالص درخواستی شما چقدر است؟'), E(null, (((ref13 = applicantData['سایر اطلاعات']) != null ? ref13['مقدار دستمزد'] : void 0) ? ((ref14 = applicantData['سایر اطلاعات']) != null ? ref14['مقدار دستمزد'] : void 0) + 'تومان - ' : '') + applicantData['سایر اطلاعات']['میزان دستمزد'])), E(style.seperator), E(style.boldSection, 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:'), E('table', null, E('tbody', null, E('tr', null, E('td', null, 'در ساعات اضافه کاری حضور داشته و کار کنید'), E('td', {
     paddingRight: 50
   }, applicantData['سایر اطلاعات']['در ساعات اضافه کاری حضور داشته و کار کنید'])), E('tr', null, E('td', null, 'در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید'), E('td', {
@@ -12473,7 +12525,7 @@ exports.submit = {
 
 
 },{}],112:[function(require,module,exports){
-var component, dateInput, dropdown, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
+var component, dateInput, dropdown, logic, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
 
@@ -12482,6 +12534,8 @@ style = require('./style');
 dropdown = require('../../../../components/dropdown');
 
 dateInput = require('../../../../components/dateInput');
+
+logic = require('../../../../utils/logic');
 
 ref = require('../../../../utils'), textIsInSearch = ref.textIsInSearch, toEnglish = ref.toEnglish, toTimestamp = ref.toTimestamp, toDate = ref.toDate;
 
@@ -12591,9 +12645,13 @@ module.exports = component('search', function(arg) {
               return typeof changeListener === "function" ? changeListener() : void 0;
             });
             isInSearch = function(arg1) {
-              var selectedJobsString;
-              selectedJobsString = arg1.selectedJobsString;
-              return !jobsInput.value() || textIsInSearch(selectedJobsString.toLowerCase(), jobsInput.value());
+              var selectedJobs;
+              selectedJobs = arg1.selectedJobs;
+              return !jobsInput.value() || selectedJobs.some(function(arg2) {
+                var jobName;
+                jobName = arg2.jobName;
+                return textIsInSearch(jobName.toLowerCase(), jobsInput.value());
+              });
             };
             return jobsInput;
           })();
@@ -12601,15 +12659,17 @@ module.exports = component('search', function(arg) {
           return (function() {
             var stateDropdown;
             stateDropdown = E(dropdown, {
-              items: [0, 1, 2],
+              items: [0, 1, 2, 3],
               getTitle: function(x) {
                 switch (x) {
                   case 0:
                     return 'ثبت شده';
                   case 1:
-                    return 'در انتظار مصاحبه';
+                    return 'مصاحبه تلفنی انجام شد';
                   case 2:
-                    return 'غیره';
+                    return 'در انتظار مصاحبه فنی';
+                  case 3:
+                    return 'در انتظار مصاحبه عمومی';
                 }
               }
             });
@@ -12618,15 +12678,21 @@ module.exports = component('search', function(arg) {
             stateDropdown.onChange(function() {
               return typeof changeListener === "function" ? changeListener() : void 0;
             });
-            isInSearch = function() {
+            isInSearch = function(arg1) {
+              var applicantsHRStatus;
+              applicantsHRStatus = arg1.applicantsHRStatus;
               if (stateDropdown.value() == null) {
                 return true;
               }
               switch (stateDropdown.value()) {
                 case 0:
-                  return true;
-                default:
-                  return false;
+                  return applicantsHRStatus.length === 0;
+                case 1:
+                  return logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status] === 'مصاحبه تلفنی انجام شد';
+                case 2:
+                  return logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status] === 'در انتظار مصاحبه فنی';
+                case 3:
+                  return logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status] === 'در انتظار مصاحبه عمومی';
               }
             };
             return stateDropdown;
@@ -12693,7 +12759,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"./style":113}],113:[function(require,module,exports){
+},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":113}],113:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -12821,7 +12887,7 @@ module.exports = component('search', function(arg) {
   });
   returnObject({
     isInSearch: function(applicant) {
-      var firstName, lastName, selectedJobsString, state, value;
+      var firstName, lastName, selectedJobs, state, value;
       if (isActive) {
         return criteria.every(function(arg1) {
           var isInSearch;
@@ -12829,9 +12895,13 @@ module.exports = component('search', function(arg) {
           return isInSearch(applicant);
         });
       } else {
-        firstName = applicant.firstName, lastName = applicant.lastName, selectedJobsString = applicant.selectedJobsString, state = applicant.state;
+        firstName = applicant.firstName, lastName = applicant.lastName, selectedJobs = applicant.selectedJobs, state = applicant.state;
         value = searchbox.value();
-        return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(selectedJobsString.toLowerCase(), value);
+        return textIsInSearch(firstName + " " + lastName, value) || selectedJobs.some(function(arg1) {
+          var jobName;
+          jobName = arg1.jobName;
+          return textIsInSearch(jobName.toLowerCase(), value);
+        });
       }
     },
     onChange: function(listener) {

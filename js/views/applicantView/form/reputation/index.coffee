@@ -148,6 +148,9 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
         E style.jobColumn,
           E style.jobColumnHeader, 'نوع همکاری'
           E null, job['نوع همکاری']
+        E style.jobColumn,
+          E style.jobColumnHeader, 'مدیر مستقیم'
+          E null, job['نام مدیر مستقیم']
         E style.clearfix
 
     onEvent removeJob, 'click', ->

@@ -157,3 +157,22 @@ exports.tabActive =
 
 exports.contents =
   marginTop: 30
+
+exports.printButton = 
+  position: 'absolute'
+  top: 0
+  left: 0
+  width: 180
+  height: 30
+  lineHeight: 30
+  fontSize: 14
+  padding: '0 5px'
+  border: '1px solid #ddd'
+  cursor: 'pointer'
+  borderRadius: 3
+  color: '#777'
+  transition: '0.2s'
+  backgroundColor: '#f5f5f5'
+
+exports.printButtonHover =
+  backgroundColor: '#e5e5e5'

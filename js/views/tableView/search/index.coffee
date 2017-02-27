@@ -74,9 +74,9 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
       if isActive
         criteria.every ({isInSearch}) -> isInSearch applicant
       else
-        {firstName, lastName, selectedJobsString, state} = applicant
+        {firstName, lastName, selectedJobs, state} = applicant
         value = searchbox.value()
-        textIsInSearch("#{firstName} #{lastName}", value) || textIsInSearch(selectedJobsString.toLowerCase(), value) # || textIsInSearch(stateToPersian(state), value)
+        textIsInSearch("#{firstName} #{lastName}", value) || selectedJobs.some ({jobName}) -> textIsInSearch jobName.toLowerCase(), value
     onChange: (listener) -> onChangeListener = listener
 
   view

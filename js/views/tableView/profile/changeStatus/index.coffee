@@ -1,6 +1,6 @@
 style = require './style'
 component = require '../../../../utils/component'
-alert = require '../../../../components/alert'
+newAlert = require '../../../../components/alert'
 dropdown = require '../../../../components/dropdown'
 dateInput = require '../../../../components/dateInput'
 logic = require '../../../../utils/logic'
@@ -11,7 +11,7 @@ module.exports = (loadbarInstance, applicant, status) ->
     {E, setStyle, show, hide, append} = dom
     {onEvent} = events
     p1Input0 = p1Input1 = p1Input2 = undefined
-    alertInstance = alert 'تغییر وضعیت به ...',
+    newAlertInstance = newAlert 'تغییر وضعیت به ...',
       E style.alert,
         headerInput = do ->
           if status || applicant.applicantsHRStatus.length
@@ -124,30 +124,43 @@ module.exports = (loadbarInstance, applicant, status) ->
       loadbarInstance.set()
       service.deleteHRStatus status.statusHRId, _interviewId
       .then loadbarInstance.reset
-      alertInstance.close()
+      newAlertInstance.close()
     onEvent submit, 'click', ->
       return unless enabled
       fn = if status
         service.editHRStatus.bind null, status.statusHRId, _interviewId
       else
         service.changeHRStatus.bind null, applicant.userId
+      checkInterviewTime = (value) ->
+        date = new Date toTimestamp value
+        today = new Date()
+        today = new Date today.getFullYear(), today.getMonth(), today.getDate()
+        date >= today
       loadbarInstance.set()
-      se = switch headerInput.value()
+      switch headerInput.value()
         when 'مصاحبه تلفنی انجام شد'
-          fn
+          se = fn
             status: logic.statuses.indexOf 'مصاحبه تلفنی انجام شد'
         when 'مصاحبه فنی'
-          fn
+          unless checkInterviewTime(p1Input2.value())
+            alert 'زمان مصاحبه نباید نباید قبل از روز جاری باشد.'
+            loadbarInstance.reset()
+            return
+          se = fn
             status: logic.statuses.indexOf 'در انتظار مصاحبه فنی'
             jobId: p1Input0.value().jobId
             managerId: p1Input1.value().userId
             interViewTime: toTimestamp p1Input2.value()
         when 'مصاحبه عمومی'
-          fn
+          unless checkInterviewTime(p2Input.value())
+            alert 'زمان مصاحبه نباید نباید قبل از روز جاری باشد.'
+            loadbarInstance.reset()
+            return
+          se = fn
             status: logic.statuses.indexOf 'در انتظار مصاحبه عمومی'
             interViewTime: toTimestamp p2Input.value()
       se.then loadbarInstance.reset
-      alertInstance.close()
+      newAlertInstance.close()
 
 
-    alertInstance
+    newAlertInstance

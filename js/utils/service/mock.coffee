@@ -65,7 +65,7 @@ applicants = [{
   notes: ['aaaaaaaaaaaa']
   applicantsHRStatus: [{
     statusHRId: 2
-    status: 7
+    status: 9
     interViewTime: 1486369082850
     jobId: jobs[1].jobId
     managerId: managers[0].userId
@@ -225,7 +225,7 @@ user =
 applicants.forEach (applicant) ->
   applicant.applicantData = user.applicantData
 
-# user.applicantData = undefined
+user.applicantData = undefined
 
 notifications = [{
   userName: 'علی فرخی'

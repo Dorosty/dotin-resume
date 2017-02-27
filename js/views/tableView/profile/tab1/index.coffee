@@ -45,6 +45,9 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
         E style.bold, 'دین'
         E null, applicantData['مشخصات فردی']['دین']
       E style.inlineSection,
+        E style.bold, 'مذهب'
+        E null, applicantData['مشخصات فردی']['مذهب']
+      E style.inlineSection,
         E style.bold, 'تاریخ تولد'
         E null, applicantData['مشخصات فردی']['تاریخ تولد']
     E null,
@@ -219,6 +222,9 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
             E style.job.column,
               E style.job.columnHeader, 'نوع همکاری'
               E null, job['نوع همکاری']
+            E style.job.column,
+              E style.job.columnHeader, 'مدیر مستقیم'
+              E null, job['نام مدیر مستقیم']
             E style.clearfix
     E style.header, 'سایر اطلاعات'
     E style.column3,
