@@ -74,8 +74,9 @@ exports.textarea =
   color: '#5c5555'
   minWidth: '100%'
   maxWidth: '100%'
-  minHeight: 120
-  maxHeight: 120
+  marginTop: 15
+  minHeight: 75
+  maxHeight: 75
 
 exports.add =
   class: 'fa fa-plus-circle'
@@ -147,7 +148,7 @@ exports.phoneIcon =
 
 exports.jobColumn =
   float: 'right'
-  width: '25%'
+  width: '20%'
 
 exports.jobColumnHeader =
   fontSize: 14

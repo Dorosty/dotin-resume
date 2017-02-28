@@ -98,7 +98,7 @@ exports.job.phoneIcon =
 
 exports.job.column =
   float: 'right'
-  width: '25%'
+  width: '20%'
 
 exports.job.columnHeader =
   fontSize: 14

@@ -17,13 +17,13 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
       add = E style.add
       i0 = E 'input', extend {placeholder: 'نام'}, style.input
       i1 = E 'input', extend {placeholder: 'نوع فعالیت'}, style.input
-      i2 = E 'input', extend {placeholder: 'نام مدیر عامل'}, style.input
-      i3 = E 'input', extend {placeholder: 'نام مدیر مستقیم'}, style.input
-      i4 = do ->
+      i2 = E 'input', extend {placeholder: 'سمت'}, style.input
+      i3 = E 'input', extend {placeholder: 'نام مدیر عامل'}, style.input
+      i4 = E 'input', extend {placeholder: 'نام مدیر مستقیم'}, style.input
+      i5 = do ->
         f = E numberInput
-        setStyle f, extend {placeholder: 'تلفن'}, style.input
+        setStyle f, extend {placeholder: 'تلفن'}, style.input, marginLeft: 0
         f
-      i5 = E 'input', extend {placeholder: 'محدوده نشانی'}, style.input, marginLeft: 0
     E style.inputRow,
       E style.inputColumn0,
         E extend(style.inputRow, marginTop: 0),
@@ -63,12 +63,13 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
             setStyle f, extend {}, style.input, marginLeft: 0, width: '70%'
             f
       E style.inputColumn1,
-        i11 = E 'textarea', extend {placeholder: 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'}, style.textarea
+        i11 = E 'input', extend {placeholder: 'محدوده نشانی'}, style.input, width: '100%'
+        i12 = E 'textarea', extend {placeholder: 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'}, style.textarea
       E style.clearfix
 
 
   onAdds = []
-  [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].forEach (field, i) ->
+  [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12].forEach (field, i) ->
     error = registerErrorField field, field, true
     onAdds.push ->
       if !field.value()? || (typeof(field.value()) is 'string' && !field.value().trim())
@@ -82,7 +83,7 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
       setError error, null
 
   onEvent add, 'click', ->
-    canAdd = [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
+    canAdd = [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12].every (i) -> !((!i.value()? || (typeof(i.value()) is 'string' && !i.value().trim())) || (i.valid? && !i.valid()))
     unless canAdd
       onAdds.forEach (x) -> x()
       return
@@ -101,18 +102,19 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
     jobs.push job =
       'نام': i0.value()
       'نوع فعالیت': i1.value()
-      'نام مدیر عامل': i2.value()
-      'نام مدیر مستقیم': i3.value()
-      'تلفن': i4.value()
-      'محدوده نشانی': i5.value()
+      'سمت': i2.value()
+      'نام مدیر عامل': i3.value()
+      'نام مدیر مستقیم': i4.value()
+      'تلفن': i5.value()
       'تاریخ شروع': i6.value()
       'تاریخ پایان': i7.value()
       'نوع همکاری': i8.value()
       'علت خاتمه همکاری': i9.value()
       'آخرین خالص دریافتی': i10.value()
-      'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف': i11.value()
+      'محدوده نشانی': i11.value()
+      'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف': i12.value()
 
-    setStyle [i0, i1, i2, i3, i4, i5, i6.input, i7.input, i9, i10, i11], value: ''
+    setStyle [i0, i1, i2, i3, i4, i5, i6.input, i7.input, i9, i10, i11, i12], value: ''
     i8.clear()
 
     start = toEnglish(job['تاریخ شروع']).split '/'
@@ -140,8 +142,11 @@ module.exports = component 'applicantFormReputation', ({dom, events}, {setData, 
       E extend {englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace /\n/g, '<br />'}, style.jobRow
       E style.jobRow,
         E style.jobColumn,
+          E style.jobColumnHeader, 'سمت'
+          E null, job['سمت']
+        E style.jobColumn,
           E style.jobColumnHeader, 'آخرین خالص دریافتی'
-          E englishText: (job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+          E null, toEnglish(job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
         E style.jobColumn,
           E style.jobColumnHeader, 'علت خاتمه همکاری'
           E null, job['علت خاتمه همکاری']
