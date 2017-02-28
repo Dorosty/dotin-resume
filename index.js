@@ -6096,7 +6096,7 @@ user = {
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 3,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -8406,15 +8406,13 @@ exports.resumeLink = {
 
 
 },{}],71:[function(require,module,exports){
-var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
+var checkbox, component, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
 radioSwitch = require('../../../../components/radioSwitch');
-
-dateInput = require('../../../../components/dateInput');
 
 dropdown = require('../../../../components/dropdown');
 
@@ -8471,14 +8469,6 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   addTextField(0, 'تابعیت');
   addTextField(0, 'دین');
   addTextField(0, 'مذهب');
-  fieldCollections[1]['تاریخ تولد'] = f = E(dateInput);
-  setStyle(f, style.dateInputPlaceholder);
-  setStyle(f.input, style.specialInput);
-  onEvent(f, ['input', 'pInput'], (function(f) {
-    return function() {
-      return setData('تاریخ تولد', f.value());
-    };
-  })(f));
   fieldCollections[1]['وضعیت نظام وظیفه'] = f = E(dropdown, {
     items: ['انجام شده', 'در حال انجام', 'معاف']
   });
@@ -8589,7 +8579,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     fieldArrays.push(fieldArray = []);
     return Object.keys(fieldCollection).forEach(function(labelText, j) {
       var field, group, label;
-      group = E(style.group, label = E(style.label, text(labelText), i === 1 && j === 7 ? E(style.optional, '(اختیاری)') : void 0, text(':')), field = fieldCollection[labelText], E(style.clearfix));
+      group = E(style.group, label = E(style.label, text(labelText), i === 1 && j === 6 ? E(style.optional, '(اختیاری)') : void 0, text(':')), field = fieldCollection[labelText], E(style.clearfix));
       textArray.push(labelText);
       groupArray.push(group);
       labelArray.push(label);
@@ -8638,7 +8628,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       if (i === 0 && (j === 0 || j === 8)) {
         return;
       }
-      if (i === 1 && (j === 4 || j === 6 || j === 7)) {
+      if (i === 1 && (j === 3 || j === 5 || j === 6)) {
         return;
       }
       if (i === 2) {
@@ -8647,20 +8637,20 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       labelText = textArray[j];
       label = labelArray[j];
       error = registerErrorField(label, field);
-      if (!((i === 1 && (j === 2 || j === 3)) || (i === 3 && (j === 3 || j === 4)))) {
+      if (!((i === 1 && (j === 1 || j === 2)) || (i === 3 && (j === 2 || j === 3)))) {
         setError(error, 'تکمیل این فیلد الزامیست.', true);
       }
       if (i === 1) {
-        if (j === 1) {
+        if (j === 0) {
           errors['وضعیت نظام وظیفه'] = error;
         }
-        if (j === 2) {
+        if (j === 1) {
           errors['نوع معافیت'] = error;
         }
-        if (j === 3) {
+        if (j === 2) {
           errors['دلیل معافیت'] = error;
         }
-        if (j === 5) {
+        if (j === 4) {
           errors['تعداد فرزندان'] = error;
         }
       }
@@ -8724,29 +8714,29 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   });
   fieldCollections[1]['وضعیت تاهل'].onChange(function() {
     if (fieldCollections[1]['وضعیت تاهل'].value() !== 'مجرد') {
-      show(groupArrays[1][5]);
+      show(groupArrays[1][4]);
       setData('تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value());
       if (!fieldCollections[1]['تعداد فرزندان'].value()) {
         return setError(errors['تعداد فرزندان'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
-      hide(groupArrays[1][5]);
+      hide(groupArrays[1][4]);
       setData('تعداد فرزندان', null);
       return setError(errors['تعداد فرزندان'], null);
     }
   });
   fieldCollections[0]['جنسیت'].onChange(function() {
     if (fieldCollections[0]['جنسیت'].value() === 'مرد') {
-      show(groupArrays[1][1]);
+      show(groupArrays[1][0]);
       setData('وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value());
       if (!fieldCollections[1]['وضعیت نظام وظیفه'].value()) {
         setError(errors['وضعیت نظام وظیفه'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageMoaf();
     } else {
+      hide(groupArrays[1][0]);
       hide(groupArrays[1][1]);
       hide(groupArrays[1][2]);
-      hide(groupArrays[1][3]);
       setData('وضعیت نظام وظیفه', null);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
@@ -8757,15 +8747,15 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   });
   (manageMoaf = function() {
     if (fieldCollections[1]['وضعیت نظام وظیفه'].value() === 'معاف') {
-      show(groupArrays[1][2]);
+      show(groupArrays[1][1]);
       setData('نوع معافیت', fieldCollections[1]['نوع معافیت'].value());
       if (!fieldCollections[1]['نوع معافیت'].value()) {
         setError(errors['نوع معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageDalil();
     } else {
+      hide(groupArrays[1][1]);
       hide(groupArrays[1][2]);
-      hide(groupArrays[1][3]);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
       setError(errors['نوع معافیت'], null);
@@ -8774,13 +8764,13 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   })();
   manageDalil = function() {
     if (fieldCollections[1]['نوع معافیت'].value() === 'معافیت پزشکی') {
-      show(groupArrays[1][3]);
+      show(groupArrays[1][2]);
       setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
       if (!fieldCollections[1]['دلیل معافیت'].value()) {
         return setError(errors['دلیل معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
-      hide(groupArrays[1][3]);
+      hide(groupArrays[1][2]);
       setData('دلیل معافیت', null);
       return setError(errors['دلیل معافیت'], null);
     }
@@ -8794,7 +8784,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":8,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../components/radioSwitch":19,"../../../../components/restrictedInput/email":21,"../../../../components/restrictedInput/number":24,"../../../../components/restrictedInput/phoneNumber":25,"../../../../utils":38,"../../../../utils/component":34,"./multivalue":72,"./style":74}],72:[function(require,module,exports){
+},{"../../../../components/checkbox":8,"../../../../components/dropdown":14,"../../../../components/radioSwitch":19,"../../../../components/restrictedInput/email":21,"../../../../components/restrictedInput/number":24,"../../../../components/restrictedInput/phoneNumber":25,"../../../../utils":38,"../../../../utils/component":34,"./multivalue":72,"./style":74}],72:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');

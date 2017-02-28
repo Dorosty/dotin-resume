@@ -1,7 +1,6 @@
 component = require '../../../../utils/component'
 style = require './style'
 radioSwitch = require '../../../../components/radioSwitch'
-dateInput = require '../../../../components/dateInput'
 dropdown = require '../../../../components/dropdown'
 numberInput = require '../../../../components/restrictedInput/number'
 emailInput = require '../../../../components/restrictedInput/email'
@@ -39,12 +38,6 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
   addTextField 0, 'تابعیت'
   addTextField 0, 'دین'
   addTextField 0, 'مذهب'
-
-  fieldCollections[1]['تاریخ تولد'] = f = E dateInput
-  setStyle f, style.dateInputPlaceholder
-  setStyle f.input, style.specialInput
-  onEvent f, ['input', 'pInput'], do (f) -> ->
-    setData 'تاریخ تولد', f.value()
 
   fieldCollections[1]['وضعیت نظام وظیفه'] = f = E dropdown, items: ['انجام شده', 'در حال انجام', 'معاف']
   setStyle f, style.dropdownPlaceholder
@@ -119,7 +112,7 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
       group = E style.group,
         label = E style.label,
           text labelText
-          if i is 1 && j is 7
+          if i is 1 && j is 6
             E style.optional, '(اختیاری)'
           text ':'
         field = fieldCollection[labelText]
@@ -163,23 +156,23 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
     fieldArray.forEach (field, j) ->
       if i is 0 && j in [0, 8]
         return
-      if i is 1 && j in [4, 6, 7]
+      if i is 1 && j in [3, 5, 6]
         return
       if i is 2
         return
       labelText = textArray[j]
       label = labelArray[j]
       error = registerErrorField label, field
-      unless (i is 1 && j in [2, 3]) || (i is 3 && j in [3, 4])
+      unless (i is 1 && j in [1, 2]) || (i is 3 && j in [2, 3])
         setError error, 'تکمیل این فیلد الزامیست.', true
       if i is 1
-        if j is 1
+        if j is 0
           errors['وضعیت نظام وظیفه'] = error
-        if j is 2
+        if j is 1
           errors['نوع معافیت'] = error
-        if j is 3
+        if j is 2
           errors['دلیل معافیت'] = error
-        if j is 5
+        if j is 4
           errors['تعداد فرزندان'] = error
       if i is 3
         if j is 2
@@ -225,26 +218,26 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
 
   fieldCollections[1]['وضعیت تاهل'].onChange ->
     if fieldCollections[1]['وضعیت تاهل'].value() isnt 'مجرد'
-      show groupArrays[1][5]
+      show groupArrays[1][4]
       setData 'تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value()
       unless fieldCollections[1]['تعداد فرزندان'].value()
         setError errors['تعداد فرزندان'], 'تکمیل این فیلد الزامیست.', true
     else
-      hide groupArrays[1][5]
+      hide groupArrays[1][4]
       setData 'تعداد فرزندان', null
       setError errors['تعداد فرزندان'], null
 
   fieldCollections[0]['جنسیت'].onChange ->
     if fieldCollections[0]['جنسیت'].value() is 'مرد'
-      show groupArrays[1][1]
+      show groupArrays[1][0]
       setData 'وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value()
       unless fieldCollections[1]['وضعیت نظام وظیفه'].value()
         setError errors['وضعیت نظام وظیفه'], 'تکمیل این فیلد الزامیست.', true
       manageMoaf()
     else
+      hide groupArrays[1][0]
       hide groupArrays[1][1]
       hide groupArrays[1][2]
-      hide groupArrays[1][3]
       setData 'وضعیت نظام وظیفه', null
       setData 'نوع معافیت', null
       setData 'دلیل معافیت', null
@@ -254,14 +247,14 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
 
   do manageMoaf = ->
     if fieldCollections[1]['وضعیت نظام وظیفه'].value() is 'معاف'
-      show groupArrays[1][2]
+      show groupArrays[1][1]
       setData 'نوع معافیت', fieldCollections[1]['نوع معافیت'].value()
       unless fieldCollections[1]['نوع معافیت'].value()
         setError errors['نوع معافیت'], 'تکمیل این فیلد الزامیست.', true
       manageDalil()
     else
+      hide groupArrays[1][1]
       hide groupArrays[1][2]
-      hide groupArrays[1][3]
       setData 'نوع معافیت', null
       setData 'دلیل معافیت', null
       setError errors['نوع معافیت'], null
@@ -269,12 +262,12 @@ module.exports = component 'applicantFormPersonalInfo', ({dom, events, state}, {
 
   manageDalil = ->
     if fieldCollections[1]['نوع معافیت'].value() is 'معافیت پزشکی'
-      show groupArrays[1][3]
+      show groupArrays[1][2]
       setData 'دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value()
       unless fieldCollections[1]['دلیل معافیت'].value()
         setError errors['دلیل معافیت'], 'تکمیل این فیلد الزامیست.', true
     else
-      hide groupArrays[1][3]
+      hide groupArrays[1][2]
       setData 'دلیل معافیت', null
       setError errors['دلیل معافیت'], null
 
