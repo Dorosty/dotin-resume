@@ -6266,6 +6266,7 @@ user = {
         {
           "نام": "1",
           "نوع فعالیت": "1",
+          "سمت": "1",
           "نام مدیر عامل": "1",
           "نام مدیر مستقیم": "1",
           "تلفن": "۱",
@@ -6274,7 +6275,7 @@ user = {
           "تاریخ پایان": "۱۳۱۱/۱/۱",
           "نوع همکاری": "تمام وقت",
           "علت خاتمه همکاری": "1",
-          "آخرین خالص دریافتی": "۱",
+          "آخرین خالص دریافتی": "۱۰۰۰۰۰۰",
           "شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف": "1"
         }
       ]
@@ -8433,15 +8434,13 @@ exports.resumeLink = {
 
 
 },{}],71:[function(require,module,exports){
-var checkbox, component, dateInput, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
+var checkbox, component, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
 radioSwitch = require('../../../../components/radioSwitch');
-
-dateInput = require('../../../../components/dateInput');
 
 dropdown = require('../../../../components/dropdown');
 
@@ -8498,14 +8497,6 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   addTextField(0, 'تابعیت');
   addTextField(0, 'دین');
   addTextField(0, 'مذهب');
-  fieldCollections[1]['تاریخ تولد'] = f = E(dateInput);
-  setStyle(f, style.dateInputPlaceholder);
-  setStyle(f.input, style.specialInput);
-  onEvent(f, ['input', 'pInput'], (function(f) {
-    return function() {
-      return setData('تاریخ تولد', f.value());
-    };
-  })(f));
   fieldCollections[1]['وضعیت نظام وظیفه'] = f = E(dropdown, {
     items: ['انجام شده', 'در حال انجام', 'معاف']
   });
@@ -8616,7 +8607,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
     fieldArrays.push(fieldArray = []);
     return Object.keys(fieldCollection).forEach(function(labelText, j) {
       var field, group, label;
-      group = E(style.group, label = E(style.label, text(labelText), i === 1 && j === 7 ? E(style.optional, '(اختیاری)') : void 0, text(':')), field = fieldCollection[labelText], E(style.clearfix));
+      group = E(style.group, label = E(style.label, text(labelText), i === 1 && j === 6 ? E(style.optional, '(اختیاری)') : void 0, text(':')), field = fieldCollection[labelText], E(style.clearfix));
       textArray.push(labelText);
       groupArray.push(group);
       labelArray.push(label);
@@ -8665,7 +8656,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       if (i === 0 && (j === 0 || j === 8)) {
         return;
       }
-      if (i === 1 && (j === 4 || j === 6 || j === 7)) {
+      if (i === 1 && (j === 3 || j === 5 || j === 6)) {
         return;
       }
       if (i === 2) {
@@ -8674,20 +8665,20 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
       labelText = textArray[j];
       label = labelArray[j];
       error = registerErrorField(label, field);
-      if (!((i === 1 && (j === 2 || j === 3)) || (i === 3 && (j === 3 || j === 4)))) {
+      if (!((i === 1 && (j === 1 || j === 2)) || (i === 3 && (j === 2 || j === 3)))) {
         setError(error, 'تکمیل این فیلد الزامیست.', true);
       }
       if (i === 1) {
-        if (j === 1) {
+        if (j === 0) {
           errors['وضعیت نظام وظیفه'] = error;
         }
-        if (j === 2) {
+        if (j === 1) {
           errors['نوع معافیت'] = error;
         }
-        if (j === 3) {
+        if (j === 2) {
           errors['دلیل معافیت'] = error;
         }
-        if (j === 5) {
+        if (j === 4) {
           errors['تعداد فرزندان'] = error;
         }
       }
@@ -8751,29 +8742,29 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   });
   fieldCollections[1]['وضعیت تاهل'].onChange(function() {
     if (fieldCollections[1]['وضعیت تاهل'].value() !== 'مجرد') {
-      show(groupArrays[1][5]);
+      show(groupArrays[1][4]);
       setData('تعداد فرزندان', fieldCollections[1]['تعداد فرزندان'].value());
       if (!fieldCollections[1]['تعداد فرزندان'].value()) {
         return setError(errors['تعداد فرزندان'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
-      hide(groupArrays[1][5]);
+      hide(groupArrays[1][4]);
       setData('تعداد فرزندان', null);
       return setError(errors['تعداد فرزندان'], null);
     }
   });
   fieldCollections[0]['جنسیت'].onChange(function() {
     if (fieldCollections[0]['جنسیت'].value() === 'مرد') {
-      show(groupArrays[1][1]);
+      show(groupArrays[1][0]);
       setData('وضعیت نظام وظیفه', fieldCollections[1]['وضعیت نظام وظیفه'].value());
       if (!fieldCollections[1]['وضعیت نظام وظیفه'].value()) {
         setError(errors['وضعیت نظام وظیفه'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageMoaf();
     } else {
+      hide(groupArrays[1][0]);
       hide(groupArrays[1][1]);
       hide(groupArrays[1][2]);
-      hide(groupArrays[1][3]);
       setData('وضعیت نظام وظیفه', null);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
@@ -8784,15 +8775,15 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   });
   (manageMoaf = function() {
     if (fieldCollections[1]['وضعیت نظام وظیفه'].value() === 'معاف') {
-      show(groupArrays[1][2]);
+      show(groupArrays[1][1]);
       setData('نوع معافیت', fieldCollections[1]['نوع معافیت'].value());
       if (!fieldCollections[1]['نوع معافیت'].value()) {
         setError(errors['نوع معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
       return manageDalil();
     } else {
+      hide(groupArrays[1][1]);
       hide(groupArrays[1][2]);
-      hide(groupArrays[1][3]);
       setData('نوع معافیت', null);
       setData('دلیل معافیت', null);
       setError(errors['نوع معافیت'], null);
@@ -8801,13 +8792,13 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
   })();
   manageDalil = function() {
     if (fieldCollections[1]['نوع معافیت'].value() === 'معافیت پزشکی') {
-      show(groupArrays[1][3]);
+      show(groupArrays[1][2]);
       setData('دلیل معافیت', fieldCollections[1]['دلیل معافیت'].value());
       if (!fieldCollections[1]['دلیل معافیت'].value()) {
         return setError(errors['دلیل معافیت'], 'تکمیل این فیلد الزامیست.', true);
       }
     } else {
-      hide(groupArrays[1][3]);
+      hide(groupArrays[1][2]);
       setData('دلیل معافیت', null);
       return setError(errors['دلیل معافیت'], null);
     }
@@ -8821,7 +8812,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":8,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../components/radioSwitch":19,"../../../../components/restrictedInput/email":21,"../../../../components/restrictedInput/number":24,"../../../../components/restrictedInput/phoneNumber":25,"../../../../utils":38,"../../../../utils/component":34,"./multivalue":72,"./style":74}],72:[function(require,module,exports){
+},{"../../../../components/checkbox":8,"../../../../components/dropdown":14,"../../../../components/radioSwitch":19,"../../../../components/restrictedInput/email":21,"../../../../components/restrictedInput/number":24,"../../../../components/restrictedInput/phoneNumber":25,"../../../../utils":38,"../../../../utils/component":34,"./multivalue":72,"./style":74}],72:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -9054,7 +9045,7 @@ style = require('./style');
 ref = require('../../../../utils'), extend = ref.extend, remove = ref.remove, monthToString = ref.monthToString, toEnglish = ref.toEnglish;
 
 module.exports = component('applicantFormReputation', function(arg, arg1) {
-  var E, add, append, destroy, dom, events, i0, i1, i10, i11, i2, i3, i4, i5, i6, i7, i8, i9, jobItemsPlaceholder, jobs, onAdds, onEvent, registerErrorField, setData, setError, setStyle, text, view;
+  var E, add, append, destroy, dom, events, i0, i1, i10, i11, i12, i2, i3, i4, i5, i6, i7, i8, i9, jobItemsPlaceholder, jobs, onAdds, onEvent, registerErrorField, setData, setError, setStyle, text, view;
   dom = arg.dom, events = arg.events;
   setData = arg1.setData, registerErrorField = arg1.registerErrorField, setError = arg1.setError;
   E = dom.E, setStyle = dom.setStyle, text = dom.text, append = dom.append, destroy = dom.destroy;
@@ -9065,21 +9056,21 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
   }, style.input)), i1 = E('input', extend({
     placeholder: 'نوع فعالیت'
   }, style.input)), i2 = E('input', extend({
-    placeholder: 'نام مدیر عامل'
+    placeholder: 'سمت'
   }, style.input)), i3 = E('input', extend({
+    placeholder: 'نام مدیر عامل'
+  }, style.input)), i4 = E('input', extend({
     placeholder: 'نام مدیر مستقیم'
-  }, style.input)), i4 = (function() {
+  }, style.input)), i5 = (function() {
     var f;
     f = E(numberInput);
     setStyle(f, extend({
       placeholder: 'تلفن'
-    }, style.input));
+    }, style.input, {
+      marginLeft: 0
+    }));
     return f;
-  })(), i5 = E('input', extend({
-    placeholder: 'محدوده نشانی'
-  }, style.input, {
-    marginLeft: 0
-  }))), E(style.inputRow, E(style.inputColumn0, E(extend(style.inputRow, {
+  })()), E(style.inputRow, E(style.inputColumn0, E(extend(style.inputRow, {
     marginTop: 0
   }), E(style.label0, 'از'), i6 = (function() {
     var f;
@@ -9143,11 +9134,15 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
       width: '70%'
     }));
     return f;
-  })())), E(style.inputColumn1, i11 = E('textarea', extend({
+  })())), E(style.inputColumn1, i11 = E('input', extend({
+    placeholder: 'محدوده نشانی'
+  }, style.input, {
+    width: '100%'
+  })), i12 = E('textarea', extend({
     placeholder: 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'
   }, style.textarea))), E(style.clearfix)));
   onAdds = [];
-  [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].forEach(function(field, i) {
+  [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12].forEach(function(field, i) {
     var error;
     error = registerErrorField(field, field, true);
     onAdds.push(function() {
@@ -9168,7 +9163,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
   });
   onEvent(add, 'click', function() {
     var canAdd, end, job, jobItem, removeJob, start;
-    canAdd = [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11].every(function(i) {
+    canAdd = [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12].every(function(i) {
       return !(((i.value() == null) || (typeof (i.value()) === 'string' && !i.value().trim())) || ((i.valid != null) && !i.valid()));
     });
     if (!canAdd) {
@@ -9180,18 +9175,19 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
     jobs.push(job = {
       'نام': i0.value(),
       'نوع فعالیت': i1.value(),
-      'نام مدیر عامل': i2.value(),
-      'نام مدیر مستقیم': i3.value(),
-      'تلفن': i4.value(),
-      'محدوده نشانی': i5.value(),
+      'سمت': i2.value(),
+      'نام مدیر عامل': i3.value(),
+      'نام مدیر مستقیم': i4.value(),
+      'تلفن': i5.value(),
       'تاریخ شروع': i6.value(),
       'تاریخ پایان': i7.value(),
       'نوع همکاری': i8.value(),
       'علت خاتمه همکاری': i9.value(),
       'آخرین خالص دریافتی': i10.value(),
-      'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف': i11.value()
+      'محدوده نشانی': i11.value(),
+      'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف': i12.value()
     });
-    setStyle([i0, i1, i2, i3, i4, i5, i6.input, i7.input, i9, i10, i11], {
+    setStyle([i0, i1, i2, i3, i4, i5, i6.input, i7.input, i9, i10, i11, i12], {
       value: ''
     });
     i8.clear();
@@ -9203,9 +9199,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
     end = [end[1], end[0]].join(' ');
     append(jobItemsPlaceholder, jobItem = E(style.job, removeJob = E(style.remove), E(style.jobDate, "از " + start + " تا " + end), E(style.jobRow, E(style['نام'], job['نام']), E(style['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.jobRow, E(style['محدوده نشانی'], E(style.mapIcon), text(job['محدوده نشانی'])), E(style['تلفن'], E(style.phoneIcon), text(job['تلفن']))), E(extend({
       englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
-    }, style.jobRow)), E(style.jobRow, E(style.jobColumn, E(style.jobColumnHeader, 'آخرین خالص دریافتی'), E({
-      englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-    })), E(style.jobColumn, E(style.jobColumnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'مدیر مستقیم'), E(null, job['نام مدیر مستقیم'])), E(style.clearfix))));
+    }, style.jobRow)), E(style.jobRow, E(style.jobColumn, E(style.jobColumnHeader, 'سمت'), E(null, job['سمت'])), E(style.jobColumn, E(style.jobColumnHeader, 'آخرین خالص دریافتی'), E(null, toEnglish(job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان')), E(style.jobColumn, E(style.jobColumnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.jobColumn, E(style.jobColumnHeader, 'مدیر مستقیم'), E(null, job['نام مدیر مستقیم'])), E(style.clearfix))));
     onEvent(removeJob, 'click', function() {
       destroy(jobItem);
       return remove(jobs, job);
@@ -9306,8 +9300,9 @@ exports.textarea = {
   color: '#5c5555',
   minWidth: '100%',
   maxWidth: '100%',
-  minHeight: 120,
-  maxHeight: 120
+  marginTop: 15,
+  minHeight: 75,
+  maxHeight: 75
 };
 
 exports.add = {
@@ -9392,7 +9387,7 @@ exports.phoneIcon = {
 
 exports.jobColumn = {
   float: 'right',
-  width: '25%'
+  width: '20%'
 };
 
 exports.jobColumnHeader = {
@@ -12218,9 +12213,7 @@ module.exports = component('tab1', function(arg, arg1) {
     end = [end[1], end[0]].join(' ');
     return E(style.job.job, E(style.job.date, "از " + start + " تا " + end), E(style.job.row, E(style.job['نام'], job['نام']), E(style.job['نوع فعالیت'], '--- ' + job['نوع فعالیت']), E(style.job['نام مدیر عامل'], '(به مدیریت ' + job['نام مدیر عامل'] + ')')), E(style.job.row, E(style.job['محدوده نشانی'], E(style.job.mapIcon), text(job['محدوده نشانی'])), E(style.job['تلفن'], E(style.job.phoneIcon), text(job['تلفن']))), E(extend({
       englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace(/\n/g, '<br />')
-    }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E({
-      englishText: job['آخرین خالص دریافتی'].replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
-    })), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.job.column, E(style.job.columnHeader, 'مدیر مستقیم'), E(null, job['نام مدیر مستقیم'])), E(style.clearfix)));
+    }, style.job.row)), E(style.job.row, E(style.job.column, E(style.job.columnHeader, 'سمت'), E(null, job['سمت'])), E(style.job.column, E(style.job.columnHeader, 'آخرین خالص دریافتی'), E(null, toEnglish(job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان')), E(style.job.column, E(style.job.columnHeader, 'علت خاتمه همکاری'), E(null, job['علت خاتمه همکاری'])), E(style.job.column, E(style.job.columnHeader, 'نوع همکاری'), E(null, job['نوع همکاری'])), E(style.job.column, E(style.job.columnHeader, 'مدیر مستقیم'), E(null, job['نام مدیر مستقیم'])), E(style.clearfix)));
   }) : void 0, E(style.header, 'سایر اطلاعات'), E(style.column3, E(style.bold, 'متقاضی چه نوع همکاری هستید؟'), E(null, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.column3, E(style.bold, 'از چه طریقی از فرصت شغلی در داتین مطلع شدید؟'), E(null, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'])), ((ref11 = applicantData['سایر اطلاعات']) != null ? ref11['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] : void 0) ? [E(style.column3, E(style.bold, 'از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟'), E(null, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید']))] : void 0, ((ref12 = applicantData['سایر اطلاعات']) != null ? ref12['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] : void 0) ? [E(style.column3, E(style.bold, 'نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟'), E(null, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید']))] : void 0, E(style.column3, E(style.bold, 'مدت زمانی که بیمه بوده‌اید'), E(null, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'])), E(style.column3, E(style.bold, 'میزان دستمزد خالص درخواستی شما چقدر است؟'), E(null, (((ref13 = applicantData['سایر اطلاعات']) != null ? ref13['مقدار دستمزد'] : void 0) ? ((ref14 = applicantData['سایر اطلاعات']) != null ? ref14['مقدار دستمزد'] : void 0) + 'تومان - ' : '') + applicantData['سایر اطلاعات']['میزان دستمزد'])), E(style.seperator), E(style.boldSection, 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:'), E('table', null, E('tbody', null, E('tr', null, E('td', null, 'در ساعات اضافه کاری حضور داشته و کار کنید'), E('td', {
     paddingRight: 50
   }, applicantData['سایر اطلاعات']['در ساعات اضافه کاری حضور داشته و کار کنید'])), E('tr', null, E('td', null, 'در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید'), E('td', {
@@ -12365,7 +12358,7 @@ exports.job.phoneIcon = {
 
 exports.job.column = {
   float: 'right',
-  width: '25%'
+  width: '20%'
 };
 
 exports.job.columnHeader = {

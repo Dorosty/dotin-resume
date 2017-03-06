@@ -214,8 +214,11 @@ module.exports = component 'tab1', ({dom}, {applicant}) ->
           E extend {englishHtml: job['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'].replace /\n/g, '<br />'}, style.job.row
           E style.job.row,
             E style.job.column,
+              E style.job.columnHeader, 'سمت'
+              E null, job['سمت']
+            E style.job.column,
               E style.job.columnHeader, 'آخرین خالص دریافتی'
-              E englishText: (job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
+              E null, toEnglish(job['آخرین خالص دریافتی']).replace(/\B(?=(\d{3})+(?!\d))/g, '،') + ' تومان'
             E style.job.column,
               E style.job.columnHeader, 'علت خاتمه همکاری'
               E null, job['علت خاتمه همکاری']
