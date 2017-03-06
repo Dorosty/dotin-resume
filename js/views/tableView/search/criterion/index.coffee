@@ -13,7 +13,7 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
 
   isInSearch = -> true
 
-  typeDropdown = E dropdown, items: [0 .. 4], getTitle: (x) ->
+  typeDropdown = E dropdown, items: [0 .. 5], getTitle: (x) ->
     switch x
       when 0
         'نام'
@@ -25,6 +25,8 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
         'وضعیت'
       when 4
         'یادداشت'
+      when 5
+        'شناسه'
   setStyle typeDropdown, style.inputPlaceholder
   setStyle typeDropdown.input, style.placeholderInput
 
@@ -129,6 +131,12 @@ module.exports = component 'search', ({dom, events, returnObject}) ->
             when 1
               false
         notesDropdown
+      when 5 then do ->
+        dateRelatedIdInput = E 'input', style.input
+        onEvent dateRelatedIdInput, 'input', -> changeListener?()
+        isInSearch = ({dateRelatedId}) ->
+          not dateRelatedIdInput.value() || textIsInSearch String(dateRelatedId), dateRelatedIdInput.value()
+        dateRelatedIdInput
     changeListener?()
   onEvent remove, 'click', ->
     destroy view

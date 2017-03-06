@@ -31,7 +31,7 @@ tabContents = [
   tab5
 ]
 
-module.exports = component 'profile', ({dom, events, state, service}, {applicant, gotoIndex}) ->
+module.exports = component 'profile', ({dom, events, state, service}, {applicant, gotoIndex, gotoArchive, isInArchive}) ->
   {E, text, setStyle, append, destroy, empty, hide} = dom
   {onEvent} = events
 
@@ -40,7 +40,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   view = E 'span', null,
     loadbarInstance = E loadbar, style.loadbar
-    indexLink = E 'a', style.indexLink, 'رزومه‌ها'
+    indexLink = E 'a', style.indexLink, if isInArchive then 'بایگانی' else 'رزومه‌ها'
     E 'span', style.profileBreadCrumb, ' › پروفایل'
     printButton = E style.printButton, 'چاپ'
     actionButtonPlaceholder = E style.action,
@@ -119,7 +119,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
           ts.push t
           t
 
-    applicantsHRStatus = applicant.applicantsHRStatus.filter ({status}) -> logic.statuses[status] in ['مصاحبه تلفنی انجام شد', 'در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی']
+    applicantsHRStatus = applicant.applicantsHRStatus.filter ({status}) -> logic.statuses[status] in ['مصاحبه تلفنی انجام شد', 'در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی', 'بایگانی', 'بازیابی']
     append statusPlaceholder,
       applicantsHRStatus.map (status, i, arr) ->
         [
@@ -137,10 +137,14 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
                     'مصاحبه عمومی'
                   when 'در انتظار مصاحبه فنی'
                     'مصاحبه فنی'
+                  when 'بایگانی'
+                    'بایگانی'
+                  when 'بازیابی'
+                    'بازیابی'
                 t = E (if i is arr.length - 1 then style.statusTextActive else style.statusText), t
                 ts.push t
                 t
-            if i is arr.length - 1
+            if i is arr.length - 1 && !isInArchive
               editStatusButton = x
             else
               onEvent x, 'click', ->
@@ -148,21 +152,24 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
             x
         ]
 
-    state.user.on once: true, (user) ->
-      if user.userType is 2
-        append statusPlaceholder, [
-          E style.statusConnectorActive
-          changeStatusButton = E style.statusSegment,
-            E style.statusCirclePlus
-            E style.statusIconPlus
-            do ->
-              t = E style.statusText, 'ایجاد وضعیت'
-              ts.push t
-              t
-          ]
-        onEvent changeStatusButton, 'click', -> changeStatus loadbarInstance, applicant
-        if editStatusButton
-          onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicantsHRStatus[applicantsHRStatus.length - 1]
+    unless isInArchive
+      state.user.on once: true, (user) ->
+        if user.userType is 2
+          append statusPlaceholder, [
+            E style.statusConnectorActive
+            changeStatusButton = E style.statusSegment,
+              E style.statusCirclePlus
+              E style.statusIconPlus
+              do ->
+                t = E style.statusText, 'ایجاد وضعیت'
+                ts.push t
+                t
+            ]
+          onEvent changeStatusButton, 'click', -> changeStatus loadbarInstance, applicant
+          if editStatusButton
+            onEvent editStatusButton, 'click', -> changeStatus loadbarInstance, applicant, applicantsHRStatus[applicantsHRStatus.length - 1]
+        # else if editStatusButton
+        #   onEvent editStatusButton, 'click', -> viewStatus applicant, applicantsHRStatus[applicantsHRStatus.length - 1]
     setTimeout ->
       ts.forEach (t) ->
         setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
@@ -200,6 +207,10 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   changeTabIndex 0
 
-  onEvent indexLink, 'click', gotoIndex
+  onEvent indexLink, 'click', ->
+    if isInArchive
+      gotoArchive()
+    else
+      gotoIndex()
 
   view

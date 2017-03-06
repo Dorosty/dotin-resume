@@ -6,12 +6,12 @@ tests = require './tests'
 
 tabNames = [
   'اطلاعات تکمیلی'
-  'آزمون'
+  # 'آزمون'
 ]
 
 tabContents = [
   form
-  tests
+  # tests
 ]
 
 module.exports = component 'applicantView', ({dom, events, service}) ->

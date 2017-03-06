@@ -14,6 +14,7 @@ exports.statuses = [
   'مراحل اداری'
   'جذب'
   'بایگانی'
+  'بازیابی'
 ]
 
 exports.actions = [

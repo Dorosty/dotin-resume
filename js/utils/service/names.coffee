@@ -22,6 +22,7 @@ exports.others = [
   'deleteHRStatus'
   'changeManagerStatus'
   'clearAllNotifications'
+  'createMultipleHRStatus'
 ]
 
 exports.states = [

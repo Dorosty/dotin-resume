@@ -5493,7 +5493,7 @@ exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
 
-exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه عمومی', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'مراحل اداری', 'جذب', 'بایگانی'];
+exports.statuses = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه فنی', 'در انتظار تکمیل اطلاعات برای مصاحبه عمومی', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'مراحل اداری', 'جذب', 'بایگانی', 'بازیابی'];
 
 exports.actions = ['ثبت شده', 'درخواست مصاحبه تلفنی', 'در انتظار مصاحبه تلفنی', 'مصاحبه تلفنی انجام شد', 'درخواست مصاحبه عمومی', 'درخواست مصاحبه فنی', 'اطلاعات تکمیل شد', '', 'در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی', 'مراحل اداری', 'جذب', 'بایگانی', 'مصاحبه حذف شد', 'مصاحبه ویرایش شد'];
 
@@ -5636,6 +5636,45 @@ exports.changeHRStatus = function(applicantId, status) {
       }));
       applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
         applicantsHRStatus: applicantsHRStatus
+      });
+      return state.applicants.set(applicants);
+    });
+  });
+};
+
+exports.createMultipleHRStatus = function(applicantIds) {
+  return post('createMultipleHRStatus', {
+    applicantIds: applicantIds.join(',')
+  }).then(function(x) {
+    var xs;
+    if (x.indexOf('statusIds = [') !== 0) {
+      return;
+    }
+    x = x.substr('statusIds = ['.length);
+    xs = x.substr(0, x.length - 1).split(',').map(function(x) {
+      return +x;
+    });
+    return state.applicants.on({
+      once: true
+    }, function(applicants) {
+      applicantIds.forEach(function(applicantId, i) {
+        var applicant, applicantsHRStatus;
+        applicant = applicants.filter(function(arg) {
+          var userId;
+          userId = arg.userId;
+          return userId === applicantId;
+        })[0];
+        applicantsHRStatus = applicant.applicantsHRStatus;
+        applicants = applicants.slice();
+        applicantsHRStatus = applicantsHRStatus.slice();
+        applicantsHRStatus.push(extend({
+          status: 13,
+          modificationTime: +new Date(),
+          statusHRId: xs[i]
+        }));
+        return applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
+          applicantsHRStatus: applicantsHRStatus
+        });
       });
       return state.applicants.set(applicants);
     });
@@ -6026,6 +6065,7 @@ jobs = [
 
 applicants = [
   {
+    dateRelatedId: '12345678901',
     userId: 0,
     identificationCode: '0016503368',
     firstName: 'علی',
@@ -6065,6 +6105,7 @@ applicants = [
       }
     ]
   }, {
+    dateRelatedId: '23456789012',
     userId: 1,
     identificationCode: '0016503368',
     firstName: 'سعید',
@@ -6414,7 +6455,7 @@ exports.cruds = [
   }
 ];
 
-exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'editHRStatus', 'deleteHRStatus', 'changeManagerStatus', 'clearAllNotifications'];
+exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'editHRStatus', 'deleteHRStatus', 'changeManagerStatus', 'clearAllNotifications', 'createMultipleHRStatus'];
 
 exports.states = ['user', 'applicants', 'notifications', 'managers', 'hrUsers', 'jobs'];
 
@@ -6440,6 +6481,9 @@ module.exports = {
     stateName: 'applicants'
   },
   changeManagerStatus: {
+    stateName: 'applicants'
+  },
+  createMultipleHRStatus: {
     stateName: 'applicants'
   }
 };
@@ -7163,7 +7207,7 @@ spring = require('../../../utils/animation').spring;
 d = require('../../../utils/dom');
 
 module.exports = component('applicantForm', function(arg) {
-  var E, accept, append, cover, data, dom, errorSpring, errorSpringRunning, errors, events, fillButton, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
+  var E, accept, append, cover, data, dom, errorSpring, errorSpringRunning, errors, events, hide, noData, onEvent, onResize, registerErrorField, resize, scroll, service, setData, setError, setOff, setStyle, setSubmitStyle, show, state, submit, submitting, text, view, yesData;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service, setOff = arg.setOff;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
@@ -7254,7 +7298,7 @@ module.exports = component('applicantForm', function(arg) {
     }
     return setSubmitStyle();
   };
-  view = E(null, cover = E(style.cover), hide(noData = E()), yesData = E(null, E(overview), scroll = E(scrollViewer), fillButton = E('button', null, 'پر کردن صفحه (برای تست)'), E(style.header, 'مشخصات فردی'), E(personalInfo, {
+  view = E(null, cover = E(style.cover), hide(noData = E()), yesData = E(null, E(overview), scroll = E(scrollViewer), E(style.header, 'مشخصات فردی'), E(personalInfo, {
     setData: setData('مشخصات فردی'),
     registerErrorField: registerErrorField,
     setError: setError
@@ -7280,23 +7324,6 @@ module.exports = component('applicantForm', function(arg) {
     setError: setError
   }), E(style.checkboxWrapper, accept = E(checkbox, 'صحت اطلاعات تکمیل شده در فرم فوق را تأیید نموده و خود را ملزم به پاسخگویی در برابر صحت اطلاعات آن می‌دانم.')), submit = E(style.submit, 'ثبت نهایی اطلاعات')));
   accept.onChange(setSubmitStyle);
-  onEvent(fillButton, 'click', function() {
-    var submitting;
-    setStyle(cover, style.coverVisible);
-    setStyle(submit, {
-      text: 'در حال ثبت...'
-    });
-    setStyle(submit, style.submitSubmitting);
-    submitting = true;
-    return service.submitProfileData(applicantData).fin(function() {
-      setStyle(submit, style.submitSubmitting);
-      submitting = false;
-      setStyle(cover, style.cover);
-      return setStyle(submit, {
-        text: 'ثبت نهایی اطلاعات'
-      });
-    });
-  });
   resize = function() {
     var body, height, html;
     body = document.body;
@@ -9759,9 +9786,9 @@ tests = require('./tests');
 
 extend = require('../../utils').extend;
 
-tabNames = ['اطلاعات تکمیلی', 'آزمون'];
+tabNames = ['اطلاعات تکمیلی'];
 
-tabContents = [form, tests];
+tabContents = [form];
 
 module.exports = component('applicantView', function(arg) {
   var E, append, changeTabIndex, content, contents, currentTabIndex, destroy, dom, events, logout, onEvent, service, setStyle, t1, t2, t3, tabs, text, view;
@@ -10717,7 +10744,7 @@ module.exports = component('views', function(arg, userId) {
         return E('tr', null, E('td', style.td, x['نام و نام خانوادگی']), E('td', style.td, x['سمت']), E('td', style.td, x['نام محل کار']), E('td', style.td, x['نسبت با شما']), E('td', style.td, x['شماره تماس']));
       })))), E(extend({
         marginTop: 50
-      }, style.boxContainer), E(style.box, E(style.bold, 'بیشتر درباره شما...')), E(style.box2, "ورزش‌های مورد علاقه: " + (applicantData['سایر اطلاعات']['ورزش‌های مورد علاقه'] || [])), E(style.box2, "زمینه‌های هنری مورد علاقه: " + (applicantData['سایر اطلاعات']['زمینه‌های هنری مورد علاقه'] || [])), E(style.box, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟ ' + (((ref11 = applicantData['سایر اطلاعات']) != null ? ref11['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] : void 0) || '') + (((ref12 = applicantData['سایر اطلاعات']) != null ? ref12['نوع آن را ذکر نمایید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['نوع آن را ذکر نمایید'] : '')), E(style.box2, "'آیا دخانیات مصرف می‌کنید؟ " + (applicantData['سایر اطلاعات']['آیا دخانیات مصرف می‌کنید'] || [])), E(style.box2, ("آیا سابقه محکومیت کیفری دارید؟ " + (applicantData['سایر اطلاعات']['آیا سابقه محکومیت کیفری دارید'] || [])) + (((ref13 = applicantData['سایر اطلاعات']) != null ? ref13['تاریخ، دلایل و مدت آن را توضیح دهید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['تاریخ، دلایل و مدت آن را توضیح دهید'] : '')))
+      }, style.boxContainer), E(style.box, E(style.bold, 'بیشتر درباره شما...')), E(style.box2, "ورزش‌های مورد علاقه: " + (applicantData['سایر اطلاعات']['ورزش‌های مورد علاقه'] || 'خیر')), E(style.box2, "زمینه‌های هنری مورد علاقه: " + (applicantData['سایر اطلاعات']['زمینه‌های هنری مورد علاقه'] || 'خیر')), E(style.box, 'آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید؟ ' + (((ref11 = applicantData['سایر اطلاعات']) != null ? ref11['آیا به بیماری خاصی که نیاز به مراقبت‌های ویژه داشته‌باشد، مبتلا هستید، یا نقص عضو یا عمل جراحی مهمی داشته‌اید'] : void 0) || 'خیر') + (((ref12 = applicantData['سایر اطلاعات']) != null ? ref12['نوع آن را ذکر نمایید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['نوع آن را ذکر نمایید'] : '')), E(style.box2, "'آیا دخانیات مصرف می‌کنید؟ " + (applicantData['سایر اطلاعات']['آیا دخانیات مصرف می‌کنید'] || 'خیر')), E(style.box2, ("آیا سابقه محکومیت کیفری دارید؟ " + (applicantData['سایر اطلاعات']['آیا سابقه محکومیت کیفری دارید'] || 'خیر')) + (((ref13 = applicantData['سایر اطلاعات']) != null ? ref13['تاریخ، دلایل و مدت آن را توضیح دهید'] : void 0) ? ' - ' + applicantData['سایر اطلاعات']['تاریخ، دلایل و مدت آن را توضیح دهید'] : '')))
     ]);
     return window.print();
   });
@@ -10830,28 +10857,86 @@ ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 logic = require('../../utils/logic');
 
 module.exports = component('tableView', function(arg) {
-  var E, actionButtonInstance, append, applicants, contents, dom, empty, events, gotoApplicant, gotoIndex, headers, hide, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  var E, actionButtonPlaceholder, append, applicants, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
+  isInArchive = false;
   gotoApplicant = function(applicant) {
     setStyle(profilePlaceholder, style.profileVisible);
     empty(profilePlaceholder);
     return append(profilePlaceholder, E(profile, {
       applicant: applicant,
-      gotoIndex: gotoIndex
+      gotoIndex: gotoIndex,
+      gotoArchive: gotoArchive,
+      isInArchive: isInArchive
     }));
   };
   gotoIndex = function() {
-    return setStyle(profilePlaceholder, style.profile);
+    var actionButtonInstance;
+    setStyle(profilePlaceholder, style.profile);
+    isInArchive = false;
+    empty(actionButtonPlaceholder);
+    append(actionButtonPlaceholder, actionButtonInstance = E(actionButton, {
+      items: ['چاپ', 'بایگانی']
+    }));
+    actionButtonInstance.onSelect(function(value) {
+      switch (value) {
+        case 'چاپ':
+          if (selectedApplicants.length !== 1) {
+            alert('لطفا یک سطر را انتخاب کنید');
+            return;
+          }
+          return window.open('#print_' + selectedApplicants[0].userId, '_blank');
+        case 'بایگانی':
+          if (!selectedApplicants.length) {
+            alert('لطفا حداقل یک سطر را انتخاب کنید');
+            return;
+          }
+          return service.createMultipleHRStatus(selectedApplicants.map(function(arg1) {
+            var userId;
+            userId = arg1.userId;
+            return userId;
+          }));
+      }
+    });
+    return update();
+  };
+  setTimeout(gotoIndex);
+  gotoArchive = function() {
+    var actionButtonInstance;
+    setStyle(profilePlaceholder, style.profile);
+    isInArchive = true;
+    empty(actionButtonPlaceholder);
+    append(actionButtonPlaceholder, actionButtonInstance = E(actionButton, {
+      items: ['چاپ', 'بازیابی']
+    }));
+    actionButtonInstance.onSelect(function(value) {
+      switch (value) {
+        case 'چاپ':
+          if (selectedApplicants.length !== 1) {
+            alert('لطفا یک سطر را انتخاب کنید');
+            return;
+          }
+          return window.open('#print_' + selectedApplicants[0].userId, '_blank');
+        case 'بازیابی':
+          if (selectedApplicants.length !== 1) {
+            alert('لطفا یک سطر را انتخاب کنید');
+            return;
+          }
+          return service.changeHRStatus(selectedApplicants[0].userId, {
+            status: logic.statuses.indexOf('بازیابی')
+          });
+      }
+    });
+    return update();
   };
   selectedApplicants = [];
   view = E('span', null, E(sidebar, {
     gotoIndex: gotoIndex,
-    gotoApplicant: gotoApplicant
-  }), contents = E(style.contents, E(style.action, actionButtonInstance = E(actionButton, {
-    items: ['چاپ']
-  })), searchInstance = E(search), tableInstance = E(table, {
+    gotoApplicant: gotoApplicant,
+    gotoArchive: gotoArchive
+  }), contents = E(style.contents, actionButtonPlaceholder = E(style.action), searchInstance = E(search), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
       multiSelect: true
@@ -10876,6 +10961,13 @@ module.exports = component('tableView', function(arg) {
               src: personalPic ? "/webApi/image?address=" + personalPic : 'assets/img/default-avatar-small.png'
             }, style.profilePicture)), text(firstName + " " + lastName)
           ]);
+        }
+      }, {
+        name: 'شناسه',
+        getValue: function(arg1) {
+          var dateRelatedId;
+          dateRelatedId = arg1.dateRelatedId;
+          return dateRelatedId;
         }
       }, {
         name: 'تاریخ ثبت',
@@ -10908,6 +11000,11 @@ module.exports = component('tableView', function(arg) {
         getValue: function(arg1) {
           var applicantData, applicantsHRStatus;
           applicantData = arg1.applicantData, applicantsHRStatus = arg1.applicantsHRStatus;
+          applicantsHRStatus = applicantsHRStatus.filter(function(arg2) {
+            var status;
+            status = arg2.status;
+            return logic.statuses[status] !== 'بازیابی';
+          });
           if (applicantsHRStatus.length) {
             switch (logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status]) {
               case 'مصاحبه تلفنی انجام شد':
@@ -10925,6 +11022,9 @@ module.exports = component('tableView', function(arg) {
                 } else {
                   return 'در انتظار تکمیل اطلاعات برای مصاحبه عمومی';
                 }
+                break;
+              case 'بایگانی':
+                return 'بایگانی';
             }
           } else {
             return 'ثبت شده';
@@ -10987,24 +11087,42 @@ module.exports = component('tableView', function(arg) {
     once: true
   }, function(user) {
     if (user.userType !== 2) {
-      return hide(actionButtonInstance);
-    }
-  });
-  actionButtonInstance.onSelect(function(value) {
-    var selectedApplicant;
-    if (selectedApplicants.length !== 1) {
-      alert('لطفا یک سطر را انتخاب کنید');
-      return;
-    }
-    selectedApplicant = selectedApplicants[0];
-    switch (value) {
-      case 'چاپ':
-        return window.open('#print_' + selectedApplicant.userId, '_blank');
+      return hide(actionButtonPlaceholder);
     }
   });
   applicants = [];
   update = function() {
-    return tableInstance.setData(applicants.filter(searchInstance.isInSearch));
+    var _applicants;
+    if (isInArchive) {
+      _applicants = applicants.filter(function(arg1) {
+        var applicantsHRStatus;
+        applicantsHRStatus = arg1.applicantsHRStatus;
+        return applicantsHRStatus.filter(function(arg2) {
+          var status;
+          status = arg2.status;
+          return logic.statuses[status] === 'بایگانی';
+        }).length > applicantsHRStatus.filter(function(arg2) {
+          var status;
+          status = arg2.status;
+          return logic.statuses[status] === 'بازیابی';
+        });
+      });
+    } else {
+      _applicants = applicants.filter(function(arg1) {
+        var applicantsHRStatus;
+        applicantsHRStatus = arg1.applicantsHRStatus;
+        return applicantsHRStatus.filter(function(arg2) {
+          var status;
+          status = arg2.status;
+          return logic.statuses[status] === 'بایگانی';
+        }).length <= applicantsHRStatus.filter(function(arg2) {
+          var status;
+          status = arg2.status;
+          return logic.statuses[status] === 'بازیابی';
+        });
+      });
+    }
+    return tableInstance.setData(_applicants.filter(searchInstance.isInSearch));
   };
   searchInstance.onChange(update);
   state.applicants.on(function(_applicants) {
@@ -11463,14 +11581,14 @@ tabNames = ['اطلاعات اولیه', 'اطلاعات تکمیلی', 'آزم�
 tabContents = [tab0, tab1, tab2, tab3, tab4, tab5];
 
 module.exports = component('profile', function(arg, arg1) {
-  var E, actionButtonInstance, actionButtonItemTexts, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoIndex, hide, indexLink, loadbarInstance, onEvent, printButton, service, setStyle, state, statusPlaceholder, tabs, text, view;
+  var E, actionButtonInstance, actionButtonItemTexts, actionButtonPlaceholder, actionLegend, actionLegendButton, actionLegendVisible, append, applicant, changeTabIndex, content, contents, currentTabIndex, destroy, dom, empty, events, gotoArchive, gotoIndex, hide, indexLink, isInArchive, loadbarInstance, onEvent, printButton, service, setStyle, state, statusPlaceholder, tabs, text, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
-  applicant = arg1.applicant, gotoIndex = arg1.gotoIndex;
+  applicant = arg1.applicant, gotoIndex = arg1.gotoIndex, gotoArchive = arg1.gotoArchive, isInArchive = arg1.isInArchive;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, destroy = dom.destroy, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
   content = void 0;
   currentTabIndex = 0;
-  view = E('span', null, loadbarInstance = E(loadbar, style.loadbar), indexLink = E('a', style.indexLink, 'رزومه‌ها'), E('span', style.profileBreadCrumb, ' › پروفایل'), printButton = E(style.printButton, 'چاپ'), actionButtonPlaceholder = E(style.action, actionLegendButton = E(style.actionLegendButton), actionLegend = E(style.actionLegend, E(style.actionLegendArrow), E(style.actionLegendRow, E(extend({
+  view = E('span', null, loadbarInstance = E(loadbar, style.loadbar), indexLink = E('a', style.indexLink, isInArchive ? 'بایگانی' : 'رزومه‌ها'), E('span', style.profileBreadCrumb, ' › پروفایل'), printButton = E(style.printButton, 'چاپ'), actionButtonPlaceholder = E(style.action, actionLegendButton = E(style.actionLegendButton), actionLegend = E(style.actionLegend, E(style.actionLegendArrow), E(style.actionLegendRow, E(extend({
     backgroundColor: 'green'
   }, style.actionLegendCircle)), text('ثبت شده')), E(style.actionLegendRow, E(extend({
     backgroundColor: '#c5c5c5'
@@ -11590,7 +11708,7 @@ module.exports = component('profile', function(arg, arg1) {
     applicantsHRStatus = applicant.applicantsHRStatus.filter(function(arg3) {
       var ref, status;
       status = arg3.status;
-      return (ref = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref === 'در انتظار مصاحبه عمومی' || ref === 'در انتظار مصاحبه فنی';
+      return (ref = logic.statuses[status]) === 'مصاحبه تلفنی انجام شد' || ref === 'در انتظار مصاحبه عمومی' || ref === 'در انتظار مصاحبه فنی' || ref === 'بایگانی' || ref === 'بازیابی';
     });
     append(statusPlaceholder, applicantsHRStatus.map(function(status, i, arr) {
       return [
@@ -11609,13 +11727,17 @@ module.exports = component('profile', function(arg, arg1) {
                   return 'مصاحبه عمومی';
                 case 'در انتظار مصاحبه فنی':
                   return 'مصاحبه فنی';
+                case 'بایگانی':
+                  return 'بایگانی';
+                case 'بازیابی':
+                  return 'بازیابی';
               }
             })();
             t = E((i === arr.length - 1 ? style.statusTextActive : style.statusText), t);
             ts.push(t);
             return t;
           })());
-          if (i === arr.length - 1) {
+          if (i === arr.length - 1 && !isInArchive) {
             editStatusButton = x;
           } else {
             onEvent(x, 'click', function() {
@@ -11626,29 +11748,31 @@ module.exports = component('profile', function(arg, arg1) {
         })()
       ];
     }));
-    state.user.on({
-      once: true
-    }, function(user) {
-      var changeStatusButton;
-      if (user.userType === 2) {
-        append(statusPlaceholder, [
-          E(style.statusConnectorActive), changeStatusButton = E(style.statusSegment, E(style.statusCirclePlus), E(style.statusIconPlus), (function() {
-            var t;
-            t = E(style.statusText, 'ایجاد وضعیت');
-            ts.push(t);
-            return t;
-          })())
-        ]);
-        onEvent(changeStatusButton, 'click', function() {
-          return changeStatus(loadbarInstance, applicant);
-        });
-        if (editStatusButton) {
-          return onEvent(editStatusButton, 'click', function() {
-            return changeStatus(loadbarInstance, applicant, applicantsHRStatus[applicantsHRStatus.length - 1]);
+    if (!isInArchive) {
+      state.user.on({
+        once: true
+      }, function(user) {
+        var changeStatusButton;
+        if (user.userType === 2) {
+          append(statusPlaceholder, [
+            E(style.statusConnectorActive), changeStatusButton = E(style.statusSegment, E(style.statusCirclePlus), E(style.statusIconPlus), (function() {
+              var t;
+              t = E(style.statusText, 'ایجاد وضعیت');
+              ts.push(t);
+              return t;
+            })())
+          ]);
+          onEvent(changeStatusButton, 'click', function() {
+            return changeStatus(loadbarInstance, applicant);
           });
+          if (editStatusButton) {
+            return onEvent(editStatusButton, 'click', function() {
+              return changeStatus(loadbarInstance, applicant, applicantsHRStatus[applicantsHRStatus.length - 1]);
+            });
+          }
         }
-      }
-    });
+      });
+    }
     return setTimeout(function() {
       return ts.forEach(function(t) {
         return setStyle(t, {
@@ -11714,7 +11838,13 @@ module.exports = component('profile', function(arg, arg1) {
     return setStyle(tabs[currentTabIndex], style.tabActive);
   };
   changeTabIndex(0);
-  onEvent(indexLink, 'click', gotoIndex);
+  onEvent(indexLink, 'click', function() {
+    if (isInArchive) {
+      return gotoArchive();
+    } else {
+      return gotoIndex();
+    }
+  });
   return view;
 });
 
@@ -12429,7 +12559,7 @@ module.exports = component('tab5', function(arg) {
 },{"../../../../utils/component":34,"./style":109}],109:[function(require,module,exports){
 arguments[4][103][0].apply(exports,arguments)
 },{"dup":103}],110:[function(require,module,exports){
-var alert, component, logic, style, toDate;
+var alert, component, logic, ref, style, toDate, toTime;
 
 style = require('./style');
 
@@ -12439,7 +12569,7 @@ alert = require('../../../../components/alert');
 
 logic = require('../../../../utils/logic');
 
-toDate = require('../../../../utils').toDate;
+ref = require('../../../../utils'), toDate = ref.toDate, toTime = ref.toTime;
 
 module.exports = function(applicant, status) {
   return component('viewStatus', function(arg) {
@@ -12488,6 +12618,12 @@ module.exports = function(applicant, status) {
           hide(loading);
           return append(p, E(null, "مصاحبه عمومی انجام شد. زمان مصاحبه: " + (toDate(interViewTime))));
         });
+        break;
+      case 'بایگانی':
+        append(p, E(null, "در تاریخ " + (toDate(status.modificationTime)) + " ساعت " + (toTime(status.modificationTime)) + " بایگانی شد."));
+        break;
+      case 'بازیابی':
+        append(p, E(null, "در تاریخ " + (toDate(status.modificationTime)) + " ساعت " + (toTime(status.modificationTime)) + " بازیابی شد."));
     }
     onEvent(submit, 'click', alertInstance.close);
     return alertInstance;
@@ -12549,7 +12685,7 @@ module.exports = component('search', function(arg) {
     return true;
   };
   typeDropdown = E(dropdown, {
-    items: [0, 1, 2, 3, 4],
+    items: [0, 1, 2, 3, 4, 5],
     getTitle: function(x) {
       switch (x) {
         case 0:
@@ -12562,6 +12698,8 @@ module.exports = component('search', function(arg) {
           return 'وضعیت';
         case 4:
           return 'یادداشت';
+        case 5:
+          return 'شناسه';
       }
     }
   });
@@ -12729,6 +12867,20 @@ module.exports = component('search', function(arg) {
             };
             return notesDropdown;
           })();
+        case 5:
+          return (function() {
+            var dateRelatedIdInput;
+            dateRelatedIdInput = E('input', style.input);
+            onEvent(dateRelatedIdInput, 'input', function() {
+              return typeof changeListener === "function" ? changeListener() : void 0;
+            });
+            isInSearch = function(arg1) {
+              var dateRelatedId;
+              dateRelatedId = arg1.dateRelatedId;
+              return !dateRelatedIdInput.value() || textIsInSearch(String(dateRelatedId), dateRelatedIdInput.value());
+            };
+            return dateRelatedIdInput;
+          })();
       }
     })());
     return typeof changeListener === "function" ? changeListener() : void 0;
@@ -12887,7 +13039,7 @@ module.exports = component('search', function(arg) {
   });
   returnObject({
     isInSearch: function(applicant) {
-      var firstName, lastName, selectedJobs, state, value;
+      var dateRelatedId, firstName, lastName, selectedJobs, state, value;
       if (isActive) {
         return criteria.every(function(arg1) {
           var isInSearch;
@@ -12895,9 +13047,9 @@ module.exports = component('search', function(arg) {
           return isInSearch(applicant);
         });
       } else {
-        firstName = applicant.firstName, lastName = applicant.lastName, selectedJobs = applicant.selectedJobs, state = applicant.state;
+        firstName = applicant.firstName, lastName = applicant.lastName, selectedJobs = applicant.selectedJobs, state = applicant.state, dateRelatedId = applicant.dateRelatedId;
         value = searchbox.value();
-        return textIsInSearch(firstName + " " + lastName, value) || selectedJobs.some(function(arg1) {
+        return textIsInSearch(firstName + " " + lastName, value) || textIsInSearch(String(dateRelatedId), value) || selectedJobs.some(function(arg1) {
           var jobName;
           jobName = arg1.jobName;
           return textIsInSearch(jobName.toLowerCase(), value);
@@ -13047,9 +13199,9 @@ ref1 = require('../../../utils/logic'), statuses = ref1.statuses, actionModifiab
 window = require('../../../utils/dom').window;
 
 module.exports = component('sidebar', function(arg, arg1) {
-  var E, append, clearAllNotifications, dom, empty, events, gotoApplicant, gotoIndex, linkIndex, links, logout, name, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, notificationsPlaceholder, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
+  var E, append, clearAllNotifications, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, linkIndex, links, logout, name, notificationsActive, notificationsBadge, notificationsIcon, notificationsPanel, notificationsPlaceholder, onEvent, onResize, position, profileImg, resize, service, setStyle, state, text, view;
   dom = arg.dom, state = arg.state, events = arg.events, service = arg.service;
-  gotoIndex = arg1.gotoIndex, gotoApplicant = arg1.gotoApplicant;
+  gotoIndex = arg1.gotoIndex, gotoApplicant = arg1.gotoApplicant, gotoArchive = arg1.gotoArchive;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, empty = dom.empty, append = dom.append;
   onEvent = events.onEvent, onResize = events.onResize;
   view = E(style.sidebar, notificationsPlaceholder = E(style.notifications, E(style.notificationsHeader, clearAllNotifications = E(style.clearAllNotifications, 'پاک شدن همه')), notificationsPanel = E()), E(style.profile, profileImg = E('img', style.profileImg)), name = E(style.name), position = E(style.title), logout = E(extend({
@@ -13077,8 +13229,12 @@ module.exports = component('sidebar', function(arg, arg1) {
       setStyle(link, style.linkActive);
     }
     onEvent(link, 'click', function() {
-      if (i === 0) {
-        gotoIndex();
+      switch (i) {
+        case 0:
+          gotoIndex();
+          break;
+        case 3:
+          gotoArchive();
       }
       linkIndex = i;
       setStyle(links, style.link);

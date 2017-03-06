@@ -43,6 +43,22 @@ exports.changeHRStatus = (applicantId, status) ->
       applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
+exports.createMultipleHRStatus = (applicantIds) ->
+  post 'createMultipleHRStatus', applicantIds: applicantIds.join ','
+  .then (x) ->
+    return if x.indexOf('statusIds = [') isnt 0
+    x = x.substr('statusIds = ['.length)
+    xs = x.substr(0, x.length - 1).split(',').map (x) -> +x
+    state.applicants.on once: true, (applicants) ->
+      applicantIds.forEach (applicantId, i) ->
+        [applicant] = applicants.filter ({userId}) -> userId is applicantId
+        {applicantsHRStatus} = applicant
+        applicants = applicants.slice()
+        applicantsHRStatus = applicantsHRStatus.slice()
+        applicantsHRStatus.push extend status: 13, modificationTime: +new Date(), statusHRId: xs[i]
+        applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
+      state.applicants.set applicants
+
 exports.editHRStatus = (statusId, interviewId, status) ->
   post 'editHRStatus', if interviewId then extend({statusId, interviewId}, status) else extend({statusId}, status)
   .then (x) ->

@@ -4,7 +4,7 @@ style = require './style'
 {statuses, actionModifiable} = require '../../../utils/logic'
 {window} = require '../../../utils/dom'
 
-module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex, gotoApplicant}) ->
+module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex, gotoApplicant, gotoArchive}) ->
   {E, text, setStyle, empty, append} = dom
   {onEvent, onResize} = events
   
@@ -43,8 +43,11 @@ module.exports = component 'sidebar', ({dom, state, events, service}, {gotoIndex
     if linkIndex is i
       setStyle link, style.linkActive
     onEvent link, 'click', ->
-      if i is 0
-        gotoIndex()
+      switch i
+        when 0
+          gotoIndex()
+        when 3
+          gotoArchive()
       linkIndex = i
       setStyle links, style.link
       setStyle link, style.linkActive

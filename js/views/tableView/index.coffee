@@ -12,21 +12,58 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   {E, text, setStyle, append, empty, hide} = dom
   {onEvent} = events
 
+  isInArchive = false
+
   gotoApplicant = (applicant) ->
     setStyle profilePlaceholder, style.profileVisible
     empty profilePlaceholder
-    append profilePlaceholder, E profile, {applicant, gotoIndex}
+    append profilePlaceholder, E profile, {applicant, gotoIndex, gotoArchive, isInArchive}
 
   gotoIndex = ->
     setStyle profilePlaceholder, style.profile
+    isInArchive = false
+    empty actionButtonPlaceholder
+    append actionButtonPlaceholder, actionButtonInstance = E actionButton, items: ['چاپ', 'بایگانی']
+    actionButtonInstance.onSelect (value) ->
+      switch value
+        when 'چاپ'
+          unless selectedApplicants.length is 1
+            alert 'لطفا یک سطر را انتخاب کنید'
+            return
+          window.open '#print_' + selectedApplicants[0].userId, '_blank'
+        when 'بایگانی'
+          unless selectedApplicants.length
+            alert 'لطفا حداقل یک سطر را انتخاب کنید'
+            return
+          service.createMultipleHRStatus selectedApplicants.map ({userId}) -> userId
+    update()
+  setTimeout gotoIndex
+
+  gotoArchive = ->
+    setStyle profilePlaceholder, style.profile
+    isInArchive = true
+    empty actionButtonPlaceholder
+    append actionButtonPlaceholder, actionButtonInstance = E actionButton, items: ['چاپ', 'بازیابی']
+    actionButtonInstance.onSelect (value) ->
+      switch value
+        when 'چاپ'
+          unless selectedApplicants.length is 1
+            alert 'لطفا یک سطر را انتخاب کنید'
+            return
+          window.open '#print_' + selectedApplicants[0].userId, '_blank'
+        when 'بازیابی'
+          unless selectedApplicants.length is 1
+            alert 'لطفا یک سطر را انتخاب کنید'
+            return
+          service.changeHRStatus selectedApplicants[0].userId, status: logic.statuses.indexOf 'بازیابی'
+    update()
 
   selectedApplicants = []
 
   view = E 'span', null,
-    E sidebar, {gotoIndex, gotoApplicant}
+    E sidebar, {gotoIndex, gotoApplicant, gotoArchive}
     contents = E style.contents,
-      E style.action,
-        actionButtonInstance = E actionButton, items: ['چاپ']
+      actionButtonPlaceholder = E style.action
       searchInstance = E search
       tableInstance = E table,
         entityId: 'userId'
@@ -46,6 +83,10 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
               ]
           }
           {
+            name: 'شناسه'
+            getValue: ({dateRelatedId}) -> dateRelatedId
+          }
+          {
             name: 'تاریخ ثبت'
             width: 100
             getValue: ({modificationTime}) ->
@@ -60,6 +101,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           {
             name: 'وضعیت'
             getValue: ({applicantData, applicantsHRStatus}) ->
+              applicantsHRStatus = applicantsHRStatus.filter ({status}) -> logic.statuses[status] != 'بازیابی'
               if applicantsHRStatus.length
                 switch logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status]
                   when 'مصاحبه تلفنی انجام شد'
@@ -74,6 +116,8 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
                       'در انتظار مصاحبه عمومی'
                     else
                       'در انتظار تکمیل اطلاعات برای مصاحبه عمومی'
+                  when 'بایگانی'
+                    'بایگانی'
               else
                 'ثبت شده'
           }
@@ -111,21 +155,18 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   ######################
   state.user.on once: true, (user) ->
     if user.userType isnt 2
-      hide actionButtonInstance
+      hide actionButtonPlaceholder
   ######################
-
-  actionButtonInstance.onSelect (value) ->
-    unless selectedApplicants.length is 1
-      alert 'لطفا یک سطر را انتخاب کنید'
-      return
-    selectedApplicant = selectedApplicants[0]
-    switch value
-      when 'چاپ'
-        window.open '#print_' + selectedApplicant.userId, '_blank'
 
   applicants = []
   update = ->
-    tableInstance.setData applicants.filter searchInstance.isInSearch
+    if isInArchive
+      _applicants = applicants.filter ({applicantsHRStatus}) ->
+        applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بایگانی').length > applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بازیابی')
+    else
+      _applicants = applicants.filter ({applicantsHRStatus}) ->
+        applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بایگانی').length <= applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بازیابی')    
+    tableInstance.setData _applicants.filter searchInstance.isInSearch
 
   searchInstance.onChange update
 

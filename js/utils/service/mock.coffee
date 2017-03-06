@@ -16,6 +16,7 @@ managers = [{
 jobs = [{jobId: 0, jobName: 'Java developer'}, {jobId: 1, jobName: 'Javascript developer'}, {jobId: 2, jobName: 'UX designer'}]
 
 applicants = [{
+  dateRelatedId: '12345678901'
   userId: 0
   identificationCode: '0016503368'
   firstName: 'علی'
@@ -51,6 +52,7 @@ applicants = [{
     time: 1386369082850
   }]
 }, {
+  dateRelatedId: '23456789012'
   userId: 1
   identificationCode: '0016503368'
   firstName: 'سعید'

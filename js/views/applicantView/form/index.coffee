@@ -212,7 +212,7 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
       E overview
       scroll = E scrollViewer
       #################################################################
-      fillButton = E 'button', null, 'پر کردن صفحه (برای تست)'
+      # fillButton = E 'button', null, 'پر کردن صفحه (برای تست)'
       #################################################################
       E style.header, 'مشخصات فردی'
       E personalInfo, {setData: setData('مشخصات فردی'), registerErrorField, setError}
@@ -236,17 +236,17 @@ module.exports = component 'applicantForm', ({dom, events, state, service, setOf
   accept.onChange setSubmitStyle
 
   #################################################################
-  onEvent fillButton, 'click', ->
-    setStyle cover, style.coverVisible
-    setStyle submit, text: 'در حال ثبت...'
-    setStyle submit, style.submitSubmitting
-    submitting = true
-    service.submitProfileData applicantData
-    .fin ->
-      setStyle submit, style.submitSubmitting
-      submitting = false
-      setStyle cover, style.cover
-      setStyle submit, text: 'ثبت نهایی اطلاعات'
+  # onEvent fillButton, 'click', ->
+  #   setStyle cover, style.coverVisible
+  #   setStyle submit, text: 'در حال ثبت...'
+  #   setStyle submit, style.submitSubmitting
+  #   submitting = true
+  #   service.submitProfileData applicantData
+  #   .fin ->
+  #     setStyle submit, style.submitSubmitting
+  #     submitting = false
+  #     setStyle cover, style.cover
+  #     setStyle submit, text: 'ثبت نهایی اطلاعات'
   #################################################################
 
   resize = ->

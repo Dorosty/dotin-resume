@@ -2,7 +2,7 @@ style = require './style'
 component = require '../../../../utils/component'
 alert = require '../../../../components/alert'
 logic = require '../../../../utils/logic'
-{toDate} = require '../../../../utils'
+{toDate, toTime} = require '../../../../utils'
 
 module.exports = (applicant, status) ->
   do component 'viewStatus', ({dom, events, state, service}) ->
@@ -34,6 +34,10 @@ module.exports = (applicant, status) ->
         .then ({interViewTime}) ->
           hide loading
           append p, E null, "مصاحبه عمومی انجام شد. زمان مصاحبه: #{toDate interViewTime}"
+      when 'بایگانی'
+        append p, E null, "در تاریخ #{toDate status.modificationTime} ساعت #{toTime status.modificationTime} بایگانی شد."
+      when 'بازیابی'
+        append p, E null, "در تاریخ #{toDate status.modificationTime} ساعت #{toTime status.modificationTime} بازیابی شد."
 
     onEvent submit, 'click', alertInstance.close
 
