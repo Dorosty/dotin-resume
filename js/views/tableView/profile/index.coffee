@@ -144,7 +144,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
                 t = E (if i is arr.length - 1 then style.statusTextActive else style.statusText), t
                 ts.push t
                 t
-            if i is arr.length - 1 && !isInArchive
+            if i is arr.length - 1 && !isInArchive && logic.statuses[status.status] not in ['بایگانی', 'بازیابی']
               editStatusButton = x
             else
               onEvent x, 'click', ->

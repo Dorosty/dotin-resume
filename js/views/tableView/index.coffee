@@ -162,10 +162,24 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   update = ->
     if isInArchive
       _applicants = applicants.filter ({applicantsHRStatus}) ->
-        applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بایگانی').length > applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بازیابی')
+        result = true
+        applicantsHRStatus.forEach ({status}) ->
+          switch logic.statuses[status]
+            when 'بایگانی'
+              result = false
+            when 'بازیابی'
+              result = true
+        result
     else
       _applicants = applicants.filter ({applicantsHRStatus}) ->
-        applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بایگانی').length <= applicantsHRStatus.filter(({status}) -> logic.statuses[status] == 'بازیابی')    
+        result = false
+        applicantsHRStatus.forEach ({status}) ->
+          switch logic.statuses[status]
+            when 'بایگانی'
+              result = true
+            when 'بازیابی'
+              result = false
+        result
     tableInstance.setData _applicants.filter searchInstance.isInSearch
 
   searchInstance.onChange update

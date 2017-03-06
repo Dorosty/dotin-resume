@@ -11090,31 +11090,37 @@ module.exports = component('tableView', function(arg) {
     var _applicants;
     if (isInArchive) {
       _applicants = applicants.filter(function(arg1) {
-        var applicantsHRStatus;
+        var applicantsHRStatus, result;
         applicantsHRStatus = arg1.applicantsHRStatus;
-        return applicantsHRStatus.filter(function(arg2) {
+        result = true;
+        applicantsHRStatus.forEach(function(arg2) {
           var status;
           status = arg2.status;
-          return logic.statuses[status] === 'بایگانی';
-        }).length > applicantsHRStatus.filter(function(arg2) {
-          var status;
-          status = arg2.status;
-          return logic.statuses[status] === 'بازیابی';
+          switch (logic.statuses[status]) {
+            case 'بایگانی':
+              return result = false;
+            case 'بازیابی':
+              return result = true;
+          }
         });
+        return result;
       });
     } else {
       _applicants = applicants.filter(function(arg1) {
-        var applicantsHRStatus;
+        var applicantsHRStatus, result;
         applicantsHRStatus = arg1.applicantsHRStatus;
-        return applicantsHRStatus.filter(function(arg2) {
+        result = false;
+        applicantsHRStatus.forEach(function(arg2) {
           var status;
           status = arg2.status;
-          return logic.statuses[status] === 'بایگانی';
-        }).length <= applicantsHRStatus.filter(function(arg2) {
-          var status;
-          status = arg2.status;
-          return logic.statuses[status] === 'بازیابی';
+          switch (logic.statuses[status]) {
+            case 'بایگانی':
+              return result = true;
+            case 'بازیابی':
+              return result = false;
+          }
         });
+        return result;
       });
     }
     return tableInstance.setData(_applicants.filter(searchInstance.isInSearch));
@@ -11708,7 +11714,7 @@ module.exports = component('profile', function(arg, arg1) {
     append(statusPlaceholder, applicantsHRStatus.map(function(status, i, arr) {
       return [
         E(style.statusConnector), (function() {
-          var x;
+          var ref, x;
           x = E(style.statusSegment, E(i === arr.length - 1 ? style.statusCircleActive : style.statusCircle), E(extend({
             "class": i === arr.length - 1 ? 'fa fa-question' : 'fa fa-check'
           }, style.statusIcon)), (function() {
@@ -11732,7 +11738,7 @@ module.exports = component('profile', function(arg, arg1) {
             ts.push(t);
             return t;
           })());
-          if (i === arr.length - 1 && !isInArchive) {
+          if (i === arr.length - 1 && !isInArchive && ((ref = logic.statuses[status.status]) !== 'بایگانی' && ref !== 'بازیابی')) {
             editStatusButton = x;
           } else {
             onEvent(x, 'click', function() {
