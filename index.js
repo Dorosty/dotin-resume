@@ -5667,11 +5667,11 @@ exports.createMultipleHRStatus = function(applicantIds) {
         applicantsHRStatus = applicant.applicantsHRStatus;
         applicants = applicants.slice();
         applicantsHRStatus = applicantsHRStatus.slice();
-        applicantsHRStatus.push(extend({
-          status: 13,
+        applicantsHRStatus.push({
+          status: 12,
           modificationTime: +new Date(),
           statusHRId: xs[i]
-        }));
+        });
         return applicants[applicants.indexOf(applicant)] = extend({}, applicant, {
           applicantsHRStatus: applicantsHRStatus
         });
@@ -10995,11 +10995,6 @@ module.exports = component('tableView', function(arg) {
         getValue: function(arg1) {
           var applicantData, applicantsHRStatus;
           applicantData = arg1.applicantData, applicantsHRStatus = arg1.applicantsHRStatus;
-          applicantsHRStatus = applicantsHRStatus.filter(function(arg2) {
-            var status;
-            status = arg2.status;
-            return logic.statuses[status] !== 'بازیابی';
-          });
           if (applicantsHRStatus.length) {
             switch (logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status]) {
               case 'مصاحبه تلفنی انجام شد':
@@ -11020,6 +11015,8 @@ module.exports = component('tableView', function(arg) {
                 break;
               case 'بایگانی':
                 return 'بایگانی';
+              case 'بازیابی':
+                return 'بازیابی';
             }
           } else {
             return 'ثبت شده';
@@ -11060,7 +11057,7 @@ module.exports = component('tableView', function(arg) {
       }
     ],
     sort: {
-      header: headers[1],
+      header: headers[2],
       direction: 'down'
     },
     handlers: {
@@ -11088,7 +11085,7 @@ module.exports = component('tableView', function(arg) {
   applicants = [];
   update = function() {
     var _applicants;
-    if (isInArchive) {
+    if (!isInArchive) {
       _applicants = applicants.filter(function(arg1) {
         var applicantsHRStatus, result;
         applicantsHRStatus = arg1.applicantsHRStatus;

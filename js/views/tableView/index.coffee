@@ -101,7 +101,6 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           {
             name: 'وضعیت'
             getValue: ({applicantData, applicantsHRStatus}) ->
-              applicantsHRStatus = applicantsHRStatus.filter ({status}) -> logic.statuses[status] != 'بازیابی'
               if applicantsHRStatus.length
                 switch logic.statuses[applicantsHRStatus[applicantsHRStatus.length - 1].status]
                   when 'مصاحبه تلفنی انجام شد'
@@ -118,6 +117,8 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
                       'در انتظار تکمیل اطلاعات برای مصاحبه عمومی'
                   when 'بایگانی'
                     'بایگانی'
+                  when 'بازیابی'
+                    'بازیابی'
               else
                 'ثبت شده'
           }
@@ -142,7 +143,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           }
         ]
         sort: {
-          header: headers[1]
+          header: headers[2]
           direction: 'down'
         }
         handlers:
@@ -160,7 +161,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
 
   applicants = []
   update = ->
-    if isInArchive
+    unless isInArchive
       _applicants = applicants.filter ({applicantsHRStatus}) ->
         result = true
         applicantsHRStatus.forEach ({status}) ->

@@ -55,7 +55,7 @@ exports.createMultipleHRStatus = (applicantIds) ->
         {applicantsHRStatus} = applicant
         applicants = applicants.slice()
         applicantsHRStatus = applicantsHRStatus.slice()
-        applicantsHRStatus.push extend status: 13, modificationTime: +new Date(), statusHRId: xs[i]
+        applicantsHRStatus.push status: 12, modificationTime: +new Date(), statusHRId: xs[i]
         applicants[applicants.indexOf applicant] = extend {}, applicant, {applicantsHRStatus}
       state.applicants.set applicants
 
