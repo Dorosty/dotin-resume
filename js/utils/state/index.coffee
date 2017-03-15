@@ -39,6 +39,11 @@ createPubSub = (name) ->
       return
 
     data = _data
+    
+    if name == 'applicants'
+      data.forEach (applicant) ->
+        applicant.applicantsHRStatus = (applicant.applicantsHRStatus || []).sort (a, b) -> a.statusHRId - b.statusHRId
+
     if data?
       dataNotNull = data
 
@@ -81,6 +86,7 @@ exports.instance = (thisComponent) ->
       unsubscribe
 
     set: ->
+
       ll = l.set data
       ll()
       pubSub.set data

@@ -6554,6 +6554,13 @@ createPubSub = function(name) {
         return;
       }
       data = _data;
+      if (name === 'applicants') {
+        data.forEach(function(applicant) {
+          return applicant.applicantsHRStatus = (applicant.applicantsHRStatus || []).sort(function(a, b) {
+            return a.statusHRId - b.statusHRId;
+          });
+        });
+      }
       if (data != null) {
         dataNotNull = data;
       }
