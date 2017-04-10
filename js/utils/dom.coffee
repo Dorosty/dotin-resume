@@ -189,7 +189,7 @@ exports.instance = (thisComponent) ->
           element.checked = value
         when 'placeholder'
           element.setAttribute key, toPersian value
-        when 'class', 'type', 'id', 'for', 'src', 'href', 'target', 'colSpan', 'rowSpan'
+        when 'class', 'name', 'type', 'id', 'for', 'src', 'href', 'target', 'colSpan', 'rowSpan', 'disabled'
           element.setAttribute key, value
         else
           if (typeof value is 'number') && not (key in ['opacity', 'zIndex'])
