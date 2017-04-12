@@ -65,6 +65,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     contents = E style.contents,
       actionButtonPlaceholder = E style.action
       searchInstance = E search
+      itemsCount = E style.itemsCount
       tableInstance = E table,
         entityId: 'userId'
         properties:
@@ -181,7 +182,9 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             when 'بازیابی'
               result = false
         result
-    tableInstance.setData _applicants.filter searchInstance.isInSearch
+    _applicants = _applicants.filter searchInstance.isInSearch
+    setStyle itemsCount, text: "#{_applicants.length} مورد"
+    tableInstance.setData _applicants
 
   searchInstance.onChange update
 

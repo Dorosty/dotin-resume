@@ -70,6 +70,7 @@ module.exports = component 'login', ({dom, events, service}) ->
       enable [email, password, submit]#, remember]
       hide spinner
     .done()
+    setStyle password, value: ''
 
   onEvent [email, password], 'input', ->
     hide [invalid, invalidCaptcha]

@@ -10826,7 +10826,7 @@ module.exports = component('login', function(arg) {
     disable([email, password, submit]);
     hide([invalid, invalidCaptcha]);
     show(spinner);
-    return service.login({
+    service.login({
       identificationCode: email.value(),
       password: password.value(),
       captcha: toEnglish(captchaInput.value())
@@ -10841,6 +10841,9 @@ module.exports = component('login', function(arg) {
       enable([email, password, submit]);
       return hide(spinner);
     }).done();
+    return setStyle(password, {
+      value: ''
+    });
   };
   onEvent([email, password], 'input', function() {
     return hide([invalid, invalidCaptcha]);
@@ -11141,7 +11144,7 @@ ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
 logic = require('../../utils/logic');
 
 module.exports = component('tableView', function(arg) {
-  var E, actionButtonPlaceholder, append, applicants, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  var E, actionButtonPlaceholder, append, applicants, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, itemsCount, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
@@ -11220,7 +11223,7 @@ module.exports = component('tableView', function(arg) {
     gotoIndex: gotoIndex,
     gotoApplicant: gotoApplicant,
     gotoArchive: gotoArchive
-  }), contents = E(style.contents, actionButtonPlaceholder = E(style.action), searchInstance = E(search), tableInstance = E(table, {
+  }), contents = E(style.contents, actionButtonPlaceholder = E(style.action), searchInstance = E(search), itemsCount = E(style.itemsCount), tableInstance = E(table, {
     entityId: 'userId',
     properties: {
       multiSelect: true
@@ -11409,7 +11412,11 @@ module.exports = component('tableView', function(arg) {
         return result;
       });
     }
-    return tableInstance.setData(_applicants.filter(searchInstance.isInSearch));
+    _applicants = _applicants.filter(searchInstance.isInSearch);
+    setStyle(itemsCount, {
+      text: _applicants.length + " مورد"
+    });
+    return tableInstance.setData(_applicants);
   };
   searchInstance.onChange(update);
   state.applicants.on(function(_applicants) {
@@ -13861,6 +13868,10 @@ exports.notificationIcon = {
 
 
 },{"../../../utils":38}],123:[function(require,module,exports){
+exports.itemsCount = {
+  margin: 20
+};
+
 exports.contents = {
   marginRight: 250,
   marginTop: 50,

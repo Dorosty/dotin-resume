@@ -1,3 +1,6 @@
+exports.itemsCount =
+  margin: 20
+
 exports.contents =
   marginRight: 250
   marginTop: 50
