@@ -2023,7 +2023,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":34,"./utils/dom":36,"./views":92}],32:[function(require,module,exports){
+},{"./utils/component":34,"./utils/dom":36,"./views":96}],32:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -4526,7 +4526,7 @@ exports.instance = function(thisComponent) {
     var element, l, ref1;
     if (Array.isArray(component)) {
       return component.map(function(component) {
-        return exports.empty(elemcomponentent);
+        return exports.empty(component);
       });
     }
     element = component.fn.element;
@@ -5613,6 +5613,20 @@ exports.submitProfileData = function(data) {
   });
 };
 
+exports.submitTestResults = function(results) {
+  return post('submitTestResults', {
+    results: JSON.stringify(results)
+  }).then(function() {
+    return state.user.on({
+      once: true
+    }, function(user) {
+      return state.user.set(extend({}, user, {
+        applicantTestResults: JSON.stringify(results)
+      }));
+    });
+  });
+};
+
 exports.changeHRStatus = function(applicantId, status) {
   return post('changeHRStatus', extend({
     applicantId: applicantId
@@ -6034,6 +6048,8 @@ exports.jobs = 'allRecordedJobs';
 },{}],46:[function(require,module,exports){
 var Q, applicants, extend, jobs, managers, notifications, user;
 
+return;
+
 Q = require('../../q');
 
 extend = require('../../utils').extend;
@@ -6154,6 +6170,7 @@ user = {
     }
   ],
   resume: null,
+  applicantTestResults: JSON.stringify([3, 10, 11, 4, 1, 2, 5, 6]),
   applicantData: JSON.stringify({
     "مشخصات فردی": {
       "جنسیت": "مرد",
@@ -6284,10 +6301,9 @@ user = {
 };
 
 applicants.forEach(function(applicant) {
-  return applicant.applicantData = user.applicantData;
+  applicant.applicantData = user.applicantData;
+  return applicant.applicantTestResults = user.applicantTestResults;
 });
-
-user.applicantData = void 0;
 
 notifications = [
   {
@@ -6399,6 +6415,16 @@ exports.submitProfileData = function(arg) {
   });
 };
 
+exports.submitTestResults = function(arg) {
+  var results;
+  results = arg.results;
+  return Q.delay(1000 + Math.floor(2000 * Math.random())).then(function() {
+    return user = extend({}, user, {
+      applicantTestResults: results
+    });
+  });
+};
+
 exports.changeHRStatus = function(arg) {
   var applicantId, status;
   applicantId = arg.applicantId, status = arg.status;
@@ -6456,7 +6482,7 @@ exports.cruds = [
   }
 ];
 
-exports.others = ['logout', 'submitProfileData', 'changeHRStatus', 'editHRStatus', 'deleteHRStatus', 'changeManagerStatus', 'clearAllNotifications', 'createMultipleHRStatus'];
+exports.others = ['logout', 'submitProfileData', 'submitTestResults', 'changeHRStatus', 'editHRStatus', 'deleteHRStatus', 'changeManagerStatus', 'clearAllNotifications', 'createMultipleHRStatus'];
 
 exports.states = ['user', 'applicants', 'notifications', 'managers', 'hrUsers', 'jobs'];
 
@@ -7421,7 +7447,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":8,"../../../components/scrollViewer":27,"../../../components/tooltip":28,"../../../utils":38,"../../../utils/animation":33,"../../../utils/component":34,"../../../utils/dom":36,"../../tableView/profile/tab1":105,"./education":51,"./english":53,"./others":56,"./overview":69,"./personalInfo":71,"./reputation":75,"./style":77,"./talents":78}],56:[function(require,module,exports){
+},{"../../../components/checkbox":8,"../../../components/scrollViewer":27,"../../../components/tooltip":28,"../../../utils":38,"../../../utils/animation":33,"../../../utils/component":34,"../../../utils/dom":36,"../../tableView/profile/tab1":109,"./education":51,"./english":53,"./others":56,"./overview":69,"./personalInfo":71,"./reputation":75,"./style":77,"./talents":78}],56:[function(require,module,exports){
 var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
@@ -9970,7 +9996,7 @@ module.exports = component('applicantTestsFirstPage', function(arg, gotoTest) {
   dom = arg.dom, events = arg.events;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
-  items = ['MBTI یک مقیاس است نه یک امتحان', 'دومین آیتم'];
+  items = ['MBTI یک مقیاس است نه یک امتحان', 'انتخاب از بین گزینه‌ها تحمیلی است و یکی را می‌بایست انتخاب کنید', 'هیچ جواب درست یا غلطی وجود ندارد', 'حدود 20 تا 40 دقیقه زمان می‌برد', 'پاسخ‌های شما به سؤالات محرمانه است و به جز سنخ شخصیتی کلی، سایر اطلاعات در دسترس هیچ فرد دیگری قرار نخواهد‌گرفت', 'MBTI فقط رفتارهای معمولی و به هنجار را می‌سنجد و ربطی به سلامت روان یا بیماریابی ندارد', 'هیچ سنخ شخصیتی خوب یا بدی وجود ندارد و هر یک از سنخ‌ها نقاط قوت طبیعی، نقاط ضعف یا نقاط مبهم خود را دارند', 'هنگام پاسخ دادن به سؤالات به این مسئله فکر کنید که در هر یک از موارد در شرایطی که فشاری بر روی شما نیست کدام یک را ترجیح می‌دهید', 'به خودتان فکر کنید، آن هم خارج از نقشهای شغلی یا خانوادگی‌ای که به عهده دارید. به این صورت که معمولا کدام پاسخ یا عمل به شما نزدیک‌تر است؟ یا این که کدام پاسخ توصیف نزدیک‌تری از اعمال و احساسات شما به دست می‌دهد؟', 'اولین پاسخی که به ذهن شما می‌رسد، درست‌ترین است. سعی کنید برای پاسخ دادن سؤال را تحلیل نکنید'];
   view = E(style.view, items.map(function(itemText) {
     return E(style.item, E(style.bullet), E(style.itemText, itemText));
   }), enterButton = E(style.enterButton, 'شروع آزمون'));
@@ -10009,12 +10035,14 @@ exports.bullet = {
   color: 'white',
   fontSize: 16,
   lineHeight: 16,
-  textAlign: 'center'
+  textAlign: 'center',
+  verticalAlign: 'top'
 };
 
 exports.itemText = {
   display: 'inline-block',
   marginRight: 10,
+  maxWidth: '95%',
   height: 30,
   lineHeight: 30
 };
@@ -10039,7 +10067,7 @@ exports.enterButtonHover = {
 
 
 },{}],84:[function(require,module,exports){
-var component, firstPage, secondPage, style;
+var component, firstPage, results, secondPage, style;
 
 component = require('../../../utils/component');
 
@@ -10049,9 +10077,11 @@ firstPage = require('./firstPage');
 
 secondPage = require('./secondPage');
 
+results = require('./results');
+
 module.exports = component('applicantTests', function(arg) {
-  var E, dom, firstPageInstance, gotoTest, secondPageInstance, setStyle;
-  dom = arg.dom;
+  var E, dom, firstPageInstance, gotoResults, gotoTest, resultsInstance, secondPageInstance, setStyle, state;
+  dom = arg.dom, state = arg.state;
   E = dom.E, setStyle = dom.setStyle;
   gotoTest = function() {
     setStyle(firstPageInstance, {
@@ -10064,54 +10094,409 @@ module.exports = component('applicantTests', function(arg) {
     });
     return secondPageInstance.gotoQuestion(0);
   };
+  gotoResults = function() {
+    setStyle([firstPageInstance, secondPageInstance], {
+      opacity: 0,
+      visibility: 'hidden'
+    });
+    return setStyle(resultsInstance, {
+      opacity: 1,
+      visibility: 'visible'
+    });
+  };
+  state.user.on(function(user) {
+    if (user.applicantTestResults) {
+      return setTimeout(function() {
+        setStyle([firstPageInstance, secondPageInstance, resultsInstance], {
+          transition: 'none'
+        });
+        return gotoResults();
+      });
+    }
+  });
   return E({
     position: 'relative',
     width: '100%'
-  }, firstPageInstance = E(firstPage, gotoTest), secondPageInstance = E(secondPage));
+  }, firstPageInstance = E(firstPage, gotoTest), secondPageInstance = E(secondPage, gotoResults), resultsInstance = E(results));
 });
 
 
-},{"../../../utils/component":34,"./firstPage":82,"./secondPage":85,"./style":87}],85:[function(require,module,exports){
-var component, extend, generateId, style;
+},{"../../../utils/component":34,"./firstPage":82,"./results":86,"./secondPage":88,"./style":91}],85:[function(require,module,exports){
+var exports;
+
+module.exports = exports = {
+  E: {
+    count: 11,
+    description: 'درون‌گرایی به طور عمده جهت‌گیری انرژی به سمت دنیای درون، تجربه‌ها و عقیده‌ها است. از جمله خصوصیات مرتبط با درون‌گرایی عبارتند از این که از تنها بودن انرژی می‌گیرند. نمی‌خواهند کانون توجه باشند. موضوعات را در ذهن خود ارزیابی می‌کنند. اطلاعات شخصی را کمتر بروز می‌دهند. بیش از آن که حرف بزنند، گوش می‌دهند. در روابط عمق و کیفیت را بر گستردگی ترجیه می‌دهند.'
+  },
+  ENFJ: {
+    0: 'هدف‌گذار - با اراده - مهارت کلامی - رهبر داتی - سنتی و محافظه کار - سریع - غیر قابل انطاف - خودجوش',
+    1: ['واقع‌بین، اهل عمل و کم احساس است.', 'در زمینه تجارت و کارهای فنی استعداد خاصی از خود نشان می‌دهد.', 'در مورد موضوعاتی که نیاز به آنها احساس نمی‌شود بی‌علاقگی نشان می‌دهد ولی در صورت لزوم آن را بکار می‌برد.', 'معمولا کارها را به خوبی انجام می‌دهد، به خصوص اگر هنگام اتخاذ تصمیم، احساسات و نقطه نظرهای متفاوت را در نظر بگیرد.', 'علاقه زیادی به سازماندهی و هدایت فعالییتها و پروژه‌ها دارد.'],
+    2: ['توجه به نتایج', 'توجه جدی به تعهدات', 'توجه به اهداف سازمانی', 'داشتن توجه و دقت و میل به درست انجام دادن کارها', 'میل به تبعیت از رویه‌ها و مقررات روزمره', 'توانایی تشخیص اقدامات غیر منطقی و ناکارآمد', 'مهارت‌های سازمانی، توانایی در تصمیم‌گیریهای عینی و منطقی', 'اعتقاد به ارزش ساختار سنتی و توانایی کار کردن در محدوده آن', 'داشتن احساس مسئولیت، می‌توان روی حرف شما حساب کرد', 'داشتن اخلاق کاری روشن، نیاز به کارآیی و کارآمدی', 'عقل سلیم و چشم اندازهای واقع‌بینانه'],
+    3: ['ناشکیبایی با کسانی که مطابق رویه‌ها و مقررات کار نمی‌کنند و یا جزئیات را نادیده می‌گیرند', 'بی‌میلی در استفاده از نقطه نظرات جدید و آزمون نشده', 'داشتن مقاومت در برابر تغییر', 'تحمل نکردن عدم کارآیی و یا فرایند‌های وقت‌گیر', 'توجه به نیازهای موجود و بی‌توجهی به نیازهای آینده', 'تمایل به نادیده انگاشتن اشخاص برای دستیابی به هدف خود', 'ناتوانی در دیدن امکانات و احتمالات آتی', 'نداشتن این حساسیت که دیگران چگونه تحت تاثیر سیاستها و تصمیمات شما قرار می‌گیرند', 'دشواری در گوش دادن به نظرات مخالف، ممکن است بارها سخن دیگران را قطع کند'],
+    4: ['مامور بیمه', 'تحلیل‌گر بودجه', 'حسابرس', 'تحلیل‌گر اعتبارات', 'افسر انتظامی', 'مدیر کارخانه', 'مهندس صنعتی', 'دندانپزشک', 'مسئول ایمنی'],
+    5: ['از تصمیم‌گیریهای بیش از اندازه سریع خودداری کنید', 'از روش‌های مبتکرانه و غیر متعارف در یافتن شغل خودداری کنید', 'از توصیه‌های همکارانتان استفاده کنید', 'از توانمندیها و نقاط قوت خود استفاده کنید', 'کارهایی را پیدا کنید و داوطلبانه سرپرستی کنید', 'همکاران کارآمدی پیدا کنید']
+  }
+};
+
+['I', 'N', 'S', 'F', 'T', 'J', 'P'].forEach(function(x) {
+  return exports[x] = exports.E;
+});
+
+['INFJ', 'ESFJ', 'ENTJ', 'ENFP', 'ISFJ', 'INTJ', 'INFP', 'ESTJ', 'ESFP', 'ENTP', 'ISTJ', 'ISFP', 'INTP', 'ESTP', 'ISTP'].forEach(function(x) {
+  return exports[x] = exports.ENFJ;
+});
+
+
+},{}],86:[function(require,module,exports){
+var component, data, style;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
+data = require('./data');
+
+module.exports = component('applicantTestResults', function(arg) {
+  var E, append, box0, box1, box2, box3, box4, box5, closeProgressBars, dom, empty, events, img, mbtiDisplay, onEvent, setProgressBars, setStyle, state, subheader, view;
+  dom = arg.dom, events = arg.events, state = arg.state;
+  E = dom.E, setStyle = dom.setStyle, empty = dom.empty, append = dom.append;
+  onEvent = events.onEvent;
+  closeProgressBars = [];
+  setProgressBars = [];
+  view = E(style.view, E(style.header, 'نتیجه آزمون'), subheader = E(style.subHeader), img = E('img', style.img), E(style.column, mbtiDisplay = E(style.mbtiDisplay), [['برون‌گرایی', 'E', 'درون‌گرایی', 'I'], ['شهودی', 'N', 'حسی', 'S'], ['احساسی', 'F', 'متفکر', 'T'], ['قضاوت‌‌کننده', 'J', 'ملاحظه‌کننده', 'P']].map(function(arg1, i, arr) {
+    var a, as, b, bs;
+    a = arg1[0], as = arg1[1], b = arg1[2], bs = arg1[3];
+    return [
+      [[a, as], [b, bs]].map(function(arg2) {
+        var a, as, bar, barEmpty, barFull, classification, closeBar, count, isOpen, totalCount;
+        a = arg2[0], as = arg2[1];
+        classification = E(style.classification, bar = E(style.progressbar, E(style.progressbarLabel, a), barEmpty = E(style.progressbarEmpty), barFull = E(style.progressbarFull), E(style.progressbarCircle, as), count = E(style.progressbarCount), totalCount = E(style.progressbarTotalCount, data[as].count), E(style.progressbarDescription, data[as].description)));
+        setProgressBars.push(function(n) {
+          return setTimeout(function() {
+            var width;
+            setStyle(count, {
+              text: n
+            });
+            width = barEmpty.fn.element.offsetWidth * n / data[as].count;
+            setStyle(count, {
+              right: 115 - (12 / 2) + width
+            });
+            return setStyle(barFull, {
+              width: width
+            });
+          });
+        });
+        isOpen = false;
+        onEvent(bar, 'mousemove', function() {
+          if (!isOpen) {
+            return setStyle(bar, style.progressbarHover);
+          }
+        });
+        onEvent(bar, 'mouseout', function() {
+          if (!isOpen) {
+            return setStyle(bar, style.progressbar);
+          }
+        });
+        closeProgressBars.push(closeBar = function() {
+          setStyle(bar, style.progressbar);
+          return isOpen = false;
+        });
+        onEvent(bar, 'click', function() {
+          if (isOpen) {
+            return closeBar();
+          } else {
+            closeProgressBars.forEach(function(x) {
+              return x();
+            });
+            setStyle(bar, style.progressbarOpen);
+            return isOpen = true;
+          }
+        });
+        return classification;
+      }), i !== arr.length - 1 ? E(style.seperator) : void 0
+    ];
+  })), E(style.column, E(style.descriptionBox, E(style.descriptionHeader, 'ویژگی‌های کلی تیپ شخصیتی'), box0 = E(style.descriptionItem)), E(style.descriptionBox, E(style.descriptionHeader, 'توصیف شخصیتی و رفتار'), box1 = E()), E(style.descriptionBox, E(style.descriptionHeader, 'نقاط قوت'), box2 = E()), E(style.descriptionBox, E(style.descriptionHeader, 'نقاط ضعف'), box3 = E()), E(style.descriptionBox, E(style.descriptionHeader, 'مشاغل مناسب'), box4 = E()), E(style.descriptionBox, E(style.descriptionHeader, 'چند پیشنهاد برای موفقیت بیشتر در محیط کار'), box5 = E())));
+  state.user.on(function(arg1) {
+    var applicantTestResults, mbti;
+    applicantTestResults = arg1.applicantTestResults;
+    if (!applicantTestResults) {
+      return;
+    }
+    applicantTestResults = JSON.parse(applicantTestResults);
+    applicantTestResults.forEach(function(x, i) {
+      return setProgressBars[i](x);
+    });
+    mbti = [['E', 'I'], ['N', 'S'], ['F', 'T'], ['J', 'P']].map(function(arg2, i) {
+      var a, b;
+      a = arg2[0], b = arg2[1];
+      if (applicantTestResults[2 * i] > applicantTestResults[2 * i + 1]) {
+        return a;
+      } else {
+        return b;
+      }
+    }).join('');
+    setStyle(mbtiDisplay, {
+      text: mbti
+    });
+    setStyle(img, {
+      src: "assets/img/mbti/" + (mbti.toLowerCase()) + "-personality-type-header.png"
+    });
+    setStyle(subheader, {
+      text: 'تیپ شخصیتی، ' + (mbti[0] === 'E' ? 'برون‌گرا' : 'درون‌گرا') + ' ' + (mbti[0] === 'N' ? 'شهودی' : 'حسی') + ' ' + (mbti[0] === 'F' ? 'احساسی' : 'متفکر') + ' ' + (mbti[0] === 'J' ? 'قضاوت‌کننده' : 'ملاحظه‌کننده') + ' ' + mbti
+    });
+    setStyle(box0, {
+      text: data[mbti][0]
+    });
+    empty([box1, box2, box3, box4, box5]);
+    append(box1, data[mbti][1].map(function(x) {
+      return E(style.descriptionItem, x);
+    }));
+    append(box2, data[mbti][2].map(function(x) {
+      return E(style.descriptionItem, E(style.bullet), E(style.itemText, x));
+    }));
+    append(box3, data[mbti][3].map(function(x) {
+      return E(style.descriptionItem, E(style.bullet), E(style.itemText, x));
+    }));
+    append(box4, data[mbti][4].map(function(x) {
+      return E(style.descriptionItem, E(style.bullet), E(style.itemText, x));
+    }));
+    return append(box5, data[mbti][5].map(function(x) {
+      return E(style.descriptionItem, x);
+    }));
+  });
+  return view;
+});
+
+
+},{"../../../../utils/component":34,"./data":85,"./style":87}],87:[function(require,module,exports){
+exports.view = {
+  position: 'absolute',
+  width: '100%',
+  transition: '0.3s',
+  opacity: 0,
+  visibility: 'hidden'
+};
+
+exports.header = {
+  fontSize: 18,
+  color: '#449e73'
+};
+
+exports.subHeader = {
+  fontSize: 18,
+  color: '#b5b5b5',
+  marginTop: 10,
+  marginBottom: 20
+};
+
+exports.img = {
+  width: '100%'
+};
+
+exports.column = {
+  float: 'right',
+  width: '50%',
+  padding: '0 30px'
+};
+
+exports.descriptionBox = {
+  margin: '30px 0'
+};
+
+exports.descriptionHeader = {
+  margin: '20px 0',
+  fontSize: 14,
+  fontWeight: 'bold'
+};
+
+exports.descriptionItem = {
+  margin: '5px 15px',
+  fontSize: 14,
+  color: '#888'
+};
+
+exports.bullet = {
+  width: 20,
+  height: 20,
+  display: 'inline-block',
+  paddingTop: 1,
+  "class": 'fa fa-arrow-left',
+  color: '#449e73',
+  fontSize: 16,
+  lineHeight: 16,
+  textAlign: 'center',
+  verticalAlign: 'top'
+};
+
+exports.itemText = {
+  display: 'inline-block',
+  maxWidth: '90%',
+  height: 20,
+  lineHeight: 20
+};
+
+exports.mbtiDisplay = {
+  fontSize: 22,
+  fontWeight: 'bold',
+  color: '#b5b5b5',
+  margin: '30px 0',
+  width: '100%',
+  textAlign: 'center'
+};
+
+exports.classification = {
+  margin: '20px 0'
+};
+
+exports.seperator = {
+  width: '100%',
+  height: 1,
+  backgroundColor: '#b5b5b5'
+};
+
+exports.progressbar = {
+  position: 'relative',
+  height: 70,
+  borderRadius: 10,
+  cursor: 'pointer',
+  overflow: 'hidden',
+  transition: '0.3s',
+  backgroundColor: 'transparent',
+  border: '1px solid transparent'
+};
+
+exports.progressbarHover = {
+  backgroundColor: '#ecf5f1',
+  borderColor: '#c3d8ce'
+};
+
+exports.progressbarOpen = {
+  backgroundColor: '#ecf5f1',
+  borderColor: '#c3d8ce',
+  height: 300
+};
+
+exports.progressbarDescription = {
+  position: 'absolute',
+  top: 70,
+  width: '100%',
+  color: 'gray',
+  padding: 10,
+  paddingRight: 30,
+  lineHeight: 20
+};
+
+exports.progressbarLabel = {
+  position: 'absolute',
+  top: 15,
+  right: 0,
+  width: 80,
+  height: 40,
+  lineHeight: 40,
+  textAlign: 'left',
+  color: '#449e73',
+  paddingLeft: 10
+};
+
+exports.progressbarEmpty = {
+  position: 'absolute',
+  top: 30,
+  height: 10,
+  left: 40,
+  right: 115,
+  backgroundColor: 'gray',
+  borderRadius: 5
+};
+
+exports.progressbarFull = {
+  position: 'absolute',
+  top: 30,
+  height: 10,
+  backgroundColor: '#449e73',
+  right: 115,
+  borderRadius: 5
+};
+
+exports.progressbarCircle = {
+  position: 'absolute',
+  width: 40,
+  height: 40,
+  top: 15,
+  right: 80,
+  lineHeight: 40,
+  textAlign: 'center',
+  borderRadius: 20,
+  backgroundColor: '#449e73',
+  color: 'white'
+};
+
+exports.progressbarCount = {
+  position: 'absolute',
+  top: 15,
+  width: 12,
+  height: 12,
+  lineHeight: 12,
+  fontSize: 12,
+  color: '#449e73'
+};
+
+exports.progressbarTotalCount = {
+  position: 'absolute',
+  top: 28,
+  width: 12,
+  height: 12,
+  lineHeight: 12,
+  fontSize: 12,
+  color: 'gray',
+  left: 25
+};
+
+
+},{}],88:[function(require,module,exports){
+var component, extend, generateId, questionNumbers, questions, style;
+
+component = require('../../../../utils/component');
+
+style = require('./style');
+
+questions = require('./questions');
+
 extend = require('../../../../utils').extend;
 
 generateId = require('../../../../utils/dom').generateId;
 
-module.exports = component('applicantTestsSecondPage', function(arg) {
-  var E, answer1Id, answer2Id, currentQuestionNumber, dom, events, gotoQuestion, hide, nextButton, nextEnabled, onEvent, questionElements, questions, returnObject, setStyle, typeNext, view;
-  dom = arg.dom, events = arg.events, returnObject = arg.returnObject;
-  E = dom.E, setStyle = dom.setStyle, hide = dom.hide;
+questionNumbers = {
+  E: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  I: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+  N: [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32],
+  S: [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43],
+  F: [44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
+  T: [55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65],
+  J: [66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76],
+  P: [77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87]
+};
+
+module.exports = component('applicantTestsSecondPage', function(arg, gotoResults) {
+  var E, answers, currentQuestionNumber, dom, events, finishButton, gotoQuestion, hide, nextButton, nextEnabled, onEvent, progressbarCirlce, progressbarCirlcePlaceholder, progressbarEmpty, progressbarFull, questionElements, returnObject, service, setStyle, show, typeNext, view;
+  dom = arg.dom, events = arg.events, service = arg.service, returnObject = arg.returnObject;
+  E = dom.E, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
   onEvent = events.onEvent;
-  questions = [
-    {
-      id: 0,
-      question: 'آیا شناختن شما',
-      answers: ['اسان است، یا', 'دشوار است؟']
-    }, {
-      id: 1,
-      question: 'chi?',
-      answers: ['1', '2']
-    }
-  ];
-  answer1Id = generateId();
-  answer2Id = generateId();
+  answers = [];
   nextEnabled = false;
   typeNext = function(enbaled) {
     if (enbaled) {
-      setStyle(nextButton, style.nextButton);
+      setStyle([nextButton, finishButton], style.nextButton);
     } else {
-      setStyle(nextButton, style.nextButtonDisabled);
+      setStyle([nextButton, finishButton], style.nextButtonDisabled);
     }
     return nextEnabled = enbaled;
   };
-  view = E(style.view, questionElements = questions.map(function(arg1) {
-    var answer1, answer1Input, answer2, answer2Input, question, questionBox, ref;
+  view = E(style.view, E(style.progressbar, progressbarEmpty = E(style.progressbarEmpty), progressbarFull = E(style.progressbarFull), progressbarCirlcePlaceholder = E(style.progressbarCirlcePlaceholder, progressbarCirlce = E(style.progressbarCirlce))), questionElements = questions.map(function(arg1, i) {
+    var answer1, answer1Id, answer1Input, answer2, answer2Id, answer2Input, question, questionBox, ref;
     question = arg1.question, (ref = arg1.answers, answer1 = ref[0], answer2 = ref[1]);
+    answer1Id = generateId();
+    answer2Id = generateId();
     questionBox = E(style.questionBox, E(style.question, question), E(style.answers, E(style.answer, answer1Input = E('input', extend({
       name: 'answer',
       id: answer1Id
@@ -10128,6 +10513,7 @@ module.exports = component('applicantTestsSecondPage', function(arg) {
       clear: 'both'
     })));
     onEvent([answer1Input, answer2Input], 'change', function() {
+      answers[i] = answer1Input.checked() ? 0 : 1;
       return typeNext(true);
     });
     return questionBox;
@@ -10137,40 +10523,78 @@ module.exports = component('applicantTestsSecondPage', function(arg) {
     "class": 'fa fa-arrow-left',
     position: 'relative',
     top: 2
-  })));
+  })), hide(finishButton = E(style.nextButton, E('span', {
+    marginLeft: 10
+  }, 'اتمام آزمون'), E({
+    "class": 'fa fa-arrow-left',
+    position: 'relative',
+    top: 2
+  }))));
   currentQuestionNumber = 0;
   gotoQuestion = function(number) {
+    var percent;
     currentQuestionNumber = number;
-    setStyle(questionElements, {
-      opacity: 0,
-      visibility: 'hidden'
-    });
-    setStyle(questionElements[number], {
-      opacity: 1,
-      visibility: 'visible'
-    });
     typeNext(false);
+    if (number !== questions.length) {
+      setStyle(questionElements, {
+        opacity: 0,
+        visibility: 'hidden'
+      });
+      setStyle(questionElements[number], {
+        opacity: 1,
+        visibility: 'visible'
+      });
+    }
     if (number === questions.length - 1) {
-      return hide(nextButton);
+      hide(nextButton);
+      show(finishButton);
     }
+    percent = Math.floor(100 * number / questions.length);
+    setStyle(progressbarEmpty, {
+      width: (100 - percent) + "%"
+    });
+    setStyle(progressbarFull, {
+      width: percent + "%"
+    });
+    setStyle(progressbarCirlcePlaceholder, {
+      right: percent + "%"
+    });
+    return setStyle(progressbarCirlce, {
+      text: percent + "%"
+    });
   };
-  onEvent(nextButton, 'mousemove', function() {
-    if (nextEnabled) {
-      return setStyle(nextButton, style.nextButtonHover);
-    } else {
-      return setStyle(nextButton, style.nextButtonDisabled);
-    }
-  });
-  onEvent(nextButton, 'mouseout', function() {
-    if (nextEnabled) {
-      return setStyle(nextButton, style.nextButton);
-    } else {
-      return setStyle(nextButton, style.nextButtonDisabled);
-    }
+  [nextButton, finishButton].forEach(function(button) {
+    onEvent(button, 'mousemove', function() {
+      if (nextEnabled) {
+        return setStyle(button, style.nextButtonHover);
+      } else {
+        return setStyle(button, style.nextButtonDisabled);
+      }
+    });
+    return onEvent(button, 'mouseout', function() {
+      if (nextEnabled) {
+        return setStyle(button, style.nextButton);
+      } else {
+        return setStyle(button, style.nextButtonDisabled);
+      }
+    });
   });
   onEvent(nextButton, 'click', function() {
     if (nextEnabled) {
       return gotoQuestion(currentQuestionNumber + 1);
+    }
+  });
+  onEvent(finishButton, 'click', function() {
+    if (nextEnabled) {
+      gotoQuestion(questions.length);
+      typeNext(false);
+      return service.submitTestResults(['E', 'I', 'N', 'S', 'F', 'T', 'J', 'P'].map(function(x) {
+        return (questionNumbers[x].map(function(x) {
+          return answers[x];
+        })).reduce((function(acc, x) {
+          return acc + x;
+        }), 0);
+      })).then(gotoResults);
     }
   });
   returnObject({
@@ -10180,7 +10604,277 @@ module.exports = component('applicantTestsSecondPage', function(arg) {
 });
 
 
-},{"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/dom":36,"./style":86}],86:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/dom":36,"./questions":89,"./style":90}],89:[function(require,module,exports){
+module.exports = [
+  {
+    question: 'آیا شناختن شما',
+    answers: ['اسان است، یا', 'دشوار است؟']
+  }, {
+    question: 'برای انجام یک کار، آیا',
+    answers: ['آن را زود شروع کرده طوری که پس از پایان کار وقت اضافی داشته باشید؟', 'آن را به لحظه ی آخر واگذار کرده و سعی می کنید با نهایت سرعت آن را انجام دهید؟']
+  }, {
+    question: 'آیا',
+    answers: ['با هرکسی تا حدی که لازم می دانید به راحتی صحبت می کنید؟', 'فقط با افراد خاصی آن هم در شرایط خاصی می توانید زیاد صحبت کنید؟']
+  }, {
+    question: 'ترجیح می دهید در نظر مردم چگونه باشید؟',
+    answers: ['فردی اهل عمل', 'فردی خلاق و مبتکر']
+  }, {
+    question: 'اگر می خواستید در همسایگی خود برای مسائلی مانند کمک صلیب سرخ به جمع آوری اعانه از دیگران بپردازید، درخواست شما …',
+    answers: ['خلاصه و تجاری می بود؟', 'دوستانه و اجتماعی می بود؟']
+  }, {
+    question: 'شما معمولا',
+    answers: ['زود جوش', 'آرام و درون گرا هستید']
+  }, {
+    question: 'هنگامی که رخدادی پیش بینی نشده شما را مجبور به کنار گذاشتن برنامه روزانه تان می کند، آیا',
+    answers: ['به وجود آمدن وقفه در برنامه تان را مزاحمت تلقی می کنید?', 'با تغییر وضعیت پیش آمده با خوشرویی برخورد می کنید؟']
+  }, {
+    question: 'هنگام مطالعه با هدف سرگرم شدن',
+    answers: ['از شیوه بیان عجیب و ابتکاری لذت می برید، یا', 'نویسندگانی را دوست دارید که به روشنی منظور خود را می رسانند؟']
+  }, {
+    question: 'کدام گزاره تعریف و تمجید بیشتری از شما به شمار می‌آید؟',
+    answers: ['شخصی با احساسات واقعی', 'شخصی همیشه منطقی؟']
+  }, {
+    question: 'روابط دوستانه شما',
+    answers: ['با افرادی معدود، ولی عمیق است', 'با تعداد بسیاری از افراد، ولی سطحی است']
+  }, {
+    question: 'آیا در تصمیم گیری، بیشتر',
+    answers: ['قلبتان بر عقلتان غلبه دارد؟', 'عقلتان بر قلبتان؟']
+  }, {
+    question: 'می توانید به طور نامحدود',
+    answers: ['فقط با کسانی که علایق مشترکی با شما دارند صحبت کنید', 'می توانید با هر کسی صحبت کنید']
+  }, {
+    question: 'آیا مطابق برنامه عمل کردن',
+    answers: ['مورد رضایت شماست، یا', 'شما را در تنگنا قرار می دهد؟']
+  }, {
+    question: 'هنگام شروع یک پروژه ی بزرگ تا یک هفته باید انجام شود، آیا',
+    answers: ['زمانی را برای تهیه فهرستی از کارهایی که می بایست انجام شوند بر اساس اولویت در نظر می گیرید', 'دل به دریا می زنید و شروع می کنید؟']
+  }, {
+    question: 'در صحبت کردن با دوستانتان، آیا',
+    answers: ['گاهی مسایل شخصی را به طور خصوصی به آنان می گویید', 'تقزیبا هرگز چیزی را که نمی خواهید بگویید بیان نمی کنید؟']
+  }, {
+    question: 'اگر معلم بودید ترجیح می دادید',
+    answers: ['واقعیت ها را تدریس کنید', 'نظریه ها را شرح دهید؟']
+  }, {
+    question: 'هنگام گفتگو بیشتر تمایل دارید',
+    answers: ['تمجید کنید', 'سرزنش کنید؟']
+  }, {
+    question: 'آیا معمولا',
+    answers: ['آزادانه احساسات خود را نشان می دهید', 'احساسات خود را نشان نمی دهید؟']
+  }, {
+    question: 'اگر قرار باشد که کاری خاص را از پیش، در زمانی خاص، انجام دهید، آیا',
+    answers: ['طبق برنامه عمل کردن برای شما خوشایند است', 'از در چهارچوب قرار گرفتن احساس ناخوشایندی می کنید؟']
+  }, {
+    question: 'معمولا با کدام شخص، راحت تر ارتباط برقرار می کنید؟ ',
+    answers: ['با فردی تخیلی، یا', 'با فردی واقع بین']
+  }, {
+    question: 'احساس می کنید که کدامیک عیب بدتری به شمار می آید؟ ',
+    answers: ['همدردی نکردن', 'استدلال پذیر نبودن؟']
+  }, {
+    question: 'وقتی غریبه ها به شما توجه می کنند ',
+    answers: ['احساس ناراحتی می کنید', 'اصلا ناراحت نمی شوید؟']
+  }, {
+    question: 'اگر بخواهید عمل خاصی را انجام دهید، کدامیک از این دو گزاره برایتان جالب تر به نظر می رسد؟ ',
+    answers: ['مردم خیلی دوست دارند که شما آن را انجام دهید', 'این منطقی ترین کاری است که انجام دهید.']
+  }, {
+    question: 'آیا عادت دارید ',
+    answers: ['به هیچ کس اعتماد نکنید، یا حداکثر به یک نفر اعتماد کنید', 'تعدادی دوست دارید که به آن ها اعتماد می کنید؟']
+  }, {
+    question: 'آیا ترجیح می دهید ',
+    answers: ['قرار ملاقات ها، وعده ها و میهمانی ها را از پیش تعیین کنید', 'فردی باشید که در لحظه آخر بتوانید آزادانه آن جایی را که تمایل دارید انتخاب کنید؟']
+  }, {
+    question: 'آیا ',
+    answers: ['ترجیح می دهید کارها را در دقیقه آخر انجام دهید', 'انجام دادن کارها در دقیقه آخر عصبی تان می کند؟']
+  }, {
+    question: 'آیا ',
+    answers: ['فکر می کنید همه کسانی را که دوست دارید، می دانند که دوستشان دارید، یا', 'به بعضی افراد علاقمند هستید بی آنکه بگذارید آن ها بدانند؟']
+  }, {
+    question: 'در انجام کاری که بسیاری از مردم انجام می دهند، ترجیح می دهید ',
+    answers: ['آن را به شیوه پذیرفته شده انجام دهید', 'روش خاص خود را برای انجام آن ابداع کنید؟']
+  }, {
+    question: 'فکر می کنید وجود کدامیک در فرد نقص بیشتری است؟ ',
+    answers: ['خیلی احساساتی بودن', 'به اندازه کافی احساساتی نبودن؟']
+  }, {
+    question: 'وقتی با گروهی از افراد هستید معمولا ترجیح می دهید ',
+    answers: ['به صحبت گروهی بپردازید', 'هر بار فقط با یک فرد صحبت کنید؟']
+  }, {
+    question: 'آیا فکر می کنید که داشتن یک برنامه روزانه ',
+    answers: ['راحت ترین روش برای انجام دادن کارهاست', 'حتی اگر ضروری باشد، رنج آور است']
+  }, {
+    question: 'در شیوه زندگی تان، ترجیح می دهید ',
+    answers: ['متفاوت باشید، یا', 'متعارف عمل کنید؟']
+  }, {
+    question: 'احساس می کنید کدامیک عیب بدتری در ارتباطات بین فردی به شمار می رود؟ ',
+    answers: ['گرمی زیاد نشان دادن', 'به اندازه کافی گرم نبودن']
+  }, {
+    question: 'در بین دوستانتان، آیا ',
+    answers: ['یکی از آخرین کسانی هستید که خبرها را می شنود', 'همه نوع خبری در مورد هر کسی دارید؟']
+  }, {
+    question: 'آیا معمولا ',
+    answers: ['برای احساس بیشتر از منطق ارزش قایل هستید، یا', 'برای منطق بیشتر از احساس؟']
+  }, {
+    question: 'در یک محفل اجتماعی، آیا ',
+    answers: ['سعی می کنید کسی را که دوست دارید با او صحبت کنید به گوشه ای بکشید', 'با گروه می جوشید؟']
+  }, {
+    question: 'وقتی که کار خاصی برای انجام دادن دارید، آیا ترجیح می دهید ',
+    answers: ['پیش از آغاز کار، با دقت آن را ساماندهی کنید', 'آنچه ضروری است را حین انجام کار متوجه شوید؟']
+  }, {
+    question: 'آیا ',
+    answers: ['روزمره بودن برایتان ساده تر است', 'متنوع بودن؟']
+  }, {
+    question: 'در میهمانی ها، آیا ',
+    answers: ['گاهی کسل می شوید، یا', 'همیشه به شما خوش می گذرد؟']
+  }, {
+    question: 'در زندگی شخصی، وقتی مسئولیتی را به پایان می رسانید',
+    answers: ['می دانید کار بعدی چیست و آماده ی درگیر شدن با آن هستید، یا', 'تا پیشامد بعدی از آرامش خود خوشنود هستید؟']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['عبارت', 'مفهوم']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['متقاعد کردن', 'درک کردن']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['صحبت کردن', 'نوشتن']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['وقت شناس', 'راحت گیر (غیر سخت گیر)']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['ساختن', 'اختراع کردن']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['موافقت کردن', 'پرسیدن']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['واقعی', 'انتزاعی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['مزیت', 'برکت']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['آرام', 'سرزنده']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['منضبط', 'آسان گیر']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['حروفی', 'ارقامی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['تحلیل کردن', 'همدردی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['تولید', 'طراحی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['نرم', 'سخت']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['ساکت', 'پرحرف']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['منظم', 'خودمانی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['علامت مشخص', 'نماد']
+  }, {
+    question: 'کدام عبارت از هر جفت عبارت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['پایبند به اندیشه خود', 'دلگرم و امیدوار']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['پذیرش', 'تغییر']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['چه کسی؟', 'چه چیزی؟']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['برنامه ریز', 'بدون برنامه']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['شناخته شده', 'نا شناخته']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['محتاط', 'خوش خیال']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['واقعیت ها', 'ایده ها']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['ملایم', 'محکم']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['زیر بنا', 'روبنا']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['عدالت', 'بخشندگی و دست و دل باز بودن']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['نظریه', 'تجربه']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['غیر انتقادی', 'انتقادی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['مبتکر', 'احساسی']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['مایع', 'جامد']
+  }, {
+    question: 'کدام لغت از هر جفت لغت برای شما جالب تر است؟ به معنی لغت ها فکر کنید نه اینکه چطور به نظر می رسند. ',
+    answers: ['دلسوزی', 'دوراندیشی']
+  }, {
+    question: 'کدامیک تمجید بیشتری از یک فرد است؟ ',
+    answers: ['بصیرت و بینش دارد', 'عقل سلیم دارد؟']
+  }, {
+    question: 'بیشتر مراقب کدامیک هستید؟ ',
+    answers: ['احساست افراد', 'حق و حقوق آن ها']
+  }, {
+    question: 'در یک مهمانی دوست دارید ',
+    answers: ['کاری می کنید که مراسم به خوبی انجام شود', 'می گذارید هر کسی به میل خودش خوش بگذراند؟']
+  }, {
+    question: 'آیا به طور کلی ترجیح می دهید ',
+    answers: ['برای دیدار کسی از قبل برنامه ریزی می کنید', 'آزاد باشید و لحظه ای عمل می کنید؟']
+  }, {
+    question: 'هنگامی که با گروهی از دوستان نزدیک خودتان هستید، آیا ',
+    answers: ['بیشتر از بقیه صحبت می کنید؟ ', 'کمتر از بقیه؟']
+  }, {
+    question: 'آیا به طور طبیعی ',
+    answers: ['به مردم بیشتر از اشیاء علاقمندید', 'به اشیا و نحوه ی کار آن ها بیشتر از روابط انسان ها علاقه مندید؟']
+  }, {
+    question: 'در یک گروه بزرگ، اغلب ',
+    answers: ['دیگران را به هم معرفی می کنید', 'صبر می کنید تا معرفی بشوید؟']
+  }, {
+    question: '.وقتی برای یک روز، جایی می روید، آیا ترجیح می دهید ',
+    answers: ['برای اینکه چه کاری و چه موقع انجام دهید برنامه ریزی کنید', 'راحت باشید و فقط راه بیافتید؟']
+  }, {
+    question: 'زمانی که در مورد یک پیشامد فکر می کنید ترجیح می دهید ',
+    answers: ['در این مورد با شخصی صحبت کنید ', 'در مورد آن خوب فکر می کنید؟']
+  }, {
+    question: 'آیا افرادی که تازه با شما آشنا می شوند می توانند بگویند به چه علاقه دارید؟ ',
+    answers: ['خیلی سریع، یا', 'تنها پس از آن که شما را خوب شناختند']
+  }, {
+    question: 'در مورد کارهای روزمره ترجیح می دهید ',
+    answers: ['صبح اول وقت آن ها را انجام دهید', 'یا در ضمن فرصت های پیش آمده حین انجام کارهای جالب تر دیگر، آن ها را انجام دهید؟']
+  }, {
+    question: '.آیا معمولا منظورتان ',
+    answers: ['بیشتر از آن چه می گویید، می باشد', 'کمتر از آن چه می گویید است؟']
+  }, {
+    question: 'آیا ',
+    answers: ['از اتمام کارها پیش از زمان موعود احساس رضایت می کنید', 'از سرعت و کار آمدی خود در لحظات آخر انجام کار لذت می برید؟']
+  }, {
+    question: 'وقتی که غریبه ها را ملاقات می کنید، آیا ',
+    answers: ['برایتان خوشایند است، یا دست کم راحت است', 'زحمت زیادی برایتان دارد؟']
+  }, {
+    question: 'وقتی در جلسه ای راجع به چیزی نظری دارید که باید گفته شود، آیا ',
+    answers: ['آن را مطرح می کنید، یا', 'در مورد گفتن ان تردید می کنید']
+  }, {
+    question: 'آیا در مورد معنی پرسش های این آزمون دوست داشتید ',
+    answers: ['خیلی سوال کنید، یا', 'کم؟']
+  }
+];
+
+
+},{}],90:[function(require,module,exports){
 exports.view = {
   position: 'absolute',
   width: '100%',
@@ -10217,12 +10911,14 @@ exports.answer = {
 exports.answerRadio = {
   type: 'radio',
   display: 'inline-block',
-  marginLeft: 10
+  marginLeft: 10,
+  verticalAlign: 'top'
 };
 
 exports.answerLabel = {
   display: 'inline-block',
-  fontWeight: 'normal'
+  fontWeight: 'normal',
+  maxWidth: '90%'
 };
 
 exports.nextButton = {
@@ -10248,12 +10944,58 @@ exports.nextButtonDisabled = {
   cursor: 'not-allowed'
 };
 
+exports.progressbar = {
+  position: 'relative',
+  height: 70
+};
 
-},{}],87:[function(require,module,exports){
+exports.progressbarEmpty = {
+  position: 'absolute',
+  top: 30,
+  height: 10,
+  backgroundColor: 'gray',
+  left: 0,
+  borderRadius: '5px 0 0 5px',
+  transition: '0.1s'
+};
+
+exports.progressbarFull = {
+  position: 'absolute',
+  top: 30,
+  height: 10,
+  backgroundColor: '#449e73',
+  right: 0,
+  borderRadius: '0 5px 5px 0',
+  transition: '0.1s'
+};
+
+exports.progressbarCirlcePlaceholder = {
+  position: 'absolute',
+  top: 35,
+  width: 0,
+  height: 0,
+  transition: '0.1s'
+};
+
+exports.progressbarCirlce = {
+  position: 'absolute',
+  width: 40,
+  height: 40,
+  top: -20,
+  left: -20,
+  lineHeight: 40,
+  textAlign: 'center',
+  borderRadius: 20,
+  backgroundColor: '#449e73',
+  color: 'white'
+};
+
+
+},{}],91:[function(require,module,exports){
 
 
 
-},{}],88:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -10402,7 +11144,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":38,"../../utils/component":34,"./jobs":89,"./style":90}],89:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./jobs":93,"./style":94}],93:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -10484,7 +11226,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],90:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -10716,7 +11458,7 @@ exports.footerLink = {
 };
 
 
-},{}],91:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -10724,7 +11466,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":98}],92:[function(require,module,exports){
+},{"../tableView":102}],96:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView, printView;
 
 component = require('../utils/component');
@@ -10742,10 +11484,11 @@ applicantView = require('./applicantView');
 printView = require('./printView');
 
 module.exports = component('views', function(arg) {
-  var E, append, currentPage, dom, empty, state, wrapper;
+  var E, append, currentPage, dom, empty, prevUserType, state, wrapper;
   dom = arg.dom, state = arg.state;
   E = dom.E, append = dom.append, empty = dom.empty;
   wrapper = E();
+  prevUserType = -1;
   currentPage = void 0;
   if (~location.hash.indexOf('#print_')) {
     append(wrapper, E(printView, +location.hash.slice('#print_'.length)));
@@ -10753,6 +11496,10 @@ module.exports = component('views', function(arg) {
     state.user.on({
       allowNull: true
     }, function(user) {
+      if ((user != null ? user.userType : void 0) === prevUserType) {
+        return;
+      }
+      prevUserType = user != null ? user.userType : void 0;
       empty(wrapper);
       currentPage = (function() {
         if (user) {
@@ -10775,7 +11522,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":34,"./applicantView":80,"./apply":88,"./hrView":91,"./login":93,"./managerView":95,"./printView":96}],93:[function(require,module,exports){
+},{"../utils/component":34,"./applicantView":80,"./apply":92,"./hrView":95,"./login":97,"./managerView":99,"./printView":100}],97:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -10854,7 +11601,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":24,"../../utils":38,"../../utils/component":34,"./style":94}],94:[function(require,module,exports){
+},{"../../components/restrictedInput/number":24,"../../utils":38,"../../utils/component":34,"./style":98}],98:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -10951,9 +11698,9 @@ exports.invalid = {
 };
 
 
-},{}],95:[function(require,module,exports){
-arguments[4][91][0].apply(exports,arguments)
-},{"../tableView":98,"dup":91}],96:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
+arguments[4][95][0].apply(exports,arguments)
+},{"../tableView":102,"dup":95}],100:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 style = require('./style');
@@ -11039,7 +11786,7 @@ module.exports = component('views', function(arg, userId) {
 });
 
 
-},{"../../utils":38,"../../utils/component":34,"./style":97}],97:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./style":101}],101:[function(require,module,exports){
 var box, extend;
 
 extend = require('../../utils').extend;
@@ -11122,7 +11869,7 @@ exports.tableFooter = {
 };
 
 
-},{"../../utils":38}],98:[function(require,module,exports){
+},{"../../utils":38}],102:[function(require,module,exports){
 var actionButton, component, extend, logic, profile, ref, search, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
@@ -11433,7 +12180,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../components/actionButton":2,"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"./profile":101,"./search":119,"./sidebar":121,"./style":123,"./table":125}],99:[function(require,module,exports){
+},{"../../components/actionButton":2,"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"./profile":105,"./search":123,"./sidebar":125,"./style":127,"./table":129}],103:[function(require,module,exports){
 var component, dateInput, dropdown, logic, newAlert, ref, remove, style, toDate, toTimestamp;
 
 style = require('./style');
@@ -11704,7 +12451,7 @@ module.exports = function(loadbarInstance, applicant, status) {
 };
 
 
-},{"../../../../components/alert":6,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":100}],100:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":104}],104:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -11839,7 +12586,7 @@ exports.dropdownInput = {
 };
 
 
-},{}],101:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 var actionButton, changeStatus, component, extend, loadbar, logic, style, tab0, tab1, tab2, tab3, tab4, tab5, tabContents, tabNames, viewStatus;
 
 component = require('../../../utils/component');
@@ -12143,7 +12890,7 @@ module.exports = component('profile', function(arg, arg1) {
 });
 
 
-},{"../../../components/actionButton":2,"../../../components/loadbar":18,"../../../utils":38,"../../../utils/component":34,"../../../utils/logic":40,"./changeStatus":99,"./style":102,"./tab0":103,"./tab1":105,"./tab2":107,"./tab3":109,"./tab4":111,"./tab5":113,"./viewStatus":115}],102:[function(require,module,exports){
+},{"../../../components/actionButton":2,"../../../components/loadbar":18,"../../../utils":38,"../../../utils/component":34,"../../../utils/logic":40,"./changeStatus":103,"./style":106,"./tab0":107,"./tab1":109,"./tab2":111,"./tab3":113,"./tab4":115,"./tab5":117,"./viewStatus":119}],106:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -12353,7 +13100,7 @@ exports.printButtonHover = {
 };
 
 
-},{"../../../utils":38}],103:[function(require,module,exports){
+},{"../../../utils":38}],107:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -12388,7 +13135,7 @@ module.exports = component('tab0', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":38,"../../../../utils/component":34,"./style":104}],104:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":108}],108:[function(require,module,exports){
 exports.column = {
   display: 'inline-block',
   width: '50%'
@@ -12454,7 +13201,7 @@ exports.resumeLink = {
 };
 
 
-},{}],105:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate, toEnglish;
 
 component = require('../../../../utils/component');
@@ -12533,7 +13280,7 @@ module.exports = component('tab1', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":38,"../../../../utils/component":34,"./style":106}],106:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":110}],110:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -12672,24 +13419,295 @@ exports.seperator = {
 };
 
 
-},{}],107:[function(require,module,exports){
-var component, style;
+},{}],111:[function(require,module,exports){
+var component, data, extend, style;
 
 component = require('../../../../utils/component');
 
 style = require('./style');
 
-module.exports = component('tab2', function(arg) {
-  var E, dom;
-  dom = arg.dom;
-  E = dom.E;
-  return E(null, 'آزمون');
+data = require('../../../applicantView/tests/results/data');
+
+extend = require('../../../../utils').extend;
+
+module.exports = component('tab2', function(arg, arg1) {
+  var E, applicant, applicantTestResults, closeProgressBars, dom, events, mbti, onEvent, setProgressBars, setStyle;
+  dom = arg.dom, events = arg.events;
+  applicant = arg1.applicant;
+  E = dom.E, setStyle = dom.setStyle;
+  if (!applicant.applicantTestResults) {
+    return E();
+  }
+  onEvent = events.onEvent;
+  applicantTestResults = applicant.applicantTestResults;
+  applicantTestResults = JSON.parse(applicantTestResults);
+  mbti = [['E', 'I'], ['N', 'S'], ['F', 'T'], ['J', 'P']].map(function(arg2, i) {
+    var a, b;
+    a = arg2[0], b = arg2[1];
+    if (applicantTestResults[2 * i] > applicantTestResults[2 * i + 1]) {
+      return a;
+    } else {
+      return b;
+    }
+  }).join('');
+  closeProgressBars = [];
+  setProgressBars = [];
+  applicantTestResults.forEach(function(x, i) {
+    return setTimeout(function() {
+      return setProgressBars[i](x);
+    });
+  });
+  return E(style.view, E(style.header, 'نتیجه آزمون'), E(style.subHeader, 'تیپ شخصیتی، ' + (mbti[0] === 'E' ? 'برون‌گرا' : 'درون‌گرا') + ' ' + (mbti[0] === 'N' ? 'شهودی' : 'حسی') + ' ' + (mbti[0] === 'F' ? 'احساسی' : 'متفکر') + ' ' + (mbti[0] === 'J' ? 'قضاوت‌کننده' : 'ملاحظه‌کننده') + ' ' + mbti), E('img', extend({
+    src: "assets/img/mbti/" + (mbti.toLowerCase()) + "-personality-type-header.png"
+  }, style.img)), E(style.column, E(style.mbtiDisplay, mbti), [['برون‌گرایی', 'E', 'درون‌گرایی', 'I'], ['شهودی', 'N', 'حسی', 'S'], ['احساسی', 'F', 'متفکر', 'T'], ['قضاوت‌‌کننده', 'J', 'ملاحظه‌کننده', 'P']].map(function(arg2, i, arr) {
+    var a, as, b, bs;
+    a = arg2[0], as = arg2[1], b = arg2[2], bs = arg2[3];
+    return [
+      [[a, as], [b, bs]].map(function(arg3) {
+        var a, as, bar, barEmpty, barFull, classification, closeBar, count, isOpen, totalCount;
+        a = arg3[0], as = arg3[1];
+        classification = E(style.classification, bar = E(style.progressbar, E(style.progressbarLabel, a), barEmpty = E(style.progressbarEmpty), barFull = E(style.progressbarFull), E(style.progressbarCircle, as), count = E(style.progressbarCount), totalCount = E(style.progressbarTotalCount, data[as].count), E(style.progressbarDescription, data[as].description)));
+        setProgressBars.push(function(n) {
+          return setTimeout(function() {
+            var width;
+            setStyle(count, {
+              text: n
+            });
+            width = barEmpty.fn.element.offsetWidth * n / data[as].count;
+            setStyle(count, {
+              right: 115 - (12 / 2) + width
+            });
+            return setStyle(barFull, {
+              width: width
+            });
+          });
+        });
+        isOpen = false;
+        onEvent(bar, 'mousemove', function() {
+          if (!isOpen) {
+            return setStyle(bar, style.progressbarHover);
+          }
+        });
+        onEvent(bar, 'mouseout', function() {
+          if (!isOpen) {
+            return setStyle(bar, style.progressbar);
+          }
+        });
+        closeProgressBars.push(closeBar = function() {
+          setStyle(bar, style.progressbar);
+          return isOpen = false;
+        });
+        onEvent(bar, 'click', function() {
+          if (isOpen) {
+            return closeBar();
+          } else {
+            closeProgressBars.forEach(function(x) {
+              return x();
+            });
+            setStyle(bar, style.progressbarOpen);
+            return isOpen = true;
+          }
+        });
+        return classification;
+      }), i !== arr.length - 1 ? E(style.seperator) : void 0
+    ];
+  })), E(style.column, E(style.descriptionBox, E(style.descriptionHeader, 'ویژگی‌های کلی تیپ شخصیتی'), E(style.descriptionItem, data[mbti][0])), E(style.descriptionBox, E(style.descriptionHeader, 'توصیف شخصیتی و رفتار'), data[mbti][1].map(function(x) {
+    return E(style.descriptionItem, x);
+  })), E(style.descriptionBox, E(style.descriptionHeader, 'نقاط قوت'), data[mbti][2].map(function(x) {
+    return E(style.descriptionItem, E(style.bullet), E(style.itemText, x));
+  })), E(style.descriptionBox, E(style.descriptionHeader, 'نقاط ضعف'), data[mbti][3].map(function(x) {
+    return E(style.descriptionItem, E(style.bullet), E(style.itemText, x));
+  })), E(style.descriptionBox, E(style.descriptionHeader, 'مشاغل مناسب'), data[mbti][4].map(function(x) {
+    return E(style.descriptionItem, E(style.bullet), E(style.itemText, x));
+  })), E(style.descriptionBox, E(style.descriptionHeader, 'چند پیشنهاد برای موفقیت بیشتر در محیط کار'), data[mbti][5].map(function(x) {
+    return E(style.descriptionItem, x);
+  }))));
 });
 
 
-},{"../../../../utils/component":34,"./style":108}],108:[function(require,module,exports){
-arguments[4][87][0].apply(exports,arguments)
-},{"dup":87}],109:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"../../../applicantView/tests/results/data":85,"./style":112}],112:[function(require,module,exports){
+exports.view = {
+  position: 'relative',
+  width: '100%',
+  transition: '0.3s'
+};
+
+exports.header = {
+  fontSize: 18,
+  color: '#449e73'
+};
+
+exports.subHeader = {
+  fontSize: 18,
+  color: '#b5b5b5',
+  marginTop: 10,
+  marginBottom: 20
+};
+
+exports.img = {
+  width: '100%'
+};
+
+exports.column = {
+  float: 'right',
+  width: '50%',
+  padding: '0 30px'
+};
+
+exports.descriptionBox = {
+  margin: '30px 0'
+};
+
+exports.descriptionHeader = {
+  margin: '20px 0',
+  fontSize: 14,
+  fontWeight: 'bold'
+};
+
+exports.descriptionItem = {
+  margin: '5px 15px',
+  fontSize: 14,
+  color: '#888'
+};
+
+exports.bullet = {
+  width: 20,
+  height: 20,
+  display: 'inline-block',
+  paddingTop: 1,
+  "class": 'fa fa-arrow-left',
+  color: '#449e73',
+  fontSize: 16,
+  lineHeight: 16,
+  textAlign: 'center',
+  verticalAlign: 'top'
+};
+
+exports.itemText = {
+  display: 'inline-block',
+  maxWidth: '90%',
+  height: 20,
+  lineHeight: 20
+};
+
+exports.mbtiDisplay = {
+  fontSize: 22,
+  fontWeight: 'bold',
+  color: '#b5b5b5',
+  margin: '30px 0',
+  width: '100%',
+  textAlign: 'center'
+};
+
+exports.classification = {
+  margin: '20px 0'
+};
+
+exports.seperator = {
+  width: '100%',
+  height: 1,
+  backgroundColor: '#b5b5b5'
+};
+
+exports.progressbar = {
+  position: 'relative',
+  height: 70,
+  borderRadius: 10,
+  cursor: 'pointer',
+  overflow: 'hidden',
+  transition: '0.3s',
+  backgroundColor: 'transparent',
+  border: '1px solid transparent'
+};
+
+exports.progressbarHover = {
+  backgroundColor: '#ecf5f1',
+  borderColor: '#c3d8ce'
+};
+
+exports.progressbarOpen = {
+  backgroundColor: '#ecf5f1',
+  borderColor: '#c3d8ce',
+  height: 300
+};
+
+exports.progressbarDescription = {
+  position: 'absolute',
+  top: 70,
+  width: '100%',
+  color: 'gray',
+  padding: 10,
+  paddingRight: 30,
+  lineHeight: 20
+};
+
+exports.progressbarLabel = {
+  position: 'absolute',
+  top: 15,
+  right: 0,
+  width: 80,
+  height: 40,
+  lineHeight: 40,
+  textAlign: 'left',
+  color: '#449e73',
+  paddingLeft: 10
+};
+
+exports.progressbarEmpty = {
+  position: 'absolute',
+  top: 30,
+  height: 10,
+  left: 40,
+  right: 115,
+  backgroundColor: 'gray',
+  borderRadius: 5
+};
+
+exports.progressbarFull = {
+  position: 'absolute',
+  top: 30,
+  height: 10,
+  backgroundColor: '#449e73',
+  right: 115,
+  borderRadius: 5
+};
+
+exports.progressbarCircle = {
+  position: 'absolute',
+  width: 40,
+  height: 40,
+  top: 15,
+  right: 80,
+  lineHeight: 40,
+  textAlign: 'center',
+  borderRadius: 20,
+  backgroundColor: '#449e73',
+  color: 'white'
+};
+
+exports.progressbarCount = {
+  position: 'absolute',
+  top: 15,
+  width: 12,
+  height: 12,
+  lineHeight: 12,
+  fontSize: 12,
+  color: '#449e73'
+};
+
+exports.progressbarTotalCount = {
+  position: 'absolute',
+  top: 28,
+  width: 12,
+  height: 12,
+  lineHeight: 12,
+  fontSize: 12,
+  color: 'gray',
+  left: 25
+};
+
+
+},{}],113:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -12704,9 +13722,9 @@ module.exports = component('tab3', function(arg) {
 });
 
 
-},{"../../../../utils/component":34,"./style":110}],110:[function(require,module,exports){
-arguments[4][87][0].apply(exports,arguments)
-},{"dup":87}],111:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":114}],114:[function(require,module,exports){
+arguments[4][91][0].apply(exports,arguments)
+},{"dup":91}],115:[function(require,module,exports){
 var component, extend, logic, ref, style, toDate, toTime;
 
 component = require('../../../../utils/component');
@@ -12809,7 +13827,7 @@ module.exports = component('tab4', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":112}],112:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":116}],116:[function(require,module,exports){
 exports.table = {
   width: '100%'
 };
@@ -12831,7 +13849,7 @@ exports.profilePicture = {
 };
 
 
-},{}],113:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -12846,9 +13864,9 @@ module.exports = component('tab5', function(arg) {
 });
 
 
-},{"../../../../utils/component":34,"./style":114}],114:[function(require,module,exports){
-arguments[4][87][0].apply(exports,arguments)
-},{"dup":87}],115:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":118}],118:[function(require,module,exports){
+arguments[4][91][0].apply(exports,arguments)
+},{"dup":91}],119:[function(require,module,exports){
 var alert, component, logic, ref, style, toDate, toTime;
 
 style = require('./style');
@@ -12921,7 +13939,7 @@ module.exports = function(applicant, status) {
 };
 
 
-},{"../../../../components/alert":6,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":116}],116:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":120}],120:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -12950,7 +13968,7 @@ exports.submit = {
 };
 
 
-},{}],117:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 var component, dateInput, dropdown, logic, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -13201,7 +14219,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":118}],118:[function(require,module,exports){
+},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":122}],122:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -13244,7 +14262,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":38}],119:[function(require,module,exports){
+},{"../../../../utils":38}],123:[function(require,module,exports){
 var component, criterion, ref, remove, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -13354,7 +14372,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":38,"../../../utils/component":34,"./criterion":117,"./style":120}],120:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"./criterion":121,"./style":124}],124:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -13475,7 +14493,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":38}],121:[function(require,module,exports){
+},{"../../../utils":38}],125:[function(require,module,exports){
 var actionModifiable, component, extend, ref, ref1, statuses, style, toDate, toTime, window;
 
 component = require('../../../utils/component');
@@ -13658,7 +14676,7 @@ module.exports = component('sidebar', function(arg, arg1) {
 });
 
 
-},{"../../../utils":38,"../../../utils/component":34,"../../../utils/dom":36,"../../../utils/logic":40,"./style":122}],122:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"../../../utils/dom":36,"../../../utils/logic":40,"./style":126}],126:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -13867,7 +14885,7 @@ exports.notificationIcon = {
 };
 
 
-},{"../../../utils":38}],123:[function(require,module,exports){
+},{"../../../utils":38}],127:[function(require,module,exports){
 exports.itemsCount = {
   margin: 20
 };
@@ -13914,7 +14932,7 @@ exports.profileVisible = {
 };
 
 
-},{}],124:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -14136,7 +15154,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":38,"./style":126}],125:[function(require,module,exports){
+},{"../../../utils":38,"./style":130}],129:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -14260,7 +15278,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":38,"../../../utils/component":34,"./functions":124,"./style":126}],126:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"./functions":128,"./style":130}],130:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -14351,7 +15369,7 @@ exports.checkboxSelected = {
 };
 
 
-},{"../../../utils":38}],127:[function(require,module,exports){
+},{"../../../utils":38}],131:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, page, ref, service;
 
 Q = require('./q');
@@ -14381,4 +15399,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./page":31,"./q":32,"./utils/dom":36,"./utils/service":44}]},{},[127]);
+},{"./page":31,"./q":32,"./utils/dom":36,"./utils/service":44}]},{},[131]);

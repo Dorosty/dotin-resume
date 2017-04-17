@@ -17,6 +17,7 @@ exports.cruds = [
 exports.others = [
   'logout'
   'submitProfileData'
+  'submitTestResults'
   'changeHRStatus'
   'editHRStatus'
   'deleteHRStatus'

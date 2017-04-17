@@ -1,7 +1,9 @@
 exports.view =
-  position: 'relative'
+  position: 'absolute'
   width: '100%'
   transition: '0.3s'
+  opacity: 0
+  visibility: 'hidden'
 
 exports.header =
   fontSize: 18

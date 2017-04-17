@@ -11,11 +11,15 @@ module.exports = component 'views', ({dom, state}) ->
 
   wrapper = E()
 
+  prevUserType = -1
   currentPage = undefined
   if ~location.hash.indexOf '#print_'
     append wrapper, E printView, +location.hash.slice '#print_'.length
   else
     state.user.on allowNull: true, (user) ->
+      if user?.userType == prevUserType
+        return
+      prevUserType = user?.userType
       empty wrapper
       currentPage = if user
         switch user.userType

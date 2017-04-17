@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -92,6 +92,7 @@ user =
   applicantsManagerStatus: []
   selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
   resume: null
+  applicantTestResults: JSON.stringify [3, 10, 11, 4, 1, 2, 5, 6]
   applicantData: JSON.stringify {
     "مشخصات فردی": {
       "جنسیت": "مرد",
@@ -227,8 +228,10 @@ user =
 
 applicants.forEach (applicant) ->
   applicant.applicantData = user.applicantData
+  applicant.applicantTestResults = user.applicantTestResults
 
-user.applicantData = undefined
+# user.applicantData = undefined
+# user.applicantTestResults = undefined
 
 notifications = [{
   userName: 'علی فرخی'
@@ -301,6 +304,11 @@ exports.submitProfileData = ({data}) ->
   Q.delay 1000 + Math.floor 2000 * Math.random()
   .then ->
     user = extend {}, user, applicantData: data
+
+exports.submitTestResults = ({results}) ->
+  Q.delay 1000 + Math.floor 2000 * Math.random()
+  .then ->
+    user = extend {}, user, applicantTestResults: results
 
 exports.changeHRStatus = ({applicantId, status}) ->
   Q.delay 1000 + Math.floor 2000 * Math.random()

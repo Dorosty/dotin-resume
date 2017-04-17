@@ -20,10 +20,12 @@ exports.bullet =
   fontSize: 16
   lineHeight: 16
   textAlign: 'center'
+  verticalAlign: 'top'
 
 exports.itemText =
   display: 'inline-block'
   marginRight: 10
+  maxWidth: '95%'
   height: 30
   lineHeight: 30
 

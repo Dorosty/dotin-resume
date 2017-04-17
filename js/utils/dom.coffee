@@ -150,7 +150,7 @@ exports.instance = (thisComponent) ->
 
   exports.empty = (component) ->
     if Array.isArray component
-      return component.map (component) -> exports.empty elemcomponentent
+      return component.map (component) -> exports.empty component
     {element} = component.fn
     l = log.empty thisComponent, component
     l()

@@ -1,46 +1,20 @@
 component = require '../../../../utils/component'
 style = require './style'
-data = require '../../../applicantView/tests/results/data'
-{extend} = require '../../../../utils'
+data = require './data'
 
-module.exports = component 'tab2', ({dom, events}, {applicant}) ->
-  {E, setStyle} = dom
-
-  return E() unless applicant.applicantTestResults
-
+module.exports = component 'applicantTestResults', ({dom, events, state}) ->
+  {E, setStyle, empty, append} = dom
   {onEvent} = events
-
-  {applicantTestResults} = applicant
-  applicantTestResults = JSON.parse applicantTestResults
-
-  mbti = [
-    ['E', 'I']
-    ['N', 'S']
-    ['F', 'T']
-    ['J', 'P']
-  ].map ([a, b], i) ->
-    if applicantTestResults[2 * i] > applicantTestResults[2 * i + 1] then a else b
-  .join ''
 
   closeProgressBars = []
   setProgressBars = []
 
-  applicantTestResults.forEach (x, i) ->
-    setTimeout -> setProgressBars[i] x
-
-  E style.view,
+  view = E style.view,
     E style.header, 'نتیجه آزمون'
-      E style.subHeader, (
-        'تیپ شخصیتی، ' +
-        (if mbti[0] == 'E' then 'برون‌گرا' else 'درون‌گرا') + ' ' +
-        (if mbti[0] == 'N' then 'شهودی' else 'حسی') + ' ' +
-        (if mbti[0] == 'F' then 'احساسی' else 'متفکر') + ' ' +
-        (if mbti[0] == 'J' then 'قضاوت‌کننده' else 'ملاحظه‌کننده') + ' ' +
-        mbti
-      )
-    E 'img', extend {src: "assets/img/mbti/#{mbti.toLowerCase()}-personality-type-header.png"}, style.img
+    subheader = E style.subHeader
+    img = E 'img', style.img
     E style.column,
-      E style.mbtiDisplay, mbti
+      mbtiDisplay = E style.mbtiDisplay
       [
         ['برون‌گرایی', 'E', 'درون‌گرایی', 'I']
         ['شهودی', 'N', 'حسی', 'S']
@@ -88,30 +62,64 @@ module.exports = component 'tab2', ({dom, events}, {applicant}) ->
     E style.column,
       E style.descriptionBox,
         E style.descriptionHeader, 'ویژگی‌های کلی تیپ شخصیتی'
-        E style.descriptionItem, data[mbti][0]
+        box0 = E style.descriptionItem
       E style.descriptionBox,
         E style.descriptionHeader, 'توصیف شخصیتی و رفتار'
-        data[mbti][1].map (x) ->
-          E style.descriptionItem, x
+        box1 = E()
        E style.descriptionBox,
         E style.descriptionHeader, 'نقاط قوت'
-        data[mbti][2].map (x) ->
-          E style.descriptionItem,
-            E style.bullet
-            E style.itemText, x
+        box2 = E()
        E style.descriptionBox,
         E style.descriptionHeader, 'نقاط ضعف'
-        data[mbti][3].map (x) ->
-          E style.descriptionItem,
-            E style.bullet
-            E style.itemText, x
+        box3 = E()
        E style.descriptionBox,
         E style.descriptionHeader, 'مشاغل مناسب'
-        data[mbti][4].map (x) ->
-          E style.descriptionItem,
-            E style.bullet
-            E style.itemText, x
+        box4 = E()
        E style.descriptionBox,
         E style.descriptionHeader, 'چند پیشنهاد برای موفقیت بیشتر در محیط کار'
-        data[mbti][5].map (x) ->
-          E style.descriptionItem, x
+        box5 = E()
+
+  state.user.on ({applicantTestResults}) ->
+    return unless applicantTestResults
+    applicantTestResults = JSON.parse applicantTestResults
+    applicantTestResults.forEach (x, i) ->
+      setProgressBars[i] x
+
+    mbti = [
+      ['E', 'I']
+      ['N', 'S']
+      ['F', 'T']
+      ['J', 'P']
+    ].map ([a, b], i) ->
+      if applicantTestResults[2 * i] > applicantTestResults[2 * i + 1] then a else b
+    .join ''
+
+    setStyle mbtiDisplay, text: mbti
+    setStyle img, src: "assets/img/mbti/#{mbti.toLowerCase()}-personality-type-header.png"
+    setStyle subheader, text: 'تیپ شخصیتی، ' +
+      (if mbti[0] == 'E' then 'برون‌گرا' else 'درون‌گرا') + ' ' +
+      (if mbti[0] == 'N' then 'شهودی' else 'حسی') + ' ' +
+      (if mbti[0] == 'F' then 'احساسی' else 'متفکر') + ' ' +
+      (if mbti[0] == 'J' then 'قضاوت‌کننده' else 'ملاحظه‌کننده') + ' ' +
+      mbti
+
+    setStyle box0, text: data[mbti][0]
+    empty [box1, box2, box3, box4, box5]
+    append box1, data[mbti][1].map (x) ->
+      E style.descriptionItem, x
+    append box2, data[mbti][2].map (x) ->
+      E style.descriptionItem,
+        E style.bullet
+        E style.itemText, x
+    append box3, data[mbti][3].map (x) ->
+      E style.descriptionItem,
+        E style.bullet
+        E style.itemText, x
+    append box4, data[mbti][4].map (x) ->
+      E style.descriptionItem,
+        E style.bullet
+        E style.itemText, x
+    append box5, data[mbti][5].map (x) ->
+      E style.descriptionItem, x
+
+  view
