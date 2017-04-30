@@ -22,6 +22,7 @@ exports.status =
   height: 100
 
 exports.statusSegment =
+  cursor: 'pointer'
   position: 'relative'
   display: 'inline-block'
   width: 30
@@ -30,10 +31,7 @@ exports.statusCircle =
   width: 30
   height: 30
   borderRadius: 100
-  backgroundColor: '#ccc'
   position: 'relative'
-
-exports.statusCircleActive = extend {}, exports.statusCircle,
   backgroundColor: '#449e73'
 
 exports.statusIcon =
@@ -57,8 +55,6 @@ exports.statusText =
   textAlign: 'center'
   whiteSpace: 'nowrap'
   overflow: 'hidden'
-
-exports.statusTextActive = extend {}, exports.statusText,
   color: '#449e73'
 
 exports.statusConnector =
@@ -67,10 +63,8 @@ exports.statusConnector =
   top: -13
   width: 100
   height: 4
-  backgroundColor: '#ccc'
-
-exports.statusConnectorActive = extend {}, exports.statusConnector,
   backgroundColor: '#449e73'
+
 
 exports.tabs =
   borderBottom: '1px solid #ccc'

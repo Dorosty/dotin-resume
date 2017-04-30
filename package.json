@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "browserify": "",
+    "coffeeify": ""
+  },
+  "scripts": {
+    "build": "browserify -t coffeeify js --extension=\".coffee\" -o index.js"
+  }
+}

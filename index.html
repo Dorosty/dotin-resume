@@ -1,10 +1,16 @@
 <!doctype html>
-<html>
+<html moznomarginboxes mozdisallowselectionprint>
 <head>
   <meta charset="utf8" />
   <script src="assets/jquery.js"></script>
   <script src="assets/bootstrap.js"></script>
   <script src="assets/jalaali.js"></script>
+  <style>
+    @media print {
+      @page { margin: 0; }
+      /*.dtn-container { margin: 1.6cm; }*/
+    }
+  </style>
 </head>
 <body>
   <script src="index.js"></script>

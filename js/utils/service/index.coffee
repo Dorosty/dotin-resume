@@ -29,6 +29,6 @@ exports.getUser = ->
 
 exports.autoPing = ->
   do fn = ->
-    Q.all [get('ping').catch(->), Q.delay 5000]
+    Q.all [get('ping').catch(->), Q.delay 3600 * 1000]
     .fin ->
       setTimeout fn

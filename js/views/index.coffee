@@ -9,7 +9,7 @@ printView = require './printView'
 module.exports = component 'views', ({dom, state}) ->
   {E, append, empty} = dom
 
-  wrapper = E()
+  wrapper = E class: 'dtn-container'
 
   prevUserType = -1
   currentPage = undefined

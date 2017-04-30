@@ -1,4 +1,4 @@
-return
+# return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -88,9 +88,9 @@ user =
   personalPic: null
   modificationTime: 1473132854116
   notes: []
-  applicantsHRStatus: []
+  applicantsHRStatus: applicants[0].applicantsHRStatus
   applicantsManagerStatus: []
-  selectedJobs: [{jobName: 'Java developer'}, {jobName: 'Javascript developer'}]
+  selectedJobs: applicants[0].selectedJobs
   resume: null
   applicantTestResults: JSON.stringify [3, 10, 11, 4, 1, 2, 5, 6]
   applicantData: JSON.stringify {

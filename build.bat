@@ -1,1 +1,1 @@
-browserify -t coffeeify js --extension=".coffee" -o index.js
+npm run build

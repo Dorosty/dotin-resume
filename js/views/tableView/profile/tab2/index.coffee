@@ -29,17 +29,17 @@ module.exports = component 'tab2', ({dom, events}, {applicant}) ->
     setTimeout -> setProgressBars[i] x
 
   E style.view,
-    E style.header, 'نتیجه آزمون'
-      E style.subHeader, (
-        'تیپ شخصیتی، ' +
-        (if mbti[0] == 'E' then 'برون‌گرا' else 'درون‌گرا') + ' ' +
-        (if mbti[0] == 'N' then 'شهودی' else 'حسی') + ' ' +
-        (if mbti[0] == 'F' then 'احساسی' else 'متفکر') + ' ' +
-        (if mbti[0] == 'J' then 'قضاوت‌کننده' else 'ملاحظه‌کننده') + ' ' +
-        mbti
-      )
-    E 'img', extend {src: "assets/img/mbti/#{mbti.toLowerCase()}-personality-type-header.png"}, style.img
     E style.column,
+      E 'img', extend {src: "assets/img/mbti/#{mbti.toLowerCase()}-personality-type-header.png"}, style.img
+      E style.header, 'نتیجه آزمون'
+        E style.subHeader, (
+          'تیپ شخصیتی، ' +
+          (if mbti[0] == 'E' then 'برون‌گرا' else 'درون‌گرا') + ' ' +
+          (if mbti[0] == 'N' then 'شهودی' else 'حسی') + ' ' +
+          (if mbti[0] == 'F' then 'احساسی' else 'متفکر') + ' ' +
+          (if mbti[0] == 'J' then 'قضاوت‌کننده' else 'ملاحظه‌کننده') + ' ' +
+          mbti
+        )
       E style.mbtiDisplay, mbti
       [
         ['برون‌گرایی', 'E', 'درون‌گرایی', 'I']

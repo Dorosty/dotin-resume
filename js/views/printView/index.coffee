@@ -235,7 +235,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
             ''
     ]
 
-    window.print()
+    setTimeout (-> window.print()), 300
 
     # SHOGHL HAYE DARKHASTI
     # SEMAT (SAVABEGHE SHOGHLI)

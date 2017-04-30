@@ -13,8 +13,12 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   {onEvent} = events
 
   isInArchive = false
+  clickedOnResume = false
 
   gotoApplicant = (applicant) ->
+    if clickedOnResume
+      clickedOnResume = false
+      return
     setStyle profilePlaceholder, style.profileVisible
     empty profilePlaceholder
     append profilePlaceholder, E profile, {applicant, gotoIndex, gotoArchive, isInArchive}
@@ -139,6 +143,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             width: 50
             styleTd: ({resume}, td, offs) ->
               setStyle td, style.iconTd
+              offs.push onEvent td, 'click', -> clickedOnResume = true
               empty td
               append td, E 'a', extend {href: '/webApi/resume?address=' + resume}, style.icon, target: '_blank', class: 'fa fa-download', color: '#449e73'
           }

@@ -1,7 +1,9 @@
 component = require '../../utils/component'
 style = require './style'
+viewStatus = require '../tableView/profile/viewStatus'
 form = require './form'
 tests = require './tests'
+logic = require '../../utils/logic'
 {extend} = require '../../utils'
 
 tabNames = [
@@ -9,14 +11,14 @@ tabNames = [
   'آزمون MBTI'
 ]
 
-tabContents = [
-  form
-  tests
-]
-
-module.exports = component 'applicantView', ({dom, events, service}) ->
-  {E, text, setStyle, append, destroy} = dom
+module.exports = component 'applicantView', ({dom, events, state, service}) ->
+  {E, text, setStyle, show, hide, append, empty} = dom
   {onEvent} = events
+
+  tabContents = [
+    E form
+    E tests
+  ]
 
   content = undefined
   currentTabIndex = 0
@@ -25,21 +27,7 @@ module.exports = component 'applicantView', ({dom, events, service}) ->
     logout = E style.logout,
       E style.logoutIcon
       text 'خروج'
-    E style.status,
-      E style.statusSegment,
-        E style.statusCircle
-        E extend {class: 'fa fa-check'}, style.statusIcon
-        t1 = E style.statusText, 'ثبت'
-      E style.statusConnector
-      E style.statusSegment,
-        E style.statusCircle
-        E extend {class: 'fa fa-check'}, style.statusIcon
-        t2 = E style.statusText, 'مصاحبه تلفنی'
-      E style.statusConnectorActive
-      E style.statusSegment,
-        E style.statusCircleActive
-        E extend {class: 'fa fa-question'}, style.statusIcon
-        t3 = E style.statusTextActive, 'در انتظار تکمیل اطلاعات'
+    statusPlaceholder = E style.status
     E style.tabs,
       tabs = tabNames.map (tabName, index) ->
         tab = E style.tab, tabName
@@ -51,21 +39,62 @@ module.exports = component 'applicantView', ({dom, events, service}) ->
           unless currentTabIndex is index
             setStyle tab, style.tab
         tab
-    contents = E style.contents
+    E style.contents, tabContents
+
+  state.user.on (user) ->
+    ts = []
+    empty statusPlaceholder
+    append statusPlaceholder, 
+      E style.statusSegment,
+        E style.statusCircle
+        E extend {class: 'fa fa-check'}, style.statusIcon
+        do ->
+          t = E style.statusText, 'ثبت'
+          ts.push t
+          t
+    append statusPlaceholder,
+      user.applicantsHRStatus.filter ({status}) -> logic.statuses[status] in ['مصاحبه تلفنی انجام شد', 'در انتظار مصاحبه عمومی', 'در انتظار مصاحبه فنی', 'بایگانی', 'بازیابی']
+      .map (status, i, arr) ->
+        [
+          E style.statusConnector
+          do ->
+            x = E style.statusSegment,
+              E style.statusCircle
+              E extend {class: if i is arr.length - 1 then 'fa fa-question' else 'fa fa-check'}, style.statusIcon
+              do ->
+                t = logic.statuses[status.status]
+                t = switch t
+                  when 'مصاحبه تلفنی انجام شد'
+                    'مصاحبه تلفنی'
+                  when 'در انتظار مصاحبه عمومی'
+                    'مصاحبه عمومی'
+                  when 'در انتظار مصاحبه فنی'
+                    'مصاحبه فنی'
+                  when 'بایگانی'
+                    'بایگانی'
+                  when 'بازیابی'
+                    'بازیابی'
+                t = E style.statusText, t
+                ts.push t
+                t
+            onEvent x, 'click', ->
+              viewStatus user, status
+            x
+        ]
+
+    setTimeout ->
+      ts.forEach (t) ->
+        setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
 
   onEvent logout, 'click', ->
     service.logout()
 
-  setTimeout ->
-    [t1, t2, t3].forEach (t) ->
-      setStyle t, marginRight: -t.fn.element.offsetWidth / 2 + 15
-
   changeTabIndex = (index) ->
     if content
-      destroy content
+      hide content
     setStyle tabs[currentTabIndex], style.tab
     currentTabIndex = index
-    append contents, content = E tabContents[currentTabIndex]
+    show content = tabContents[currentTabIndex]
     setStyle tabs[currentTabIndex], style.tabActive
 
   changeTabIndex 0
