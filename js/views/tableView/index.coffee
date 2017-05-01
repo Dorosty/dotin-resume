@@ -5,7 +5,7 @@ table = require './table'
 search = require './search'
 profile = require './profile'
 actionButton = require '../../components/actionButton'
-{extend, toDate} = require '../../utils'
+{extend, toDate, changeHash, getManualHash, setManualHash} = require '../../utils'
 logic = require '../../utils/logic'
 
 module.exports = component 'tableView', ({dom, events, state, service}) ->
@@ -15,7 +15,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   isInArchive = false
   clickedOnResume = false
 
-  gotoApplicant = (applicant) ->
+  _gotoApplicant = (applicant) ->
     if clickedOnResume
       clickedOnResume = false
       return
@@ -23,7 +23,10 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     empty profilePlaceholder
     append profilePlaceholder, E profile, {applicant, gotoIndex, gotoArchive, isInArchive}
 
-  gotoIndex = ->
+  gotoApplicant = ({userId}) ->
+    window.location = '#profile_' + userId
+
+  _gotoIndex = ->
     setStyle profilePlaceholder, style.profile
     isInArchive = false
     empty actionButtonPlaceholder
@@ -41,7 +44,9 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             return
           service.createMultipleHRStatus selectedApplicants.map ({userId}) -> userId
     update()
-  setTimeout gotoIndex
+
+  gotoIndex = ->
+    window.location = '#home'
 
   gotoArchive = ->
     setStyle profilePlaceholder, style.profile
@@ -158,7 +163,6 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             selectedApplicants = descriptors.filter(({selected}) -> selected).map ({entity}) -> entity
       profilePlaceholder = E style.profile
 
-
   ######################
   state.user.on once: true, (user) ->
     if user.userType isnt 2
@@ -201,5 +205,19 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
       applicant.lastName ?= ''
     #################################
     update()
+
+  do loc = ->
+    if ~location.hash.indexOf '#profile_'
+      profileId = +location.hash.slice '#profile_'.length
+      state.applicants.on once: true, (applicants) ->
+        [applicant] = applicants.filter ({userId}) -> userId == profileId
+        if applicant
+          _gotoApplicant applicant
+        else
+          _gotoIndex()
+    else
+      _gotoIndex()
+
+  window.onhashchange = loc
 
   view

@@ -68,3 +68,19 @@ exports.checkbox =
 exports.checkboxSelected =
   backgroundColor: '#449e73'
   color: 'white'
+
+exports.pagination =
+  marginTop: 20
+  textAlign: 'left'
+
+exports.paginationNumbers =
+  display: 'inline-block'
+  marginLeft: 10
+
+exports.paginationNumber =
+  display: 'inline-block'
+  marginRight: 13
+  cursor: 'pointer'
+
+exports.paginationNumberGreen = extend {}, exports.paginationNumber,
+  color: '#449e73'

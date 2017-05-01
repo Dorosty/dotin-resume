@@ -4416,6 +4416,7 @@ exports.instance = function(thisComponent) {
         case 'colSpan':
         case 'rowSpan':
         case 'disabled':
+        case 'selected':
           return element.setAttribute(key, value);
         default:
           if ((typeof value === 'number') && !(key === 'opacity' || key === 'zIndex')) {
@@ -5864,7 +5865,7 @@ exports.jobs = 'allRecordedJobs';
 
 
 },{}],45:[function(require,module,exports){
-var Q, applicants, extend, jobs, managers, notifications, user;
+var Q, applicants, extend, j, jobs, managers, notifications, results1, user;
 
 Q = require('../../q');
 
@@ -5964,12 +5965,24 @@ applicants = [
   }
 ];
 
+applicants = [].concat.apply([], (function() {
+  results1 = [];
+  for (j = 0; j <= 32; j++){ results1.push(j); }
+  return results1;
+}).apply(this).map(function(i) {
+  return applicants.map(function(applicant) {
+    return extend({}, applicant, {
+      userId: applicant.userId + 100 * i
+    });
+  });
+}));
+
 user = {
   userId: 110,
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 3,
+  userType: 2,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -9844,7 +9857,7 @@ module.exports = component('applicantTestsFirstPage', function(arg, gotoTest) {
   dom = arg.dom, events = arg.events;
   E = dom.E, setStyle = dom.setStyle;
   onEvent = events.onEvent;
-  items = ['MBTI یک مقیاس است نه یک امتحان', 'انتخاب از بین گزینه‌ها تحمیلی است و یکی را می‌بایست انتخاب کنید', 'هیچ جواب درست یا غلطی وجود ندارد', 'حدود 20 تا 40 دقیقه زمان می‌برد', 'پاسخ‌های شما به سؤالات محرمانه است و به جز سنخ شخصیتی کلی، سایر اطلاعات در دسترس هیچ فرد دیگری قرار نخواهد‌گرفت', 'MBTI فقط رفتارهای معمولی و به هنجار را می‌سنجد و ربطی به سلامت روان یا بیماریابی ندارد', 'هیچ سنخ شخصیتی خوب یا بدی وجود ندارد و هر یک از سنخ‌ها نقاط قوت طبیعی، نقاط ضعف یا نقاط مبهم خود را دارند', 'هنگام پاسخ دادن به سؤالات به این مسئله فکر کنید که در هر یک از موارد در شرایطی که فشاری بر روی شما نیست کدام یک را ترجیح می‌دهید', 'به خودتان فکر کنید، آن هم خارج از نقشهای شغلی یا خانوادگی‌ای که به عهده دارید. به این صورت که معمولا کدام پاسخ یا عمل به شما نزدیک‌تر است؟ یا این که کدام پاسخ توصیف نزدیک‌تری از اعمال و احساسات شما به دست می‌دهد؟', 'اولین پاسخی که به ذهن شما می‌رسد، درست‌ترین است. سعی کنید برای پاسخ دادن سؤال را تحلیل نکنید'];
+  items = ['MBTI یک مقیاس است نه یک امتحان', 'انتخاب از بین گزینه‌ها تحمیلی است و یکی را می‌بایست انتخاب کنید', 'هیچ جواب درست یا غلطی وجود ندارد', 'حدود 20 تا 40 دقیقه زمان می‌برد', 'پاسخ‌های شما به سؤالات محرمانه است و به جز سنخ شخصیتی کلی، سایر اطلاعات در دسترس هیچ فرد دیگری قرار نخواهد‌گرفت', 'MBTI فقط رفتارهای معمولی و به هنجار را می‌سنجد و ربطی به سلامت روان یا بیماریابی ندارد', 'هیچ سنخ شخصیتی خوب یا بدی وجود ندارد و هر یک از سنخ‌ها نقاط قوت طبیعی، نقاط ضعف یا نقاط مبهم خود را دارند', 'هنگام پاسخ دادن به سؤالات به این مسئله فکر کنید که در هر یک از موارد در شرایطی که فشاری بر روی شما نیست کدام یک را ترجیح می‌دهید', 'به خودتان فکر کنید، آن هم خارج از نقشهای شغلی یا خانوادگی‌ای که به عهده دارید. به این صورت که معمولا کدام پاسخ یا عمل به شما نزدیک‌تر است؟ یا این که کدام پاسخ توصیف نزدیک‌تری از اعمال و احساسات شما به دست می‌دهد؟', 'اولین پاسخی که به ذهن شما می‌رسد، درست‌ترین است. سعی کنید برای پاسخ دادن سؤال را تحلیل نکنید', 'در طول آزمون از دکمه‌ی بازگشت مرورگر استفاده نکرده و صفحه را نبندید'];
   view = E(style.view, items.map(function(itemText) {
     return E(style.item, E(style.bullet), E(style.itemText, itemText));
   }), enterButton = E(style.enterButton, 'شروع آزمون'));
@@ -11332,7 +11345,7 @@ applicantView = require('./applicantView');
 printView = require('./printView');
 
 module.exports = component('views', function(arg) {
-  var E, append, currentPage, dom, empty, prevUserType, state, wrapper;
+  var E, append, currentPage, dom, empty, prevUserType, ref, state, wrapper;
   dom = arg.dom, state = arg.state;
   E = dom.E, append = dom.append, empty = dom.empty;
   wrapper = E({
@@ -11343,6 +11356,11 @@ module.exports = component('views', function(arg) {
   if (~location.hash.indexOf('#print_')) {
     append(wrapper, E(printView, +location.hash.slice('#print_'.length)));
   } else {
+    if ((ref = location.hash) === '' || ref === '#') {
+      setTimeout((function() {
+        return window.location = '#home';
+      }), 100);
+    }
     state.user.on({
       allowNull: true
     }, function(user) {
@@ -11722,7 +11740,7 @@ exports.tableFooter = {
 
 
 },{"../../utils":37}],101:[function(require,module,exports){
-var actionButton, component, extend, logic, profile, ref, search, sidebar, style, table, toDate;
+var actionButton, changeHash, component, extend, getManualHash, logic, profile, ref, search, setManualHash, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
 
@@ -11738,18 +11756,18 @@ profile = require('./profile');
 
 actionButton = require('../../components/actionButton');
 
-ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate;
+ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, changeHash = ref.changeHash, getManualHash = ref.getManualHash, setManualHash = ref.setManualHash;
 
 logic = require('../../utils/logic');
 
 module.exports = component('tableView', function(arg) {
-  var E, actionButtonPlaceholder, append, applicants, clickedOnResume, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, itemsCount, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  var E, _gotoApplicant, _gotoIndex, actionButtonPlaceholder, append, applicants, clickedOnResume, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, itemsCount, loc, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
   isInArchive = false;
   clickedOnResume = false;
-  gotoApplicant = function(applicant) {
+  _gotoApplicant = function(applicant) {
     if (clickedOnResume) {
       clickedOnResume = false;
       return;
@@ -11763,7 +11781,12 @@ module.exports = component('tableView', function(arg) {
       isInArchive: isInArchive
     }));
   };
-  gotoIndex = function() {
+  gotoApplicant = function(arg1) {
+    var userId;
+    userId = arg1.userId;
+    return window.location = '#profile_' + userId;
+  };
+  _gotoIndex = function() {
     var actionButtonInstance;
     setStyle(profilePlaceholder, style.profile);
     isInArchive = false;
@@ -11793,7 +11816,9 @@ module.exports = component('tableView', function(arg) {
     });
     return update();
   };
-  setTimeout(gotoIndex);
+  gotoIndex = function() {
+    return window.location = '#home';
+  };
   gotoArchive = function() {
     var actionButtonInstance;
     setStyle(profilePlaceholder, style.profile);
@@ -12036,6 +12061,30 @@ module.exports = component('tableView', function(arg) {
     });
     return update();
   });
+  (loc = function() {
+    var profileId;
+    if (~location.hash.indexOf('#profile_')) {
+      profileId = +location.hash.slice('#profile_'.length);
+      return state.applicants.on({
+        once: true
+      }, function(applicants) {
+        var applicant;
+        applicant = applicants.filter(function(arg1) {
+          var userId;
+          userId = arg1.userId;
+          return userId === profileId;
+        })[0];
+        if (applicant) {
+          return _gotoApplicant(applicant);
+        } else {
+          return _gotoIndex();
+        }
+      });
+    } else {
+      return _gotoIndex();
+    }
+  })();
+  window.onhashchange = loc;
   return view;
 });
 
@@ -14801,13 +14850,13 @@ style = require('./style');
 ref = require('../../../utils'), collection = ref.collection, compare = ref.compare;
 
 exports.create = function(arg) {
-  var E, append, components, destroy, dom, events, functions, handlers, headers, hide, onEvent, properties, setStyle, show, variables;
+  var E, append, components, destroy, dom, empty, events, functions, handlers, headers, hide, onEvent, properties, setStyle, show, variables;
   headers = arg.headers, properties = arg.properties, handlers = arg.handlers, variables = arg.variables, components = arg.components, dom = arg.dom, events = arg.events;
-  E = dom.E, destroy = dom.destroy, append = dom.append, setStyle = dom.setStyle, show = dom.show, hide = dom.hide;
+  E = dom.E, destroy = dom.destroy, append = dom.append, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, empty = dom.empty;
   onEvent = events.onEvent;
   functions = {
     update: function() {
-      var descriptors;
+      var currentPage, descriptors, itemsInPage, pageCount, updatePage;
       if (variables.descriptors) {
         hide(components.noData);
         show(components.yesData);
@@ -14847,7 +14896,51 @@ exports.create = function(arg) {
       descriptors.forEach(function(descriptor, index) {
         return descriptor.index = index;
       });
-      functions.handleRows(descriptors);
+      itemsInPage = +components.paginationSelect.value();
+      pageCount = Math.ceil(descriptors.length / itemsInPage);
+      currentPage = 1;
+      (updatePage = function() {
+        var first, j, last, next, prev, results;
+        empty(components.paginationNumbers);
+        append(components.paginationNumbers, [
+          first = E(style.paginationNumberGreen, '<<'), prev = E(style.paginationNumberGreen, '<'), (function() {
+            results = [];
+            for (var j = 1; 1 <= pageCount ? j <= pageCount : j >= pageCount; 1 <= pageCount ? j++ : j--){ results.push(j); }
+            return results;
+          }).apply(this).map(function(page) {
+            var number;
+            number = E((page === currentPage ? style.paginationNumberGreen : style.paginationNumber), page);
+            onEvent(number, 'click', function() {
+              currentPage = page;
+              return updatePage();
+            });
+            return number;
+          }), next = E(style.paginationNumberGreen, '>'), last = E(style.paginationNumberGreen, '>>')
+        ]);
+        onEvent(first, 'click', function() {
+          currentPage = 1;
+          return updatePage();
+        });
+        onEvent(prev, 'click', function() {
+          currentPage--;
+          if (currentPage < 1) {
+            currentPage = 1;
+          }
+          return updatePage();
+        });
+        onEvent(next, 'click', function() {
+          currentPage++;
+          if (currentPage > pageCount) {
+            currentPage = pageCount;
+          }
+          return updatePage();
+        });
+        onEvent(last, 'click', function() {
+          currentPage = pageCount;
+          return updatePage();
+        });
+        return functions.handleRows(descriptors.slice(itemsInPage * (currentPage - 1), itemsInPage * currentPage));
+      })();
       return handlers.update(descriptors);
     },
     setData: function(entities) {
@@ -15111,7 +15204,17 @@ module.exports = component('table', function(arg, arg1) {
       });
     }
     return th;
-  }))), components.body = E('tbody', style.tbody)))));
+  }))), components.body = E('tbody', style.tbody)), E(style.pagination, components.paginationNumbers = E(style.paginationNumbers), components.paginationSelect = E('select', null, E('option', {
+    englishValue: 10
+  }, '10'), E('option', {
+    englishValue: 20
+  }, '20'), E('option', {
+    englishValue: 30
+  }, '30'), E('option', {
+    englishValue: 40
+  }, '40'), E('option', {
+    englishValue: 50
+  }, '50'))))));
   onEvent(selectAllTd, 'click', function() {
     functions.setSelectedRows(function(descriptors) {
       if (allSelected) {
@@ -15122,6 +15225,7 @@ module.exports = component('table', function(arg, arg1) {
     });
     return styleSelectAll();
   });
+  onEvent(components.paginationSelect, 'change', functions.update);
   variables.sort.direction = (function() {
     switch (variables.sort.direction) {
       case 'up':
@@ -15228,6 +15332,26 @@ exports.checkboxSelected = {
   backgroundColor: '#449e73',
   color: 'white'
 };
+
+exports.pagination = {
+  marginTop: 20,
+  textAlign: 'left'
+};
+
+exports.paginationNumbers = {
+  display: 'inline-block',
+  marginLeft: 10
+};
+
+exports.paginationNumber = {
+  display: 'inline-block',
+  marginRight: 13,
+  cursor: 'pointer'
+};
+
+exports.paginationNumberGreen = extend({}, exports.paginationNumber, {
+  color: '#449e73'
+});
 
 
 },{"../../../utils":37}],130:[function(require,module,exports){

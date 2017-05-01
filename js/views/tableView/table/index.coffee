@@ -65,6 +65,14 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
                   setStyle th, style.thOut
               th
         components.body = E 'tbody', style.tbody
+      E style.pagination,
+        components.paginationNumbers = E style.paginationNumbers
+        components.paginationSelect = E 'select', null,
+          E 'option', englishValue: 10, '10'
+          E 'option', englishValue: 20, '20'
+          E 'option', englishValue: 30, '30'
+          E 'option', englishValue: 40, '40'
+          E 'option', englishValue: 50, '50'
 
   # onEvent selectAllTd, 'mouseover', ->
   #   setStyle selectAllTd, style.thHover
@@ -73,6 +81,8 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
   onEvent selectAllTd, 'click', ->
     functions.setSelectedRows (descriptors) -> if allSelected then [] else descriptors
     styleSelectAll()
+
+  onEvent components.paginationSelect, 'change', functions.update
 
   variables.sort.direction = switch variables.sort.direction
     when 'up'

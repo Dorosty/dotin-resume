@@ -2,8 +2,11 @@ style = require './style'
 {collection, compare} = require '../../../utils'
 
 exports.create = ({headers, properties, handlers, variables, components, dom, events}) ->
-  {E, destroy, append, setStyle, show, hide} = dom
+  {E, destroy, append, setStyle, show, hide, empty} = dom
   {onEvent} = events
+
+
+
 
   functions =
     update: ->
@@ -32,7 +35,49 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
       variables.selectionMode = descriptors.some ({selected}) -> selected
       descriptors.forEach (descriptor, index) ->
         descriptor.index = index
-      functions.handleRows descriptors
+
+
+
+      # functions.handleRows descriptors
+
+      itemsInPage = +components.paginationSelect.value()
+      pageCount = Math.ceil descriptors.length / itemsInPage
+      currentPage = 1
+      do updatePage = ->
+        empty components.paginationNumbers
+        append components.paginationNumbers, [
+          first = E style.paginationNumberGreen, '<<'
+          prev = E style.paginationNumberGreen, '<'
+          [1 .. pageCount].map (page) ->
+            number = E (if page == currentPage then style.paginationNumberGreen else style.paginationNumber), page
+            onEvent number, 'click', ->
+              currentPage = page
+              updatePage()
+            number
+          next = E style.paginationNumberGreen, '>'
+          last = E style.paginationNumberGreen, '>>'
+        ]
+        onEvent first, 'click', ->
+          currentPage = 1
+          updatePage()
+        onEvent prev, 'click', ->
+          currentPage--
+          if currentPage < 1
+            currentPage = 1
+          updatePage()
+        onEvent next, 'click', ->
+          currentPage++
+          if currentPage > pageCount
+            currentPage = pageCount
+          updatePage()
+        onEvent last, 'click', ->
+          currentPage = pageCount
+          updatePage()
+        functions.handleRows descriptors.slice itemsInPage * (currentPage - 1), itemsInPage * currentPage
+
+
+
+
       handlers.update descriptors
 
     setData: (entities) ->
