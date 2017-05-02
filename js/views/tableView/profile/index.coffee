@@ -56,7 +56,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
         E style.actionLegendRow,
           E extend {backgroundColor: 'black'}, style.actionLegendCircle
           text 'فعال'
-      actionButtonInstance = E actionButton, noButtonFunctionality: true, placeholder: 'ارسال درخواست', items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی']
+      actionButtonInstance = E actionButton, noButtonFunctionality: true, placeholder: 'ارسال درخواست', items: actionButtonItemTexts = ['درخواست مصاحبه تلفنی', 'درخواست مصاحبه فنی', 'درخواست مصاحبه عمومی', 'رد کردن']
     statusPlaceholder = E style.status
     E style.tabs,
       tabs = tabNames.map (tabName, index) ->
@@ -82,9 +82,9 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
   ######################
   state.user.on once: true, (user) ->
     if user.userType is 1
-      hide printButton
-    else
       hide actionButtonPlaceholder
+    else
+      hide printButton
   ######################
 
   onEvent printButton, 'mouseover', ->
@@ -98,15 +98,18 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     [applicant] = applicants.filter ({userId}) -> userId is applicant.userId
     actionButtonItemTexts.forEach (s, i) ->
       item = actionButtonInstance.items()[i]
-      setStyle item, color: 'black'
-      if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
-        setStyle item, color: '#c5c5c5'
-      if s is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دش'))
-        setStyle item, color: '#c5c5c5'
-      if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
-        setStyle item, color: '#c5c5c5'
-      if applicant.applicantsManagerStatus.some(({managerId, status}) -> logic.statuses[status] is s && managerId is user.userId)
-        setStyle item, color: 'green'
+      if i == 3
+        setStyle item, borderTop: '1px solid #999'
+      else
+        setStyle item, color: 'black'
+        if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
+          setStyle item, color: '#c5c5c5'
+        if s is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دش'))
+          setStyle item, color: '#c5c5c5'
+        if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
+          setStyle item, color: '#c5c5c5'
+        if applicant.applicantsManagerStatus.some(({managerId, status}) -> logic.statuses[status] is s && managerId is user.userId)
+          setStyle item, color: 'green'
     ts = []
     editStatusButton = undefined
     empty statusPlaceholder
@@ -176,13 +179,19 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   actionButtonInstance.onSelect (value) ->
     state.user.on once: true, (user) ->
-      return if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
-      return if value is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
-      return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
-      return unless confirm "بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از #{value} اطمینان دارید؟"
+      if value is 'رد کردن'
+        return unless confirm "بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از رد کردن این متقاضی اطمینان دارید؟"
+      else
+        return if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
+        return if value is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
+        return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
+        return unless confirm "بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از #{value} اطمینان دارید؟"
       loadbarInstance.set()
       service.changeManagerStatus applicant.userId, logic.statuses.indexOf value
-      .then loadbarInstance.reset
+      .then ->
+        loadbarInstance.reset()
+        if value is 'رد کردن'
+          gotoIndex()
 
 
   actionLegendVisible = false

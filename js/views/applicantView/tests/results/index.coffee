@@ -1,6 +1,7 @@
 component = require '../../../../utils/component'
 style = require './style'
 data = require './data'
+{extend} = require '../../../../utils'
 
 module.exports = component 'applicantTestResults', ({dom, events, state}) ->
   {E, setStyle, empty, append} = dom
@@ -13,6 +14,7 @@ module.exports = component 'applicantTestResults', ({dom, events, state}) ->
     E style.header, 'نتیجه آزمون'
     subheader = E style.subHeader
     img = E 'img', style.img
+    E extend {englishText: 'تصویر از سایت 16personalities.com'}, style.imgSource
     E style.column,
       mbtiDisplay = E style.mbtiDisplay
       [

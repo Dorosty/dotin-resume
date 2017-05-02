@@ -15,6 +15,7 @@ exports.statuses = [
   'جذب'
   'بایگانی'
   'بازیابی'
+  'رد کردن'
 ]
 
 exports.actions = [

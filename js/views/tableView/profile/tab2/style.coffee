@@ -17,6 +17,11 @@ exports.subHeader =
 exports.img =
   width: '100%'
 
+exports.imgSource =
+  marginTop: 5
+  textAlign: 'left'
+  color: '#777'
+
 exports.column =
   float: 'right'
   width: '50%'

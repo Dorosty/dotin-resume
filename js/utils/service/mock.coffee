@@ -1,4 +1,4 @@
-# return
+return
 
 Q = require '../../q'
 {extend} = require '../../utils'
@@ -76,7 +76,7 @@ applicants = [{
   history: []
 }]
 
-applicants = [].concat.apply [], [0..32].map (i) -> applicants.map (applicant) -> extend {}, applicant, userId: applicant.userId + 100 * i
+# applicants = [].concat.apply [], [0..32].map (i) -> applicants.map (applicant) -> extend {}, applicant, userId: applicant.userId + 100 * i
 
 user =
   userId: 110

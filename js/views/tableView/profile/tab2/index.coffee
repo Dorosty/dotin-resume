@@ -31,6 +31,7 @@ module.exports = component 'tab2', ({dom, events}, {applicant}) ->
   E style.view,
     E style.column,
       E 'img', extend {src: "assets/img/mbti/#{mbti.toLowerCase()}-personality-type-header.png"}, style.img
+      # E extend {englishText: 'تصویر از سایت 16personalities.com'}, style.imgSource
       E style.header, 'نتیجه آزمون'
         E style.subHeader, (
           'تیپ شخصیتی، ' +

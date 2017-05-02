@@ -1,5 +1,10 @@
 {extend} = require '../../utils'
 
+exports.answer =
+  display: 'inline-block'
+  color: '#0026B2'
+  fontFamily: 'Dastnevis'
+
 exports.view =
   fontFamily: 'B Nazanin,Bold'
   width: 1201

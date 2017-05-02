@@ -27,6 +27,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     window.location = '#profile_' + userId
 
   _gotoIndex = ->
+    setTimeout update
     setStyle profilePlaceholder, style.profile
     isInArchive = false
     empty actionButtonPlaceholder
@@ -49,6 +50,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     window.location = '#home'
 
   gotoArchive = ->
+    setTimeout update
     setStyle profilePlaceholder, style.profile
     isInArchive = true
     empty actionButtonPlaceholder
@@ -191,6 +193,9 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             when 'بازیابی'
               result = false
         result
+    state.user.on once: true, (user) ->
+      _applicants = _applicants.filter ({applicantsManagerStatus}) ->
+        !applicantsManagerStatus.some ({managerId, status}) -> status is logic.statuses.indexOf('رد کردن') && managerId is user.userId
     _applicants = _applicants.filter searchInstance.isInSearch
     setStyle itemsCount, text: "#{_applicants.length} مورد"
     tableInstance.setData _applicants
