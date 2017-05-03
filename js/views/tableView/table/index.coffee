@@ -20,6 +20,7 @@ module.exports = component 'table', ({dom, events, returnObject}, {headers, enti
       header: headers[0]
       direction: 'up'
     }
+    currentPage: 1
 
   components = {}
 

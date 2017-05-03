@@ -81,7 +81,7 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   ######################
   state.user.on once: true, (user) ->
-    if user.userType is 1
+    unless user.userType is 1
       hide actionButtonPlaceholder
     else
       hide printButton

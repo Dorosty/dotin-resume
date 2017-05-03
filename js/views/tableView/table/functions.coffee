@@ -9,7 +9,7 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
 
 
   functions =
-    update: ->
+    update: (doNotReset) ->
       if variables.descriptors
         hide components.noData
         show components.yesData
@@ -36,15 +36,13 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
       descriptors.forEach (descriptor, index) ->
         descriptor.index = index
 
-
-
       # functions.handleRows descriptors
-
       itemsInPage = +components.paginationSelect.value()
       pageCount = Math.ceil descriptors.length / itemsInPage
-      currentPage = 1
+      unless doNotReset
+        variables.currentPage = 1
       do updatePage = ->
-        start = Math.max 1, currentPage - 2
+        start = Math.max 1, variables.currentPage - 2
         end = Math.min pageCount, start + 4
         start = Math.max 1, end - 4
         empty components.paginationNumbers
@@ -52,34 +50,31 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
           first = E style.paginationNumberGreen, '<<'
           prev = E style.paginationNumberGreen, '<'
           [start .. end].map (page) ->
-            number = E (if page == currentPage then style.paginationNumberCurrent else style.paginationNumber), page
+            number = E (if page == variables.currentPage then style.paginationNumberCurrent else style.paginationNumber), page
             onEvent number, 'click', ->
-              currentPage = page
+              variables.currentPage = page
               updatePage()
             number
           next = E style.paginationNumberGreen, '>'
           last = E style.paginationNumberGreen, '>>'
         ]
         onEvent first, 'click', ->
-          currentPage = 1
+          variables.currentPage = 1
           updatePage()
         onEvent prev, 'click', ->
-          currentPage--
-          if currentPage < 1
-            currentPage = 1
+          variables.currentPage--
+          if variables.currentPage < 1
+            variables.currentPage = 1
           updatePage()
         onEvent next, 'click', ->
-          currentPage++
-          if currentPage > pageCount
-            currentPage = pageCount
+          variables.currentPage++
+          if variables.currentPage > pageCount
+            variables.currentPage = pageCount
           updatePage()
         onEvent last, 'click', ->
-          currentPage = pageCount
+          variables.currentPage = pageCount
           updatePage()
-        functions.handleRows descriptors.slice itemsInPage * (currentPage - 1), itemsInPage * currentPage
-
-
-
+        functions.handleRows descriptors.slice itemsInPage * (variables.currentPage - 1), itemsInPage * variables.currentPage
 
       handlers.update descriptors
 
@@ -103,7 +98,7 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
     setSelectedRows: (callback) ->
       variables.descriptors.forEach (descriptor) -> descriptor.selected = false
       callback(variables.descriptors).forEach (descriptor) -> descriptor.selected = true
-      functions.update()
+      functions.update true
 
     setSort: (header) ->
       headers.forEach ({arrowUp, arrowDown}) ->
@@ -150,7 +145,7 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
           setStyle row.checkbox, style.checkboxSelected
         row.offs.push onEvent row.checkboxTd, 'click', ->
           descriptor.selected = !descriptor.selected
-          functions.update()
+          functions.update true
       if handlers.select && not descriptor.unselectable
         unless descriptor.selected
           row.offs.push onEvent row.tr, 'mousemove', ->

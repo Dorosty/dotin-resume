@@ -12622,7 +12622,7 @@ module.exports = component('profile', function(arg, arg1) {
   state.user.on({
     once: true
   }, function(user) {
-    if (user.userType === 1) {
+    if (user.userType !== 1) {
       return hide(actionButtonPlaceholder);
     } else {
       return hide(printButton);
@@ -14922,8 +14922,8 @@ exports.create = function(arg) {
   E = dom.E, destroy = dom.destroy, append = dom.append, setStyle = dom.setStyle, show = dom.show, hide = dom.hide, empty = dom.empty;
   onEvent = events.onEvent;
   functions = {
-    update: function() {
-      var currentPage, descriptors, itemsInPage, pageCount, updatePage;
+    update: function(doNotReset) {
+      var descriptors, itemsInPage, pageCount, updatePage;
       if (variables.descriptors) {
         hide(components.noData);
         show(components.yesData);
@@ -14965,10 +14965,12 @@ exports.create = function(arg) {
       });
       itemsInPage = +components.paginationSelect.value();
       pageCount = Math.ceil(descriptors.length / itemsInPage);
-      currentPage = 1;
+      if (!doNotReset) {
+        variables.currentPage = 1;
+      }
       (updatePage = function() {
         var end, first, j, last, next, prev, results, start;
-        start = Math.max(1, currentPage - 2);
+        start = Math.max(1, variables.currentPage - 2);
         end = Math.min(pageCount, start + 4);
         start = Math.max(1, end - 4);
         empty(components.paginationNumbers);
@@ -14979,37 +14981,37 @@ exports.create = function(arg) {
             return results;
           }).apply(this).map(function(page) {
             var number;
-            number = E((page === currentPage ? style.paginationNumberCurrent : style.paginationNumber), page);
+            number = E((page === variables.currentPage ? style.paginationNumberCurrent : style.paginationNumber), page);
             onEvent(number, 'click', function() {
-              currentPage = page;
+              variables.currentPage = page;
               return updatePage();
             });
             return number;
           }), next = E(style.paginationNumberGreen, '>'), last = E(style.paginationNumberGreen, '>>')
         ]);
         onEvent(first, 'click', function() {
-          currentPage = 1;
+          variables.currentPage = 1;
           return updatePage();
         });
         onEvent(prev, 'click', function() {
-          currentPage--;
-          if (currentPage < 1) {
-            currentPage = 1;
+          variables.currentPage--;
+          if (variables.currentPage < 1) {
+            variables.currentPage = 1;
           }
           return updatePage();
         });
         onEvent(next, 'click', function() {
-          currentPage++;
-          if (currentPage > pageCount) {
-            currentPage = pageCount;
+          variables.currentPage++;
+          if (variables.currentPage > pageCount) {
+            variables.currentPage = pageCount;
           }
           return updatePage();
         });
         onEvent(last, 'click', function() {
-          currentPage = pageCount;
+          variables.currentPage = pageCount;
           return updatePage();
         });
-        return functions.handleRows(descriptors.slice(itemsInPage * (currentPage - 1), itemsInPage * currentPage));
+        return functions.handleRows(descriptors.slice(itemsInPage * (variables.currentPage - 1), itemsInPage * variables.currentPage));
       })();
       return handlers.update(descriptors);
     },
@@ -15049,7 +15051,7 @@ exports.create = function(arg) {
       callback(variables.descriptors).forEach(function(descriptor) {
         return descriptor.selected = true;
       });
-      return functions.update();
+      return functions.update(true);
     },
     setSort: function(header) {
       var sort;
@@ -15120,7 +15122,7 @@ exports.create = function(arg) {
         }
         row.offs.push(onEvent(row.checkboxTd, 'click', function() {
           descriptor.selected = !descriptor.selected;
-          return functions.update();
+          return functions.update(true);
         }));
       }
       if (handlers.select && !descriptor.unselectable) {
@@ -15210,7 +15212,8 @@ module.exports = component('table', function(arg, arg1) {
     sort: sort || {
       header: headers[0],
       direction: 'up'
-    }
+    },
+    currentPage: 1
   };
   components = {};
   allSelected = false;
