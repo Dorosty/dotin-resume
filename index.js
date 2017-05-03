@@ -4324,7 +4324,7 @@ exports.instance = function(thisComponent) {
     try {
       element.parentNode.removeChild(element);
       remove(component.fn.domParent.fn.childComponents, component);
-    } catch (error) {}
+    } catch (undefined) {}
     return l();
   };
   exports.destroy = function(component) {
@@ -5025,7 +5025,7 @@ exports.dom = {
     var part;
     part = 0;
     return function(component, args) {
-      var stringifiedArgs;
+      var error, stringifiedArgs;
       return;
       try {
         stringifiedArgs = JSON.stringify(args);
@@ -5362,7 +5362,7 @@ module.exports = function(isGet, serviceName, params) {
           response = xhr.responseText;
           try {
             response = JSON.parse(response);
-          } catch (error) {}
+          } catch (undefined) {}
           return resolve(response);
         } else {
           return reject(xhr.responseText);
@@ -5972,7 +5972,7 @@ user = {
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 3,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -6117,6 +6117,8 @@ applicants.forEach(function(applicant) {
   applicant.applicantData = user.applicantData;
   return applicant.applicantTestResults = user.applicantTestResults;
 });
+
+user.applicantTestResults = void 0;
 
 notifications = [
   {

@@ -83,7 +83,7 @@ user =
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 2
+  userType: 3
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'
@@ -233,7 +233,7 @@ applicants.forEach (applicant) ->
   applicant.applicantTestResults = user.applicantTestResults
 
 # user.applicantData = undefined
-# user.applicantTestResults = undefined
+user.applicantTestResults = undefined
 
 notifications = [{
   userName: 'علی فرخی'
