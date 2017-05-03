@@ -84,3 +84,6 @@ exports.paginationNumber =
 
 exports.paginationNumberGreen = extend {}, exports.paginationNumber,
   color: '#449e73'
+
+exports.paginationNumberCurrent = extend {}, exports.paginationNumberGreen,
+  textDecoration: 'underline'

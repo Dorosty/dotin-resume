@@ -212,6 +212,8 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
     update()
 
   do loc = ->
+    if location.hash in ['', '#']
+      setTimeout (-> window.location = '#home'), 1000
     if ~location.hash.indexOf '#profile_'
       profileId = +location.hash.slice '#profile_'.length
       state.applicants.on once: true, (applicants) ->

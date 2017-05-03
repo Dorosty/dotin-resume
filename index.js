@@ -5865,7 +5865,7 @@ exports.jobs = 'allRecordedJobs';
 
 
 },{}],45:[function(require,module,exports){
-var Q, applicants, extend, jobs, managers, notifications, user;
+var Q, applicants, extend, j, jobs, managers, notifications, results1, user;
 
 return;
 
@@ -5967,12 +5967,24 @@ applicants = [
   }
 ];
 
+applicants = [].concat.apply([], (function() {
+  results1 = [];
+  for (j = 0; j <= 32; j++){ results1.push(j); }
+  return results1;
+}).apply(this).map(function(i) {
+  return applicants.map(function(applicant) {
+    return extend({}, applicant, {
+      userId: applicant.userId + 100 * i
+    });
+  });
+}));
+
 user = {
   userId: 110,
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 3,
+  userType: 2,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -11361,7 +11373,7 @@ module.exports = component('views', function(arg) {
     if ((ref = location.hash) === '' || ref === '#') {
       setTimeout((function() {
         return window.location = '#home';
-      }), 100);
+      }), 1000);
     }
     state.user.on({
       allowNull: true
@@ -11388,6 +11400,14 @@ module.exports = component('views', function(arg) {
       return append(wrapper, E(currentPage));
     });
   }
+  window.onhashchange = function() {
+    var ref1;
+    if ((ref1 = location.hash) === '' || ref1 === '#') {
+      return setTimeout((function() {
+        return window.location = '#home';
+      }), 1000);
+    }
+  };
   return wrapper;
 });
 
@@ -12081,7 +12101,12 @@ module.exports = component('tableView', function(arg) {
     return update();
   });
   (loc = function() {
-    var profileId;
+    var profileId, ref1;
+    if ((ref1 = location.hash) === '' || ref1 === '#') {
+      setTimeout((function() {
+        return window.location = '#home';
+      }), 1000);
+    }
     if (~location.hash.indexOf('#profile_')) {
       profileId = +location.hash.slice('#profile_'.length);
       return state.applicants.on({
@@ -14942,16 +14967,19 @@ exports.create = function(arg) {
       pageCount = Math.ceil(descriptors.length / itemsInPage);
       currentPage = 1;
       (updatePage = function() {
-        var first, j, last, next, prev, results;
+        var end, first, j, last, next, prev, results, start;
+        start = Math.max(1, currentPage - 2);
+        end = Math.min(pageCount, start + 4);
+        start = Math.max(1, end - 4);
         empty(components.paginationNumbers);
         append(components.paginationNumbers, [
           first = E(style.paginationNumberGreen, '<<'), prev = E(style.paginationNumberGreen, '<'), (function() {
             results = [];
-            for (var j = 1; 1 <= pageCount ? j <= pageCount : j >= pageCount; 1 <= pageCount ? j++ : j--){ results.push(j); }
+            for (var j = start; start <= end ? j <= end : j >= end; start <= end ? j++ : j--){ results.push(j); }
             return results;
           }).apply(this).map(function(page) {
             var number;
-            number = E((page === currentPage ? style.paginationNumberGreen : style.paginationNumber), page);
+            number = E((page === currentPage ? style.paginationNumberCurrent : style.paginationNumber), page);
             onEvent(number, 'click', function() {
               currentPage = page;
               return updatePage();
@@ -15393,6 +15421,10 @@ exports.paginationNumber = {
 
 exports.paginationNumberGreen = extend({}, exports.paginationNumber, {
   color: '#449e73'
+});
+
+exports.paginationNumberCurrent = extend({}, exports.paginationNumberGreen, {
+  textDecoration: 'underline'
 });
 
 

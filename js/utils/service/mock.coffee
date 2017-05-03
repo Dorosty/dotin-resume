@@ -76,14 +76,14 @@ applicants = [{
   history: []
 }]
 
-# applicants = [].concat.apply [], [0..32].map (i) -> applicants.map (applicant) -> extend {}, applicant, userId: applicant.userId + 100 * i
+applicants = [].concat.apply [], [0..32].map (i) -> applicants.map (applicant) -> extend {}, applicant, userId: applicant.userId + 100 * i
 
 user =
   userId: 110
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 3
+  userType: 2
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'

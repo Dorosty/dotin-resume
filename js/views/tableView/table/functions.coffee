@@ -44,12 +44,15 @@ exports.create = ({headers, properties, handlers, variables, components, dom, ev
       pageCount = Math.ceil descriptors.length / itemsInPage
       currentPage = 1
       do updatePage = ->
+        start = Math.max 1, currentPage - 2
+        end = Math.min pageCount, start + 4
+        start = Math.max 1, end - 4
         empty components.paginationNumbers
         append components.paginationNumbers, [
           first = E style.paginationNumberGreen, '<<'
           prev = E style.paginationNumberGreen, '<'
-          [1 .. pageCount].map (page) ->
-            number = E (if page == currentPage then style.paginationNumberGreen else style.paginationNumber), page
+          [start .. end].map (page) ->
+            number = E (if page == currentPage then style.paginationNumberCurrent else style.paginationNumber), page
             onEvent number, 'click', ->
               currentPage = page
               updatePage()

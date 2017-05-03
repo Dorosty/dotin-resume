@@ -17,7 +17,7 @@ module.exports = component 'views', ({dom, state}) ->
     append wrapper, E printView, +location.hash.slice '#print_'.length
   else
     if location.hash in ['', '#']
-      setTimeout (-> window.location = '#home'), 100
+      setTimeout (-> window.location = '#home'), 1000
     state.user.on allowNull: true, (user) ->
       if user?.userType == prevUserType
         return
@@ -34,5 +34,9 @@ module.exports = component 'views', ({dom, state}) ->
       else
         login
       append wrapper, E currentPage
+
+  window.onhashchange = ->
+    if location.hash in ['', '#']
+      setTimeout (-> window.location = '#home'), 1000
 
   wrapper
