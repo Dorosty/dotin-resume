@@ -182,7 +182,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
         E style.box3,
           text 'خواندن: '
           E style.answer, applicantData['مهارت زبان انگلیسی']['خواندن']
-      E 'h1', null, '5. آخرین سوابق سازمانی و پروژه‌ای'
+      E 'h1', null, '4. آخرین سوابق سازمانی و پروژه‌ای'
       E 'table', style.table,
         E 'thead', null,
           E 'tr', null,
@@ -234,7 +234,7 @@ module.exports = component 'views', ({dom, state}, userId) ->
                     text 'علت خاتمه همکاری: '
                     E style.answer, x['علت خاتمه همکاری']
             ]
-      E 'h1', null, '6. اطلاعات تکمیلی'
+      E 'h1', null, '5. اطلاعات تکمیلی'
       E style.boxContainer,
         E style.box,
           E style.bold, 'کار در داتین...'

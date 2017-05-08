@@ -49,7 +49,7 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
   gotoIndex = ->
     window.location = '#home'
 
-  gotoArchive = ->
+  _gotoArchive = ->
     setTimeout update
     setStyle profilePlaceholder, style.profile
     isInArchive = true
@@ -68,6 +68,9 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
             return
           service.changeHRStatus selectedApplicants[0].userId, status: logic.statuses.indexOf 'بازیابی'
     update()
+
+  gotoArchive = ->
+    window.location = '#archive'
 
   selectedApplicants = []
 
@@ -222,8 +225,10 @@ module.exports = component 'tableView', ({dom, events, state, service}) ->
           _gotoApplicant applicant
         else
           _gotoIndex()
-    else
+    else if ~location.hash.indexOf '#home'
       _gotoIndex()
+    else if ~location.hash.indexOf '#archive'
+      _gotoArchive()
 
   window.onhashchange = loc
 

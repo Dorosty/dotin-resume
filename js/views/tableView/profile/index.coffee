@@ -179,12 +179,12 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
 
   actionButtonInstance.onSelect (value) ->
     state.user.on once: true, (user) ->
+      return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
       if value is 'رد کردن'
         return unless confirm "بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از رد کردن این متقاضی اطمینان دارید؟"
       else
         return if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
         return if value is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دشه'))
-        return if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
         return unless confirm "بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از #{value} اطمینان دارید؟"
       loadbarInstance.set()
       service.changeManagerStatus applicant.userId, logic.statuses.indexOf value

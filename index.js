@@ -1,4 +1,186 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],2:[function(require,module,exports){
 var component, list, style, toPersian, window;
 
 component = require('../../utils/component');
@@ -106,7 +288,7 @@ module.exports = component('actionButton', function(arg, arg1) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./list":2,"./style":4}],2:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./list":3,"./style":5}],3:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -209,7 +391,7 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":33,"./style":3}],3:[function(require,module,exports){
+},{"../../../utils/component":34,"./style":4}],4:[function(require,module,exports){
 exports.list = {
   cursor: 'pointer',
   position: 'absolute',
@@ -244,7 +426,7 @@ exports.highlightedItem = {
 };
 
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 exports.actionButton = {
   position: 'relative'
 };
@@ -287,7 +469,7 @@ exports.hover = {
 };
 
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var body, component, defer, style,
   slice = [].slice;
 
@@ -331,7 +513,7 @@ module.exports = function() {
 };
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./style":6}],6:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./style":7}],7:[function(require,module,exports){
 exports.shade = {
   position: 'fixed',
   top: 0,
@@ -398,7 +580,7 @@ exports.contents = {
 };
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var component, extend, style;
 
 component = require('../../utils/component');
@@ -436,7 +618,7 @@ module.exports = component('checkbox', function(arg, text) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./style":8}],8:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./style":9}],9:[function(require,module,exports){
 exports.view = {};
 
 exports.text = {
@@ -468,7 +650,7 @@ exports.checkboxChecked = {
 };
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var component, getNextMonth, getPrevMonth, jalali, style;
 
 component = require('../../../utils/component');
@@ -609,7 +791,7 @@ module.exports = component('calendar', function(arg, textbox) {
 });
 
 
-},{"../../../jalali":29,"../../../utils/component":33,"./style":10}],10:[function(require,module,exports){
+},{"../../../jalali":30,"../../../utils/component":34,"./style":11}],11:[function(require,module,exports){
 var chevron, extend;
 
 extend = require('../../../utils').extend;
@@ -700,7 +882,7 @@ exports.prevYear = extend({}, chevron, {
 });
 
 
-},{"../../../utils":37}],11:[function(require,module,exports){
+},{"../../../utils":38}],12:[function(require,module,exports){
 var body, calendar, component, jalali, style, toEnglish,
   slice = [].slice;
 
@@ -778,7 +960,7 @@ module.exports = component('dateInput', function(arg) {
 });
 
 
-},{"../../jalali":29,"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./calendar":9,"./style":12}],12:[function(require,module,exports){
+},{"../../jalali":30,"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./calendar":10,"./style":13}],13:[function(require,module,exports){
 exports.view = {
   position: 'relative'
 };
@@ -826,7 +1008,7 @@ exports.calendarArrow = {
 };
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var _style, component, extend, list, ref, textIsInSearch, toPersian;
 
 component = require('../../utils/component');
@@ -979,7 +1161,7 @@ module.exports = component('dropdown', function(arg, arg1) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./list":14,"./style":16}],14:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./list":15,"./style":17}],15:[function(require,module,exports){
 var component, style;
 
 component = require('../../../utils/component');
@@ -1070,9 +1252,9 @@ module.exports = component('dropdownList', function(arg, arg1) {
 });
 
 
-},{"../../../utils/component":33,"./style":15}],15:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],16:[function(require,module,exports){
+},{"../../../utils/component":34,"./style":16}],16:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"dup":4}],17:[function(require,module,exports){
 exports.dropdown = {
   position: 'relative'
 };
@@ -1104,7 +1286,7 @@ exports.arrowHover = {
 };
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var component;
 
 component = require('../utils/component');
@@ -1146,7 +1328,7 @@ module.exports = component('loadbar', function(arg, style) {
 });
 
 
-},{"../utils/component":33}],18:[function(require,module,exports){
+},{"../utils/component":34}],19:[function(require,module,exports){
 var component, style;
 
 component = require('../../utils/component');
@@ -1198,7 +1380,7 @@ module.exports = component('radioSwitch', function(arg, arg1) {
 });
 
 
-},{"../../utils/component":33,"./style":19}],19:[function(require,module,exports){
+},{"../../utils/component":34,"./style":20}],20:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -1231,7 +1413,7 @@ exports.optionActive = {
 };
 
 
-},{"../../utils":37}],20:[function(require,module,exports){
+},{"../../utils":38}],21:[function(require,module,exports){
 var component, emailIsValid;
 
 component = require('../../utils/component');
@@ -1254,7 +1436,7 @@ module.exports = component('emailInput', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33}],21:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34}],22:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1279,7 +1461,7 @@ module.exports = component('gradeInput', function(arg) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],22:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],23:[function(require,module,exports){
 var component, toEnglish;
 
 component = require('../../utils/component');
@@ -1314,7 +1496,7 @@ module.exports = component('restrictedInput', function(arg, regex) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33}],23:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34}],24:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1339,7 +1521,7 @@ module.exports = component('numberInput', function(arg, isFraction) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],24:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],25:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1364,7 +1546,7 @@ module.exports = component('phoneNumberInput', function(arg) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],25:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],26:[function(require,module,exports){
 var component, restrictedInput, toEnglish;
 
 component = require('../../utils/component');
@@ -1389,7 +1571,7 @@ module.exports = component('yearInput', function(arg) {
 });
 
 
-},{".":22,"../../utils":37,"../../utils/component":33}],26:[function(require,module,exports){
+},{".":23,"../../utils":38,"../../utils/component":34}],27:[function(require,module,exports){
 var component, window;
 
 component = require('../utils/component');
@@ -1469,7 +1651,7 @@ module.exports = component('scrollViewer', function(arg) {
 });
 
 
-},{"../utils/component":33,"../utils/dom":35}],27:[function(require,module,exports){
+},{"../utils/component":34,"../utils/dom":36}],28:[function(require,module,exports){
 var body, component, defer, extend, ref, style;
 
 component = require('../../utils/component');
@@ -1519,7 +1701,7 @@ module.exports = function(element, text) {
 };
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/dom":35,"./style":28}],28:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/dom":36,"./style":29}],29:[function(require,module,exports){
 exports.tooltip = {
   position: 'absolute',
   textAlign: 'center',
@@ -1553,7 +1735,7 @@ exports.arrow = {
 };
 
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /*
   Expose functions.
 */
@@ -1807,7 +1989,7 @@ function div(a, b) {
 function mod(a, b) {
   return a - ~~(a / b) * b
 }
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var body, component, views;
 
 component = require('./utils/component');
@@ -1841,7 +2023,7 @@ module.exports = component('page', function(arg) {
  */
 
 
-},{"./utils/component":33,"./utils/dom":35,"./views":95}],31:[function(require,module,exports){
+},{"./utils/component":34,"./utils/dom":36,"./views":96}],32:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -3893,7 +4075,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":131}],32:[function(require,module,exports){
+},{"_process":1}],33:[function(require,module,exports){
 var linear, spring, timeStep;
 
 linear = function(rawCallback, wrapCallback) {
@@ -4008,7 +4190,7 @@ module.exports = {
 };
 
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var _dom, _events, _service, _state, extend, log,
   slice = [].slice;
 
@@ -4077,7 +4259,7 @@ module.exports = function(componentName, create) {
 };
 
 
-},{".":37,"./dom":35,"./events":36,"./log":38,"./service":43,"./state":48}],34:[function(require,module,exports){
+},{".":38,"./dom":36,"./events":37,"./log":39,"./service":44,"./state":49}],35:[function(require,module,exports){
 var createCookie, eraseCookie, readCookie;
 
 createCookie = function(name, value, days) {
@@ -4118,7 +4300,7 @@ module.exports = {
 };
 
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var extend, log, ref, remove, toPersian, uppercaseFirst,
   slice = [].slice;
 
@@ -4524,7 +4706,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":37,"./log":38}],36:[function(require,module,exports){
+},{".":38,"./log":39}],37:[function(require,module,exports){
 var body, isIn, log, ref, remove, window,
   slice = [].slice;
 
@@ -4800,7 +4982,7 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{".":37,"./dom":35,"./log":38}],37:[function(require,module,exports){
+},{".":38,"./dom":36,"./log":39}],38:[function(require,module,exports){
 var slice = [].slice;
 
 exports.emailIsValid = function(email) {
@@ -4996,7 +5178,7 @@ exports.collection = function(add, destroy, change) {
 };
 
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var getFullName, log;
 
 log = function(x) {
@@ -5309,7 +5491,7 @@ exports.service = {
 };
 
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 exports.passwordIsValid = function(password) {
   return password.length >= 6;
 };
@@ -5329,7 +5511,7 @@ exports.actionModifiable = function(action) {
 };
 
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var Q, mock;
 
 Q = require('../../q');
@@ -5383,7 +5565,7 @@ module.exports = function(isGet, serviceName, params) {
 };
 
 
-},{"../../q":31,"./mock":45}],41:[function(require,module,exports){
+},{"../../q":32,"./mock":46}],42:[function(require,module,exports){
 var Q, cruds, eraseCookie, extend, get, gets, post, posts, ref, ref1, ref2, remove, state, stateChangingServices, uppercaseFirst,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
@@ -5713,7 +5895,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":37,"../../q":31,"../cookies":34,"../state":48,"./getPost":42,"./names":46,"./stateChangingServices":47}],42:[function(require,module,exports){
+},{"..":38,"../../q":32,"../cookies":35,"../state":49,"./getPost":43,"./names":47,"./stateChangingServices":48}],43:[function(require,module,exports){
 var ajax, eraseCookie, ex, handle, map, state, stateChangingServices, states;
 
 ajax = require('./ajax');
@@ -5807,7 +5989,7 @@ exports.get = handle(true);
 exports.post = handle(false);
 
 
-},{"../cookies":34,"../state":48,"./ajax":40,"./ex":41,"./map":44,"./names":46,"./stateChangingServices":47}],43:[function(require,module,exports){
+},{"../cookies":35,"../state":49,"./ajax":41,"./ex":42,"./map":45,"./names":47,"./stateChangingServices":48}],44:[function(require,module,exports){
 var Q, ex, get, gets, log, others, post, posts, ref, ref1,
   slice = [].slice;
 
@@ -5860,11 +6042,11 @@ exports.autoPing = function() {
 };
 
 
-},{"../../q":31,"../log":38,"./ex":41,"./getPost":42,"./names":46}],44:[function(require,module,exports){
+},{"../../q":32,"../log":39,"./ex":42,"./getPost":43,"./names":47}],45:[function(require,module,exports){
 exports.jobs = 'allRecordedJobs';
 
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var Q, applicants, extend, j, jobs, managers, notifications, results1, user;
 
 return;
@@ -5984,7 +6166,7 @@ user = {
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 2,
+  userType: 1,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -6297,7 +6479,7 @@ exports.clearAllNotifications = function() {
 };
 
 
-},{"../../q":31,"../../utils":37}],46:[function(require,module,exports){
+},{"../../q":32,"../../utils":38}],47:[function(require,module,exports){
 exports.gets = ['getCaptcha', 'getUser'];
 
 exports.posts = ['login', 'addJob', 'loadInterview', 'loadApplicantHistory'];
@@ -6314,7 +6496,7 @@ exports.others = ['logout', 'submitProfileData', 'submitTestResults', 'changeHRS
 exports.states = ['user', 'applicants', 'notifications', 'managers', 'hrUsers', 'jobs'];
 
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 var cruds, uppercaseFirst;
 
 cruds = require('./names').cruds;
@@ -6356,7 +6538,7 @@ cruds.forEach(function(arg) {
 });
 
 
-},{"..":37,"./names":46}],48:[function(require,module,exports){
+},{"..":38,"./names":47}],49:[function(require,module,exports){
 var createPubSub, log, names, pubSubs;
 
 names = require('./names');
@@ -6568,11 +6750,11 @@ exports.instance = function(thisComponent) {
 };
 
 
-},{"../log":38,"./names":49}],49:[function(require,module,exports){
+},{"../log":39,"./names":50}],50:[function(require,module,exports){
 module.exports = ['user', 'applicants', 'notifications', 'hrUsers', 'managers', 'jobs'];
 
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var checkbox, component, dropdown, extend, gradeInput, ref, remove, style, yearInput;
 
 component = require('../../../../utils/component');
@@ -6741,7 +6923,7 @@ module.exports = component('applicantFormEducation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":7,"../../../../components/dropdown":13,"../../../../components/restrictedInput/grade":21,"../../../../components/restrictedInput/year":25,"../../../../utils":37,"../../../../utils/component":33,"./style":51}],51:[function(require,module,exports){
+},{"../../../../components/checkbox":8,"../../../../components/dropdown":14,"../../../../components/restrictedInput/grade":22,"../../../../components/restrictedInput/year":26,"../../../../utils":38,"../../../../utils/component":34,"./style":52}],52:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -6818,7 +7000,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":37}],52:[function(require,module,exports){
+},{"../../../../utils":38}],53:[function(require,module,exports){
 var component, dropdown, style;
 
 component = require('../../../../utils/component');
@@ -6863,7 +7045,7 @@ module.exports = component('applicantFormEnglish', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":13,"../../../../utils/component":33,"./style":53}],53:[function(require,module,exports){
+},{"../../../../components/dropdown":14,"../../../../utils/component":34,"./style":54}],54:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -6905,7 +7087,7 @@ exports.input = {
 };
 
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 var applicantData, checkbox, component, d, education, english, extend, others, overview, personalInfo, ref, remove, reputation, scrollViewer, spring, style, tab1, talents, tooltip;
 
 applicantData = {
@@ -7274,7 +7456,7 @@ module.exports = component('applicantForm', function(arg) {
 });
 
 
-},{"../../../components/checkbox":7,"../../../components/scrollViewer":26,"../../../components/tooltip":27,"../../../utils":37,"../../../utils/animation":32,"../../../utils/component":33,"../../../utils/dom":35,"../../tableView/profile/tab1":108,"./education":50,"./english":52,"./others":55,"./overview":68,"./personalInfo":70,"./reputation":74,"./style":76,"./talents":77}],55:[function(require,module,exports){
+},{"../../../components/checkbox":8,"../../../components/scrollViewer":27,"../../../components/tooltip":28,"../../../utils":38,"../../../utils/animation":33,"../../../utils/component":34,"../../../utils/dom":36,"../../tableView/profile/tab1":109,"./education":51,"./english":53,"./others":56,"./overview":69,"./personalInfo":71,"./reputation":75,"./style":77,"./talents":78}],56:[function(require,module,exports){
 var component, part0, part1, part2, part3, part4, part5;
 
 component = require('../../../../utils/component');
@@ -7320,7 +7502,7 @@ module.exports = component('applicantFormOthers', function(arg, arg1) {
 });
 
 
-},{"../../../../utils/component":33,"./part0":56,"./part1":58,"./part2":60,"./part3":62,"./part4":64,"./part5":66}],56:[function(require,module,exports){
+},{"../../../../utils/component":34,"./part0":57,"./part1":59,"./part2":61,"./part3":63,"./part4":65,"./part5":67}],57:[function(require,module,exports){
 var component, dateInput, dropdown, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7472,7 +7654,7 @@ module.exports = component('applicantFormOthersPart0', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/dateInput":11,"../../../../../components/dropdown":13,"../../../../../components/restrictedInput/number":23,"../../../../../utils":37,"../../../../../utils/component":33,"./style":57}],57:[function(require,module,exports){
+},{"../../../../../components/dateInput":12,"../../../../../components/dropdown":14,"../../../../../components/restrictedInput/number":24,"../../../../../utils":38,"../../../../../utils/component":34,"./style":58}],58:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../../utils').extend;
@@ -7553,7 +7735,7 @@ exports.descriptionInput = extend({}, exports.input, {
 });
 
 
-},{"../../../../../utils":37}],58:[function(require,module,exports){
+},{"../../../../../utils":38}],59:[function(require,module,exports){
 var component, radioSwitch, style;
 
 component = require('../../../../../utils/component');
@@ -7616,7 +7798,7 @@ module.exports = component('applicantFormOthersPart1', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":18,"../../../../../utils/component":33,"./style":59}],59:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":19,"../../../../../utils/component":34,"./style":60}],60:[function(require,module,exports){
 exports.mainLabel = {
   fontSize: 12,
   lineHeight: 30,
@@ -7640,7 +7822,7 @@ exports.radioSwitch = {
 };
 
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 var component, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7752,7 +7934,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/number":23,"../../../../../utils":37,"../../../../../utils/component":33,"./style":61}],61:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":24,"../../../../../utils":38,"../../../../../utils/component":34,"./style":62}],62:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -7817,7 +7999,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":37}],62:[function(require,module,exports){
+},{"../../../../../utils":38}],63:[function(require,module,exports){
 var component, extend, numberInput, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -7919,7 +8101,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/restrictedInput/number":23,"../../../../../utils":37,"../../../../../utils/component":33,"./style":63}],63:[function(require,module,exports){
+},{"../../../../../components/restrictedInput/number":24,"../../../../../utils":38,"../../../../../utils/component":34,"./style":64}],64:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -7993,7 +8175,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":37}],64:[function(require,module,exports){
+},{"../../../../../utils":38}],65:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../../utils/component');
@@ -8017,7 +8199,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils/component":33,"./style":65}],65:[function(require,module,exports){
+},{"../../../../../utils/component":34,"./style":66}],66:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -8059,7 +8241,7 @@ exports.textarea = {
 };
 
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 var component, extend, radioSwitch, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -8151,7 +8333,7 @@ module.exports = component('applicantFormOthersPart2', function(arg, arg1) {
 });
 
 
-},{"../../../../../components/radioSwitch":18,"../../../../../utils":37,"../../../../../utils/component":33,"./style":67}],67:[function(require,module,exports){
+},{"../../../../../components/radioSwitch":19,"../../../../../utils":38,"../../../../../utils/component":34,"./style":68}],68:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -8178,7 +8360,7 @@ exports.input = {
 };
 
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -8230,7 +8412,7 @@ module.exports = component('applicantFormOverview', function(arg) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"./style":69}],69:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":70}],70:[function(require,module,exports){
 exports.section = {
   display: 'inline-block',
   width: '33%',
@@ -8293,7 +8475,7 @@ exports.resumeLink = {
 };
 
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 var checkbox, component, defer, dropdown, emailInput, extend, multivalue, numberInput, phoneNumberInput, radioSwitch, ref, remove, style, toPersian;
 
 component = require('../../../../utils/component');
@@ -8672,7 +8854,7 @@ module.exports = component('applicantFormPersonalInfo', function(arg, arg1) {
 });
 
 
-},{"../../../../components/checkbox":7,"../../../../components/dropdown":13,"../../../../components/radioSwitch":18,"../../../../components/restrictedInput/email":20,"../../../../components/restrictedInput/number":23,"../../../../components/restrictedInput/phoneNumber":24,"../../../../utils":37,"../../../../utils/component":33,"./multivalue":71,"./style":73}],71:[function(require,module,exports){
+},{"../../../../components/checkbox":8,"../../../../components/dropdown":14,"../../../../components/radioSwitch":19,"../../../../components/restrictedInput/email":21,"../../../../components/restrictedInput/number":24,"../../../../components/restrictedInput/phoneNumber":25,"../../../../utils":38,"../../../../utils/component":34,"./multivalue":72,"./style":74}],72:[function(require,module,exports){
 var component, extend, ref, remove, style;
 
 component = require('../../../../../utils/component');
@@ -8745,7 +8927,7 @@ module.exports = component('personalInfoMultivalue', function(arg, arg1) {
 });
 
 
-},{"../../../../../utils":37,"../../../../../utils/component":33,"./style":72}],72:[function(require,module,exports){
+},{"../../../../../utils":38,"../../../../../utils/component":34,"./style":73}],73:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../../utils').extend;
@@ -8799,7 +8981,7 @@ exports.remove = extend({}, icon, {
 });
 
 
-},{"../../../../../utils":37}],73:[function(require,module,exports){
+},{"../../../../../utils":38}],74:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -8889,7 +9071,7 @@ exports.phoneNumber = extend({}, exports.input, {
 });
 
 
-},{"../../../../utils":37}],74:[function(require,module,exports){
+},{"../../../../utils":38}],75:[function(require,module,exports){
 var component, dateInput, dropdown, extend, monthToString, numberInput, ref, remove, style, toEnglish;
 
 component = require('../../../../utils/component');
@@ -9070,7 +9252,7 @@ module.exports = component('applicantFormReputation', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../components/restrictedInput/number":23,"../../../../utils":37,"../../../../utils/component":33,"./style":75}],75:[function(require,module,exports){
+},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../components/restrictedInput/number":24,"../../../../utils":38,"../../../../utils/component":34,"./style":76}],76:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -9257,7 +9439,7 @@ exports.jobColumnHeader = {
 };
 
 
-},{"../../../../utils":37}],76:[function(require,module,exports){
+},{"../../../../utils":38}],77:[function(require,module,exports){
 exports.valid = {
   color: '#5c5555',
   borderColor: '#ccc'
@@ -9333,7 +9515,7 @@ exports.submitSubmitting = {
 };
 
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var component, dropdown, remove, style, yearInput;
 
 component = require('../../../../utils/component');
@@ -9544,7 +9726,7 @@ module.exports = component('applicantFormTalents', function(arg, arg1) {
 });
 
 
-},{"../../../../components/dropdown":13,"../../../../components/restrictedInput/year":25,"../../../../utils":37,"../../../../utils/component":33,"./style":78}],78:[function(require,module,exports){
+},{"../../../../components/dropdown":14,"../../../../components/restrictedInput/year":26,"../../../../utils":38,"../../../../utils/component":34,"./style":79}],79:[function(require,module,exports){
 var extend, icon;
 
 extend = require('../../../../utils').extend;
@@ -9628,7 +9810,7 @@ exports.textarea = {
 };
 
 
-},{"../../../../utils":37}],79:[function(require,module,exports){
+},{"../../../../utils":38}],80:[function(require,module,exports){
 var component, extend, form, logic, style, tabNames, tests, viewStatus;
 
 component = require('../../utils/component');
@@ -9746,7 +9928,7 @@ module.exports = component('applicantView', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"../../utils/logic":39,"../tableView/profile/viewStatus":118,"./form":54,"./style":80,"./tests":83}],80:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"../tableView/profile/viewStatus":119,"./form":55,"./style":81,"./tests":84}],81:[function(require,module,exports){
 var extend;
 
 extend = require('../../utils').extend;
@@ -9849,7 +10031,7 @@ exports.contents = {
 };
 
 
-},{"../../utils":37}],81:[function(require,module,exports){
+},{"../../utils":38}],82:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -9876,7 +10058,7 @@ module.exports = component('applicantTestsFirstPage', function(arg, gotoTest) {
 });
 
 
-},{"../../../../utils/component":33,"./style":82}],82:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":83}],83:[function(require,module,exports){
 exports.view = {
   position: 'absolute',
   width: '100%',
@@ -9931,7 +10113,7 @@ exports.enterButtonHover = {
 };
 
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 var component, firstPage, results, secondPage, style;
 
 component = require('../../../utils/component');
@@ -9986,7 +10168,7 @@ module.exports = component('applicantTests', function(arg) {
 });
 
 
-},{"../../../utils/component":33,"./firstPage":81,"./results":85,"./secondPage":87,"./style":90}],84:[function(require,module,exports){
+},{"../../../utils/component":34,"./firstPage":82,"./results":86,"./secondPage":88,"./style":91}],85:[function(require,module,exports){
 var exports;
 
 module.exports = exports = {
@@ -10013,7 +10195,7 @@ module.exports = exports = {
 });
 
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 var component, data, extend, style;
 
 component = require('../../../../utils/component');
@@ -10138,7 +10320,7 @@ module.exports = component('applicantTestResults', function(arg) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"./data":84,"./style":86}],86:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./data":85,"./style":87}],87:[function(require,module,exports){
 exports.view = {
   position: 'absolute',
   width: '100%',
@@ -10328,7 +10510,7 @@ exports.progressbarTotalCount = {
 };
 
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 var component, extend, generateId, questionNumbers, questions, style;
 
 component = require('../../../../utils/component');
@@ -10479,7 +10661,7 @@ module.exports = component('applicantTestsSecondPage', function(arg, gotoResults
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"../../../../utils/dom":35,"./questions":88,"./style":89}],88:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/dom":36,"./questions":89,"./style":90}],89:[function(require,module,exports){
 module.exports = [
   {
     question: 'آیا شناختن شما',
@@ -10749,7 +10931,7 @@ module.exports = [
 ];
 
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 exports.view = {
   position: 'absolute',
   width: '100%',
@@ -10866,11 +11048,11 @@ exports.progressbarCirlce = {
 };
 
 
-},{}],90:[function(require,module,exports){
-
-
-
 },{}],91:[function(require,module,exports){
+
+
+
+},{}],92:[function(require,module,exports){
 var component, extend, jobs, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -11019,7 +11201,7 @@ module.exports = component('apply', function(arg) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./jobs":92,"./style":93}],92:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./jobs":93,"./style":94}],93:[function(require,module,exports){
 module.exports = [{
     id: 1,
     title: 'کارشناس کنترل کیفیت',
@@ -11101,7 +11283,7 @@ module.exports = [{
     ],
     selected: false
 }];
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 exports.headerMarginfix = {
   display: 'inline-block',
   marginTop: 30
@@ -11333,7 +11515,7 @@ exports.footerLink = {
 };
 
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var tableView;
 
 tableView = require('../tableView');
@@ -11341,7 +11523,7 @@ tableView = require('../tableView');
 module.exports = tableView;
 
 
-},{"../tableView":101}],95:[function(require,module,exports){
+},{"../tableView":102}],96:[function(require,module,exports){
 var applicantView, apply, component, hrView, login, managerView, printView;
 
 component = require('../utils/component');
@@ -11412,7 +11594,7 @@ module.exports = component('views', function(arg) {
 });
 
 
-},{"../utils/component":33,"./applicantView":79,"./apply":91,"./hrView":94,"./login":96,"./managerView":98,"./printView":99}],96:[function(require,module,exports){
+},{"../utils/component":34,"./applicantView":80,"./apply":92,"./hrView":95,"./login":97,"./managerView":99,"./printView":100}],97:[function(require,module,exports){
 var component, extend, numberInput, ref, style, toEnglish;
 
 component = require('../../utils/component');
@@ -11491,7 +11673,7 @@ module.exports = component('login', function(arg) {
 });
 
 
-},{"../../components/restrictedInput/number":23,"../../utils":37,"../../utils/component":33,"./style":97}],97:[function(require,module,exports){
+},{"../../components/restrictedInput/number":24,"../../utils":38,"../../utils/component":34,"./style":98}],98:[function(require,module,exports){
 exports.bg = {
   src: 'assets/img/login/bg.jpg',
   zIndex: -1,
@@ -11588,9 +11770,9 @@ exports.invalid = {
 };
 
 
-},{}],98:[function(require,module,exports){
-arguments[4][94][0].apply(exports,arguments)
-},{"../tableView":101,"dup":94}],99:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
+arguments[4][95][0].apply(exports,arguments)
+},{"../tableView":102,"dup":95}],100:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 style = require('./style');
@@ -11644,7 +11826,7 @@ module.exports = component('views', function(arg, userId) {
         return E('tr', null, E('td', style.td, E(style.answer, x['دوره'])), E('td', style.td, E(style.answer, x['برگزار کننده'])), E('td', style.td, E(style.answer, x['سال'])));
       }))), E(style.tableFooter, E(null, text('نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده: '), E(style.answer, ((ref7 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref7['نکات تکمیلی قابل ذکر در دوره‌های آموزشی گذرانده شده'] : void 0) || ''))), E(style.tableFooter, E(null, text('آثار علمی و عضویت در انجمن‌ها: '), E(style.answer, ((ref8 = applicantData['توانمندی‌ها، مهارت‌ها، دانش و شایستگی‌ها']) != null ? ref8['آثار علمی و عضویت در انجمن‌ها'] : void 0) || ''))), E(extend({
         marginTop: -1
-      }, style.boxContainer), E(extend(style.darkBox), 'مهارت زبان انگلیسی'), E(style.box3, text('مکالمه: '), E(style.answer, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.box3, text('نوشتن: '), E(style.answer, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.box3, text('خواندن: '), E(style.answer, applicantData['مهارت زبان انگلیسی']['خواندن']))), E('h1', null, '5. آخرین سوابق سازمانی و پروژه‌ای'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مشخصات شرکت / سازمان محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'))), E('tbody', null, (((ref9 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref9['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) || []).map(function(x) {
+      }, style.boxContainer), E(extend(style.darkBox), 'مهارت زبان انگلیسی'), E(style.box3, text('مکالمه: '), E(style.answer, applicantData['مهارت زبان انگلیسی']['مکالمه'])), E(style.box3, text('نوشتن: '), E(style.answer, applicantData['مهارت زبان انگلیسی']['نوشتن'])), E(style.box3, text('خواندن: '), E(style.answer, applicantData['مهارت زبان انگلیسی']['خواندن']))), E('h1', null, '4. آخرین سوابق سازمانی و پروژه‌ای'), E('table', style.table, E('thead', null, E('tr', null, E('th', style.th, 'مشخصات شرکت / سازمان محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف'))), E('tbody', null, (((ref9 = applicantData['آخرین سوابق سازمانی و پروژه‌ای']) != null ? ref9['آخرین سوابق سازمانی و پروژه‌ای'] : void 0) || []).map(function(x) {
         return [
           E('tr', null, E('td', extend({
             rowSpan: 2
@@ -11652,7 +11834,7 @@ module.exports = component('views', function(arg, userId) {
             rowSpan: 2
           }, style.td), E(style.answer, x['سمت'])), E('td', style.td, E(style.answer, x['شرح مهمترین اقدامات صورت گرفته / مهمترین شرح وظایف']))), E('tr', null, E('td', style.td, E(null, text('تاریخ شروع: '), E(style.answer, x['تاریخ شروع'])), E(null, text('تاریخ پایان: '), E(style.answer, x['تاریخ پایان'])), E(null, text('آخرین خالص دریافتی (تومان): '), E(style.answer, x['آخرین خالص دریافتی'])), E(null, text('نوع همکاری: '), E(style.answer, x['نوع همکاری'])), E(null, text('علت خاتمه همکاری: '), E(style.answer, x['علت خاتمه همکاری']))))
         ];
-      }))), E('h1', null, '6. اطلاعات تکمیلی'), E(style.boxContainer, E(style.box, E(style.bold, 'کار در داتین...')), E(style.box, text('متقاضی چه نوع همکاری هستید؟ '), E(style.answer, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.box, text('از چه طریقی از فرصت شغلی در داتین مطلع شدید؟ '), E(style.answer, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] || '' + (applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] === 'سایر' ? ' - ' + (((ref10 = applicantData['سایر اطلاعات']) != null ? ref10['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] : void 0) || '') : ''))), E(style.box, text('از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟ '), E(style.answer, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] || '')), E(style.box, text('نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟ '), E(style.answer, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] || ''), E(style.boxMarginRight, text('مدت زمانی که بیمه بوده‌اید؟ '), E(style.answer, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'] || ''))), E(style.box, text('میزان دستمزد '), E(style.boldUnderline, 'خالص'), text(" درخواستی شما چقدر است؟ " + (applicantData['سایر اطلاعات']['میزان دستمزد'] || '')), E(style.answer, applicantData['سایر اطلاعات']['مقدار دستمزد'] ? ' - ' + applicantData['سایر اطلاعات']['مقدار دستمزد'] + ' تومان' : '')), E(style.box, E(null, 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:'), E(null, text('در ساعات اضافه کاری حضور داشته و کار کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در ساعات اضافه کاری حضور داشته و کار کنید'])), E(null, text('در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید'])), E(null, text('در شیفت شب کار کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در شیفت شب کار کنید'])), E(null, text('در تعطیلات آخر هفته کار کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در تعطیلات آخر هفته کار کنید'])), E(null, text('در شهر تهران غیر از محل شرکت مشغول کار شوید - '), E(style.answer, applicantData['سایر اطلاعات']['در شهر تهران غیر از محل شرکت مشغول کار شوید']))), E(style.box, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', extend({
+      }))), E('h1', null, '5. اطلاعات تکمیلی'), E(style.boxContainer, E(style.box, E(style.bold, 'کار در داتین...')), E(style.box, text('متقاضی چه نوع همکاری هستید؟ '), E(style.answer, applicantData['سایر اطلاعات']['متقاضی چه نوع همکاری هستید'])), E(style.box, text('از چه طریقی از فرصت شغلی در داتین مطلع شدید؟ '), E(style.answer, applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] || '' + (applicantData['سایر اطلاعات']['از چه طریقی از فرصت شغلی در داتین مطلع شدید'] === 'سایر' ? ' - ' + (((ref10 = applicantData['سایر اطلاعات']) != null ? ref10['از چه طریقی از فرصت شغلی در داتین مطلع شدید - سایر'] : void 0) || '') : ''))), E(style.box, text('از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید؟ '), E(style.answer, applicantData['سایر اطلاعات']['از چه تاریخی می‌توانید همکاری خود را با داتین آغاز کنید'] || '')), E(style.box, text('نوع بیمه‌ای که تا‌به‌حال داشته‌اید؟ '), E(style.answer, applicantData['سایر اطلاعات']['نوع بیمه‌ای که تا‌به‌حال داشته‌اید'] || ''), E(style.boxMarginRight, text('مدت زمانی که بیمه بوده‌اید؟ '), E(style.answer, applicantData['سایر اطلاعات']['مدت زمانی که بیمه بوده‌اید'] || ''))), E(style.box, text('میزان دستمزد '), E(style.boldUnderline, 'خالص'), text(" درخواستی شما چقدر است؟ " + (applicantData['سایر اطلاعات']['میزان دستمزد'] || '')), E(style.answer, applicantData['سایر اطلاعات']['مقدار دستمزد'] ? ' - ' + applicantData['سایر اطلاعات']['مقدار دستمزد'] + ' تومان' : '')), E(style.box, E(null, 'در صورتی که شغل مورد نظر شما نیاز به موارد زیر داشته باشد، آیا می‌توانید:'), E(null, text('در ساعات اضافه کاری حضور داشته و کار کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در ساعات اضافه کاری حضور داشته و کار کنید'])), E(null, text('در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در صورت لزوم در ساعات غیر اداری به شرکت مراجعه کنید'])), E(null, text('در شیفت شب کار کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در شیفت شب کار کنید'])), E(null, text('در تعطیلات آخر هفته کار کنید - '), E(style.answer, applicantData['سایر اطلاعات']['در تعطیلات آخر هفته کار کنید'])), E(null, text('در شهر تهران غیر از محل شرکت مشغول کار شوید - '), E(style.answer, applicantData['سایر اطلاعات']['در شهر تهران غیر از محل شرکت مشغول کار شوید']))), E(style.box, 'مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند:'), E('table', extend({
         marginTop: -1,
         marginRight: -1
       }, style.table), E('thead', null, E('tr', null, E('th', style.th, 'نام و نام خانوادگی'), E('th', style.th, 'نسبت با شما'), E('th', style.th, 'نام محل کار'), E('th', style.th, 'سمت'), E('th', style.th, 'شماره تماس'))), E('tbody', null, (applicantData['سایر اطلاعات']['مشخصات دو نفر از کسانی که شما را بشناسند و توانایی کاری شما را تایید کنند'] || []).map(function(x) {
@@ -11674,7 +11856,7 @@ module.exports = component('views', function(arg, userId) {
 });
 
 
-},{"../../utils":37,"../../utils/component":33,"./style":100}],100:[function(require,module,exports){
+},{"../../utils":38,"../../utils/component":34,"./style":101}],101:[function(require,module,exports){
 var box, extend;
 
 extend = require('../../utils').extend;
@@ -11763,7 +11945,7 @@ exports.tableFooter = {
 };
 
 
-},{"../../utils":37}],101:[function(require,module,exports){
+},{"../../utils":38}],102:[function(require,module,exports){
 var actionButton, changeHash, component, extend, getManualHash, logic, profile, ref, search, setManualHash, sidebar, style, table, toDate;
 
 component = require('../../utils/component');
@@ -11785,7 +11967,7 @@ ref = require('../../utils'), extend = ref.extend, toDate = ref.toDate, changeHa
 logic = require('../../utils/logic');
 
 module.exports = component('tableView', function(arg) {
-  var E, _gotoApplicant, _gotoIndex, actionButtonPlaceholder, append, applicants, clickedOnResume, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, itemsCount, loc, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
+  var E, _gotoApplicant, _gotoArchive, _gotoIndex, actionButtonPlaceholder, append, applicants, clickedOnResume, contents, dom, empty, events, gotoApplicant, gotoArchive, gotoIndex, headers, hide, isInArchive, itemsCount, loc, onEvent, profilePlaceholder, searchInstance, selectedApplicants, service, setStyle, state, tableInstance, text, update, view;
   dom = arg.dom, events = arg.events, state = arg.state, service = arg.service;
   E = dom.E, text = dom.text, setStyle = dom.setStyle, append = dom.append, empty = dom.empty, hide = dom.hide;
   onEvent = events.onEvent;
@@ -11844,7 +12026,7 @@ module.exports = component('tableView', function(arg) {
   gotoIndex = function() {
     return window.location = '#home';
   };
-  gotoArchive = function() {
+  _gotoArchive = function() {
     var actionButtonInstance;
     setTimeout(update);
     setStyle(profilePlaceholder, style.profile);
@@ -11872,6 +12054,9 @@ module.exports = component('tableView', function(arg) {
       }
     });
     return update();
+  };
+  gotoArchive = function() {
+    return window.location = '#archive';
   };
   selectedApplicants = [];
   view = E('span', null, E(sidebar, {
@@ -12124,8 +12309,10 @@ module.exports = component('tableView', function(arg) {
           return _gotoIndex();
         }
       });
-    } else {
+    } else if (~location.hash.indexOf('#home')) {
       return _gotoIndex();
+    } else if (~location.hash.indexOf('#archive')) {
+      return _gotoArchive();
     }
   })();
   window.onhashchange = loc;
@@ -12133,7 +12320,7 @@ module.exports = component('tableView', function(arg) {
 });
 
 
-},{"../../components/actionButton":1,"../../utils":37,"../../utils/component":33,"../../utils/logic":39,"./profile":104,"./search":122,"./sidebar":124,"./style":126,"./table":128}],102:[function(require,module,exports){
+},{"../../components/actionButton":2,"../../utils":38,"../../utils/component":34,"../../utils/logic":40,"./profile":105,"./search":123,"./sidebar":125,"./style":127,"./table":129}],103:[function(require,module,exports){
 var component, dateInput, dropdown, logic, newAlert, ref, remove, style, toDate, toTimestamp;
 
 style = require('./style');
@@ -12404,7 +12591,7 @@ module.exports = function(loadbarInstance, applicant, status) {
 };
 
 
-},{"../../../../components/alert":5,"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../utils":37,"../../../../utils/component":33,"../../../../utils/logic":39,"./style":103}],103:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":104}],104:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -12539,7 +12726,7 @@ exports.dropdownInput = {
 };
 
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 var actionButton, changeStatus, component, extend, loadbar, logic, style, tab0, tab1, tab2, tab3, tab4, tab5, tabContents, tabNames, viewStatus;
 
 component = require('../../../utils/component');
@@ -12785,6 +12972,13 @@ module.exports = component('profile', function(arg, arg1) {
     return state.user.on({
       once: true
     }, function(user) {
+      if (applicant.applicantsManagerStatus.some(function(arg2) {
+        var managerId;
+        managerId = arg2.managerId;
+        return managerId === user.userId;
+      })) {
+        return;
+      }
       if (value === 'رد کردن') {
         if (!confirm("بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از رد کردن این متقاضی اطمینان دارید؟")) {
           return;
@@ -12802,13 +12996,6 @@ module.exports = component('profile', function(arg, arg1) {
           status = arg2.status;
           return logic.statuses[status] === 'مصاحبه تلفنی انجام دشه';
         }))) {
-          return;
-        }
-        if (applicant.applicantsManagerStatus.some(function(arg2) {
-          var managerId;
-          managerId = arg2.managerId;
-          return managerId === user.userId;
-        })) {
           return;
         }
         if (!confirm("بعد از ثبت امکان حذف یا ویرایش وجود ندارد. آیا از " + value + " اطمینان دارید؟")) {
@@ -12860,7 +13047,7 @@ module.exports = component('profile', function(arg, arg1) {
 });
 
 
-},{"../../../components/actionButton":1,"../../../components/loadbar":17,"../../../utils":37,"../../../utils/component":33,"../../../utils/logic":39,"./changeStatus":102,"./style":105,"./tab0":106,"./tab1":108,"./tab2":110,"./tab3":112,"./tab4":114,"./tab5":116,"./viewStatus":118}],105:[function(require,module,exports){
+},{"../../../components/actionButton":2,"../../../components/loadbar":18,"../../../utils":38,"../../../utils/component":34,"../../../utils/logic":40,"./changeStatus":103,"./style":106,"./tab0":107,"./tab1":109,"./tab2":111,"./tab3":113,"./tab4":115,"./tab5":117,"./viewStatus":119}],106:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -13070,7 +13257,7 @@ exports.printButtonHover = {
 };
 
 
-},{"../../../utils":37}],106:[function(require,module,exports){
+},{"../../../utils":38}],107:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate;
 
 component = require('../../../../utils/component');
@@ -13105,7 +13292,7 @@ module.exports = component('tab0', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"./style":107}],107:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":108}],108:[function(require,module,exports){
 exports.column = {
   display: 'inline-block',
   width: '50%'
@@ -13171,7 +13358,7 @@ exports.resumeLink = {
 };
 
 
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 var component, extend, monthToString, ref, style, toDate, toEnglish;
 
 component = require('../../../../utils/component');
@@ -13250,7 +13437,7 @@ module.exports = component('tab1', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"./style":109}],109:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"./style":110}],110:[function(require,module,exports){
 exports.clearfix = {
   clear: 'both'
 };
@@ -13389,7 +13576,7 @@ exports.seperator = {
 };
 
 
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 var component, data, extend, style;
 
 component = require('../../../../utils/component');
@@ -13495,7 +13682,7 @@ module.exports = component('tab2', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"../../../applicantView/tests/results/data":84,"./style":111}],111:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"../../../applicantView/tests/results/data":85,"./style":112}],112:[function(require,module,exports){
 exports.view = {
   position: 'relative',
   width: '100%',
@@ -13684,7 +13871,7 @@ exports.progressbarTotalCount = {
 };
 
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -13699,9 +13886,9 @@ module.exports = component('tab3', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":113}],113:[function(require,module,exports){
-arguments[4][90][0].apply(exports,arguments)
-},{"dup":90}],114:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":114}],114:[function(require,module,exports){
+arguments[4][91][0].apply(exports,arguments)
+},{"dup":91}],115:[function(require,module,exports){
 var component, extend, logic, ref, style, toDate, toTime;
 
 component = require('../../../../utils/component');
@@ -13804,7 +13991,7 @@ module.exports = component('tab4', function(arg, arg1) {
 });
 
 
-},{"../../../../utils":37,"../../../../utils/component":33,"../../../../utils/logic":39,"./style":115}],115:[function(require,module,exports){
+},{"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":116}],116:[function(require,module,exports){
 exports.table = {
   width: '100%'
 };
@@ -13826,7 +14013,7 @@ exports.profilePicture = {
 };
 
 
-},{}],116:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 var component, style;
 
 component = require('../../../../utils/component');
@@ -13841,9 +14028,9 @@ module.exports = component('tab5', function(arg) {
 });
 
 
-},{"../../../../utils/component":33,"./style":117}],117:[function(require,module,exports){
-arguments[4][90][0].apply(exports,arguments)
-},{"dup":90}],118:[function(require,module,exports){
+},{"../../../../utils/component":34,"./style":118}],118:[function(require,module,exports){
+arguments[4][91][0].apply(exports,arguments)
+},{"dup":91}],119:[function(require,module,exports){
 var alert, component, logic, ref, style, toDate, toTime;
 
 style = require('./style');
@@ -13916,7 +14103,7 @@ module.exports = function(applicant, status) {
 };
 
 
-},{"../../../../components/alert":5,"../../../../utils":37,"../../../../utils/component":33,"../../../../utils/logic":39,"./style":119}],119:[function(require,module,exports){
+},{"../../../../components/alert":6,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":120}],120:[function(require,module,exports){
 exports.alert = {
   backgroundColor: '#eee',
   padding: 10,
@@ -13945,7 +14132,7 @@ exports.submit = {
 };
 
 
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 var component, dateInput, dropdown, logic, ref, style, textIsInSearch, toDate, toEnglish, toTimestamp;
 
 component = require('../../../../utils/component');
@@ -14196,7 +14383,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../../components/dateInput":11,"../../../../components/dropdown":13,"../../../../utils":37,"../../../../utils/component":33,"../../../../utils/logic":39,"./style":121}],121:[function(require,module,exports){
+},{"../../../../components/dateInput":12,"../../../../components/dropdown":14,"../../../../utils":38,"../../../../utils/component":34,"../../../../utils/logic":40,"./style":122}],122:[function(require,module,exports){
 var extend;
 
 extend = require('../../../../utils').extend;
@@ -14239,7 +14426,7 @@ exports.remove = {
 };
 
 
-},{"../../../../utils":37}],122:[function(require,module,exports){
+},{"../../../../utils":38}],123:[function(require,module,exports){
 var component, criterion, ref, remove, style, textIsInSearch;
 
 component = require('../../../utils/component');
@@ -14349,7 +14536,7 @@ module.exports = component('search', function(arg) {
 });
 
 
-},{"../../../utils":37,"../../../utils/component":33,"./criterion":120,"./style":123}],123:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"./criterion":121,"./style":124}],124:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -14470,7 +14657,7 @@ exports.addHover = {
 };
 
 
-},{"../../../utils":37}],124:[function(require,module,exports){
+},{"../../../utils":38}],125:[function(require,module,exports){
 var actionModifiable, component, extend, ref, ref1, statuses, style, toDate, toTime, window;
 
 component = require('../../../utils/component');
@@ -14653,7 +14840,7 @@ module.exports = component('sidebar', function(arg, arg1) {
 });
 
 
-},{"../../../utils":37,"../../../utils/component":33,"../../../utils/dom":35,"../../../utils/logic":39,"./style":125}],125:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"../../../utils/dom":36,"../../../utils/logic":40,"./style":126}],126:[function(require,module,exports){
 var extend;
 
 extend = require('../../../utils').extend;
@@ -14862,7 +15049,7 @@ exports.notificationIcon = {
 };
 
 
-},{"../../../utils":37}],126:[function(require,module,exports){
+},{"../../../utils":38}],127:[function(require,module,exports){
 exports.itemsCount = {
   margin: 20
 };
@@ -14909,7 +15096,7 @@ exports.profileVisible = {
 };
 
 
-},{}],127:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 var collection, compare, ref, style;
 
 style = require('./style');
@@ -15180,7 +15367,7 @@ exports.create = function(arg) {
 };
 
 
-},{"../../../utils":37,"./style":129}],128:[function(require,module,exports){
+},{"../../../utils":38,"./style":130}],129:[function(require,module,exports){
 var _functions, component, extend, style;
 
 component = require('../../../utils/component');
@@ -15316,7 +15503,7 @@ module.exports = component('table', function(arg, arg1) {
 });
 
 
-},{"../../../utils":37,"../../../utils/component":33,"./functions":127,"./style":129}],129:[function(require,module,exports){
+},{"../../../utils":38,"../../../utils/component":34,"./functions":128,"./style":130}],130:[function(require,module,exports){
 var arrow, extend, row;
 
 extend = require('../../../utils').extend;
@@ -15431,7 +15618,7 @@ exports.paginationNumberCurrent = extend({}, exports.paginationNumberGreen, {
 });
 
 
-},{"../../../utils":37}],130:[function(require,module,exports){
+},{"../../../utils":38}],131:[function(require,module,exports){
 var Q, addPageCSS, addPageStyle, page, ref, service;
 
 Q = require('./q');
@@ -15461,190 +15648,4 @@ service.getUser().then(function() {
 });
 
 
-},{"./page":30,"./q":31,"./utils/dom":35,"./utils/service":43}],131:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}]},{},[130]);
+},{"./page":31,"./q":32,"./utils/dom":36,"./utils/service":44}]},{},[131]);
