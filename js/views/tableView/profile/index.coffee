@@ -98,15 +98,15 @@ module.exports = component 'profile', ({dom, events, state, service}, {applicant
     [applicant] = applicants.filter ({userId}) -> userId is applicant.userId
     actionButtonItemTexts.forEach (s, i) ->
       item = actionButtonInstance.items()[i]
+      setStyle item, color: 'black'
+      if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
+        setStyle item, color: '#c5c5c5'
       if i == 3
         setStyle item, borderTop: '1px solid #999'
       else
-        setStyle item, color: 'black'
         if applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] in ['در انتظار مصاحبه فنی', 'در انتظار مصاحبه عمومی'])
           setStyle item, color: '#c5c5c5'
         if s is 'درخواست مصاحبه تلفنی' && (applicant.applicantsHRStatus.some(({status}) -> logic.statuses[status] is 'مصاحبه تلفنی انجام دش'))
-          setStyle item, color: '#c5c5c5'
-        if applicant.applicantsManagerStatus.some(({managerId}) -> managerId is user.userId)
           setStyle item, color: '#c5c5c5'
         if applicant.applicantsManagerStatus.some(({managerId, status}) -> logic.statuses[status] is s && managerId is user.userId)
           setStyle item, color: 'green'

@@ -71,6 +71,9 @@ applicants = [{
     interViewTime: 1486369082850
     jobId: jobs[1].jobId
     managerId: managers[0].userId
+  }, {
+    statusHRId: 100
+    status: 12
   }]
   applicantsManagerStatus: []
   history: []
@@ -83,7 +86,7 @@ user =
   identificationCode: '0016503368'
   firstName: 'علی'
   lastName: 'درستی'
-  userType: 1
+  userType: 2
   phoneNumber: '09121234567'
   email: 'dorosty@doin.ir'
   birthday: '1340/1/2'

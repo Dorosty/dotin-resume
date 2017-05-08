@@ -6142,6 +6142,9 @@ applicants = [
         interViewTime: 1486369082850,
         jobId: jobs[1].jobId,
         managerId: managers[0].userId
+      }, {
+        statusHRId: 100,
+        status: 12
       }
     ],
     applicantsManagerStatus: [],
@@ -6166,7 +6169,7 @@ user = {
   identificationCode: '0016503368',
   firstName: 'علی',
   lastName: 'درستی',
-  userType: 1,
+  userType: 2,
   phoneNumber: '09121234567',
   email: 'dorosty@doin.ir',
   birthday: '1340/1/2',
@@ -12835,14 +12838,23 @@ module.exports = component('profile', function(arg, arg1) {
     actionButtonItemTexts.forEach(function(s, i) {
       var item;
       item = actionButtonInstance.items()[i];
+      setStyle(item, {
+        color: 'black'
+      });
+      if (applicant.applicantsManagerStatus.some(function(arg3) {
+        var managerId;
+        managerId = arg3.managerId;
+        return managerId === user.userId;
+      })) {
+        setStyle(item, {
+          color: '#c5c5c5'
+        });
+      }
       if (i === 3) {
         return setStyle(item, {
           borderTop: '1px solid #999'
         });
       } else {
-        setStyle(item, {
-          color: 'black'
-        });
         if (applicant.applicantsHRStatus.some(function(arg3) {
           var ref, status;
           status = arg3.status;
@@ -12857,15 +12869,6 @@ module.exports = component('profile', function(arg, arg1) {
           status = arg3.status;
           return logic.statuses[status] === 'مصاحبه تلفنی انجام دش';
         }))) {
-          setStyle(item, {
-            color: '#c5c5c5'
-          });
-        }
-        if (applicant.applicantsManagerStatus.some(function(arg3) {
-          var managerId;
-          managerId = arg3.managerId;
-          return managerId === user.userId;
-        })) {
           setStyle(item, {
             color: '#c5c5c5'
           });
