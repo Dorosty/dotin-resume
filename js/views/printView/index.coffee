@@ -261,7 +261,8 @@ module.exports = component 'views', ({dom, state}, userId) ->
         E style.box,
           text 'میزان دستمزد '
           E style.boldUnderline, 'خالص'
-          text " درخواستی شما چقدر است؟ #{applicantData['سایر اطلاعات']['میزان دستمزد'] || ''}"
+          text ' درخواستی شما چقدر است؟'
+          E style.answer, applicantData['سایر اطلاعات']['میزان دستمزد'] || ''
           E style.answer, if applicantData['سایر اطلاعات']['مقدار دستمزد']
             ' - ' + applicantData['سایر اطلاعات']['مقدار دستمزد'] + ' تومان'
           else
